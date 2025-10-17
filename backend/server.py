@@ -429,8 +429,6 @@ async def export_pdf(analysis_id: str, user: dict = Depends(get_current_user)):
 
 @api_router.get("/export/excel/{analysis_id}")
 async def export_excel(analysis_id: str, user: dict = Depends(get_current_user)):
-    user = await get_current_user(authorization)
-    
     analysis = await db.analyses.find_one(
         {"id": analysis_id, "user_id": user['id']},
         {"_id": 0}
