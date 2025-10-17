@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز الترميز الطبي وتحسين التوثيق السريري</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+        
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: white;
+            display: none;
+            padding: 60px 80px;
+            overflow: hidden;
+        }
+        
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .slide-header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(30, 64, 175, 0.3);
+        }
+        
+        .slide-title {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 15px;
+        }
+        
+        .slide-subtitle {
+            font-size: 24px;
+            opacity: 0.9;
+        }
+        
+        .slide-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .content-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-right: 5px solid #3b82f6;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+        
+        .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .list-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            border-right: 4px solid #10b981;
+            font-size: 20px;
+        }
+        
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(30, 64, 175, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30, 64, 175, 0.4);
+        }
+        
+        .slide-number {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(30, 64, 175, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin: 0 auto 30px;
+            display: block;
+        }
+        
+        .cover-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+        }
+        
+        .cover-title {
+            font-size: 72px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .cover-subtitle {
+            font-size: 36px;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        
+        .cover-author {
+            font-size: 32px;
+            margin-top: 40px;
+            font-weight: 700;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: right;
+            border: 2px solid #3b82f6;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            font-weight: 700;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-right: 5px solid #f59e0b;
+        }
+        
+        @media print {
+            .controls, .slide-number { display: none; }
+            .slide { page-break-after: always; }
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation" id="presentation">
+        
+        <!-- Slide 1: Cover -->
+        <div class="slide active cover-slide">
+            <img src="/logo.jpeg" alt="Logo" class="logo" style="width: 200px; height: 200px;">
+            <h1 class="cover-title">مركز الترميز الطبي<br>وتحسين التوثيق السريري</h1>
+            <p class="cover-subtitle">Medical Coding & Clinical Documentation Improvement Center</p>
+            <p class="cover-author">إعداد: عمر المغذوي<br>Omar Almaghthawi</p>
+            <p style="font-size: 24px; margin-top: 20px;">2025</p>
+        </div>
+
+        <!-- Slide 2: جدول المحتويات -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">جدول المحتويات</h2>
+            </div>
+            <div class="slide-content">
+                <div class="content-box" style="font-size: 24px; line-height: 2;">
+                    <p>📌 1. التحديات الحالية</p>
+                    <p>✨ 2. الحل المقترح</p>
+                    <p>🎯 3. الميزات الرئيسية</p>
+                    <p>⚙️ 4. كيفية العمل</p>
+                    <p>💰 5. الفوائد المتوقعة</p>
+                    <p>👑 6. لوحة تحكم الإدارة</p>
+                    <p>💻 7. التقنيات المستخدمة</p>
+                    <p>📅 8. خطة التنفيذ</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: التحديات -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">🔴 التحديات الحالية</h2>
+                <p class="slide-subtitle">المشاكل التي نواجهها في التوثيق السريري</p>
+            </div>
+            <div class="slide-content">
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="icon">❌</div>
+                        <h3 style="font-size: 24px; margin-bottom: 15px;">توثيق غير كامل</h3>
+                        <p style="font-size: 18px;">نقص في تفاصيل الحالات وعدم وضوح شدة المرض</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">⚠️</div>
+                        <h3 style="font-size: 24px; margin-bottom: 15px;">فجوات توثيقية</h3>
+                        <p style="font-size: 18px;">معلومات ناقصة عن التشخيصات والعلاقات السببية</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">⏰</div>
+                        <h3 style="font-size: 24px; margin-bottom: 15px;">استفسارات متأخرة</h3>
+                        <p style="font-size: 18px;">تأخر في توضيح الحالات وتأثير على الترميز</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🐌</div>
+                        <h3 style="font-size: 24px; margin-bottom: 15px;">عمليات يدوية بطيئة</h3>
+                        <p style="font-size: 18px;">مراجعة يدوية تستهلك الوقت والجهد</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: الحل -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">✨ الحل المقترح</h2>
+                <p class="slide-subtitle">منصة ذكية مدعومة بالذكاء الاصطناعي</p>
+            </div>
+            <div class="slide-content">
+                <div class="feature-grid">
+                    <div class="feature-card" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+                        <div class="icon">🤖</div>
+                        <h3 style="font-size: 24px; margin-bottom: 15px;">تحليل تلقائي ذكي</h3>
+                        <p style="font-size: 18px;">باستخدام Gemini AI 2.5-pro<br>مراجعة شاملة للتوثيق</p>
+                    </div>
+                    <div class="feature-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                        <div class="icon">🔍</div>
+                        <h3 style="font-size: 24px; margin-bottom: 15px;">كشف الثغرات فوراً</h3>
+                        <p style="font-size: 18px;">تحديد التوثيق الناقص<br>اقتراحات فورية للتحسين</p>
+                    </div>
+                    <div class="feature-card" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
+                        <div class="icon">💡</div>
+                        <h3 style="font-size: 24px; margin-bottom: 15px;">استفسارات دقيقة</h3>
+                        <p style="font-size: 18px;">أسئلة محددة للأطباء<br>توضيح الحالات المعقدة</p>
+                    </div>
+                    <div class="feature-card" style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);">
+                        <div class="icon">⚡</div>
+                        <h3 style="font-size: 24px; margin-bottom: 15px;">توفير الوقت</h3>
+                        <p style="font-size: 18px;">تقليل 70% من الوقت<br>زيادة الدقة والكفاءة</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: الميزات 1 -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">🎯 الميزات الأساسية (1/2)</h2>
+            </div>
+            <div class="slide-content">
+                <div class="list-item">
+                    <strong style="font-size: 24px;">📝 إدخال ملاحظات متعددة</strong>
+                    <p style="margin-top: 10px;">إضافة عدد غير محدود من الملاحظات • تصنيف حسب 50 تخصص طبي • دعم جميع الأقسام</p>
+                </div>
+                <div class="list-item">
+                    <strong style="font-size: 24px;">🤖 تحليل ذكي بالـ AI</strong>
+                    <p style="margin-top: 10px;">مراجعة شاملة • تحديد التشخيصات المطلوبة • كشف التوثيق الناقص • أكواد ICD-10-CM</p>
+                </div>
+                <div class="list-item">
+                    <strong style="font-size: 24px;">💬 محادثة تفاعلية</strong>
+                    <p style="margin-top: 10px;">نقاش مع الذكاء الاصطناعي • توضيح الاستفسارات • إجابات فورية ودقيقة</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: الميزات 2 -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">📊 الميزات الأساسية (2/2)</h2>
+            </div>
+            <div class="slide-content">
+                <div class="list-item">
+                    <strong style="font-size: 24px;">📄 تقارير احترافية</strong>
+                    <p style="margin-top: 10px;">تصدير PDF كامل • تصدير Excel للتحليل • تقارير جاهزة للطباعة</p>
+                </div>
+                <div class="list-item">
+                    <strong style="font-size: 24px;">📚 سجل كامل</strong>
+                    <p style="margin-top: 10px;">حفظ جميع التحليلات • الرجوع للحالات السابقة • تتبع التحسينات</p>
+                </div>
+                <div class="list-item">
+                    <strong style="font-size: 24px;">🌐 واجهة ثنائية اللغة</strong>
+                    <p style="margin-top: 10px;">عربي/إنجليزي • تبديل فوري • جميع المحتويات مترجمة</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: كيف يعمل -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">⚙️ كيف يعمل النظام؟</h2>
+                <p class="slide-subtitle">4 خطوات بسيطة فقط</p>
+            </div>
+            <div class="slide-content">
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="icon">1️⃣</div>
+                        <h3 style="font-size: 22px; margin-bottom: 10px;">جمع الملاحظات</h3>
+                        <p style="font-size: 16px;">أخصائي CDI يجمع ملاحظات الأطباء من جميع التخصصات</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">2️⃣</div>
+                        <h3 style="font-size: 22px; margin-bottom: 10px;">إدخال البيانات</h3>
+                        <p style="font-size: 16px;">إدخال الملاحظات في النظام مع تحديد التخصص</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">3️⃣</div>
+                        <h3 style="font-size: 22px; margin-bottom: 10px;">التحليل الذكي</h3>
+                        <p style="font-size: 16px;">الذكاء الاصطناعي يحلل ويحدد التشخيصات والثغرات</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">4️⃣</div>
+                        <h3 style="font-size: 22px; margin-bottom: 10px;">المراجعة والإرسال</h3>
+                        <p style="font-size: 16px;">مراجعة النتائج وتصدير التقرير للطبيب</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: الفوائد -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">💰 الفوائد المتوقعة</h2>
+                <p class="slide-subtitle">القيمة المضافة للمستشفى والفريق</p>
+            </div>
+            <div class="slide-content">
+                <div class="content-box">
+                    <h3 style="font-size: 28px; margin-bottom: 20px; color: #1e40af;">للمستشفى:</h3>
+                    <p style="font-size: 20px; line-height: 1.8;">
+                        ✅ تحسين جودة التوثيق وارتفاع مؤشرات الجودة<br>
+                        ✅ زيادة الإيرادات من التشخيصات المفقودة<br>
+                        ✅ تقليل المخاطر والامتثال للمعايير
+                    </p>
+                </div>
+                <div class="content-box" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+                    <h3 style="font-size: 28px; margin-bottom: 20px; color: #059669;">للفريق الطبي:</h3>
+                    <p style="font-size: 20px; line-height: 1.8;">
+                        ✅ توفير 70% من الوقت<br>
+                        ✅ تحسين الكفاءة واستفسارات أدق<br>
+                        ✅ التركيز على الحالات المعقدة
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: لوحة الأدمن -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">👑 لوحة تحكم الإدارة</h2>
+                <p class="slide-subtitle">نظام إدارة متكامل</p>
+            </div>
+            <div class="slide-content">
+                <div class="feature-grid">
+                    <div class="feature-card" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);">
+                        <div class="icon">📊</div>
+                        <h3 style="font-size: 22px; margin-bottom: 10px;">إحصائيات شاملة</h3>
+                        <p style="font-size: 16px;">عدد المستخدمين • الملاحظات • التحليلات • معدلات الاستخدام</p>
+                    </div>
+                    <div class="feature-card" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+                        <div class="icon">👥</div>
+                        <h3 style="font-size: 22px; margin-bottom: 10px;">إدارة المستخدمين</h3>
+                        <p style="font-size: 16px;">إضافة/حذف • تفعيل/تعطيل • مراقبة النشاط • تعيين صلاحيات</p>
+                    </div>
+                    <div class="feature-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                        <div class="icon">📈</div>
+                        <h3 style="font-size: 22px; margin-bottom: 10px;">تقارير الأداء</h3>
+                        <p style="font-size: 16px;">متوسط الوقت • عدد الحالات • الأقسام الأكثر نشاطاً</p>
+                    </div>
+                    <div class="feature-card" style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);">
+                        <div class="icon">🔐</div>
+                        <h3 style="font-size: 22px; margin-bottom: 10px;">الأمان والصلاحيات</h3>
+                        <p style="font-size: 16px;">تشفير البيانات • مستويات وصول • سجل الأنشطة</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: المقارنة -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">📊 مقارنة قبل وبعد</h2>
+                <p class="slide-subtitle">التأثير المتوقع على الأداء</p>
+            </div>
+            <div class="slide-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المؤشر</th>
+                            <th>قبل النظام</th>
+                            <th>بعد النظام</th>
+                            <th>التحسن</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>وقت المراجعة</strong></td>
+                            <td>30 دقيقة/حالة</td>
+                            <td>10 دقائق/حالة</td>
+                            <td style="color: #10b981; font-weight: bold;">70% ⬇️</td>
+                        </tr>
+                        <tr>
+                            <td><strong>دقة التوثيق</strong></td>
+                            <td>70%</td>
+                            <td>95%</td>
+                            <td style="color: #10b981; font-weight: bold;">25% ⬆️</td>
+                        </tr>
+                        <tr>
+                            <td><strong>عدد الاستفسارات</strong></td>
+                            <td>5-10/حالة</td>
+                            <td>15-20/حالة</td>
+                            <td style="color: #10b981; font-weight: bold;">100% ⬆️</td>
+                        </tr>
+                        <tr>
+                            <td><strong>الحالات/يوم</strong></td>
+                            <td>10-15</td>
+                            <td>30-40</td>
+                            <td style="color: #10b981; font-weight: bold;">200% ⬆️</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="highlight" style="margin-top: 30px; text-align: center; font-size: 24px;">
+                    <strong>⚡ تحسين شامل في الأداء والكفاءة</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: خطة التنفيذ -->
+        <div class="slide">
+            <div class="slide-header">
+                <h2 class="slide-title">📅 خطة التنفيذ</h2>
+                <p class="slide-subtitle">جاهز للتطبيق الفوري!</p>
+            </div>
+            <div class="slide-content">
+                <div class="list-item" style="border-right-color: #3b82f6;">
+                    <strong style="font-size: 22px;">المرحلة 1: الإطلاق التجريبي (أسبوع 1)</strong>
+                    <p style="margin-top: 10px; font-size: 18px;">تدريب فريق CDI • تجربة على 10-20 حالة • جمع الملاحظات</p>
+                </div>
+                <div class="list-item" style="border-right-color: #10b981;">
+                    <strong style="font-size: 22px;">المرحلة 2: التوسع (أسبوع 2-3)</strong>
+                    <p style="margin-top: 10px; font-size: 18px;">إضافة باقي الفريق • توسيع الاستخدام • تحسين حسب الملاحظات</p>
+                </div>
+                <div class="list-item" style="border-right-color: #f59e0b;">
+                    <strong style="font-size: 22px;">المرحلة 3: التشغيل الكامل (أسبوع 4)</strong>
+                    <p style="margin-top: 10px; font-size: 18px;">استخدام يومي • مراقبة الأداء • قياس النتائج</p>
+                </div>
+                <div class="list-item" style="border-right-color: #ef4444;">
+                    <strong style="font-size: 22px;">المرحلة 4: التقييم (شهر 1)</strong>
+                    <p style="margin-top: 10px; font-size: 18px;">تقرير شامل • قياس العائد • خطة التطوير المستقبلية</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: الختام -->
+        <div class="slide cover-slide">
+            <h2 style="font-size: 64px; margin-bottom: 30px;">🎯 الخطوات التالية</h2>
+            <div style="background: rgba(255,255,255,0.2); padding: 40px; border-radius: 20px; max-width: 800px;">
+                <p style="font-size: 28px; line-height: 2;">
+                    1️⃣ الموافقة والاعتماد<br>
+                    2️⃣ إنشاء الحسابات<br>
+                    3️⃣ التدريب (ساعة واحدة)<br>
+                    4️⃣ البدء الفوري!
+                </p>
+            </div>
+            <div style="margin-top: 50px; font-size: 24px;">
+                <p><strong>رابط التطبيق:</strong></p>
+                <p style="font-size: 20px; margin-top: 10px;">clinical-doc-ai.preview.emergentagent.com</p>
+            </div>
+        </div>
+
+        <!-- Slide 13: شكراً -->
+        <div class="slide cover-slide">
+            <h1 style="font-size: 80px; margin-bottom: 30px;">شكراً لكم</h1>
+            <p style="font-size: 48px; margin-bottom: 40px;">🌟 معاً نحو توثيق سريري أفضل</p>
+            <div style="background: rgba(255,255,255,0.2); padding: 40px; border-radius: 20px; margin-top: 50px;">
+                <p style="font-size: 32px; font-weight: 700;">عمر المغذوي</p>
+                <p style="font-size: 28px; margin-top: 10px;">Omar Almaghthawi</p>
+                <p style="font-size: 20px; margin-top: 30px;">© 2025 جميع الحقوق محفوظة</p>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="previousSlide()">⏮️ السابق</button>
+        <button class="btn" onclick="nextSlide()">التالي ⏭️</button>
+    </div>
+    
+    <div class="slide-number" id="slideNumber">1 / 13</div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            document.getElementById('slideNumber').textContent = `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
+            if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') previousSlide();
+        });
+
+        // Print to PDF instruction
+        console.log('للطباعة كـ PDF: اضغط Ctrl+P واختر "حفظ كـ PDF"');
+    </script>
+</body>
+</html>
