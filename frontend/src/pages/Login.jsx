@@ -45,8 +45,8 @@ const Login = ({ setUser }) => {
       <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4">
         <Card className="w-full max-w-md medical-card fade-in" data-testid="login-card">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center">
-            <FileText className="w-8 h-8 text-white" />
+          <div className="mx-auto w-24 h-24 flex items-center justify-center">
+            <img src="/logo.jpeg" alt="Logo" className="w-full h-full object-contain rounded-xl" />
           </div>
           <CardTitle className="text-3xl font-bold text-gray-800">{t('login')}</CardTitle>
           <CardDescription className="text-lg">{t('appName')}<br />{t('appSubtitle')}</CardDescription>
