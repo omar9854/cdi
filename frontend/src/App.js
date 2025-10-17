@@ -9,6 +9,7 @@ import NewNote from '@/pages/NewNote';
 import Analysis from '@/pages/Analysis';
 import History from '@/pages/History';
 import Chat from '@/pages/Chat';
+import AdminDashboard from '@/pages/AdminDashboard';
 
 function AppContent() {
   const { t } = useLanguage();
