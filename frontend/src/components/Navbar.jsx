@@ -36,6 +36,17 @@ const Navbar = ({ user, onLogout }) => {
                 {language === 'ar' ? <Home className="ml-2 w-4 h-4" /> : <Home className="mr-2 w-4 h-4" />}
                 {t('home')}
               </Button>
+              {user.role === 'admin' && (
+                <Button
+                  variant={isActive('/admin') ? 'secondary' : 'ghost'}
+                  onClick={() => navigate('/admin')}
+                  className={isActive('/admin') ? '' : 'text-white hover:bg-white/10'}
+                  data-testid="nav-admin"
+                >
+                  {language === 'ar' ? <History className="ml-2 w-4 h-4" /> : <History className="mr-2 w-4 h-4" />}
+                  {language === 'ar' ? 'الأدمن' : 'Admin'}
+                </Button>
+              )}
               <Button
                 variant={isActive('/history') ? 'secondary' : 'ghost'}
                 onClick={() => navigate('/history')}
