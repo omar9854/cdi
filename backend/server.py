@@ -286,7 +286,7 @@ async def get_note(note_id: str, user: dict = Depends(get_current_user)):
 
 # ========== Analysis Routes ==========
 @api_router.post("/analyze", response_model=Analysis)
-async def analyze_note(request: AnalyzeRequest, authorization: str = None):
+async def analyze_note(request: AnalyzeRequest, user: dict = Depends(get_current_user)):
     user = await get_current_user(authorization)
     
     # Get the note
