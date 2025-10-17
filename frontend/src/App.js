@@ -49,6 +49,7 @@ function AppContent() {
           <Route path=\"/dashboard\" element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to=\"/login\" />} />
           <Route path=\"/new-note\" element={user ? <NewNote user={user} onLogout={handleLogout} /> : <Navigate to=\"/login\" />} />
           <Route path=\"/analysis/:noteId\" element={user ? <Analysis user={user} onLogout={handleLogout} /> : <Navigate to=\"/login\" />} />
+          <Route path=\"/chat/:analysisId\" element={user ? <Chat user={user} onLogout={handleLogout} /> : <Navigate to=\"/login\" />} />
           <Route path=\"/history\" element={user ? <History user={user} onLogout={handleLogout} /> : <Navigate to=\"/login\" />} />
           <Route path=\"/\" element={<Navigate to={user ? \"/dashboard\" : \"/login\"} />} />
         </Routes>
