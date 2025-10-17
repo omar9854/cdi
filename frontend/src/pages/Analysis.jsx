@@ -4,8 +4,9 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { ArrowRight, Loader2, Sparkles, FileDown, FileSpreadsheet } from 'lucide-react';
+import { ArrowRight, Loader2, Sparkles, FileDown, FileSpreadsheet, MessageSquare } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -13,6 +14,7 @@ const API = `${BACKEND_URL}/api`;
 const Analysis = ({ user, onLogout }) => {
   const { noteId } = useParams();
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
   const [note, setNote] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,7 +33,7 @@ const Analysis = ({ user, onLogout }) => {
       });
       setNote(response.data);
     } catch (error) {
-      toast.error('فشل تحميل الملاحظة');
+      toast.error(t('error'));
     }
   };
 
@@ -61,9 +63,9 @@ const Analysis = ({ user, onLogout }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setAnalysis(response.data);
-      toast.success('تم التحليل بنجاح!');
+      toast.success(t('analysisComplete'));
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'فشل التحليل');
+      toast.error(error.response?.data?.detail || t('error'));
     } finally {
       setAnalyzing(false);
     }
@@ -88,9 +90,9 @@ const Analysis = ({ user, onLogout }) => {
       link.click();
       link.remove();
       
-      toast.success('تم تصدير التحليل بنجاح!');
+      toast.success(t('exportSuccess'));
     } catch (error) {
-      toast.error('فشل تصدير التحليل');
+      toast.error(t('error'));
     }
   };
 
@@ -109,20 +111,31 @@ const Analysis = ({ user, onLogout }) => {
       <main className="container mx-auto px-4 py-8 max-w-6xl" data-testid="analysis-page">
         <div className="mb-6 fade-in">
           <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4" data-testid="back-button">
-            <ArrowRight className="ml-2" /> العودة
+            {language === 'ar' ? <ArrowRight className="ml-2" /> : <ArrowRight className="mr-2" />}
+            {t('back')}
           </Button>
           <h1 className="text-4xl font-bold text-gray-800 mb-2">{note?.title}</h1>
-          <p className="text-gray-600">تحليل الملاحظات السريرية</p>
+          <p className="text-gray-600">{t('analysisOf')} {t('clinicalNotes')}</p>
         </div>
 
-        {/* Note Content */}
+        {/* Doctor Notes */}
         <Card className="medical-card mb-6 fade-in">
           <CardHeader>
-            <CardTitle className="text-2xl">الملاحظات السريرية</CardTitle>
+            <CardTitle className="text-2xl">{t('clinicalNotes')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="bg-gray-50 p-6 rounded-lg" data-testid="note-content">
-              <pre className="whitespace-pre-wrap text-gray-700 font-sans">{note?.notes_text}</pre>
+            <div className="space-y-4" data-testid="doctor-notes">
+              {note?.doctor_notes?.map((dn, idx) => (
+                <div key={idx} className="bg-gray-50 p-4 rounded-lg border-l-4 border-blue-500">
+                  <p className="font-semibold text-blue-700 mb-2">
+                    {language === 'ar' 
+                      ? note.doctor_notes[idx].specialty 
+                      : note.doctor_notes[idx].specialty
+                    }
+                  </p>
+                  <pre className="whitespace-pre-wrap text-gray-700 font-sans">{dn.text}</pre>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -132,8 +145,8 @@ const Analysis = ({ user, onLogout }) => {
           <Card className="medical-card mb-6 fade-in">
             <CardContent className="text-center py-8">
               <Sparkles className="w-16 h-16 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-semibold text-gray-800 mb-2">جاهز للتحليل</h3>
-              <p className="text-gray-600 mb-6">استخدم الذكاء الاصطناعي لتحليل الملاحظات واستخراج أكواد ICD-10-CM</p>
+              <h3 className="text-2xl font-semibold text-gray-800 mb-2">{t('readyToAnalyze')}</h3>
+              <p className="text-gray-600 mb-6">{t('aiAnalysisDescription')}</p>
               <Button
                 onClick={handleAnalyze}
                 disabled={analyzing}
@@ -142,11 +155,13 @@ const Analysis = ({ user, onLogout }) => {
               >
                 {analyzing ? (
                   <>
-                    <Loader2 className="ml-2 animate-spin" /> جاري التحليل...
+                    {language === 'ar' ? <Loader2 className="ml-2 animate-spin" /> : <Loader2 className="mr-2 animate-spin" />}
+                    {t('analyzing')}
                   </>
                 ) : (
                   <>
-                    <Sparkles className="ml-2" /> تحليل بالذكاء الاصطناعي
+                    {language === 'ar' ? <Sparkles className="ml-2" /> : <Sparkles className="mr-2" />}
+                    {t('analyzeWithAI')}
                   </>
                 )}
               </Button>
@@ -157,28 +172,45 @@ const Analysis = ({ user, onLogout }) => {
         {/* Analysis Results */}
         {analysis && (
           <div className="space-y-6 fade-in">
-            {/* Export Buttons */}
-            <div className="flex gap-4 justify-end">
+            {/* Action Buttons */}
+            <div className="flex gap-4 justify-end flex-wrap">
+              <Button 
+                onClick={() => navigate(`/chat/${analysis.id}`)} 
+                className="medical-blue"
+                data-testid="chat-button"
+              >
+                {language === 'ar' ? <MessageSquare className="ml-2" /> : <MessageSquare className="mr-2" />}
+                {t('discussWithAI')}
+              </Button>
               <Button onClick={() => handleExport('pdf')} variant="outline" data-testid="export-pdf-button">
-                <FileDown className="ml-2" /> تصدير PDF
+                {language === 'ar' ? <FileDown className="ml-2" /> : <FileDown className="mr-2" />}
+                {t('exportPDF')}
               </Button>
               <Button onClick={() => handleExport('excel')} variant="outline" data-testid="export-excel-button">
-                <FileSpreadsheet className="ml-2" /> تصدير Excel
+                {language === 'ar' ? <FileSpreadsheet className="ml-2" /> : <FileSpreadsheet className="mr-2" />}
+                {t('exportExcel')}
               </Button>
             </div>
 
             {/* Primary Diagnoses */}
             <Card className="medical-card">
               <CardHeader>
-                <CardTitle className="text-2xl text-blue-700">التشخيصات الرئيسية</CardTitle>
+                <CardTitle className="text-2xl text-blue-700">{t('primaryDiagnoses')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3" data-testid="primary-diagnoses">
                   {analysis.primary_diagnoses.map((diag, idx) => (
                     <div key={idx} className="diagnosis-card p-4 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <p className="text-gray-800 font-medium">{diag.diagnosis}</p>
-                        <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1">
+                          <p className="text-gray-800 font-medium mb-1">
+                            {language === 'ar' ? diag.diagnosis_ar : diag.diagnosis_en}
+                          </p>
+                          <p className="text-gray-600 text-sm">
+                            {language === 'ar' ? diag.diagnosis_en : diag.diagnosis_ar}
+                          </p>
+                        </div>
+                        <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap">
                           {diag.icd_code}
                         </span>
                       </div>
@@ -191,15 +223,22 @@ const Analysis = ({ user, onLogout }) => {
             {/* Secondary Diagnoses */}
             <Card className="medical-card">
               <CardHeader>
-                <CardTitle className="text-2xl text-indigo-700">التشخيصات الثانوية</CardTitle>
+                <CardTitle className="text-2xl text-indigo-700">{t('secondaryDiagnoses')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3" data-testid="secondary-diagnoses">
                   {analysis.secondary_diagnoses.map((diag, idx) => (
                     <div key={idx} className="diagnosis-card p-4 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <p className="text-gray-800 font-medium">{diag.diagnosis}</p>
-                        <span className="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1">
+                          <p className="text-gray-800 font-medium mb-1">
+                            {language === 'ar' ? diag.diagnosis_ar : diag.diagnosis_en}
+                          </p>
+                          <p className="text-gray-600 text-sm">
+                            {language === 'ar' ? diag.diagnosis_en : diag.diagnosis_ar}
+                          </p>
+                        </div>
+                        <span className="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap">
                           {diag.icd_code}
                         </span>
                       </div>
@@ -212,11 +251,11 @@ const Analysis = ({ user, onLogout }) => {
             {/* Gaps */}
             <Card className="medical-card">
               <CardHeader>
-                <CardTitle className="text-2xl text-amber-700">الثغرات في التوثيق</CardTitle>
+                <CardTitle className="text-2xl text-amber-700">{t('documentationGaps')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3" data-testid="gaps">
-                  {analysis.gaps.map((gap, idx) => (
+                  {(language === 'ar' ? analysis.gaps_ar : analysis.gaps_en).map((gap, idx) => (
                     <div key={idx} className="gap-card p-4 rounded-lg">
                       <p className="text-gray-800">{gap}</p>
                     </div>
@@ -228,11 +267,11 @@ const Analysis = ({ user, onLogout }) => {
             {/* Queries for Doctor */}
             <Card className="medical-card">
               <CardHeader>
-                <CardTitle className="text-2xl text-green-700">استفسارات للطبيب</CardTitle>
+                <CardTitle className="text-2xl text-green-700">{t('queriesForDoctor')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3" data-testid="queries">
-                  {analysis.queries_for_doctor.map((query, idx) => (
+                  {(language === 'ar' ? analysis.queries_ar : analysis.queries_en).map((query, idx) => (
                     <div key={idx} className="query-card p-4 rounded-lg">
                       <p className="text-gray-800">{query}</p>
                     </div>
@@ -242,18 +281,18 @@ const Analysis = ({ user, onLogout }) => {
             </Card>
 
             {/* Full Analysis Summary */}
-            {analysis.full_analysis && (
-              <Card className="medical-card">
-                <CardHeader>
-                  <CardTitle className="text-2xl text-gray-800">الملخص الشامل</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-gray-50 p-6 rounded-lg" data-testid="full-analysis">
-                    <p className="text-gray-700 whitespace-pre-wrap">{analysis.full_analysis}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <Card className="medical-card">
+              <CardHeader>
+                <CardTitle className="text-2xl text-gray-800">{t('comprehensiveSummary')}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-50 p-6 rounded-lg" data-testid="full-analysis">
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {language === 'ar' ? analysis.summary_ar : analysis.summary_en}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </main>
