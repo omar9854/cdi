@@ -8,6 +8,7 @@ import Dashboard from '@/pages/Dashboard';
 import NewNote from '@/pages/NewNote';
 import Analysis from '@/pages/Analysis';
 import History from '@/pages/History';
+import Chat from '@/pages/Chat';
 
 function AppContent() {
   const { t } = useLanguage();
