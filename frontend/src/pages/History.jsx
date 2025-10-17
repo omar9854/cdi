@@ -14,6 +14,7 @@ const API = `${BACKEND_URL}/api`;
 
 const History = ({ user, onLogout }) => {
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
