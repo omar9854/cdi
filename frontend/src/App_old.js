@@ -16,6 +16,7 @@ function AppContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if user is logged in
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
     
@@ -40,17 +41,17 @@ function AppContent() {
   }
 
   return (
-    <div className="App">
+    <div className=\"App\">
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to="/dashboard" />} />
-          <Route path="/register" element={!user ? <Register setUser={setUser} /> : <Navigate to="/dashboard" />} />
-          <Route path="/dashboard" element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
-          <Route path="/new-note" element={user ? <NewNote user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
-          <Route path="/analysis/:noteId" element={user ? <Analysis user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
-          <Route path="/chat/:analysisId" element={user ? <Chat user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
-          <Route path="/history" element={user ? <History user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
-          <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
+          <Route path=\"/login\" element={!user ? <Login setUser={setUser} /> : <Navigate to=\"/dashboard\" />} />
+          <Route path=\"/register\" element={!user ? <Register setUser={setUser} /> : <Navigate to=\"/dashboard\" />} />
+          <Route path=\"/dashboard\" element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to=\"/login\" />} />
+          <Route path=\"/new-note\" element={user ? <NewNote user={user} onLogout={handleLogout} /> : <Navigate to=\"/login\" />} />
+          <Route path=\"/analysis/:noteId\" element={user ? <Analysis user={user} onLogout={handleLogout} /> : <Navigate to=\"/login\" />} />
+          <Route path=\"/chat/:analysisId\" element={user ? <Chat user={user} onLogout={handleLogout} /> : <Navigate to=\"/login\" />} />
+          <Route path=\"/history\" element={user ? <History user={user} onLogout={handleLogout} /> : <Navigate to=\"/login\" />} />
+          <Route path=\"/\" element={<Navigate to={user ? \"/dashboard\" : \"/login\"} />} />
         </Routes>
       </BrowserRouter>
     </div>
