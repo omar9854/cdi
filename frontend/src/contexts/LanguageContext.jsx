@@ -16,8 +16,8 @@ export const translations = {
     loginNow: 'سجل الدخول',
     
     // App name
-    appName: 'مركز تحسين التوثيق السريري',
-    appSubtitle: 'Clinical Documentation Improvement',
+    appName: 'مركز الترميز الطبي وتحسين التوثيق السريري',
+    appSubtitle: 'Medical Coding & Clinical Documentation Improvement Center',
     
     // Dashboard
     dashboard: 'لوحة التحكم',
