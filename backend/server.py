@@ -118,6 +118,8 @@ class User(BaseModel):
     email: EmailStr
     full_name: str
     password_hash: str
+    role: str = "user"  # "admin" or "user"
+    is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserRegister(BaseModel):
