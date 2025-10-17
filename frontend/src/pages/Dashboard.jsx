@@ -14,6 +14,7 @@ const API = `${BACKEND_URL}/api`;
 
 const Dashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
 
