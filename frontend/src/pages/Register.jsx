@@ -157,6 +157,8 @@ const Register = ({ setUser }) => {
           </div>
         </CardContent>
       </Card>
+      </div>
+      <Footer />
     </div>
   );
 };
