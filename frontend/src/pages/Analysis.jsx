@@ -272,6 +272,24 @@ const Analysis = ({ user, onLogout }) => {
               </CardContent>
             </Card>
 
+            {/* Recommendations */}
+            {analysis.recommendations_ar && analysis.recommendations_ar.length > 0 && (
+              <Card className="medical-card">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-purple-700">{t('recommendations')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3" data-testid="recommendations">
+                    {(language === 'ar' ? analysis.recommendations_ar : analysis.recommendations_en).map((rec, idx) => (
+                      <div key={idx} className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
+                        <p className="text-gray-800">{rec}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Full Analysis Summary */}
             <Card className="medical-card">
               <CardHeader>
