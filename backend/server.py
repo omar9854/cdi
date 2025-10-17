@@ -160,12 +160,14 @@ class Analysis(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     note_id: str
     user_id: str
-    primary_diagnoses: List[DiagnosisBilingual]
-    secondary_diagnoses: List[DiagnosisBilingual]
+    diagnoses_to_document: List[DiagnosisBilingual]  # التشخيصات التي يجب توثيقها
+    missing_documentation: List[Dict[str, str]]  # التوثيق الناقص
     gaps_ar: List[str]
     gaps_en: List[str]
     queries_ar: List[str]
     queries_en: List[str]
+    recommendations_ar: List[str]  # توصيات لتحسين التوثيق
+    recommendations_en: List[str]
     summary_ar: str
     summary_en: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
