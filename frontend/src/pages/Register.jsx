@@ -105,6 +105,37 @@ const Register = ({ setUser }) => {
                 />
               </div>
             </div>
+            
+            {/* Admin Code Toggle */}
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setShowAdminCode(!showAdminCode)}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                {showAdminCode ? 
+                  (language === 'ar' ? 'إخفاء كود الأدمن' : 'Hide Admin Code') : 
+                  (language === 'ar' ? 'هل أنت أدمن؟ أدخل الكود' : 'Are you an admin? Enter code')
+                }
+              </button>
+            </div>
+
+            {/* Admin Code Field */}
+            {showAdminCode && (
+              <div className="space-y-2 fade-in">
+                <Label htmlFor="admin_code">
+                  {language === 'ar' ? 'كود الأدمن (اختياري)' : 'Admin Code (Optional)'}
+                </Label>
+                <Input
+                  id="admin_code"
+                  type="text"
+                  placeholder={language === 'ar' ? 'أدخل كود الأدمن' : 'Enter admin code'}
+                  value={formData.admin_code}
+                  onChange={(e) => setFormData({ ...formData, admin_code: e.target.value })}
+                  data-testid="register-admin-code-input"
+                />
+              </div>
+            )}
             <Button
               type="submit"
               className="w-full medical-blue text-white py-6 text-lg font-semibold"
