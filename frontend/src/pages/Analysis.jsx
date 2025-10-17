@@ -192,14 +192,14 @@ const Analysis = ({ user, onLogout }) => {
               </Button>
             </div>
 
-            {/* Primary Diagnoses */}
+            {/* Diagnoses to Document */}
             <Card className="medical-card">
               <CardHeader>
-                <CardTitle className="text-2xl text-blue-700">{t('primaryDiagnoses')}</CardTitle>
+                <CardTitle className="text-2xl text-blue-700">{t('diagnosesToDocument')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3" data-testid="primary-diagnoses">
-                  {analysis.primary_diagnoses.map((diag, idx) => (
+                <div className="space-y-3" data-testid="diagnoses-to-document">
+                  {analysis.diagnoses_to_document.map((diag, idx) => (
                     <div key={idx} className="diagnosis-card p-4 rounded-lg">
                       <div className="flex justify-between items-start gap-4">
                         <div className="flex-1">
@@ -220,33 +220,25 @@ const Analysis = ({ user, onLogout }) => {
               </CardContent>
             </Card>
 
-            {/* Secondary Diagnoses */}
-            <Card className="medical-card">
-              <CardHeader>
-                <CardTitle className="text-2xl text-indigo-700">{t('secondaryDiagnoses')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3" data-testid="secondary-diagnoses">
-                  {analysis.secondary_diagnoses.map((diag, idx) => (
-                    <div key={idx} className="diagnosis-card p-4 rounded-lg">
-                      <div className="flex justify-between items-start gap-4">
-                        <div className="flex-1">
-                          <p className="text-gray-800 font-medium mb-1">
-                            {language === 'ar' ? diag.diagnosis_ar : diag.diagnosis_en}
-                          </p>
-                          <p className="text-gray-600 text-sm">
-                            {language === 'ar' ? diag.diagnosis_en : diag.diagnosis_ar}
-                          </p>
-                        </div>
-                        <span className="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap">
-                          {diag.icd_code}
-                        </span>
+            {/* Missing Documentation */}
+            {analysis.missing_documentation && analysis.missing_documentation.length > 0 && (
+              <Card className="medical-card">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-orange-700">{t('missingDocumentation')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3" data-testid="missing-documentation">
+                    {analysis.missing_documentation.map((item, idx) => (
+                      <div key={idx} className="gap-card p-4 rounded-lg border-l-4 border-orange-500">
+                        <p className="text-gray-800">
+                          {language === 'ar' ? item.item_ar : item.item_en}
+                        </p>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Gaps */}
             <Card className="medical-card">
