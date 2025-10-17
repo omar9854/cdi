@@ -228,7 +228,7 @@ async def get_current_user(authorization: str = Header(None)) -> dict:
     return user
 
 async def analyze_with_gemini(notes_text: str, doctor_notes: List[Dict]) -> Dict:
-    """Analyze clinical notes using Gemini AI"""
+    """Analyze clinical notes using Gemini AI - CDI Focus"""
     
     # Format doctor notes with specialties
     formatted_notes = "\n\n".join([
@@ -236,46 +236,54 @@ async def analyze_with_gemini(notes_text: str, doctor_notes: List[Dict]) -> Dict
         for note in doctor_notes
     ])
     
-    system_message = """You are an expert in clinical documentation and medical coding specialized in ICD-10-CM system.
+    system_message = """You are a Clinical Documentation Improvement (CDI) Specialist expert.
 
-Your task:
-1. Analyze the provided clinical notes
-2. Identify primary and secondary diagnoses
-3. Find appropriate ICD-10-CM codes for each diagnosis
-4. Identify gaps in documentation
-5. Create specific queries for the physician
+Your role is NOT to code or assign ICD-10-CM codes directly. Your role is to:
+1. Review clinical documentation for completeness and specificity
+2. Identify diagnoses that SHOULD BE documented based on clinical findings
+3. Identify missing or incomplete documentation
+4. Provide queries to physicians to improve documentation quality
+5. Ensure documentation supports the severity of illness and risk of mortality
 
-IMPORTANT: Provide ALL responses in BOTH Arabic and English.
-You must be accurate, professional, and provide actionable information."""
+Focus on CLINICAL DOCUMENTATION IMPROVEMENT, not medical coding.
 
-    user_prompt = f"""Please analyze the following clinical notes:
+IMPORTANT: Provide ALL responses in BOTH Arabic and English."""
+
+    user_prompt = f"""Please review the following clinical notes as a CDI Specialist:
 
 {formatted_notes}
 
-Please provide:
-1. Primary diagnoses with ICD-10-CM codes (in both Arabic and English)
-2. Secondary diagnoses with ICD-10-CM codes (in both Arabic and English)
-3. Documentation gaps (in both Arabic and English)
-4. Specific queries for the physician (in both Arabic and English)
+Perform a Clinical Documentation Improvement review and provide:
+
+1. **Diagnoses That Should Be Documented**: Based on the clinical findings in the notes, what diagnoses should be clearly documented? (with ICD-10-CM codes for reference only)
+
+2. **Missing Documentation**: What specific clinical information is missing or incomplete? (e.g., severity, acuity, specificity, causal relationships)
+
+3. **Documentation Gaps**: What gaps exist in the current documentation?
+
+4. **Physician Queries**: What specific questions should be asked to the physicians to improve documentation?
+
+5. **Recommendations**: Specific recommendations to improve the clinical documentation quality
 
 Please respond in the following JSON format:
 {{{{
-  "primary_diagnoses": [{{
-    "diagnosis_ar": "Arabic diagnosis name",
-    "diagnosis_en": "English diagnosis name",
-    "icd_code": "Code"
+  "diagnoses_to_document": [{{
+    "diagnosis_ar": "التشخيص بالعربي",
+    "diagnosis_en": "Diagnosis in English", 
+    "icd_code": "Code (for reference)"
   }}],
-  "secondary_diagnoses": [{{
-    "diagnosis_ar": "Arabic diagnosis name",
-    "diagnosis_en": "English diagnosis name",
-    "icd_code": "Code"
+  "missing_documentation": [{{
+    "item_ar": "التوثيق الناقص بالعربي",
+    "item_en": "Missing item in English"
   }}],
-  "gaps_ar": ["Gap 1 in Arabic", "Gap 2 in Arabic"],
-  "gaps_en": ["Gap 1 in English", "Gap 2 in English"],
-  "queries_ar": ["Query 1 in Arabic", "Query 2 in Arabic"],
-  "queries_en": ["Query 1 in English", "Query 2 in English"],
-  "summary_ar": "Comprehensive analysis summary in Arabic",
-  "summary_en": "Comprehensive analysis summary in English"
+  "gaps_ar": ["ثغرة 1", "ثغرة 2"],
+  "gaps_en": ["Gap 1", "Gap 2"],
+  "queries_ar": ["استفسار 1 للطبيب", "استفسار 2"],
+  "queries_en": ["Query 1 for physician", "Query 2"],
+  "recommendations_ar": ["توصية 1 لتحسين التوثيق", "توصية 2"],
+  "recommendations_en": ["Recommendation 1 for documentation improvement", "Recommendation 2"],
+  "summary_ar": "ملخص شامل لمراجعة تحسين التوثيق السريري بالعربي",
+  "summary_en": "Comprehensive CDI review summary in English"
 }}}}"""
 
     try:
