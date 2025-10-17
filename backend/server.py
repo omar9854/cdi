@@ -422,12 +422,14 @@ async def analyze_note(request: AnalyzeRequest, user: dict = Depends(get_current
     analysis = Analysis(
         note_id=request.note_id,
         user_id=user['id'],
-        primary_diagnoses=[DiagnosisBilingual(**d) for d in result.get('primary_diagnoses', [])],
-        secondary_diagnoses=[DiagnosisBilingual(**d) for d in result.get('secondary_diagnoses', [])],
+        diagnoses_to_document=[DiagnosisBilingual(**d) for d in result.get('diagnoses_to_document', [])],
+        missing_documentation=result.get('missing_documentation', []),
         gaps_ar=result.get('gaps_ar', []),
         gaps_en=result.get('gaps_en', []),
         queries_ar=result.get('queries_ar', []),
         queries_en=result.get('queries_en', []),
+        recommendations_ar=result.get('recommendations_ar', []),
+        recommendations_en=result.get('recommendations_en', []),
         summary_ar=result.get('summary_ar', ''),
         summary_en=result.get('summary_en', '')
     )
@@ -435,8 +437,7 @@ async def analyze_note(request: AnalyzeRequest, user: dict = Depends(get_current
     doc = analysis.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     # Convert DiagnosisBilingual to dict
-    doc['primary_diagnoses'] = [d.model_dump() if hasattr(d, 'model_dump') else d for d in doc['primary_diagnoses']]
-    doc['secondary_diagnoses'] = [d.model_dump() if hasattr(d, 'model_dump') else d for d in doc['secondary_diagnoses']]
+    doc['diagnoses_to_document'] = [d.model_dump() if hasattr(d, 'model_dump') else d for d in doc['diagnoses_to_document']]
     await db.analyses.insert_one(doc)
     
     return analysis
