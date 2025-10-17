@@ -103,8 +103,8 @@ export const translations = {
     loginNow: 'Login',
     
     // App name
-    appName: 'Medical Coding Center',
-    appSubtitle: 'Clinical Documentation Improvement',
+    appName: 'Clinical Documentation Improvement Center',
+    appSubtitle: 'مركز تحسين التوثيق السريري',
     
     // Dashboard
     dashboard: 'Dashboard',
