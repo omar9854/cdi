@@ -159,13 +159,13 @@ async def analyze_with_gemini(notes_text: str) -> Dict:
 4. استفسارات محددة للطبيب
 
 الرجاء تقديم الإجابة بصيغة JSON التالية:
-{{
-  "primary_diagnoses": [{"diagnosis": "اسم التشخيص", "icd_code": "الكود"}],
-  "secondary_diagnoses": [{"diagnosis": "اسم التشخيص", "icd_code": "الكود"}],
+{{{{
+  "primary_diagnoses": [{{"diagnosis": "اسم التشخيص", "icd_code": "الكود"}}],
+  "secondary_diagnoses": [{{"diagnosis": "اسم التشخيص", "icd_code": "الكود"}}],
   "gaps": ["ثغرة 1", "ثغرة 2"],
   "queries_for_doctor": ["استفسار 1", "استفسار 2"],
   "summary": "ملخص شامل للتحليل"
-}}"""
+}}}}"""
 
     try:
         chat = LlmChat(
