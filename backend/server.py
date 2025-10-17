@@ -331,8 +331,6 @@ async def get_analyses(note_id: str, user: dict = Depends(get_current_user)):
 
 @api_router.get("/history", response_model=List[Dict])
 async def get_history(user: dict = Depends(get_current_user)):
-    user = await get_current_user(authorization)
-    
     # Get all analyses with note info
     analyses = await db.analyses.find(
         {"user_id": user['id']},
