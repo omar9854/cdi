@@ -126,6 +126,7 @@ class UserRegister(BaseModel):
     email: EmailStr
     full_name: str
     password: str
+    admin_code: Optional[str] = None  # كود سري للأدمن
 
 class UserLogin(BaseModel):
     email: EmailStr
