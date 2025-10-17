@@ -334,22 +334,40 @@ async def register(user_data: UserRegister):
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
+    # Check if admin code is provided and valid
+    role = "user"
+    if user_data.admin_code:
+        if user_data.admin_code == ADMIN_SECRET_CODE:
+            role = "admin"
+        else:
+            raise HTTPException(status_code=400, detail="Invalid admin code")
+    
     user = User(
         email=user_data.email,
         full_name=user_data.full_name,
-        password_hash=hash_password(user_data.password)
+        password_hash=hash_password(user_data.password),
+        role=role
     )
     
     doc = user.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.users.insert_one(doc)
     
-    token = create_access_token({"user_id": user.id, "email": user.email})
+    token = create_access_token({
+        "user_id": user.id, 
+        "email": user.email,
+        "role": user.role
+    })
     
     return {
         "access_token": token,
         "token_type": "bearer",
-        "user": {"id": user.id, "email": user.email, "full_name": user.full_name}
+        "user": {
+            "id": user.id, 
+            "email": user.email, 
+            "full_name": user.full_name,
+            "role": user.role
+        }
     }
 
 @api_router.post("/auth/login", response_model=Token)
