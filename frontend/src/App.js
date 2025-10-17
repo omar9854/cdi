@@ -34,8 +34,8 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className=\"flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50\">
-        <div className=\"text-xl text-blue-600\">{t('loading')}</div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <div className="text-xl text-blue-600">{t('loading')}</div>
       </div>
     );
   }
