@@ -723,9 +723,9 @@ async def export_pdf(analysis_id: str, user: dict = Depends(get_current_user)):
     elements.append(Paragraph(f"<b>Note Title:</b> {note.get('title', '')}", styles['Normal']))
     elements.append(Spacer(1, 0.2*inch))
     
-    # Primary Diagnoses
-    elements.append(Paragraph("<b>Primary Diagnoses / التشخيصات الرئيسية:</b>", styles['Heading2']))
-    for diag in analysis.get('primary_diagnoses', []):
+    # Diagnoses to Document
+    elements.append(Paragraph("<b>Diagnoses to Document / التشخيصات المطلوب توثيقها:</b>", styles['Heading2']))
+    for diag in analysis.get('diagnoses_to_document', []):
         elements.append(Paragraph(f"• {diag.get('diagnosis_en', '')} / {diag.get('diagnosis_ar', '')} - {diag.get('icd_code', '')}", styles['Normal']))
     elements.append(Spacer(1, 0.2*inch))
     
