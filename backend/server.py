@@ -270,7 +270,7 @@ async def get_notes(user: dict = Depends(get_current_user)):
     return notes
 
 @api_router.get("/notes/{note_id}", response_model=ClinicalNote)
-async def get_note(note_id: str, authorization: str = None):
+async def get_note(note_id: str, user: dict = Depends(get_current_user)):
     user = await get_current_user(authorization)
     
     note = await db.clinical_notes.find_one(
