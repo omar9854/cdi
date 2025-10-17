@@ -15,8 +15,14 @@ const API = `${BACKEND_URL}/api`;
 const Register = ({ setUser }) => {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
-  const [formData, setFormData] = useState({ email: '', full_name: '', password: '' });
+  const [formData, setFormData] = useState({ 
+    email: '', 
+    full_name: '', 
+    password: '',
+    admin_code: '' 
+  });
   const [loading, setLoading] = useState(false);
+  const [showAdminCode, setShowAdminCode] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
