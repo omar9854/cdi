@@ -193,6 +193,11 @@ async def analyze_with_gemini(notes_text: str) -> Dict:
         logging.error(f"Error analyzing with Gemini: {str(e)}")
         raise HTTPException(status_code=500, detail=f"خطأ في التحليل: {str(e)}")
 
+# Health check route
+@api_router.get("/")
+async def root():
+    return {"message": "مركز الترميز الطبي وتحسين التوثيق السريري", "status": "active"}
+
 # ========== Auth Routes ==========
 @api_router.post("/auth/register", response_model=Token)
 async def register(user_data: UserRegister):
