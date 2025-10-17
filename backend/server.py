@@ -318,8 +318,6 @@ async def analyze_note(request: AnalyzeRequest, user: dict = Depends(get_current
 
 @api_router.get("/analyses/{note_id}", response_model=List[Analysis])
 async def get_analyses(note_id: str, user: dict = Depends(get_current_user)):
-    user = await get_current_user(authorization)
-    
     analyses = await db.analyses.find(
         {"note_id": note_id, "user_id": user['id']},
         {"_id": 0}
