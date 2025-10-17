@@ -45,19 +45,69 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 # Emergent LLM Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
 
-# Medical Specialties
+# Medical Specialties - Comprehensive List
 MEDICAL_SPECIALTIES = [
+    # الأقسام الطبية الرئيسية - Main Medical Departments
     {"value": "internal_medicine", "label_ar": "الطب الباطني", "label_en": "Internal Medicine"},
     {"value": "cardiology", "label_ar": "أمراض القلب", "label_en": "Cardiology"},
-    {"value": "neurology", "label_ar": "الأمراض العصبية", "label_en": "Neurology"},
-    {"value": "surgery", "label_ar": "الجراحة", "label_en": "Surgery"},
+    {"value": "pulmonology", "label_ar": "أمراض الصدرية والجهاز التنفسي", "label_en": "Pulmonology"},
+    {"value": "gastroenterology", "label_ar": "أمراض الجهاز الهضمي", "label_en": "Gastroenterology"},
+    {"value": "nephrology", "label_ar": "أمراض الكلى", "label_en": "Nephrology"},
+    {"value": "endocrinology", "label_ar": "الغدد الصماء والسكري", "label_en": "Endocrinology"},
+    {"value": "hematology", "label_ar": "أمراض الدم", "label_en": "Hematology"},
+    {"value": "oncology", "label_ar": "الأورام", "label_en": "Oncology"},
+    {"value": "infectious_disease", "label_ar": "الأمراض المعدية", "label_en": "Infectious Disease"},
+    {"value": "rheumatology", "label_ar": "أمراض الروماتيزم", "label_en": "Rheumatology"},
+    
+    # الجراحة - Surgery
+    {"value": "general_surgery", "label_ar": "الجراحة العامة", "label_en": "General Surgery"},
     {"value": "orthopedics", "label_ar": "جراحة العظام", "label_en": "Orthopedics"},
+    {"value": "neurosurgery", "label_ar": "جراحة المخ والأعصاب", "label_en": "Neurosurgery"},
+    {"value": "cardiothoracic_surgery", "label_ar": "جراحة القلب والصدر", "label_en": "Cardiothoracic Surgery"},
+    {"value": "vascular_surgery", "label_ar": "جراحة الأوعية الدموية", "label_en": "Vascular Surgery"},
+    {"value": "plastic_surgery", "label_ar": "جراحة التجميل والترميم", "label_en": "Plastic Surgery"},
+    {"value": "urology", "label_ar": "المسالك البولية", "label_en": "Urology"},
+    
+    # التخصصات الدقيقة - Specialized Departments
+    {"value": "neurology", "label_ar": "الأمراض العصبية", "label_en": "Neurology"},
     {"value": "pediatrics", "label_ar": "طب الأطفال", "label_en": "Pediatrics"},
+    {"value": "neonatology", "label_ar": "حديثي الولادة", "label_en": "Neonatology"},
     {"value": "obstetrics", "label_ar": "النساء والولادة", "label_en": "Obstetrics & Gynecology"},
     {"value": "psychiatry", "label_ar": "الطب النفسي", "label_en": "Psychiatry"},
-    {"value": "radiology", "label_ar": "الأشعة", "label_en": "Radiology"},
+    {"value": "dermatology", "label_ar": "الأمراض الجلدية", "label_en": "Dermatology"},
+    {"value": "ophthalmology", "label_ar": "طب العيون", "label_en": "Ophthalmology"},
+    {"value": "ent", "label_ar": "الأنف والأذن والحنجرة", "label_en": "ENT"},
+    {"value": "dental", "label_ar": "طب الأسنان", "label_en": "Dentistry"},
+    
+    # الطوارئ والعناية المركزة - Emergency & Critical Care
     {"value": "emergency", "label_ar": "الطوارئ", "label_en": "Emergency Medicine"},
-    {"value": "icu", "label_ar": "العناية المركزة", "label_en": "Intensive Care"},
+    {"value": "icu", "label_ar": "العناية المركزة", "label_en": "Intensive Care Unit"},
+    {"value": "ccu", "label_ar": "العناية المركزة القلبية", "label_en": "Cardiac Care Unit"},
+    {"value": "nicu", "label_ar": "العناية المركزة لحديثي الولادة", "label_en": "Neonatal ICU"},
+    
+    # الأقسام المساندة - Supporting Departments
+    {"value": "radiology", "label_ar": "الأشعة التشخيصية", "label_en": "Radiology"},
+    {"value": "nuclear_medicine", "label_ar": "الطب النووي", "label_en": "Nuclear Medicine"},
+    {"value": "pathology", "label_ar": "علم الأمراض", "label_en": "Pathology"},
+    {"value": "laboratory", "label_ar": "المختبر", "label_en": "Laboratory"},
+    {"value": "blood_bank", "label_ar": "بنك الدم", "label_en": "Blood Bank"},
+    {"value": "pharmacy", "label_ar": "الصيدلية", "label_en": "Pharmacy"},
+    {"value": "nutrition", "label_ar": "التغذية العلاجية", "label_en": "Clinical Nutrition"},
+    {"value": "physiotherapy", "label_ar": "العلاج الطبيعي", "label_en": "Physiotherapy"},
+    {"value": "respiratory_therapy", "label_ar": "العلاج التنفسي", "label_en": "Respiratory Therapy"},
+    {"value": "social_services", "label_ar": "الخدمة الاجتماعية", "label_en": "Social Services"},
+    {"value": "nursing", "label_ar": "التمريض", "label_en": "Nursing"},
+    {"value": "infection_control", "label_ar": "مكافحة العدوى", "label_en": "Infection Control"},
+    
+    # تخصصات أخرى - Other Specialties
+    {"value": "anesthesiology", "label_ar": "التخدير", "label_en": "Anesthesiology"},
+    {"value": "pain_management", "label_ar": "إدارة الألم", "label_en": "Pain Management"},
+    {"value": "palliative_care", "label_ar": "الرعاية التلطيفية", "label_en": "Palliative Care"},
+    {"value": "family_medicine", "label_ar": "طب الأسرة", "label_en": "Family Medicine"},
+    {"value": "geriatrics", "label_ar": "طب المسنين", "label_en": "Geriatrics"},
+    {"value": "sports_medicine", "label_ar": "الطب الرياضي", "label_en": "Sports Medicine"},
+    {"value": "occupational_medicine", "label_ar": "طب الصناعات", "label_en": "Occupational Medicine"},
+    
     {"value": "other", "label_ar": "أخرى", "label_en": "Other"}
 ]
 
