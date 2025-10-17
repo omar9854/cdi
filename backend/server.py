@@ -634,23 +634,25 @@ async def chat_with_ai(request: ChatRequest, user: dict = Depends(get_current_us
 Analysis Summary (Arabic): {analysis.get('summary_ar', '')}
 Analysis Summary (English): {analysis.get('summary_en', '')}
 
-Primary Diagnoses: {json.dumps(analysis.get('primary_diagnoses', []), ensure_ascii=False)}
-Secondary Diagnoses: {json.dumps(analysis.get('secondary_diagnoses', []), ensure_ascii=False)}"""
+Diagnoses to Document: {json.dumps(analysis.get('diagnoses_to_document', []), ensure_ascii=False)}
+Missing Documentation: {json.dumps(analysis.get('missing_documentation', []), ensure_ascii=False)}"""
     
-    system_message = f"""You are a medical coding and clinical documentation expert. You have analyzed a clinical case and now the user wants to discuss the analysis with you.
+    system_message = f"""You are a Clinical Documentation Improvement (CDI) specialist. You have reviewed a clinical case and now the user wants to discuss the analysis with you.
 
 Context:
 {context}
 
-Answer questions professionally, provide clarifications, and help improve the documentation. Respond in the same language as the user's question."""
+Answer questions professionally, provide clarifications, and help improve the documentation. Respond in the same language as the user's question. Be concise and direct."""
     
-    # Create conversation for Gemini
+    # Use analysis_id as session for continuity
     try:
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,
-            session_id=request.analysis_id,
-            system_message=system_message
+            session_id=request.analysis_id  # استخدام نفس الـ session
         ).with_model("gemini", "gemini-2.5-pro")
+        
+        # Set system message
+        chat.system_message = system_message
         
         message = UserMessage(text=request.message)
         response = await chat.send_message(message)
