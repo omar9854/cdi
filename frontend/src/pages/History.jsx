@@ -54,10 +54,11 @@ const History = ({ user, onLogout }) => {
       <main className="container mx-auto px-4 py-8 max-w-6xl" data-testid="history-page">
         <div className="mb-6 fade-in">
           <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4" data-testid="back-button">
-            <ArrowRight className="ml-2" /> العودة
+            {language === 'ar' ? <ArrowRight className="ml-2" /> : <ArrowRight className="mr-2" />}
+            {t('back')}
           </Button>
-          <h1 className="text-4xl font-bold text-gray-800">سجل التحليلات</h1>
-          <p className="text-gray-600 mt-2">جميع التحليلات السابقة</p>
+          <h1 className="text-4xl font-bold text-gray-800">{t('analysisHistory')}</h1>
+          <p className="text-gray-600 mt-2">{t('allPreviousAnalyses')}</p>
         </div>
 
         {loading ? (
