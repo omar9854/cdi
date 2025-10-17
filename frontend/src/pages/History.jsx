@@ -69,7 +69,7 @@ const History = ({ user, onLogout }) => {
           <Card className="medical-card fade-in">
             <CardContent className="text-center py-12">
               <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg">لا يوجد سجل تحليلات حتى الآن</p>
+              <p className="text-gray-600 text-lg">{t('noHistory')}</p>
             </CardContent>
           </Card>
         ) : (
@@ -88,20 +88,36 @@ const History = ({ user, onLogout }) => {
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm font-semibold text-blue-700 mb-1">التشخيصات الرئيسية</p>
-                      <p className="text-gray-700">{item.primary_diagnoses.length} تشخيص</p>
+                      <p className="text-sm font-semibold text-blue-700 mb-1">
+                        {language === 'ar' ? 'التشخيصات الموثقة' : 'Documented Diagnoses'}
+                      </p>
+                      <p className="text-gray-700">
+                        {item.diagnoses_to_document?.length || 0} {t('diagnoses')}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-indigo-700 mb-1">التشخيصات الثانوية</p>
-                      <p className="text-gray-700">{item.secondary_diagnoses.length} تشخيص</p>
+                      <p className="text-sm font-semibold text-orange-700 mb-1">
+                        {language === 'ar' ? 'التوثيق الناقص' : 'Missing Documentation'}
+                      </p>
+                      <p className="text-gray-700">
+                        {item.missing_documentation?.length || 0} {language === 'ar' ? 'عنصر' : 'items'}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-amber-700 mb-1">الثغرات</p>
-                      <p className="text-gray-700">{item.gaps.length} ثغرة</p>
+                      <p className="text-sm font-semibold text-amber-700 mb-1">
+                        {language === 'ar' ? 'الثغرات' : 'Gaps'}
+                      </p>
+                      <p className="text-gray-700">
+                        {(item.gaps_ar?.length || item.gaps_en?.length || 0)} {t('gaps')}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-green-700 mb-1">الاستفسارات</p>
-                      <p className="text-gray-700">{item.queries_for_doctor.length} استفسار</p>
+                      <p className="text-sm font-semibold text-green-700 mb-1">
+                        {language === 'ar' ? 'الاستفسارات' : 'Queries'}
+                      </p>
+                      <p className="text-gray-700">
+                        {(item.queries_ar?.length || item.queries_en?.length || 0)} {t('queries')}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
