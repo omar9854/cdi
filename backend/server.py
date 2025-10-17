@@ -377,12 +377,21 @@ async def login(credentials: UserLogin):
     if not user or not verify_password(credentials.password, user['password_hash']):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
-    token = create_access_token({"user_id": user['id'], "email": user['email']})
+    token = create_access_token({
+        "user_id": user['id'], 
+        "email": user['email'],
+        "role": user.get('role', 'user')
+    })
     
     return {
         "access_token": token,
         "token_type": "bearer",
-        "user": {"id": user['id'], "email": user['email'], "full_name": user['full_name']}
+        "user": {
+            "id": user['id'], 
+            "email": user['email'], 
+            "full_name": user['full_name'],
+            "role": user.get('role', 'user')
+        }
     }
 
 # ========== Notes Routes ==========
