@@ -621,12 +621,6 @@ async def chat_with_ai(request: ChatRequest, user: dict = Depends(get_current_us
     user_doc['created_at'] = user_doc['created_at'].isoformat()
     await db.chat_messages.insert_one(user_doc)
     
-    # Get chat history
-    chat_history = await db.chat_messages.find(
-        {"analysis_id": request.analysis_id},
-        {"_id": 0}
-    ).sort("created_at", 1).to_list(100)
-    
     # Build context
     import json
     context = f"""Clinical Note: {note['title']}
