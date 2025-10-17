@@ -356,7 +356,7 @@ async def get_history(user: dict = Depends(get_current_user)):
 
 # ========== Export Routes ==========
 @api_router.get("/export/pdf/{analysis_id}")
-async def export_pdf(analysis_id: str, authorization: str = None):
+async def export_pdf(analysis_id: str, user: dict = Depends(get_current_user)):
     user = await get_current_user(authorization)
     
     analysis = await db.analyses.find_one(
