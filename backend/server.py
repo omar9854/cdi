@@ -394,6 +394,86 @@ async def login(credentials: UserLogin):
         }
     }
 
+# ========== Admin Routes ==========
+async def require_admin(user: dict = Depends(get_current_user)):
+    if user.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
+@api_router.get("/admin/stats")
+async def get_admin_stats(admin: dict = Depends(require_admin)):
+    # Count users
+    total_users = await db.users.count_documents({})
+    admin_users = await db.users.count_documents({"role": "admin"})
+    
+    # Count notes
+    total_notes = await db.clinical_notes.count_documents({})
+    
+    # Count analyses
+    total_analyses = await db.analyses.count_documents({})
+    
+    # Recent activity
+    recent_users = await db.users.find(
+        {}, {"_id": 0, "password_hash": 0}
+    ).sort("created_at", -1).limit(10).to_list(10)
+    
+    recent_analyses = await db.analyses.find(
+        {}, {"_id": 0}
+    ).sort("created_at", -1).limit(10).to_list(10)
+    
+    return {
+        "total_users": total_users,
+        "admin_users": admin_users,
+        "regular_users": total_users - admin_users,
+        "total_notes": total_notes,
+        "total_analyses": total_analyses,
+        "recent_users": recent_users,
+        "recent_analyses": recent_analyses
+    }
+
+@api_router.get("/admin/users")
+async def get_all_users(admin: dict = Depends(require_admin)):
+    users = await db.users.find(
+        {}, {"_id": 0, "password_hash": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    for user in users:
+        if isinstance(user.get('created_at'), str):
+            user['created_at'] = datetime.fromisoformat(user['created_at'])
+    
+    return users
+
+@api_router.put("/admin/users/{user_id}/toggle-active")
+async def toggle_user_active(user_id: str, admin: dict = Depends(require_admin)):
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    new_status = not user.get('is_active', True)
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_active": new_status}}
+    )
+    
+    return {"message": "User status updated", "is_active": new_status}
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, admin: dict = Depends(require_admin)):
+    # Don't allow deleting yourself
+    if user_id == admin['id']:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+    
+    result = await db.users.delete_one({"id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Also delete user's notes and analyses
+    await db.clinical_notes.delete_many({"user_id": user_id})
+    await db.analyses.delete_many({"user_id": user_id})
+    await db.chat_messages.delete_many({"user_id": user_id})
+    
+    return {"message": "User and all data deleted successfully"}
+
 # ========== Notes Routes ==========
 @api_router.post("/notes", response_model=ClinicalNote)
 async def create_note(note_data: ClinicalNoteCreate, user: dict = Depends(get_current_user)):
