@@ -766,7 +766,7 @@ async def export_excel(analysis_id: str, user: dict = Depends(get_current_user))
     ws['A1'].font = header_font
     
     row = 3
-    ws[f'A{row}'] = 'Primary Diagnoses'
+    ws[f'A{row}'] = 'Diagnoses to Document'
     ws[f'A{row}'].fill = header_fill
     ws[f'A{row}'].font = header_font
     row += 1
@@ -776,7 +776,7 @@ async def export_excel(analysis_id: str, user: dict = Depends(get_current_user))
     ws[f'C{row}'] = 'ICD-10 Code'
     row += 1
     
-    for diag in analysis.get('primary_diagnoses', []):
+    for diag in analysis.get('diagnoses_to_document', []):
         ws[f'A{row}'] = diag.get('diagnosis_en', '')
         ws[f'B{row}'] = diag.get('diagnosis_ar', '')
         ws[f'C{row}'] = diag.get('icd_code', '')
