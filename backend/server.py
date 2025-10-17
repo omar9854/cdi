@@ -45,6 +45,22 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 # Emergent LLM Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
 
+# Medical Specialties
+MEDICAL_SPECIALTIES = [
+    {"value": "internal_medicine", "label_ar": "الطب الباطني", "label_en": "Internal Medicine"},
+    {"value": "cardiology", "label_ar": "أمراض القلب", "label_en": "Cardiology"},
+    {"value": "neurology", "label_ar": "الأمراض العصبية", "label_en": "Neurology"},
+    {"value": "surgery", "label_ar": "الجراحة", "label_en": "Surgery"},
+    {"value": "orthopedics", "label_ar": "جراحة العظام", "label_en": "Orthopedics"},
+    {"value": "pediatrics", "label_ar": "طب الأطفال", "label_en": "Pediatrics"},
+    {"value": "obstetrics", "label_ar": "النساء والولادة", "label_en": "Obstetrics & Gynecology"},
+    {"value": "psychiatry", "label_ar": "الطب النفسي", "label_en": "Psychiatry"},
+    {"value": "radiology", "label_ar": "الأشعة", "label_en": "Radiology"},
+    {"value": "emergency", "label_ar": "الطوارئ", "label_en": "Emergency Medicine"},
+    {"value": "icu", "label_ar": "العناية المركزة", "label_en": "Intensive Care"},
+    {"value": "other", "label_ar": "أخرى", "label_en": "Other"}
+]
+
 # ========== Models ==========
 class User(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -68,32 +84,57 @@ class Token(BaseModel):
     token_type: str
     user: Dict
 
+class DoctorNote(BaseModel):
+    text: str
+    specialty: str
+
 class ClinicalNote(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
     title: str
-    notes_text: str
+    doctor_notes: List[DoctorNote]
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class ClinicalNoteCreate(BaseModel):
     title: str
-    notes_text: str
+    doctor_notes: List[DoctorNote]
+
+class DiagnosisBilingual(BaseModel):
+    diagnosis_ar: str
+    diagnosis_en: str
+    icd_code: str
 
 class Analysis(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     note_id: str
     user_id: str
-    primary_diagnoses: List[Dict[str, str]]  # [{"diagnosis": "", "icd_code": ""}]
-    secondary_diagnoses: List[Dict[str, str]]
-    gaps: List[str]
-    queries_for_doctor: List[str]
-    full_analysis: str
+    primary_diagnoses: List[DiagnosisBilingual]
+    secondary_diagnoses: List[DiagnosisBilingual]
+    gaps_ar: List[str]
+    gaps_en: List[str]
+    queries_ar: List[str]
+    queries_en: List[str]
+    summary_ar: str
+    summary_en: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class AnalyzeRequest(BaseModel):
     note_id: str
+
+class ChatMessage(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    analysis_id: str
+    user_id: str
+    role: str  # 'user' or 'assistant'
+    message: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ChatRequest(BaseModel):
+    analysis_id: str
+    message: str
 
 # ========== Helper Functions ==========
 def hash_password(password: str) -> str:
@@ -134,37 +175,55 @@ async def get_current_user(authorization: str = Header(None)) -> dict:
     
     return user
 
-async def analyze_with_gemini(notes_text: str) -> Dict:
+async def analyze_with_gemini(notes_text: str, doctor_notes: List[Dict]) -> Dict:
     """Analyze clinical notes using Gemini AI"""
     
-    system_message = """أنت خبير في التوثيق السريري والترميز الطبي متخصص في نظام ICD-10-CM.
+    # Format doctor notes with specialties
+    formatted_notes = "\n\n".join([
+        f"**{note['specialty']}**:\n{note['text']}"
+        for note in doctor_notes
+    ])
+    
+    system_message = """You are an expert in clinical documentation and medical coding specialized in ICD-10-CM system.
 
-مهمتك:
-1. تحليل الملاحظات السريرية المقدمة
-2. تحديد التشخيصات الرئيسية والثانوية
-3. إيجاد أكواد ICD-10-CM المناسبة لكل تشخيص
-4. تحديد الثغرات في التوثيق
-5. إنشاء استفسارات محددة للطبيب
+Your task:
+1. Analyze the provided clinical notes
+2. Identify primary and secondary diagnoses
+3. Find appropriate ICD-10-CM codes for each diagnosis
+4. Identify gaps in documentation
+5. Create specific queries for the physician
 
-يجب أن تكون دقيقاً ومهنياً وتقدم معلومات قابلة للتطبيق."""
+IMPORTANT: Provide ALL responses in BOTH Arabic and English.
+You must be accurate, professional, and provide actionable information."""
 
-    user_prompt = f"""يرجى تحليل الملاحظات السريرية التالية:
+    user_prompt = f"""Please analyze the following clinical notes:
 
-{notes_text}
+{formatted_notes}
 
-يرجى تقديم:
-1. التشخيصات الرئيسية مع أكواد ICD-10-CM
-2. التشخيصات الثانوية مع أكواد ICD-10-CM
-3. الثغرات في التوثيق
-4. استفسارات محددة للطبيب
+Please provide:
+1. Primary diagnoses with ICD-10-CM codes (in both Arabic and English)
+2. Secondary diagnoses with ICD-10-CM codes (in both Arabic and English)
+3. Documentation gaps (in both Arabic and English)
+4. Specific queries for the physician (in both Arabic and English)
 
-الرجاء تقديم الإجابة بصيغة JSON التالية:
+Please respond in the following JSON format:
 {{{{
-  "primary_diagnoses": [{{"diagnosis": "اسم التشخيص", "icd_code": "الكود"}}],
-  "secondary_diagnoses": [{{"diagnosis": "اسم التشخيص", "icd_code": "الكود"}}],
-  "gaps": ["ثغرة 1", "ثغرة 2"],
-  "queries_for_doctor": ["استفسار 1", "استفسار 2"],
-  "summary": "ملخص شامل للتحليل"
+  "primary_diagnoses": [{{
+    "diagnosis_ar": "Arabic diagnosis name",
+    "diagnosis_en": "English diagnosis name",
+    "icd_code": "Code"
+  }}],
+  "secondary_diagnoses": [{{
+    "diagnosis_ar": "Arabic diagnosis name",
+    "diagnosis_en": "English diagnosis name",
+    "icd_code": "Code"
+  }}],
+  "gaps_ar": ["Gap 1 in Arabic", "Gap 2 in Arabic"],
+  "gaps_en": ["Gap 1 in English", "Gap 2 in English"],
+  "queries_ar": ["Query 1 in Arabic", "Query 2 in Arabic"],
+  "queries_en": ["Query 1 in English", "Query 2 in English"],
+  "summary_ar": "Comprehensive analysis summary in Arabic",
+  "summary_en": "Comprehensive analysis summary in English"
 }}}}"""
 
     try:
@@ -179,7 +238,6 @@ async def analyze_with_gemini(notes_text: str) -> Dict:
         
         # Parse JSON response
         import json
-        # Try to extract JSON from response
         response_text = response.strip()
         if "```json" in response_text:
             response_text = response_text.split("```json")[1].split("```")[0].strip()
@@ -191,22 +249,25 @@ async def analyze_with_gemini(notes_text: str) -> Dict:
         
     except Exception as e:
         logging.error(f"Error analyzing with Gemini: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"خطأ في التحليل: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error in analysis: {str(e)}")
 
 # Health check route
 @api_router.get("/")
 async def root():
     return {"message": "مركز الترميز الطبي وتحسين التوثيق السريري", "status": "active"}
 
+# Get specialties
+@api_router.get("/specialties")
+async def get_specialties():
+    return MEDICAL_SPECIALTIES
+
 # ========== Auth Routes ==========
 @api_router.post("/auth/register", response_model=Token)
 async def register(user_data: UserRegister):
-    # Check if user exists
     existing_user = await db.users.find_one({"email": user_data.email})
     if existing_user:
-        raise HTTPException(status_code=400, detail="البريد الإلكتروني مسجل مسبقاً")
+        raise HTTPException(status_code=400, detail="Email already registered")
     
-    # Create user
     user = User(
         email=user_data.email,
         full_name=user_data.full_name,
@@ -217,7 +278,6 @@ async def register(user_data: UserRegister):
     doc['created_at'] = doc['created_at'].isoformat()
     await db.users.insert_one(doc)
     
-    # Create token
     token = create_access_token({"user_id": user.id, "email": user.email})
     
     return {
@@ -231,7 +291,7 @@ async def login(credentials: UserLogin):
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     
     if not user or not verify_password(credentials.password, user['password_hash']):
-        raise HTTPException(status_code=401, detail="البريد الإلكتروني أو كلمة المرور غير صحيحة")
+        raise HTTPException(status_code=401, detail="Invalid email or password")
     
     token = create_access_token({"user_id": user['id'], "email": user['email']})
     
@@ -247,7 +307,7 @@ async def create_note(note_data: ClinicalNoteCreate, user: dict = Depends(get_cu
     note = ClinicalNote(
         user_id=user['id'],
         title=note_data.title,
-        notes_text=note_data.notes_text
+        doctor_notes=[dn.model_dump() for dn in note_data.doctor_notes]
     )
     
     doc = note.model_dump()
@@ -277,7 +337,7 @@ async def get_note(note_id: str, user: dict = Depends(get_current_user)):
     )
     
     if not note:
-        raise HTTPException(status_code=404, detail="الملاحظة غير موجودة")
+        raise HTTPException(status_code=404, detail="Note not found")
     
     if isinstance(note['created_at'], str):
         note['created_at'] = datetime.fromisoformat(note['created_at'])
@@ -287,31 +347,36 @@ async def get_note(note_id: str, user: dict = Depends(get_current_user)):
 # ========== Analysis Routes ==========
 @api_router.post("/analyze", response_model=Analysis)
 async def analyze_note(request: AnalyzeRequest, user: dict = Depends(get_current_user)):
-    # Get the note
     note = await db.clinical_notes.find_one(
         {"id": request.note_id, "user_id": user['id']},
         {"_id": 0}
     )
     
     if not note:
-        raise HTTPException(status_code=404, detail="الملاحظة غير موجودة")
+        raise HTTPException(status_code=404, detail="Note not found")
     
     # Analyze with Gemini
-    result = await analyze_with_gemini(note['notes_text'])
+    result = await analyze_with_gemini(note['title'], note['doctor_notes'])
     
     # Create analysis record
     analysis = Analysis(
         note_id=request.note_id,
         user_id=user['id'],
-        primary_diagnoses=result.get('primary_diagnoses', []),
-        secondary_diagnoses=result.get('secondary_diagnoses', []),
-        gaps=result.get('gaps', []),
-        queries_for_doctor=result.get('queries_for_doctor', []),
-        full_analysis=result.get('summary', '')
+        primary_diagnoses=[DiagnosisBilingual(**d) for d in result.get('primary_diagnoses', [])],
+        secondary_diagnoses=[DiagnosisBilingual(**d) for d in result.get('secondary_diagnoses', [])],
+        gaps_ar=result.get('gaps_ar', []),
+        gaps_en=result.get('gaps_en', []),
+        queries_ar=result.get('queries_ar', []),
+        queries_en=result.get('queries_en', []),
+        summary_ar=result.get('summary_ar', ''),
+        summary_en=result.get('summary_en', '')
     )
     
     doc = analysis.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
+    # Convert DiagnosisBilingual to dict
+    doc['primary_diagnoses'] = [d.model_dump() if hasattr(d, 'model_dump') else d for d in doc['primary_diagnoses']]
+    doc['secondary_diagnoses'] = [d.model_dump() if hasattr(d, 'model_dump') else d for d in doc['secondary_diagnoses']]
     await db.analyses.insert_one(doc)
     
     return analysis
@@ -331,7 +396,6 @@ async def get_analyses(note_id: str, user: dict = Depends(get_current_user)):
 
 @api_router.get("/history", response_model=List[Dict])
 async def get_history(user: dict = Depends(get_current_user)):
-    # Get all analyses with note info
     analyses = await db.analyses.find(
         {"user_id": user['id']},
         {"_id": 0}
@@ -354,6 +418,99 @@ async def get_history(user: dict = Depends(get_current_user)):
     
     return result
 
+# ========== Chat Routes ==========
+@api_router.post("/chat")
+async def chat_with_ai(request: ChatRequest, user: dict = Depends(get_current_user)):
+    # Get analysis
+    analysis = await db.analyses.find_one(
+        {"id": request.analysis_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    
+    # Get note
+    note = await db.clinical_notes.find_one(
+        {"id": analysis['note_id']},
+        {"_id": 0}
+    )
+    
+    # Save user message
+    user_msg = ChatMessage(
+        analysis_id=request.analysis_id,
+        user_id=user['id'],
+        role='user',
+        message=request.message
+    )
+    user_doc = user_msg.model_dump()
+    user_doc['created_at'] = user_doc['created_at'].isoformat()
+    await db.chat_messages.insert_one(user_doc)
+    
+    # Get chat history
+    chat_history = await db.chat_messages.find(
+        {"analysis_id": request.analysis_id},
+        {"_id": 0}
+    ).sort("created_at", 1).to_list(100)
+    
+    # Build context
+    import json
+    context = f"""Clinical Note: {note['title']}
+
+Analysis Summary (Arabic): {analysis.get('summary_ar', '')}
+Analysis Summary (English): {analysis.get('summary_en', '')}
+
+Primary Diagnoses: {json.dumps(analysis.get('primary_diagnoses', []), ensure_ascii=False)}
+Secondary Diagnoses: {json.dumps(analysis.get('secondary_diagnoses', []), ensure_ascii=False)}"""
+    
+    system_message = f"""You are a medical coding and clinical documentation expert. You have analyzed a clinical case and now the user wants to discuss the analysis with you.
+
+Context:
+{context}
+
+Answer questions professionally, provide clarifications, and help improve the documentation. Respond in the same language as the user's question."""
+    
+    # Create conversation for Gemini
+    try:
+        chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id=request.analysis_id,
+            system_message=system_message
+        ).with_model("gemini", "gemini-2.5-pro")
+        
+        message = UserMessage(text=request.message)
+        response = await chat.send_message(message)
+        
+        # Save assistant message
+        assistant_msg = ChatMessage(
+            analysis_id=request.analysis_id,
+            user_id=user['id'],
+            role='assistant',
+            message=response
+        )
+        assistant_doc = assistant_msg.model_dump()
+        assistant_doc['created_at'] = assistant_doc['created_at'].isoformat()
+        await db.chat_messages.insert_one(assistant_doc)
+        
+        return {"message": response}
+        
+    except Exception as e:
+        logging.error(f"Error in chat: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error in chat: {str(e)}")
+
+@api_router.get("/chat/{analysis_id}")
+async def get_chat_history(analysis_id: str, user: dict = Depends(get_current_user)):
+    messages = await db.chat_messages.find(
+        {"analysis_id": analysis_id, "user_id": user['id']},
+        {"_id": 0}
+    ).sort("created_at", 1).to_list(1000)
+    
+    for msg in messages:
+        if isinstance(msg['created_at'], str):
+            msg['created_at'] = datetime.fromisoformat(msg['created_at'])
+    
+    return messages
+
 # ========== Export Routes ==========
 @api_router.get("/export/pdf/{analysis_id}")
 async def export_pdf(analysis_id: str, user: dict = Depends(get_current_user)):
@@ -363,22 +520,19 @@ async def export_pdf(analysis_id: str, user: dict = Depends(get_current_user)):
     )
     
     if not analysis:
-        raise HTTPException(status_code=404, detail="التحليل غير موجود")
+        raise HTTPException(status_code=404, detail="Analysis not found")
     
     note = await db.clinical_notes.find_one(
         {"id": analysis['note_id']},
         {"_id": 0}
     )
     
-    # Create PDF in memory
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
     
-    # Container for elements
     elements = []
     styles = getSampleStyleSheet()
     
-    # Title
     title_style = ParagraphStyle(
         'CustomTitle',
         parent=styles['Heading1'],
@@ -388,35 +542,16 @@ async def export_pdf(analysis_id: str, user: dict = Depends(get_current_user)):
         spaceAfter=30
     )
     
-    elements.append(Paragraph("تقرير التحليل السريري", title_style))
+    elements.append(Paragraph("Clinical Analysis Report / تقرير التحليل السريري", title_style))
     elements.append(Spacer(1, 0.3*inch))
-    
-    # Note title
-    elements.append(Paragraph(f"<b>عنوان الملاحظة:</b> {note.get('title', '')}", styles['Normal']))
+    elements.append(Paragraph(f"<b>Note Title:</b> {note.get('title', '')}", styles['Normal']))
     elements.append(Spacer(1, 0.2*inch))
     
     # Primary Diagnoses
-    elements.append(Paragraph("<b>التشخيصات الرئيسية:</b>", styles['Heading2']))
+    elements.append(Paragraph("<b>Primary Diagnoses / التشخيصات الرئيسية:</b>", styles['Heading2']))
     for diag in analysis.get('primary_diagnoses', []):
-        elements.append(Paragraph(f"• {diag.get('diagnosis', '')} - {diag.get('icd_code', '')}", styles['Normal']))
+        elements.append(Paragraph(f"• {diag.get('diagnosis_en', '')} / {diag.get('diagnosis_ar', '')} - {diag.get('icd_code', '')}", styles['Normal']))
     elements.append(Spacer(1, 0.2*inch))
-    
-    # Secondary Diagnoses
-    elements.append(Paragraph("<b>التشخيصات الثانوية:</b>", styles['Heading2']))
-    for diag in analysis.get('secondary_diagnoses', []):
-        elements.append(Paragraph(f"• {diag.get('diagnosis', '')} - {diag.get('icd_code', '')}", styles['Normal']))
-    elements.append(Spacer(1, 0.2*inch))
-    
-    # Gaps
-    elements.append(Paragraph("<b>الثغرات في التوثيق:</b>", styles['Heading2']))
-    for gap in analysis.get('gaps', []):
-        elements.append(Paragraph(f"• {gap}", styles['Normal']))
-    elements.append(Spacer(1, 0.2*inch))
-    
-    # Queries
-    elements.append(Paragraph("<b>استفسارات للطبيب:</b>", styles['Heading2']))
-    for query in analysis.get('queries_for_doctor', []):
-        elements.append(Paragraph(f"• {query}", styles['Normal']))
     
     doc.build(elements)
     buffer.seek(0)
@@ -435,90 +570,46 @@ async def export_excel(analysis_id: str, user: dict = Depends(get_current_user))
     )
     
     if not analysis:
-        raise HTTPException(status_code=404, detail="التحليل غير موجود")
+        raise HTTPException(status_code=404, detail="Analysis not found")
     
     note = await db.clinical_notes.find_one(
         {"id": analysis['note_id']},
         {"_id": 0}
     )
     
-    # Create workbook
     wb = Workbook()
     ws = wb.active
-    ws.title = "تحليل سريري"
+    ws.title = "Clinical Analysis"
     
-    # Headers
     header_fill = PatternFill(start_color="1e40af", end_color="1e40af", fill_type="solid")
     header_font = Font(bold=True, color="FFFFFF")
     
-    ws['A1'] = 'عنوان الملاحظة'
+    ws['A1'] = 'Note Title'
     ws['B1'] = note.get('title', '')
     ws['A1'].fill = header_fill
     ws['A1'].font = header_font
     
-    # Primary Diagnoses
     row = 3
-    ws[f'A{row}'] = 'التشخيصات الرئيسية'
+    ws[f'A{row}'] = 'Primary Diagnoses'
     ws[f'A{row}'].fill = header_fill
     ws[f'A{row}'].font = header_font
     row += 1
     
-    ws[f'A{row}'] = 'التشخيص'
-    ws[f'B{row}'] = 'كود ICD-10'
-    ws[f'A{row}'].fill = PatternFill(start_color="3b82f6", end_color="3b82f6", fill_type="solid")
-    ws[f'B{row}'].fill = PatternFill(start_color="3b82f6", end_color="3b82f6", fill_type="solid")
+    ws[f'A{row}'] = 'Diagnosis (EN)'
+    ws[f'B{row}'] = 'Diagnosis (AR)'
+    ws[f'C{row}'] = 'ICD-10 Code'
     row += 1
     
     for diag in analysis.get('primary_diagnoses', []):
-        ws[f'A{row}'] = diag.get('diagnosis', '')
-        ws[f'B{row}'] = diag.get('icd_code', '')
+        ws[f'A{row}'] = diag.get('diagnosis_en', '')
+        ws[f'B{row}'] = diag.get('diagnosis_ar', '')
+        ws[f'C{row}'] = diag.get('icd_code', '')
         row += 1
     
-    # Secondary Diagnoses
-    row += 1
-    ws[f'A{row}'] = 'التشخيصات الثانوية'
-    ws[f'A{row}'].fill = header_fill
-    ws[f'A{row}'].font = header_font
-    row += 1
+    ws.column_dimensions['A'].width = 40
+    ws.column_dimensions['B'].width = 40
+    ws.column_dimensions['C'].width = 15
     
-    ws[f'A{row}'] = 'التشخيص'
-    ws[f'B{row}'] = 'كود ICD-10'
-    ws[f'A{row}'].fill = PatternFill(start_color="3b82f6", end_color="3b82f6", fill_type="solid")
-    ws[f'B{row}'].fill = PatternFill(start_color="3b82f6", end_color="3b82f6", fill_type="solid")
-    row += 1
-    
-    for diag in analysis.get('secondary_diagnoses', []):
-        ws[f'A{row}'] = diag.get('diagnosis', '')
-        ws[f'B{row}'] = diag.get('icd_code', '')
-        row += 1
-    
-    # Gaps
-    row += 1
-    ws[f'A{row}'] = 'الثغرات'
-    ws[f'A{row}'].fill = header_fill
-    ws[f'A{row}'].font = header_font
-    row += 1
-    
-    for gap in analysis.get('gaps', []):
-        ws[f'A{row}'] = gap
-        row += 1
-    
-    # Queries
-    row += 1
-    ws[f'A{row}'] = 'استفسارات للطبيب'
-    ws[f'A{row}'].fill = header_fill
-    ws[f'A{row}'].font = header_font
-    row += 1
-    
-    for query in analysis.get('queries_for_doctor', []):
-        ws[f'A{row}'] = query
-        row += 1
-    
-    # Adjust column widths
-    ws.column_dimensions['A'].width = 50
-    ws.column_dimensions['B'].width = 20
-    
-    # Save to buffer
     buffer = io.BytesIO()
     wb.save(buffer)
     buffer.seek(0)
