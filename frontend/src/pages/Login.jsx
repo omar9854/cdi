@@ -104,6 +104,8 @@ const Login = ({ setUser }) => {
           </div>
         </CardContent>
       </Card>
+      </div>
+      <Footer />
     </div>
   );
 };
