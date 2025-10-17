@@ -258,8 +258,6 @@ async def create_note(note_data: ClinicalNoteCreate, user: dict = Depends(get_cu
 
 @api_router.get("/notes", response_model=List[ClinicalNote])
 async def get_notes(user: dict = Depends(get_current_user)):
-    user = await get_current_user(authorization)
-    
     notes = await db.clinical_notes.find(
         {"user_id": user['id']},
         {"_id": 0}
