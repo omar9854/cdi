@@ -30,7 +30,7 @@ const History = ({ user, onLogout }) => {
       });
       setHistory(response.data);
     } catch (error) {
-      toast.error('فشل تحميل السجل');
+      toast.error(t('error'));
     } finally {
       setLoading(false);
     }
