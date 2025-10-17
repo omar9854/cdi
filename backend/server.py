@@ -642,11 +642,9 @@ Answer questions professionally, provide clarifications, and help improve the do
     try:
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,
-            session_id=request.analysis_id  # استخدام نفس الـ session
+            session_id=request.analysis_id,
+            system_message=system_message
         ).with_model("gemini", "gemini-2.5-pro")
-        
-        # Set system message
-        chat.system_message = system_message
         
         message = UserMessage(text=request.message)
         response = await chat.send_message(message)
