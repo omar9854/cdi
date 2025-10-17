@@ -45,6 +45,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 # Emergent LLM Key
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
 
+# Admin Secret Code (يمكن تغييره من .env)
+ADMIN_SECRET_CODE = os.environ.get('ADMIN_SECRET_CODE', 'CDI-ADMIN-2024')
+
 # Medical Specialties - Comprehensive List
 MEDICAL_SPECIALTIES = [
     # الأقسام الطبية الرئيسية - Main Medical Departments
