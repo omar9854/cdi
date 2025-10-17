@@ -244,8 +244,6 @@ async def login(credentials: UserLogin):
 # ========== Notes Routes ==========
 @api_router.post("/notes", response_model=ClinicalNote)
 async def create_note(note_data: ClinicalNoteCreate, user: dict = Depends(get_current_user)):
-    user = await get_current_user(authorization)
-    
     note = ClinicalNote(
         user_id=user['id'],
         title=note_data.title,
