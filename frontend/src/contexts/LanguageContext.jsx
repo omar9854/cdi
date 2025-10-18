@@ -108,6 +108,7 @@ export const translations = {
     email: 'Email',
     password: 'Password',
     fullName: 'Full Name',
+    phoneNumber: 'Phone Number',
     alreadyHaveAccount: 'Already have an account?',
     dontHaveAccount: "Don't have an account?",
     signupNow: 'Sign Up Now',
@@ -120,6 +121,8 @@ export const translations = {
     newPassword: 'New Password',
     confirmPassword: 'Confirm Password',
     resetPasswordTitle: 'Reset Your Password',
+    support: 'Technical Support',
+    contactSupport: 'Contact Support',
     
     // App name
     appName: 'Medical Coding & CDI Center',
