@@ -10,6 +10,7 @@ export const translations = {
     email: 'البريد الإلكتروني',
     password: 'كلمة المرور',
     fullName: 'الاسم الكامل',
+    phoneNumber: 'رقم الجوال',
     alreadyHaveAccount: 'لديك حساب بالفعل؟',
     dontHaveAccount: 'ليس لديك حساب؟',
     signupNow: 'سجل الآن',
@@ -22,6 +23,8 @@ export const translations = {
     newPassword: 'كلمة المرور الجديدة',
     confirmPassword: 'تأكيد كلمة المرور',
     resetPasswordTitle: 'إعادة تعيين كلمة المرور',
+    support: 'الدعم الفني',
+    contactSupport: 'تواصل مع الدعم',
     
     // App name
     appName: 'مركز الترميز الطبي وتحسين التوثيق السريري',
