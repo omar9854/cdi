@@ -252,6 +252,164 @@ async def get_current_user(authorization: str = Header(None)) -> dict:
     
     return user
 
+async def send_email(to_email: str, subject: str, body_html: str):
+    """Send email using SMTP (Gmail)"""
+    smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
+    smtp_port = int(os.environ.get('SMTP_PORT', 587))
+    smtp_user = os.environ.get('SMTP_USER', '')
+    smtp_password = os.environ.get('SMTP_PASSWORD', '')
+    email_from = os.environ.get('EMAIL_FROM', 'almaghthawi.cdi@gmail.com')
+    
+    # If SMTP password is not set, skip email sending (for now)
+    if not smtp_password:
+        logging.warning(f"Email sending skipped - SMTP_PASSWORD not configured. Would have sent to: {to_email}")
+        return
+    
+    try:
+        message = MIMEMultipart('alternative')
+        message['From'] = email_from
+        message['To'] = to_email
+        message['Subject'] = subject
+        
+        html_part = MIMEText(body_html, 'html', 'utf-8')
+        message.attach(html_part)
+        
+        await aiosmtplib.send(
+            message,
+            hostname=smtp_host,
+            port=smtp_port,
+            username=smtp_user,
+            password=smtp_password,
+            start_tls=True
+        )
+        logging.info(f"Email sent successfully to {to_email}")
+    except Exception as e:
+        logging.error(f"Failed to send email to {to_email}: {str(e)}")
+        # Don't raise exception - email failure shouldn't break registration/password reset
+
+async def send_welcome_email(user_email: str, user_name: str):
+    """Send welcome email to new users"""
+    subject = "مرحباً بك في مركز الترميز الطبي | Welcome to Medical Coding Center"
+    
+    body_html = f"""
+    <html dir="rtl">
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">مركز الترميز الطبي وتحسين التوثيق السريري</h1>
+            <p style="color: #f0f0f0; margin-top: 10px; font-size: 14px;">Medical Coding & Clinical Documentation Improvement Center</p>
+        </div>
+        
+        <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #667eea; text-align: right;">مرحباً {user_name}</h2>
+            <p style="text-align: right; font-size: 16px;">
+                نرحب بك في منصة مركز الترميز الطبي وتحسين التوثيق السريري. نحن سعداء بانضمامك إلينا!
+            </p>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-right: 4px solid #667eea;">
+                <h3 style="color: #667eea; margin-top: 0; text-align: right;">ماذا يمكنك أن تفعل؟</h3>
+                <ul style="text-align: right; color: #555;">
+                    <li>إضافة وتحليل الملاحظات السريرية باستخدام الذكاء الاصطناعي</li>
+                    <li>تحديد التشخيصات وتحسين التوثيق الطبي</li>
+                    <li>إنشاء استفسارات للأطباء</li>
+                    <li>تصدير التقارير بصيغة PDF و Excel</li>
+                </ul>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+            
+            <h2 style="color: #667eea; text-align: left;">Welcome {user_name}</h2>
+            <p style="text-align: left; font-size: 16px;">
+                Welcome to the Medical Coding & Clinical Documentation Improvement Center platform. We're excited to have you join us!
+            </p>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
+                <h3 style="color: #667eea; margin-top: 0; text-align: left;">What can you do?</h3>
+                <ul style="text-align: left; color: #555;">
+                    <li>Add and analyze clinical notes using AI</li>
+                    <li>Identify diagnoses and improve medical documentation</li>
+                    <li>Generate physician queries</li>
+                    <li>Export reports in PDF and Excel formats</li>
+                </ul>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <p style="color: #999; font-size: 12px;">© 2025 جميع الحقوق محفوظة | عمر المغذوي</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    await send_email(user_email, subject, body_html)
+
+async def send_password_reset_email(user_email: str, user_name: str, reset_token: str):
+    """Send password reset email"""
+    frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+    reset_link = f"{frontend_url}/reset-password?token={reset_token}"
+    
+    subject = "إعادة تعيين كلمة المرور | Password Reset"
+    
+    body_html = f"""
+    <html dir="rtl">
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">إعادة تعيين كلمة المرور</h1>
+            <p style="color: #f0f0f0; margin-top: 10px; font-size: 14px;">Password Reset Request</p>
+        </div>
+        
+        <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #667eea; text-align: right;">مرحباً {user_name}</h2>
+            <p style="text-align: right; font-size: 16px;">
+                تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك. إذا كنت أنت من قام بهذا الطلب، يرجى النقر على الزر أدناه:
+            </p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{reset_link}" style="background: #667eea; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
+                    إعادة تعيين كلمة المرور
+                </a>
+            </div>
+            
+            <p style="text-align: right; font-size: 14px; color: #666;">
+                أو يمكنك نسخ الرابط التالي ولصقه في المتصفح:<br>
+                <a href="{reset_link}" style="color: #667eea; word-break: break-all;">{reset_link}</a>
+            </p>
+            
+            <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: right;">
+                <strong>ملاحظة:</strong> هذا الرابط صالح لمدة ساعة واحدة فقط. إذا لم تطلب إعادة تعيين كلمة المرور، يرجى تجاهل هذا البريد.
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+            
+            <h2 style="color: #667eea; text-align: left;">Hello {user_name}</h2>
+            <p style="text-align: left; font-size: 16px;">
+                We received a request to reset your password. If this was you, please click the button below:
+            </p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{reset_link}" style="background: #667eea; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; font-size: 16px; display: inline-block;">
+                    Reset Password
+                </a>
+            </div>
+            
+            <p style="text-align: left; font-size: 14px; color: #666;">
+                Or copy and paste this link into your browser:<br>
+                <a href="{reset_link}" style="color: #667eea; word-break: break-all;">{reset_link}</a>
+            </p>
+            
+            <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: left;">
+                <strong>Note:</strong> This link is valid for 1 hour only. If you didn't request a password reset, please ignore this email.
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <p style="color: #999; font-size: 12px;">© 2025 جميع الحقوق محفوظة | عمر المغذوي</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    await send_email(user_email, subject, body_html)
+
 async def analyze_with_gemini(notes_text: str, doctor_notes: List[Dict]) -> Dict:
     """Analyze clinical notes using Gemini AI - CDI Focus"""
     
