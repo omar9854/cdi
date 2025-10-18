@@ -123,6 +123,7 @@ class User(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     email: EmailStr
     full_name: str
+    phone_number: str  # رقم الجوال
     password_hash: str
     role: str = "user"  # "admin" or "user"
     is_active: bool = True
@@ -131,6 +132,7 @@ class User(BaseModel):
 class UserRegister(BaseModel):
     email: EmailStr
     full_name: str
+    phone_number: str  # رقم الجوال مطلوب
     password: str
     admin_code: Optional[str] = None  # كود سري للأدمن
 
