@@ -582,6 +582,7 @@ async def login(credentials: UserLogin):
             "id": user['id'], 
             "email": user['email'], 
             "full_name": user['full_name'],
+            "phone_number": user.get('phone_number', ''),
             "role": user.get('role', 'user')
         }
     }
