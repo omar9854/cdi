@@ -661,6 +661,15 @@ async def reset_password(request: PasswordReset):
     
     return {"message": "Password reset successful"}
 
+@api_router.get("/support/whatsapp")
+async def get_support_whatsapp():
+    """Get support WhatsApp number"""
+    support_number = os.environ.get('SUPPORT_WHATSAPP', '966502468148')
+    return {
+        "whatsapp_number": support_number,
+        "whatsapp_link": f"https://wa.me/{support_number}"
+    }
+
 # ========== Admin Routes ==========
 async def require_admin(user: dict = Depends(get_current_user)):
     if user.get('role') != 'admin':
