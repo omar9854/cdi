@@ -109,6 +109,14 @@ export const translations = {
     dontHaveAccount: "Don't have an account?",
     signupNow: 'Sign Up Now',
     loginNow: 'Login',
+    forgotPassword: 'Forgot Password?',
+    resetPassword: 'Reset Password',
+    sendResetLink: 'Send Reset Link',
+    backToLogin: 'Back to Login',
+    resetLinkSent: 'Password reset link has been sent to your email',
+    newPassword: 'New Password',
+    confirmPassword: 'Confirm Password',
+    resetPasswordTitle: 'Reset Your Password',
     
     // App name
     appName: 'Medical Coding & CDI Center',
