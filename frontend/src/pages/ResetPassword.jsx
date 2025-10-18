@@ -80,8 +80,8 @@ const ResetPassword = () => {
       <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4">
         <Card className="w-full max-w-md medical-card fade-in">
           <CardHeader className="text-center space-y-4">
-            <div className="mx-auto w-24 h-24 flex items-center justify-center">
-              <img src="/download-2.png" alt="Logo" className="w-full h-full object-contain rounded-xl" />
+            <div className="mx-auto w-32 h-32 flex items-center justify-center">
+              <img src="/download-2.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
             <CardTitle className="text-3xl font-bold text-gray-800">{t('resetPasswordTitle')}</CardTitle>
             <CardDescription className="text-lg">
