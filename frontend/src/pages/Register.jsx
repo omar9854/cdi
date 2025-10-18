@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { FileText, Lock, Mail, User } from 'lucide-react';
+import { FileText, Lock, Mail, User, Phone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Footer from '@/components/Footer';
 
