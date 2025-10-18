@@ -530,6 +530,12 @@ async def register(user_data: UserRegister):
     doc['created_at'] = doc['created_at'].isoformat()
     await db.users.insert_one(doc)
     
+    # Send welcome email (async, non-blocking)
+    try:
+        await send_welcome_email(user.email, user.full_name)
+    except Exception as e:
+        logging.error(f"Failed to send welcome email: {str(e)}")
+    
     token = create_access_token({
         "user_id": user.id, 
         "email": user.email,
