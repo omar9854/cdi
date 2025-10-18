@@ -513,6 +513,11 @@ async def register(user_data: UserRegister):
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
+    # Check if phone number already registered
+    existing_phone = await db.users.find_one({"phone_number": user_data.phone_number})
+    if existing_phone:
+        raise HTTPException(status_code=400, detail="Phone number already registered")
+    
     # Check if admin code is provided and valid
     role = "user"
     if user_data.admin_code:
@@ -524,6 +529,7 @@ async def register(user_data: UserRegister):
     user = User(
         email=user_data.email,
         full_name=user_data.full_name,
+        phone_number=user_data.phone_number,
         password_hash=hash_password(user_data.password),
         role=role
     )
@@ -551,6 +557,7 @@ async def register(user_data: UserRegister):
             "id": user.id, 
             "email": user.email, 
             "full_name": user.full_name,
+            "phone_number": user.phone_number,
             "role": user.role
         }
     }
