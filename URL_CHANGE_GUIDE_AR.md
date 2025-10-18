@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://clinical-doc-ai.preview.emergentagent.com
+https://medidoc-ai.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://clinical-doc-ai.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://cdi.preview.emergentagent.com
+   https://medidoc-ai.preview.emergentagent.com
    ```
 
 ---
