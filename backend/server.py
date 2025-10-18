@@ -596,8 +596,9 @@ async def forgot_password(request: PasswordResetRequest):
     if not user:
         return {"message": "If the email exists, a password reset link has been sent"}
     
-    # Generate reset token
+    # Generate reset token and code
     reset_token = str(uuid.uuid4())
+    reset_code = str(uuid.uuid4())[:6].upper()  # 6-digit code for WhatsApp
     expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
     
     # Store reset token
@@ -610,6 +611,7 @@ async def forgot_password(request: PasswordResetRequest):
     doc = token_doc.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     doc['expires_at'] = doc['expires_at'].isoformat()
+    doc['reset_code'] = reset_code  # Add code for WhatsApp
     await db.password_reset_tokens.insert_one(doc)
     
     # Send password reset email
@@ -618,7 +620,14 @@ async def forgot_password(request: PasswordResetRequest):
     except Exception as e:
         logging.error(f"Failed to send password reset email: {str(e)}")
     
-    return {"message": "If the email exists, a password reset link has been sent"}
+    # Return WhatsApp info if user has phone number
+    response = {"message": "If the email exists, a password reset link has been sent"}
+    if user.get('phone_number'):
+        response["whatsapp_available"] = True
+        response["phone_number"] = user['phone_number']
+        response["reset_code"] = reset_code
+    
+    return response
 
 @api_router.post("/auth/reset-password")
 async def reset_password(request: PasswordReset):
