@@ -14,6 +14,14 @@ export const translations = {
     dontHaveAccount: 'ليس لديك حساب؟',
     signupNow: 'سجل الآن',
     loginNow: 'سجل الدخول',
+    forgotPassword: 'نسيت كلمة المرور؟',
+    resetPassword: 'إعادة تعيين كلمة المرور',
+    sendResetLink: 'إرسال رابط إعادة التعيين',
+    backToLogin: 'العودة لتسجيل الدخول',
+    resetLinkSent: 'تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني',
+    newPassword: 'كلمة المرور الجديدة',
+    confirmPassword: 'تأكيد كلمة المرور',
+    resetPasswordTitle: 'إعادة تعيين كلمة المرور',
     
     // App name
     appName: 'مركز الترميز الطبي وتحسين التوثيق السريري',
