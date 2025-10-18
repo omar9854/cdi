@@ -545,6 +545,7 @@ async def register(user_data: UserRegister):
         logging.error(f"Failed to send welcome email: {str(e)}")
     
     # Create WhatsApp welcome message link
+    import urllib.parse
     welcome_message = f"""مرحباً {user.full_name}
 
 شكراً جزيلاً على إنشاء حسابك معنا
@@ -555,7 +556,8 @@ async def register(user_data: UserRegister):
 
 شكراً"""
     
-    whatsapp_link = f"https://wa.me/{user.phone_number}?text={welcome_message}"
+    encoded_message = urllib.parse.quote(welcome_message)
+    whatsapp_link = f"https://wa.me/{user.phone_number}?text={encoded_message}"
     
     token = create_access_token({
         "user_id": user.id, 
