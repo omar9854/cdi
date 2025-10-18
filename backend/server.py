@@ -577,6 +577,71 @@ async def login(credentials: UserLogin):
         }
     }
 
+@api_router.post("/auth/forgot-password")
+async def forgot_password(request: PasswordResetRequest):
+    """Request password reset - sends email with reset token"""
+    user = await db.users.find_one({"email": request.email}, {"_id": 0})
+    
+    # Always return success (don't reveal if email exists)
+    if not user:
+        return {"message": "If the email exists, a password reset link has been sent"}
+    
+    # Generate reset token
+    reset_token = str(uuid.uuid4())
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
+    
+    # Store reset token
+    token_doc = PasswordResetToken(
+        user_id=user['id'],
+        token=reset_token,
+        expires_at=expires_at
+    )
+    
+    doc = token_doc.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['expires_at'] = doc['expires_at'].isoformat()
+    await db.password_reset_tokens.insert_one(doc)
+    
+    # Send password reset email
+    try:
+        await send_password_reset_email(user['email'], user['full_name'], reset_token)
+    except Exception as e:
+        logging.error(f"Failed to send password reset email: {str(e)}")
+    
+    return {"message": "If the email exists, a password reset link has been sent"}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(request: PasswordReset):
+    """Reset password using token from email"""
+    # Find valid token
+    token_doc = await db.password_reset_tokens.find_one({
+        "token": request.token,
+        "used": False
+    }, {"_id": 0})
+    
+    if not token_doc:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+    
+    # Check if token expired
+    expires_at = datetime.fromisoformat(token_doc['expires_at'])
+    if datetime.now(timezone.utc) > expires_at:
+        raise HTTPException(status_code=400, detail="Reset token has expired")
+    
+    # Update user password
+    new_password_hash = hash_password(request.new_password)
+    await db.users.update_one(
+        {"id": token_doc['user_id']},
+        {"$set": {"password_hash": new_password_hash}}
+    )
+    
+    # Mark token as used
+    await db.password_reset_tokens.update_one(
+        {"token": request.token},
+        {"$set": {"used": True}}
+    )
+    
+    return {"message": "Password reset successful"}
+
 # ========== Admin Routes ==========
 async def require_admin(user: dict = Depends(get_current_user)):
     if user.get('role') != 'admin':
