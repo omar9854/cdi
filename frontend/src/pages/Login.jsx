@@ -85,6 +85,11 @@ const Login = ({ setUser }) => {
                 />
               </div>
             </div>
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                {t('forgotPassword')}
+              </Link>
+            </div>
             <Button
               type="submit"
               className="w-full medical-blue text-white py-6 text-lg font-semibold"
