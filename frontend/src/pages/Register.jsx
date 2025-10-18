@@ -93,6 +93,22 @@ const Register = ({ setUser }) => {
               </div>
             </div>
             <div className="space-y-2">
+              <Label htmlFor="phone_number">{t('phoneNumber')}</Label>
+              <div className="relative">
+                <Phone className={`absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-3 h-5 w-5 text-gray-400`} />
+                <Input
+                  id="phone_number"
+                  type="tel"
+                  placeholder="966502468148"
+                  value={formData.phone_number}
+                  onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                  className={language === 'ar' ? 'pr-10' : 'pl-10'}
+                  required
+                  data-testid="register-phone-input"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="password">{t('password')}</Label>
               <div className="relative">
                 <Lock className={`absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-3 h-5 w-5 text-gray-400`} />
