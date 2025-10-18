@@ -46,6 +46,7 @@ function AppContent() {
   return (
     <div className="App">
       <BrowserRouter>
+        <WhatsAppSupport />
         <Routes>
           <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to="/dashboard" />} />
           <Route path="/register" element={!user ? <Register setUser={setUser} /> : <Navigate to="/dashboard" />} />
