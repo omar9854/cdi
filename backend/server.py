@@ -605,16 +605,17 @@ async def login(credentials: UserLogin):
 
 @api_router.post("/auth/forgot-password")
 async def forgot_password(request: PasswordResetRequest):
-    """Request password reset - sends email with reset token"""
+    """Request password reset - sends code via WhatsApp"""
     user = await db.users.find_one({"email": request.email}, {"_id": 0})
     
     # Always return success (don't reveal if email exists)
     if not user:
-        return {"message": "If the email exists, a password reset link has been sent"}
+        return {"message": "If the account exists, a reset code will be sent"}
     
-    # Generate reset token and code
+    # Generate reset code (6 digits)
+    import random
+    reset_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
     reset_token = str(uuid.uuid4())
-    reset_code = str(uuid.uuid4())[:6].upper()  # 6-digit code for WhatsApp
     expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
     
     # Store reset token
@@ -627,23 +628,39 @@ async def forgot_password(request: PasswordResetRequest):
     doc = token_doc.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     doc['expires_at'] = doc['expires_at'].isoformat()
-    doc['reset_code'] = reset_code  # Add code for WhatsApp
+    doc['reset_code'] = reset_code
     await db.password_reset_tokens.insert_one(doc)
     
-    # Send password reset email
+    # Send password reset email (if configured)
     try:
         await send_password_reset_email(user['email'], user['full_name'], reset_token)
     except Exception as e:
         logging.error(f"Failed to send password reset email: {str(e)}")
     
-    # Return WhatsApp info if user has phone number
-    response = {"message": "If the email exists, a password reset link has been sent"}
-    if user.get('phone_number'):
-        response["whatsapp_available"] = True
-        response["phone_number"] = user['phone_number']
-        response["reset_code"] = reset_code
+    # Create WhatsApp message with reset code
+    import urllib.parse
+    phone_number = user.get('phone_number', '')
+    if phone_number:
+        whatsapp_message = f"""مرحباً {user['full_name']}
+
+كود استعادة كلمة المرور الخاص بك هو:
+
+{reset_code}
+
+هذا الكود صالح لمدة ساعة واحدة فقط.
+
+للدعم الفني: 966502468148"""
+        
+        encoded_message = urllib.parse.quote(whatsapp_message)
+        whatsapp_link = f"https://wa.me/{phone_number}?text={encoded_message}"
+        
+        return {
+            "message": "Reset code sent",
+            "whatsapp_link": whatsapp_link,
+            "has_phone": True
+        }
     
-    return response
+    return {"message": "If the account exists, a reset code will be sent", "has_phone": False}
 
 @api_router.post("/auth/reset-password")
 async def reset_password(request: PasswordReset):
