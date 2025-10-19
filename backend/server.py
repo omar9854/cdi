@@ -511,12 +511,12 @@ async def get_specialties():
 async def register(user_data: UserRegister):
     existing_user = await db.users.find_one({"email": user_data.email})
     if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Registration failed")
     
     # Check if phone number already registered
     existing_phone = await db.users.find_one({"phone_number": user_data.phone_number})
     if existing_phone:
-        raise HTTPException(status_code=400, detail="Phone number already registered")
+        raise HTTPException(status_code=400, detail="Registration failed")
     
     # Check if admin code is provided and valid
     role = "user"
