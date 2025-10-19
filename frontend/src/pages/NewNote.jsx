@@ -126,16 +126,6 @@ const NewNote = ({ user, onLogout }) => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <Label className="text-lg">{t('doctorNotes')}</Label>
-                  <Button
-                    type="button"
-                    onClick={addNote}
-                    variant="outline"
-                    className="text-blue-600"
-                    data-testid="add-note-button"
-                  >
-                    {language === 'ar' ? <Plus className="ml-2" /> : <Plus className="mr-2" />}
-                    {t('addAnotherNote')}
-                  </Button>
                 </div>
 
                 {doctorNotes.map((note, index) => (
@@ -193,6 +183,20 @@ const NewNote = ({ user, onLogout }) => {
                     </CardContent>
                   </Card>
                 ))}
+                
+                {/* زر إضافة ملاحظة جديدة في الأسفل */}
+                <div className="flex justify-center pt-4">
+                  <Button
+                    type="button"
+                    onClick={addNote}
+                    variant="outline"
+                    className="text-blue-600 border-2 border-blue-300 hover:bg-blue-50 px-8 py-6 text-lg"
+                    data-testid="add-note-button"
+                  >
+                    {language === 'ar' ? <Plus className="ml-2" /> : <Plus className="mr-2" />}
+                    {t('addAnotherNote')}
+                  </Button>
+                </div>
               </div>
 
               <div className="flex gap-4 pt-4">
