@@ -123,6 +123,18 @@ const History = ({ user, onLogout }) => {
                 </CardContent>
               </Card>
             ))}
+            
+            {/* زر إضافة ملاحظة جديدة */}
+            <div className="mt-8 flex justify-center">
+              <Button
+                onClick={() => navigate('/new-note')}
+                className="medical-blue text-white px-8 py-6 text-lg font-semibold"
+                data-testid="add-new-note-button"
+              >
+                <FileText className={language === 'ar' ? 'ml-2' : 'mr-2'} />
+                {t('newNote')}
+              </Button>
+            </div>
           </div>
         )}
       </main>
