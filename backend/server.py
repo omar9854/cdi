@@ -752,6 +752,81 @@ async def require_admin(user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
 
+@api_router.get("/admin/users-statistics")
+async def get_users_statistics(admin: dict = Depends(require_admin)):
+    """Get detailed statistics for all users"""
+    from datetime import datetime, timezone, timedelta
+    
+    # Get all users except admins
+    users = await db.users.find(
+        {"role": {"$ne": "admin"}},
+        {"_id": 0, "password_hash": 0}
+    ).to_list(1000)
+    
+    today = datetime.now(timezone.utc).date()
+    yesterday = today - timedelta(days=1)
+    
+    user_stats = []
+    for user in users:
+        user_id = user['id']
+        
+        # Count total notes
+        total_notes = await db.clinical_notes.count_documents({"user_id": user_id})
+        
+        # Count total analyses
+        total_analyses = await db.analyses.count_documents({"user_id": user_id})
+        
+        # Count today's notes
+        today_notes = await db.clinical_notes.count_documents({
+            "user_id": user_id,
+            "created_at": {
+                "$gte": datetime.combine(today, datetime.min.time()).isoformat(),
+                "$lt": datetime.combine(today + timedelta(days=1), datetime.min.time()).isoformat()
+            }
+        })
+        
+        # Count today's analyses
+        today_analyses = await db.analyses.count_documents({
+            "user_id": user_id,
+            "created_at": {
+                "$gte": datetime.combine(today, datetime.min.time()).isoformat(),
+                "$lt": datetime.combine(today + timedelta(days=1), datetime.min.time()).isoformat()
+            }
+        })
+        
+        # Get last activity
+        last_note = await db.clinical_notes.find_one(
+            {"user_id": user_id},
+            {"_id": 0, "created_at": 1},
+            sort=[("created_at", -1)]
+        )
+        
+        last_activity = last_note['created_at'] if last_note else user.get('created_at')
+        
+        user_stats.append({
+            "user_id": user_id,
+            "full_name": user['full_name'],
+            "email": user['email'],
+            "phone_number": user.get('phone_number', ''),
+            "registration_date": user.get('created_at'),
+            "last_activity": last_activity,
+            "total_notes": total_notes,
+            "total_analyses": total_analyses,
+            "today_notes": today_notes,
+            "today_analyses": today_analyses,
+            "is_active_today": today_notes > 0 or today_analyses > 0
+        })
+    
+    # Sort by today's activity (most active first)
+    user_stats.sort(key=lambda x: (x['today_notes'] + x['today_analyses']), reverse=True)
+    
+    return {
+        "date": today.isoformat(),
+        "total_users": len(user_stats),
+        "active_today": sum(1 for u in user_stats if u['is_active_today']),
+        "statistics": user_stats
+    }
+
 @api_router.get("/admin/stats")
 async def get_admin_stats(admin: dict = Depends(require_admin)):
     # Count users
