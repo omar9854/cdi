@@ -24,9 +24,17 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      await axios.post(`${API}/auth/forgot-password`, { email });
-      setSent(true);
-      toast.success(t('resetLinkSent'));
+      const response = await axios.post(`${API}/auth/forgot-password`, { email });
+      
+      if (response.data.whatsapp_link) {
+        // فتح واتساب مع الكود
+        window.open(response.data.whatsapp_link, '_blank');
+        setSent(true);
+        toast.success(t('resetLinkSent'));
+      } else {
+        setSent(true);
+        toast.success(t('resetLinkSent'));
+      }
     } catch (error) {
       toast.error(error.response?.data?.detail || t('error'));
     } finally {
