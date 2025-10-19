@@ -40,17 +40,20 @@ const Register = ({ setUser }) => {
       
       toast.success(t('registerSuccess'));
       
-      // فتح واتساب مع رسالة الترحيب
+      // فتح واتساب مع رسالة الترحيب - استخدام location بدلاً من window.open
       if (whatsapp_welcome_link) {
+        // حفظ الرابط وفتحه مباشرة
+        window.location.href = whatsapp_welcome_link;
+        
+        // الانتظار قليلاً ثم التوجيه للداشبورد
         setTimeout(() => {
-          window.open(whatsapp_welcome_link, '_blank');
-        }, 1000);
+          navigate('/dashboard');
+        }, 3000);
+      } else {
+        navigate('/dashboard');
       }
-      
-      navigate('/dashboard');
     } catch (error) {
       toast.error(error.response?.data?.detail || t('error'));
-    } finally {
       setLoading(false);
     }
   };
