@@ -68,17 +68,92 @@ const ResetPassword = () => {
   };
 
   if (!token) {
+    // Show form for code-based reset (from WhatsApp)
     return (
       <div className="min-h-screen flex flex-col">
         <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4">
-          <Card className="w-full max-w-md medical-card">
-            <CardContent className="pt-6 text-center">
-              <p className="text-red-600 mb-4">
-                {language === 'ar' ? 'رابط غير صالح' : 'Invalid reset link'}
-              </p>
-              <Link to="/forgot-password" className="text-blue-600 hover:underline">
-                {language === 'ar' ? 'طلب رابط جديد' : 'Request new link'}
-              </Link>
+          <Card className="w-full max-w-md medical-card fade-in">
+            <CardHeader className="text-center space-y-4">
+              <div className="mx-auto w-32 h-32 flex items-center justify-center">
+                <img src="/download-2.png" alt="Logo" className="w-full h-full object-contain" />
+              </div>
+              <CardTitle className="text-3xl font-bold text-gray-800">{t('resetPasswordTitle')}</CardTitle>
+              <CardDescription className="text-lg">
+                {language === 'ar' 
+                  ? 'أدخل الكود المرسل على واتساب' 
+                  : 'Enter the code sent via WhatsApp'
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">{t('email')}</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="example@hospital.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="code">
+                    {language === 'ar' ? 'كود الاستعادة' : 'Reset Code'}
+                  </Label>
+                  <Input
+                    id="code"
+                    type="text"
+                    placeholder="123456"
+                    value={formData.code}
+                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">{t('newPassword')}</Label>
+                  <div className="relative">
+                    <Lock className={`absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-3 h-5 w-5 text-gray-400`} />
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className={language === 'ar' ? 'pr-10' : 'pl-10'}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
+                  <div className="relative">
+                    <Lock className={`absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-3 h-5 w-5 text-gray-400`} />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                      className={language === 'ar' ? 'pr-10' : 'pl-10'}
+                      required
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full medical-blue text-white py-6 text-lg font-semibold"
+                  disabled={loading}
+                >
+                  {loading ? t('loading') : t('resetPassword')}
+                </Button>
+              </form>
+              <div className="mt-6 text-center">
+                <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+                  {t('backToLogin')}
+                </Link>
+              </div>
             </CardContent>
           </Card>
         </div>
