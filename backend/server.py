@@ -884,6 +884,112 @@ async def toggle_user_active(user_id: str, admin: dict = Depends(require_admin))
     
     return {"message": "User status updated", "is_active": new_status}
 
+@api_router.get("/admin/export-statistics")
+async def export_users_statistics(admin: dict = Depends(require_admin)):
+    """Export user statistics to Excel file"""
+    from datetime import datetime, timezone, timedelta
+    
+    # Get statistics
+    stats_data = await get_users_statistics(admin)
+    
+    # Create Excel workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "إحصائيات المستخدمين"
+    
+    # Define headers (Arabic and English)
+    headers = [
+        "الاسم الكامل\nFull Name",
+        "البريد الإلكتروني\nEmail",
+        "رقم الجوال\nPhone",
+        "تاريخ التسجيل\nRegistration Date",
+        "آخر نشاط\nLast Activity",
+        "إجمالي الملاحظات\nTotal Notes",
+        "إجمالي التحليلات\nTotal Analyses",
+        "ملاحظات اليوم\nToday's Notes",
+        "تحليلات اليوم\nToday's Analyses",
+        "نشط اليوم\nActive Today"
+    ]
+    
+    # Style headers
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=12)
+    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num)
+        cell.value = header
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+    
+    # Set column widths
+    ws.column_dimensions['A'].width = 25
+    ws.column_dimensions['B'].width = 30
+    ws.column_dimensions['C'].width = 20
+    ws.column_dimensions['D'].width = 20
+    ws.column_dimensions['E'].width = 20
+    ws.column_dimensions['F'].width = 18
+    ws.column_dimensions['G'].width = 18
+    ws.column_dimensions['H'].width = 18
+    ws.column_dimensions['I'].width = 18
+    ws.column_dimensions['J'].width = 15
+    
+    # Add data
+    for row_num, user_stat in enumerate(stats_data['statistics'], 2):
+        ws.cell(row=row_num, column=1, value=user_stat['full_name'])
+        ws.cell(row=row_num, column=2, value=user_stat['email'])
+        ws.cell(row=row_num, column=3, value=user_stat['phone_number'])
+        
+        # Format dates
+        reg_date = user_stat.get('registration_date')
+        if isinstance(reg_date, str):
+            try:
+                reg_date = datetime.fromisoformat(reg_date).strftime('%Y-%m-%d %H:%M')
+            except:
+                pass
+        ws.cell(row=row_num, column=4, value=reg_date)
+        
+        last_activity = user_stat.get('last_activity')
+        if isinstance(last_activity, str):
+            try:
+                last_activity = datetime.fromisoformat(last_activity).strftime('%Y-%m-%d %H:%M')
+            except:
+                pass
+        ws.cell(row=row_num, column=5, value=last_activity)
+        
+        ws.cell(row=row_num, column=6, value=user_stat['total_notes'])
+        ws.cell(row=row_num, column=7, value=user_stat['total_analyses'])
+        ws.cell(row=row_num, column=8, value=user_stat['today_notes'])
+        ws.cell(row=row_num, column=9, value=user_stat['today_analyses'])
+        ws.cell(row=row_num, column=10, value='نعم / Yes' if user_stat['is_active_today'] else 'لا / No')
+        
+        # Apply alignment
+        for col in range(1, 11):
+            ws.cell(row=row_num, column=col).alignment = Alignment(horizontal="center", vertical="center")
+    
+    # Add summary at the bottom
+    summary_row = len(stats_data['statistics']) + 3
+    ws.cell(row=summary_row, column=1, value="الملخص / Summary").font = Font(bold=True, size=14)
+    ws.cell(row=summary_row + 1, column=1, value=f"إجمالي المستخدمين / Total Users: {stats_data['total_users']}")
+    ws.cell(row=summary_row + 2, column=1, value=f"نشط اليوم / Active Today: {stats_data['active_today']}")
+    ws.cell(row=summary_row + 3, column=1, value=f"التاريخ / Date: {stats_data['date']}")
+    
+    # Save to BytesIO
+    excel_file = io.BytesIO()
+    wb.save(excel_file)
+    excel_file.seek(0)
+    
+    # Return as downloadable file
+    from fastapi.responses import StreamingResponse
+    filename = f"user_statistics_{stats_data['date']}.xlsx"
+    
+    return StreamingResponse(
+        excel_file,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
 @api_router.delete("/admin/users/{user_id}")
 async def delete_user(user_id: str, admin: dict = Depends(require_admin)):
     # Don't allow deleting yourself
