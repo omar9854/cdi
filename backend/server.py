@@ -206,6 +206,11 @@ class PasswordReset(BaseModel):
     token: str
     new_password: str
 
+class PasswordResetWithCode(BaseModel):
+    email: EmailStr
+    code: str
+    new_password: str
+
 class PasswordResetToken(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
