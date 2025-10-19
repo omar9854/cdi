@@ -851,6 +851,9 @@ async def get_notes(user: dict = Depends(get_current_user)):
     for note in notes:
         if isinstance(note['created_at'], str):
             note['created_at'] = datetime.fromisoformat(note['created_at'])
+        # تأكد من وجود doctor_notes
+        if 'doctor_notes' not in note:
+            note['doctor_notes'] = []
     
     return notes
 
