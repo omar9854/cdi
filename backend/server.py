@@ -699,6 +699,44 @@ async def reset_password(request: PasswordReset):
     
     return {"message": "Password reset successful"}
 
+@api_router.post("/auth/reset-password-with-code")
+async def reset_password_with_code(request: PasswordResetWithCode):
+    """Reset password using code from WhatsApp"""
+    # Find user by email
+    user = await db.users.find_one({"email": request.email}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=400, detail="Reset failed")
+    
+    # Find valid token with matching code
+    token_doc = await db.password_reset_tokens.find_one({
+        "user_id": user['id'],
+        "reset_code": request.code,
+        "used": False
+    }, {"_id": 0})
+    
+    if not token_doc:
+        raise HTTPException(status_code=400, detail="Invalid code")
+    
+    # Check if token expired
+    expires_at = datetime.fromisoformat(token_doc['expires_at'])
+    if datetime.now(timezone.utc) > expires_at:
+        raise HTTPException(status_code=400, detail="Code has expired")
+    
+    # Update user password
+    new_password_hash = hash_password(request.new_password)
+    await db.users.update_one(
+        {"id": user['id']},
+        {"$set": {"password_hash": new_password_hash}}
+    )
+    
+    # Mark token as used
+    await db.password_reset_tokens.update_one(
+        {"user_id": user['id'], "reset_code": request.code},
+        {"$set": {"used": True}}
+    )
+    
+    return {"message": "Password reset successful"}
+
 @api_router.get("/support/whatsapp")
 async def get_support_whatsapp():
     """Get support WhatsApp number"""
