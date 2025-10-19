@@ -583,7 +583,7 @@ async def login(credentials: UserLogin):
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     
     if not user or not verify_password(credentials.password, user['password_hash']):
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        raise HTTPException(status_code=401, detail="Login failed")
     
     token = create_access_token({
         "user_id": user['id'], 
