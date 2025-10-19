@@ -20,6 +20,8 @@ const ResetPassword = () => {
   const token = searchParams.get('token');
   
   const [formData, setFormData] = useState({
+    email: '',
+    code: '',
     password: '',
     confirmPassword: ''
   });
@@ -41,10 +43,20 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      await axios.post(`${API}/auth/reset-password`, {
-        token,
-        new_password: formData.password
-      });
+      if (token) {
+        // Reset with token from email
+        await axios.post(`${API}/auth/reset-password`, {
+          token,
+          new_password: formData.password
+        });
+      } else {
+        // Reset with code from WhatsApp
+        await axios.post(`${API}/auth/reset-password-with-code`, {
+          email: formData.email,
+          code: formData.code,
+          new_password: formData.password
+        });
+      }
       
       toast.success(language === 'ar' ? 'تم إعادة تعيين كلمة المرور بنجاح!' : 'Password reset successfully!');
       setTimeout(() => navigate('/login'), 2000);
