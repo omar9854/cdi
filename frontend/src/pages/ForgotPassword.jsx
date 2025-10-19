@@ -27,10 +27,14 @@ const ForgotPassword = () => {
       const response = await axios.post(`${API}/auth/forgot-password`, { email });
       
       if (response.data.whatsapp_link) {
-        // فتح واتساب مع الكود
-        window.open(response.data.whatsapp_link, '_blank');
+        // فتح واتساب مع الكود مباشرة
+        toast.success(language === 'ar' ? 'جاري فتح واتساب مع الكود...' : 'Opening WhatsApp with code...');
+        
+        setTimeout(() => {
+          window.location.href = response.data.whatsapp_link;
+        }, 1000);
+        
         setSent(true);
-        toast.success(t('resetLinkSent'));
       } else {
         setSent(true);
         toast.success(t('resetLinkSent'));
