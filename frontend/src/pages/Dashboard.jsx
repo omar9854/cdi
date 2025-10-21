@@ -124,7 +124,6 @@ const Dashboard = ({ user, onLogout }) => {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };
