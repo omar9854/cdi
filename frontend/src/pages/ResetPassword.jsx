@@ -156,7 +156,6 @@ const ResetPassword = () => {
             </CardContent>
           </Card>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -225,7 +224,6 @@ const ResetPassword = () => {
           </CardContent>
         </Card>
       </div>
-      <Footer />
     </div>
   );
 };
