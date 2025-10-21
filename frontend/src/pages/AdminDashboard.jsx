@@ -224,7 +224,6 @@ const AdminDashboard = ({ user, onLogout }) => {
           </CardContent>
         </Card>
       </main>
-      <Footer />
     </div>
   );
 };
