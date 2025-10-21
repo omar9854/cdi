@@ -137,7 +137,6 @@ const History = ({ user, onLogout }) => {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 };
