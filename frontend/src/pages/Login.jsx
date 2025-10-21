@@ -6,9 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { FileText, Lock, Mail } from 'lucide-react';
+import { Lock, Mail } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import Footer from '@/components/Footer';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
