@@ -185,7 +185,6 @@ const Register = ({ setUser }) => {
         </CardContent>
       </Card>
       </div>
-      <Footer />
     </div>
   );
 };
