@@ -1008,6 +1008,51 @@ async def delete_user(user_id: str, admin: dict = Depends(require_admin)):
     
     return {"message": "User and all data deleted successfully"}
 
+@api_router.put("/admin/users/{user_id}")
+async def update_user(user_id: str, update_data: dict, admin: dict = Depends(require_admin)):
+    """Update user information"""
+    allowed_fields = ['full_name', 'email', 'phone_number']
+    update_dict = {k: v for k, v in update_data.items() if k in allowed_fields}
+    
+    if not update_dict:
+        raise HTTPException(status_code=400, detail="No valid fields to update")
+    
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": update_dict}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "User updated successfully"}
+
+@api_router.post("/admin/suspend-user/{user_id}")
+async def suspend_user(user_id: str, admin: dict = Depends(require_admin)):
+    """Suspend a user account"""
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_active": False}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "User suspended successfully"}
+
+@api_router.post("/admin/activate-user/{user_id}")
+async def activate_user(user_id: str, admin: dict = Depends(require_admin)):
+    """Activate a user account"""
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_active": True}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "User activated successfully"}
+
 # ========== Supervisor Management Routes ==========
 @api_router.post("/admin/assign-supervisor/{user_id}")
 async def assign_supervisor(user_id: str, admin: dict = Depends(require_admin)):
