@@ -276,7 +276,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
     if (!analysis || !analysis.top_diagnoses) return null;
 
     return (
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
         {analysis.top_diagnoses.pdx_after_cdi && analysis.top_diagnoses.pdx_after_cdi.length > 0 && (
           <Card className="medical-card">
             <CardHeader>
@@ -293,6 +293,32 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                       <div className="text-xs text-gray-600">{diag.percentage}%</div>
                     </div>
                     <div className="text-xl font-bold text-blue-600">{diag.count}</div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {analysis.top_diagnoses.pdx_due_to_cdi && analysis.top_diagnoses.pdx_due_to_cdi.length > 0 && (
+          <Card className="medical-card">
+            <CardHeader>
+              <CardTitle className="text-xl text-gray-800">
+                {language === 'ar' ? 'أكثر التشخيصات PDX due to CDI' : 'Top PDX due to CDI Diagnoses'}
+              </CardTitle>
+              <CardDescription className="text-xs">
+                {language === 'ar' ? '(التشخيصات الرئيسية المضافة فقط)' : '(Newly added primary diagnoses only)'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {analysis.top_diagnoses.pdx_due_to_cdi.map((diag, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100 transition">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-800 text-sm">{diag.diagnosis}</div>
+                      <div className="text-xs text-gray-600">{diag.percentage}%</div>
+                    </div>
+                    <div className="text-xl font-bold text-green-600">{diag.count}</div>
                   </div>
                 ))}
               </div>
