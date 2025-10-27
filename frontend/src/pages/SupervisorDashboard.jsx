@@ -860,6 +860,79 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                 </div>
               )}
 
+              {/* PDX due to CDI Diagnoses Chart & Table */}
+              {currentHospital.top_pdx_due_to_cdi_diagnoses && currentHospital.top_pdx_due_to_cdi_diagnoses.length > 0 && (
+                <div className="grid md:grid-cols-2 gap-6 mt-6">
+                  {/* PDX due to CDI Chart */}
+                  <Card className="bg-green-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-800">
+                        {language === 'ar' ? '📊 رسم بياني - تشخيصات PDX due to CDI' : '📊 Chart - PDX due to CDI Diagnoses'}
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        {language === 'ar' ? '(التشخيصات الرئيسية المضافة فقط)' : '(Newly added primary only)'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={currentHospital.top_pdx_due_to_cdi_diagnoses.slice(0, 10)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis 
+                            dataKey="diagnosis" 
+                            angle={-45} 
+                            textAnchor="end" 
+                            height={120} 
+                            fontSize={9}
+                            interval={0}
+                          />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="count" fill="#22c55e" name={language === 'ar' ? 'التكرار' : 'Count'} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  {/* PDX due to CDI Table */}
+                  <Card className="bg-green-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-800">
+                        {language === 'ar' ? '📋 جدول - تشخيصات PDX due to CDI' : '📋 Table - PDX due to CDI Diagnoses'}
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        {language === 'ar' ? '(التشخيصات الرئيسية المضافة فقط)' : '(Newly added primary only)'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="max-h-80 overflow-y-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-center">#</TableHead>
+                              <TableHead>{language === 'ar' ? 'التشخيص' : 'Diagnosis'}</TableHead>
+                              <TableHead className="text-center">{language === 'ar' ? 'التكرار' : 'Count'}</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {currentHospital.top_pdx_due_to_cdi_diagnoses.map((diag, index) => (
+                              <TableRow key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-green-100'}>
+                                <TableCell className="text-center font-bold text-green-600">{index + 1}</TableCell>
+                                <TableCell className="text-sm">{diag.diagnosis}</TableCell>
+                                <TableCell className="text-center">
+                                  <span className="inline-block bg-green-600 text-white px-3 py-1 rounded-full font-bold">
+                                    {diag.count}
+                                  </span>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
               {/* ADX Diagnoses Chart & Table */}
               {currentHospital.top_adx_diagnoses && currentHospital.top_adx_diagnoses.length > 0 && (
                 <div className="grid md:grid-cols-2 gap-6 mt-6">
