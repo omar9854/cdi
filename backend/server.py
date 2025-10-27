@@ -125,7 +125,8 @@ class User(BaseModel):
     full_name: str
     phone_number: str  # رقم الجوال
     password_hash: str
-    role: str = "user"  # "admin" or "user"
+    role: str = "user"  # "admin", "supervisor", or "user"
+    supervisor_id: Optional[str] = None  # ID of supervisor (if user is assigned to one)
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
