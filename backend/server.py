@@ -1008,6 +1008,124 @@ async def delete_user(user_id: str, admin: dict = Depends(require_admin)):
     
     return {"message": "User and all data deleted successfully"}
 
+# ========== Supervisor Management Routes ==========
+@api_router.post("/admin/assign-supervisor/{user_id}")
+async def assign_supervisor(user_id: str, admin: dict = Depends(require_admin)):
+    """Promote a user to supervisor role"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user['role'] == 'admin':
+        raise HTTPException(status_code=400, detail="Cannot change admin role")
+    
+    # Update user role to supervisor
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"role": "supervisor"}}
+    )
+    
+    return {"message": "User promoted to supervisor successfully"}
+
+@api_router.post("/admin/remove-supervisor/{user_id}")
+async def remove_supervisor(user_id: str, admin: dict = Depends(require_admin)):
+    """Demote a supervisor back to regular user"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user['role'] != 'supervisor':
+        raise HTTPException(status_code=400, detail="User is not a supervisor")
+    
+    # Update user role back to user
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"role": "user"}}
+    )
+    
+    return {"message": "Supervisor demoted to user successfully"}
+
+@api_router.get("/admin/supervisors")
+async def get_supervisors(admin: dict = Depends(require_admin)):
+    """Get all supervisors"""
+    supervisors = await db.users.find(
+        {"role": "supervisor"},
+        {"_id": 0, "password_hash": 0}
+    ).to_list(1000)
+    
+    # Get employee count for each supervisor
+    for supervisor in supervisors:
+        employee_count = await db.users.count_documents({"supervisor_id": supervisor['id']})
+        supervisor['employee_count'] = employee_count
+    
+    return supervisors
+
+# ========== Supervisor Routes ==========
+async def require_supervisor(user: dict = Depends(get_current_user)):
+    if user.get('role') not in ['admin', 'supervisor']:
+        raise HTTPException(status_code=403, detail="Supervisor access required")
+    return user
+
+@api_router.get("/supervisor/employees")
+async def get_supervisor_employees(supervisor: dict = Depends(require_supervisor)):
+    """Get all employees under this supervisor"""
+    if supervisor['role'] == 'admin':
+        # Admin sees all users
+        employees = await db.users.find(
+            {"role": "user"},
+            {"_id": 0, "password_hash": 0}
+        ).to_list(1000)
+    else:
+        # Supervisor sees only assigned employees
+        employees = await db.users.find(
+            {"supervisor_id": supervisor['id']},
+            {"_id": 0, "password_hash": 0}
+        ).to_list(1000)
+    
+    return employees
+
+@api_router.get("/supervisor/employee-notes/{employee_id}")
+async def get_employee_notes(employee_id: str, supervisor: dict = Depends(require_supervisor)):
+    """Get all notes for a specific employee"""
+    # Verify employee belongs to this supervisor (unless admin)
+    if supervisor['role'] != 'admin':
+        employee = await db.users.find_one({"id": employee_id}, {"_id": 0})
+        if not employee or employee.get('supervisor_id') != supervisor['id']:
+            raise HTTPException(status_code=403, detail="Not authorized to view this employee's notes")
+    
+    notes = await db.clinical_notes.find(
+        {"user_id": employee_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    for note in notes:
+        if isinstance(note['created_at'], str):
+            note['created_at'] = datetime.fromisoformat(note['created_at'])
+        if 'doctor_notes' not in note:
+            note['doctor_notes'] = []
+    
+    return notes
+
+@api_router.get("/supervisor/employee-analyses/{employee_id}")
+async def get_employee_analyses(employee_id: str, supervisor: dict = Depends(require_supervisor)):
+    """Get all analyses for a specific employee"""
+    # Verify employee belongs to this supervisor (unless admin)
+    if supervisor['role'] != 'admin':
+        employee = await db.users.find_one({"id": employee_id}, {"_id": 0})
+        if not employee or employee.get('supervisor_id') != supervisor['id']:
+            raise HTTPException(status_code=403, detail="Not authorized to view this employee's analyses")
+    
+    analyses = await db.analyses.find(
+        {"user_id": employee_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    for analysis in analyses:
+        if isinstance(analysis['created_at'], str):
+            analysis['created_at'] = datetime.fromisoformat(analysis['created_at'])
+    
+    return analyses
+
 # ========== Notes Routes ==========
 @api_router.post("/notes", response_model=ClinicalNote)
 async def create_note(note_data: ClinicalNoteCreate, user: dict = Depends(get_current_user)):
