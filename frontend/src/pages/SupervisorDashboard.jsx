@@ -583,6 +583,213 @@ const SupervisorDashboard = ({ user, onLogout }) => {
     );
   };
 
+  const renderHospitalDetailedAnalysis = () => {
+    if (!analysis || !analysis.hospitals_analysis || analysis.hospitals_analysis.length === 0) return null;
+
+    const hospitalsList = analysis.hospitals_analysis;
+    const currentHospital = selectedHospital || hospitalsList[0];
+
+    return (
+      <Card className="medical-card mb-8 bg-gradient-to-br from-indigo-50 to-blue-50">
+        <CardHeader>
+          <CardTitle className="text-2xl text-gray-800 flex items-center gap-2">
+            <Hospital className="h-6 w-6 text-blue-600" />
+            {language === 'ar' ? 'تحليل تفصيلي لكل مستشفى - التشخيصات والتكرار' : 'Detailed Hospital Analysis - Diagnoses & Frequency'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Hospital Selector */}
+          <div className="mb-6">
+            <Label className="text-lg mb-2 block font-semibold">
+              {language === 'ar' ? 'اختر المستشفى:' : 'Select Hospital:'}
+            </Label>
+            <select
+              value={currentHospital?.hospital_name || ''}
+              onChange={(e) => {
+                const hospital = hospitalsList.find(h => h.hospital_name === e.target.value);
+                setSelectedHospital(hospital);
+              }}
+              className="w-full md:w-1/2 p-3 border border-gray-300 rounded-lg bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {hospitalsList.map((hospital, index) => (
+                <option key={index} value={hospital.hospital_name}>
+                  {hospital.hospital_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {currentHospital && (
+            <div className="space-y-6">
+              {/* Hospital Summary */}
+              <div className="grid md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-blue-100 p-4 rounded-lg text-center">
+                  <div className="text-sm text-blue-600 mb-1">{language === 'ar' ? 'إجمالي الحالات' : 'Total Cases'}</div>
+                  <div className="text-3xl font-bold text-blue-700">{currentHospital.total_cases}</div>
+                </div>
+                <div className="bg-purple-100 p-4 rounded-lg text-center">
+                  <div className="text-sm text-purple-600 mb-1">{language === 'ar' ? 'تغييرات DRG' : 'DRG Changes'}</div>
+                  <div className="text-3xl font-bold text-purple-700">{currentHospital.drg_changes}</div>
+                </div>
+                <div className="bg-green-100 p-4 rounded-lg text-center">
+                  <div className="text-sm text-green-600 mb-1">{language === 'ar' ? 'PDX المضافة' : 'PDX Added'}</div>
+                  <div className="text-3xl font-bold text-green-700">{currentHospital.pdx_added}</div>
+                </div>
+                <div className="bg-orange-100 p-4 rounded-lg text-center">
+                  <div className="text-sm text-orange-600 mb-1">{language === 'ar' ? 'ADX المضافة' : 'ADX Added'}</div>
+                  <div className="text-3xl font-bold text-orange-700">{currentHospital.adx_added}</div>
+                </div>
+              </div>
+
+              {/* PDX Diagnoses Chart & Table */}
+              {currentHospital.top_pdx_diagnoses && currentHospital.top_pdx_diagnoses.length > 0 && (
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* PDX Chart */}
+                  <Card className="bg-blue-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-800">
+                        {language === 'ar' ? '📊 رسم بياني - تشخيصات PDX/After CDI' : '📊 Chart - PDX/After CDI Diagnoses'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={currentHospital.top_pdx_diagnoses.slice(0, 10)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis 
+                            dataKey="diagnosis" 
+                            angle={-45} 
+                            textAnchor="end" 
+                            height={120} 
+                            fontSize={9}
+                            interval={0}
+                          />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="count" fill="#3b82f6" name={language === 'ar' ? 'التكرار' : 'Count'} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  {/* PDX Table */}
+                  <Card className="bg-blue-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-800">
+                        {language === 'ar' ? '📋 جدول - تشخيصات PDX/After CDI' : '📋 Table - PDX/After CDI Diagnoses'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="max-h-80 overflow-y-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-center">#</TableHead>
+                              <TableHead>{language === 'ar' ? 'التشخيص' : 'Diagnosis'}</TableHead>
+                              <TableHead className="text-center">{language === 'ar' ? 'التكرار' : 'Count'}</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {currentHospital.top_pdx_diagnoses.map((diag, index) => (
+                              <TableRow key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-blue-100'}>
+                                <TableCell className="text-center font-bold text-blue-600">{index + 1}</TableCell>
+                                <TableCell className="text-sm">{diag.diagnosis}</TableCell>
+                                <TableCell className="text-center">
+                                  <span className="inline-block bg-blue-600 text-white px-3 py-1 rounded-full font-bold">
+                                    {diag.count}
+                                  </span>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* ADX Diagnoses Chart & Table */}
+              {currentHospital.top_adx_diagnoses && currentHospital.top_adx_diagnoses.length > 0 && (
+                <div className="grid md:grid-cols-2 gap-6 mt-6">
+                  {/* ADX Chart */}
+                  <Card className="bg-orange-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-800">
+                        {language === 'ar' ? '📊 رسم بياني - تشخيصات ADX due to CDI' : '📊 Chart - ADX due to CDI Diagnoses'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={currentHospital.top_adx_diagnoses.slice(0, 10)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis 
+                            dataKey="diagnosis" 
+                            angle={-45} 
+                            textAnchor="end" 
+                            height={120} 
+                            fontSize={9}
+                            interval={0}
+                          />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="count" fill="#f97316" name={language === 'ar' ? 'التكرار' : 'Count'} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  {/* ADX Table */}
+                  <Card className="bg-orange-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-800">
+                        {language === 'ar' ? '📋 جدول - تشخيصات ADX due to CDI' : '📋 Table - ADX due to CDI Diagnoses'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="max-h-80 overflow-y-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-center">#</TableHead>
+                              <TableHead>{language === 'ar' ? 'التشخيص' : 'Diagnosis'}</TableHead>
+                              <TableHead className="text-center">{language === 'ar' ? 'التكرار' : 'Count'}</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {currentHospital.top_adx_diagnoses.map((diag, index) => (
+                              <TableRow key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-orange-100'}>
+                                <TableCell className="text-center font-bold text-orange-600">{index + 1}</TableCell>
+                                <TableCell className="text-sm">{diag.diagnosis}</TableCell>
+                                <TableCell className="text-center">
+                                  <span className="inline-block bg-orange-600 text-white px-3 py-1 rounded-full font-bold">
+                                    {diag.count}
+                                  </span>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* No Data Message */}
+              {(!currentHospital.top_pdx_diagnoses || currentHospital.top_pdx_diagnoses.length === 0) && 
+               (!currentHospital.top_adx_diagnoses || currentHospital.top_adx_diagnoses.length === 0) && (
+                <div className="text-center py-8 text-gray-500">
+                  <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <p>{language === 'ar' ? 'لا توجد بيانات تشخيص متاحة لهذا المستشفى' : 'No diagnosis data available for this hospital'}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Navbar user={user} onLogout={onLogout} />
