@@ -425,6 +425,163 @@ const SupervisorDashboard = ({ user, onLogout }) => {
     );
   };
 
+  const renderCharts = () => {
+    if (!analysis || !analysis.hospitals_analysis) return null;
+
+    const hospitalsData = analysis.hospitals_analysis.slice(0, 10).map(h => ({
+      name: h.hospital_name.length > 20 ? h.hospital_name.substring(0, 17) + '...' : h.hospital_name,
+      DRG: h.drg_changes,
+      PDX: h.pdx_changes + h.pdx_added,
+      ADX: h.adx_added
+    }));
+
+    const drgPieData = [
+      { name: language === 'ar' ? 'تغييرات DRG' : 'DRG Changes', value: analysis.drg_metrics.total_changes },
+      { name: language === 'ar' ? 'بدون تغيير' : 'No Change', value: analysis.drg_metrics.no_change }
+    ];
+
+    return (
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <Card className="medical-card">
+          <CardHeader>
+            <CardTitle className="text-xl text-gray-800 flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              {language === 'ar' ? 'مقارنة المستشفيات (Top 10)' : 'Hospitals Comparison (Top 10)'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={hospitalsData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} fontSize={10} />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="DRG" fill="#8b5cf6" name="DRG Changes" />
+                <Bar dataKey="PDX" fill="#3b82f6" name="PDX" />
+                <Bar dataKey="ADX" fill="#f97316" name="ADX" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="medical-card">
+          <CardHeader>
+            <CardTitle className="text-xl text-gray-800 flex items-center gap-2">
+              <PieChart className="h-5 w-5 text-purple-600" />
+              {language === 'ar' ? 'توزيع تأثير DRG' : 'DRG Impact Distribution'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <RePieChart>
+                <Pie
+                  data={drgPieData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={(entry) => `${entry.name}: ${entry.value}`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {drgPieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </RePieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
+  const renderRecommendations = () => {
+    if (!analysis) return null;
+
+    const recommendations = [];
+    const drgRate = analysis.drg_metrics?.change_rate || 0;
+    const pdxRate = analysis.pdx_metrics?.change_rate || 0;
+    const hospitals = analysis.hospitals_analysis || [];
+    
+    if (drgRate < 20) {
+      recommendations.push({
+        category: '⚠️ معدل تأثير DRG منخفض',
+        recommendation: `معدل تغيير DRG الحالي ${drgRate}% أقل من المتوقع. يُنصح بتكثيف جهود CDI والتركيز على المراجعة الدقيقة للملفات قبل الترميز النهائي.`
+      });
+    } else if (drgRate > 60) {
+      recommendations.push({
+        category: '✅ معدل تأثير DRG ممتاز',
+        recommendation: `معدل تغيير DRG الحالي ${drgRate}% يعتبر ممتازاً. استمروا في تطبيق نفس المعايير والممارسات الحالية.`
+      });
+    }
+
+    if (pdxRate > 30) {
+      recommendations.push({
+        category: '📋 تحسين التوثيق الرئيسي مطلوب',
+        recommendation: `نسبة ${pdxRate}% من التشخيصات الرئيسية تم تعديلها. يجب تدريب الأطباء على توثيق التشخيص الرئيسي بدقة منذ البداية.`
+      });
+    }
+
+    if (hospitals.length > 0) {
+      const lowPerformers = hospitals.filter(h => (h.drg_impact_rate || 0) < 20);
+      if (lowPerformers.length > 0) {
+        const names = lowPerformers.slice(0, 3).map(h => h.hospital_name).join(', ');
+        recommendations.push({
+          category: '🏥 مستشفيات تحتاج تحسين',
+          recommendation: `المستشفيات التالية تحتاج إلى تحسين في التوثيق: ${names}. يُنصح بعقد ورش عمل تدريبية وزيادة التواصل مع فريق التوثيق.`
+        });
+      }
+
+      const sorted = [...hospitals].sort((a, b) => 
+        ((b.pdx_added || 0) + (b.adx_added || 0)) - ((a.pdx_added || 0) + (a.adx_added || 0))
+      );
+      if (sorted.length > 0 && ((sorted[0].pdx_added || 0) + (sorted[0].adx_added || 0)) > 50) {
+        recommendations.push({
+          category: '📝 نقص في التوثيق',
+          recommendation: `المستشفى ${sorted[0].hospital_name} يحتاج إلى تحسين كبير في توثيق التشخيصات. تم إضافة ${sorted[0].pdx_added || 0} تشخيص رئيسي و ${sorted[0].adx_added || 0} تشخيص إضافي بعد مراجعة CDI.`
+        });
+      }
+    }
+
+    const topPdx = analysis.top_diagnoses?.pdx_after_cdi || [];
+    if (topPdx.length > 0) {
+      const top3 = topPdx.slice(0, 3).map(d => d.diagnosis).join(', ');
+      recommendations.push({
+        category: '🎯 التشخيصات الأكثر شيوعاً',
+        recommendation: `التشخيصات الأكثر شيوعاً بعد CDI: ${top3}. يُنصح بإنشاء بروتوكولات توثيق محددة لهذه الحالات لتقليل الحاجة للتعديل مستقبلاً.`
+      });
+    }
+
+    recommendations.push({
+      category: '💡 أفضل الممارسات',
+      recommendation: 'استمروا في المراجعة الدورية للملفات، وتحديث البروتوكولات بناءً على أحدث إرشادات ICD-10، وعقد اجتماعات دورية بين فريق CDI والأطباء.'
+    });
+
+    return (
+      <Card className="medical-card mb-8 bg-gradient-to-br from-yellow-50 to-orange-50">
+        <CardHeader>
+          <CardTitle className="text-2xl text-gray-800 flex items-center gap-2">
+            <Award className="h-6 w-6 text-orange-600" />
+            {language === 'ar' ? 'التوصيات والتوجيهات للتحسين' : 'Recommendations & Improvement Guidelines'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {recommendations.map((rec, index) => (
+              <div key={index} className="bg-white p-4 rounded-lg border-l-4 border-orange-500 shadow-sm hover:shadow-md transition">
+                <h3 className="font-bold text-gray-800 mb-2">{rec.category}</h3>
+                <p className="text-gray-700 text-sm leading-relaxed">{rec.recommendation}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Navbar user={user} onLogout={onLogout} />
