@@ -379,11 +379,13 @@ const SupervisorDashboard = ({ user, onLogout }) => {
   const renderCDSPerformance = () => {
     if (!analysis || !analysis.cds_performance || analysis.cds_performance.length === 0) return null;
 
+    const hasStatusData = analysis.data_flags?.has_status_data;
+
     return (
       <Card className="medical-card mb-8">
         <CardHeader>
           <CardTitle className="text-2xl text-gray-800">
-            {language === 'ar' ? 'أداء CDS المتخصصين' : 'CDS Specialists Performance'}
+            {language === 'ar' ? 'أداء أخصائيي التوثيق السريري (CDS)' : 'CDS Specialists Performance'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -394,16 +396,26 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                   <TableHead className="text-center">{language === 'ar' ? 'الاسم' : 'Name'}</TableHead>
                   <TableHead className="text-center">{language === 'ar' ? 'الحالات' : 'Cases'}</TableHead>
                   <TableHead className="text-center">{language === 'ar' ? 'تأثير DRG' : 'DRG Impact'}</TableHead>
-                  <TableHead className="text-center">{language === 'ar' ? 'PDX' : 'PDX Queries'}</TableHead>
-                  <TableHead className="text-center">{language === 'ar' ? 'ADX' : 'ADX Queries'}</TableHead>
-                  <TableHead className="text-center">{language === 'ar' ? 'معدل النجاح' : 'Success Rate'}</TableHead>
+                  <TableHead className="text-center">{language === 'ar' ? 'PDX' : 'PDX'}</TableHead>
+                  <TableHead className="text-center">{language === 'ar' ? 'ADX' : 'ADX'}</TableHead>
+                  {hasStatusData && (
+                    <>
+                      <TableHead className="text-center">{language === 'ar' ? 'تم ✅' : 'Done ✅'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'للبدء 🔵' : 'To Start 🔵'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'جاري 🔄' : 'Working 🔄'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'فارغ ⚪' : 'Empty ⚪'}</TableHead>
+                    </>
+                  )}
+                  <TableHead className="text-center">{language === 'ar' ? 'النجاح %' : 'Success %'}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {analysis.cds_performance.map((cds, index) => (
                   <TableRow key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
                     <TableCell className="text-center font-medium">{cds.cds_name}</TableCell>
-                    <TableCell className="text-center">{cds.total_cases}</TableCell>
+                    <TableCell className="text-center">
+                      <span className="font-bold text-gray-800">{cds.total_cases}</span>
+                    </TableCell>
                     <TableCell className="text-center">
                       <span className="font-bold text-purple-600">{cds.drg_impact}</span>
                     </TableCell>
@@ -413,6 +425,30 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                     <TableCell className="text-center">
                       <span className="font-bold text-orange-600">{cds.adx_queries}</span>
                     </TableCell>
+                    {hasStatusData && (
+                      <>
+                        <TableCell className="text-center">
+                          <span className="inline-block bg-green-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                            {cds.status_done || 0}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="inline-block bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                            {cds.status_to_start || 0}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="inline-block bg-yellow-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                            {cds.status_working || 0}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="inline-block bg-gray-400 text-white px-2 py-1 rounded-full text-xs font-bold">
+                            {cds.status_empty || 0}
+                          </span>
+                        </TableCell>
+                      </>
+                    )}
                     <TableCell className="text-center">
                       <span className="font-bold text-green-600">{cds.success_rate}%</span>
                     </TableCell>
@@ -421,6 +457,71 @@ const SupervisorDashboard = ({ user, onLogout }) => {
               </TableBody>
             </Table>
           </div>
+
+          {/* CDS Status Chart if available */}
+          {hasStatusData && analysis.cds_performance.length > 0 && (
+            <div className="mt-8">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">
+                {language === 'ar' ? 'توزيع حالة الملفات لكل أخصائي' : 'File Status Distribution per Specialist'}
+              </h3>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {analysis.cds_performance.slice(0, 6).map((cds, index) => {
+                  const statusData = [
+                    { name: language === 'ar' ? 'تم' : 'Done', value: cds.status_done || 0, color: '#16a34a' },
+                    { name: language === 'ar' ? 'للبدء' : 'To Start', value: cds.status_to_start || 0, color: '#2563eb' },
+                    { name: language === 'ar' ? 'جاري' : 'Working', value: cds.status_working || 0, color: '#ca8a04' },
+                    { name: language === 'ar' ? 'فارغ' : 'Empty', value: cds.status_empty || 0, color: '#9ca3af' }
+                  ];
+
+                  return (
+                    <Card key={index} className="bg-gradient-to-br from-gray-50 to-blue-50">
+                      <CardHeader>
+                        <CardTitle className="text-sm font-medium text-center">{cds.cds_name}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ResponsiveContainer width="100%" height={200}>
+                          <RePieChart>
+                            <Pie
+                              data={statusData}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={(entry) => entry.value > 0 ? `${entry.value}` : ''}
+                              outerRadius={70}
+                              dataKey="value"
+                            >
+                              {statusData.map((entry, idx) => (
+                                <Cell key={`cell-${idx}`} fill={entry.color} />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                          </RePieChart>
+                        </ResponsiveContainer>
+                        <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 bg-green-600 rounded"></div>
+                            <span>{language === 'ar' ? 'تم' : 'Done'}: {cds.status_done || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 bg-blue-600 rounded"></div>
+                            <span>{language === 'ar' ? 'للبدء' : 'Start'}: {cds.status_to_start || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 bg-yellow-600 rounded"></div>
+                            <span>{language === 'ar' ? 'جاري' : 'Work'}: {cds.status_working || 0}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 bg-gray-400 rounded"></div>
+                            <span>{language === 'ar' ? 'فارغ' : 'Empty'}: {cds.status_empty || 0}</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
