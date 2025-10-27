@@ -4,8 +4,11 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Users, FileText, BarChart3, Download, Activity, Calendar } from 'lucide-react';
+import { Users, Download, Activity, Calendar, UserCheck, UserX, Trash2, Edit, ShieldCheck } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Footer from '@/components/Footer';
@@ -17,26 +20,44 @@ const AdminDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
   const [statistics, setStatistics] = useState(null);
+  const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [editFormData, setEditFormData] = useState({});
 
   useEffect(() => {
     if (user.role !== 'admin') {
       navigate('/dashboard');
       return;
     }
-    fetchStatistics();
+    fetchData();
   }, []);
 
-  const fetchStatistics = async () => {
+  const fetchData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/admin/users-statistics`, {
+      
+      // Fetch statistics
+      const statsResponse = await axios.get(`${API}/admin/users-statistics`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setStatistics(response.data);
+      setStatistics(statsResponse.data);
+      
+      // Fetch all users
+      const usersResponse = await axios.get(`${API}/admin/stats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      // Get detailed user list
+      const users = statsResponse.data.statistics.map(stat => ({
+        ...stat,
+        id: stat.user_id,
+        is_active: true // Will be updated from backend
+      }));
+      setAllUsers(users);
     } catch (error) {
-      toast.error(language === 'ar' ? 'فشل تحميل الإحصائيات' : 'Failed to load statistics');
+      toast.error(language === 'ar' ? 'فشل تحميل البيانات' : 'Failed to load data');
     } finally {
       setLoading(false);
     }
@@ -51,7 +72,6 @@ const AdminDashboard = ({ user, onLogout }) => {
         responseType: 'blob'
       });
       
-      // Create download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -65,6 +85,98 @@ const AdminDashboard = ({ user, onLogout }) => {
       toast.error(language === 'ar' ? 'فشل التصدير' : 'Export failed');
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handlePromoteToSupervisor = async (userId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/admin/assign-supervisor/${userId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(language === 'ar' ? 'تم تعيين المشرف بنجاح' : 'Supervisor assigned successfully');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || (language === 'ar' ? 'فشل التعيين' : 'Failed to assign'));
+    }
+  };
+
+  const handleRemoveSupervisor = async (userId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/admin/remove-supervisor/${userId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(language === 'ar' ? 'تم إلغاء صلاحيات المشرف' : 'Supervisor removed successfully');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || (language === 'ar' ? 'فشل الإلغاء' : 'Failed to remove'));
+    }
+  };
+
+  const handleSuspendUser = async (userId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/admin/suspend-user/${userId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(language === 'ar' ? 'تم تعليق الحساب' : 'Account suspended');
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'ar' ? 'فشل التعليق' : 'Failed to suspend');
+    }
+  };
+
+  const handleActivateUser = async (userId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API}/admin/activate-user/${userId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(language === 'ar' ? 'تم تفعيل الحساب' : 'Account activated');
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'ar' ? 'فشل التفعيل' : 'Failed to activate');
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذا المستخدم؟' : 'Are you sure you want to delete this user?')) {
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API}/admin/users/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(language === 'ar' ? 'تم حذف المستخدم' : 'User deleted');
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'ar' ? 'فشل الحذف' : 'Failed to delete');
+    }
+  };
+
+  const handleEditUser = (userStat) => {
+    setEditingUser(userStat);
+    setEditFormData({
+      full_name: userStat.full_name,
+      email: userStat.email,
+      phone_number: userStat.phone_number
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(`${API}/admin/users/${editingUser.user_id}`, editFormData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success(language === 'ar' ? 'تم تحديث البيانات' : 'Data updated');
+      setEditingUser(null);
+      fetchData();
+    } catch (error) {
+      toast.error(language === 'ar' ? 'فشل التحديث' : 'Failed to update');
     }
   };
 
@@ -101,7 +213,7 @@ const AdminDashboard = ({ user, onLogout }) => {
             {language === 'ar' ? 'لوحة تحكم الأدمن' : 'Admin Dashboard'}
           </h1>
           <p className="text-gray-600">
-            {language === 'ar' ? 'إحصائيات المستخدمين اليومية' : 'Daily User Statistics'}
+            {language === 'ar' ? 'إدارة المستخدمين والإحصائيات' : 'User Management & Statistics'}
           </p>
         </div>
 
@@ -159,11 +271,11 @@ const AdminDashboard = ({ user, onLogout }) => {
           </Button>
         </div>
 
-        {/* Statistics Table */}
+        {/* Users Management Table */}
         <Card className="medical-card">
           <CardHeader>
             <CardTitle className="text-2xl text-gray-800">
-              {language === 'ar' ? 'إحصائيات المستخدمين التفصيلية' : 'Detailed User Statistics'}
+              {language === 'ar' ? 'إدارة المستخدمين' : 'User Management'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -174,48 +286,76 @@ const AdminDashboard = ({ user, onLogout }) => {
                     <TableHead className="text-center">{language === 'ar' ? 'الاسم' : 'Name'}</TableHead>
                     <TableHead className="text-center">{language === 'ar' ? 'البريد' : 'Email'}</TableHead>
                     <TableHead className="text-center">{language === 'ar' ? 'الجوال' : 'Phone'}</TableHead>
-                    <TableHead className="text-center">{language === 'ar' ? 'آخر نشاط' : 'Last Activity'}</TableHead>
-                    <TableHead className="text-center">{language === 'ar' ? 'الملاحظات' : 'Notes'}</TableHead>
-                    <TableHead className="text-center">{language === 'ar' ? 'التحليلات' : 'Analyses'}</TableHead>
-                    <TableHead className="text-center">{language === 'ar' ? 'اليوم' : 'Today'}</TableHead>
-                    <TableHead className="text-center">{language === 'ar' ? 'الحالة' : 'Status'}</TableHead>
+                    <TableHead className="text-center">{language === 'ar' ? 'الدور' : 'Role'}</TableHead>
+                    <TableHead className="text-center">{language === 'ar' ? 'النشاط اليوم' : 'Today'}</TableHead>
+                    <TableHead className="text-center">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {statistics?.statistics?.map((userStat, index) => (
-                    <TableRow key={userStat.user_id} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                  {statistics?.statistics?.map((userStat) => (
+                    <TableRow key={userStat.user_id}>
                       <TableCell className="text-center font-medium">{userStat.full_name}</TableCell>
                       <TableCell className="text-center text-sm">{userStat.email}</TableCell>
                       <TableCell className="text-center text-sm">{userStat.phone_number || '-'}</TableCell>
-                      <TableCell className="text-center text-sm">{formatDate(userStat.last_activity)}</TableCell>
                       <TableCell className="text-center">
-                        <span className="font-semibold text-blue-600">{userStat.total_notes}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="font-semibold text-green-600">{userStat.total_analyses}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="text-sm">
-                            {language === 'ar' ? 'ملاحظات:' : 'Notes:'} 
-                            <span className="font-bold text-orange-600 ml-1">{userStat.today_notes}</span>
-                          </span>
-                          <span className="text-sm">
-                            {language === 'ar' ? 'تحليلات:' : 'Analyses:'} 
-                            <span className="font-bold text-purple-600 ml-1">{userStat.today_analyses}</span>
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {userStat.is_active_today ? (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {language === 'ar' ? 'نشط' : 'Active'}
+                        {userStat.role === 'supervisor' ? (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            {language === 'ar' ? 'مشرف' : 'Supervisor'}
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            {language === 'ar' ? 'غير نشط' : 'Inactive'}
+                            {language === 'ar' ? 'موظف' : 'User'}
                           </span>
                         )}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="font-bold text-orange-600">{userStat.today_notes}</span>
+                        {' / '}
+                        <span className="font-bold text-purple-600">{userStat.today_analyses}</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2 flex-wrap">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditUser(userStat)}
+                            title={language === 'ar' ? 'تعديل' : 'Edit'}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          
+                          {userStat.role !== 'supervisor' ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-purple-600"
+                              onClick={() => handlePromoteToSupervisor(userStat.user_id)}
+                              title={language === 'ar' ? 'تعيين كمشرف' : 'Make Supervisor'}
+                            >
+                              <ShieldCheck className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-gray-600"
+                              onClick={() => handleRemoveSupervisor(userStat.user_id)}
+                              title={language === 'ar' ? 'إلغاء المشرف' : 'Remove Supervisor'}
+                            >
+                              <UserX className="h-4 w-4" />
+                            </Button>
+                          )}
+                          
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600"
+                            onClick={() => handleDeleteUser(userStat.user_id)}
+                            title={language === 'ar' ? 'حذف' : 'Delete'}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -224,7 +364,54 @@ const AdminDashboard = ({ user, onLogout }) => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Edit User Dialog */}
+        {editingUser && (
+          <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{language === 'ar' ? 'تعديل بيانات المستخدم' : 'Edit User Data'}</DialogTitle>
+                <DialogDescription>
+                  {language === 'ar' ? 'قم بتعديل البيانات أدناه' : 'Modify the data below'}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>{language === 'ar' ? 'الاسم الكامل' : 'Full Name'}</Label>
+                  <Input
+                    value={editFormData.full_name}
+                    onChange={(e) => setEditFormData({...editFormData, full_name: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>{language === 'ar' ? 'البريد الإلكتروني' : 'Email'}</Label>
+                  <Input
+                    type="email"
+                    value={editFormData.email}
+                    onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label>{language === 'ar' ? 'رقم الجوال' : 'Phone Number'}</Label>
+                  <Input
+                    value={editFormData.phone_number}
+                    onChange={(e) => setEditFormData({...editFormData, phone_number: e.target.value})}
+                  />
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" onClick={() => setEditingUser(null)}>
+                    {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                  </Button>
+                  <Button onClick={handleSaveEdit} className="medical-blue">
+                    {language === 'ar' ? 'حفظ' : 'Save'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </main>
+      <Footer />
     </div>
   );
 };
