@@ -1490,6 +1490,103 @@ async def export_excel(analysis_id: str, user: dict = Depends(get_current_user))
         headers={"Content-Disposition": f"attachment; filename=analysis_{analysis_id}.xlsx"}
     )
 
+@api_router.post("/supervisor/upload-cdi-data")
+async def upload_cdi_data(
+    file: UploadFile = File(...),
+    supervisor: dict = Depends(require_supervisor)
+):
+    """Upload and analyze monthly CDI Excel data"""
+    import pandas as pd
+    
+    # Validate file type
+    if not (file.filename.endswith('.xlsx') or file.filename.endswith('.xls')):
+        raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are allowed")
+    
+    try:
+        # Read Excel file
+        contents = await file.read()
+        df = pd.read_excel(io.BytesIO(contents))
+        
+        # Expected columns (flexible matching)
+        expected_columns = ['cds name', 'hospital name', 'admission date', 'primary diagnosis', 
+                          'secondary diagnosis', 'drg before', 'drg after', 'drg change']
+        
+        # Normalize column names for matching
+        df.columns = df.columns.str.lower().str.strip()
+        
+        # Check if required columns exist
+        missing_columns = []
+        for col in expected_columns:
+            if col not in df.columns:
+                # Try partial matching
+                matches = [c for c in df.columns if col.replace(' ', '') in c.replace(' ', '')]
+                if not matches:
+                    missing_columns.append(col)
+        
+        if missing_columns:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Missing required columns: {', '.join(missing_columns)}"
+            )
+        
+        # Total records
+        total_records = len(df)
+        
+        # Get unique hospitals
+        hospital_col = [c for c in df.columns if 'hospital' in c][0]
+        hospitals = df[hospital_col].unique()
+        total_hospitals = len(hospitals)
+        
+        # Calculate DRG changes
+        drg_change_col = [c for c in df.columns if 'drg' in c and 'change' in c][0]
+        drg_changes = df[drg_change_col].notna().sum()
+        
+        # Calculate undocumented diagnoses
+        primary_col = [c for c in df.columns if 'primary' in c and 'diagnosis' in c][0]
+        secondary_col = [c for c in df.columns if 'secondary' in c and 'diagnosis' in c][0]
+        
+        # Identify undocumented (missing or empty diagnoses)
+        df['primary_undocumented'] = df[primary_col].isna() | (df[primary_col] == '') | (df[primary_col].str.lower() == 'not documented')
+        df['secondary_undocumented'] = df[secondary_col].isna() | (df[secondary_col] == '') | (df[secondary_col].str.lower() == 'not documented')
+        
+        total_primary_undoc = df['primary_undocumented'].sum()
+        total_secondary_undoc = df['secondary_undocumented'].sum()
+        undocumented_total = total_primary_undoc + total_secondary_undoc
+        
+        # Hospital-level analysis
+        hospitals_data = []
+        for hospital in hospitals:
+            hospital_df = df[df[hospital_col] == hospital]
+            
+            hospital_data = {
+                'hospital_name': str(hospital),
+                'total_records': len(hospital_df),
+                'primary_undocumented': int(hospital_df['primary_undocumented'].sum()),
+                'secondary_undocumented': int(hospital_df['secondary_undocumented'].sum()),
+                'drg_changes': int(hospital_df[drg_change_col].notna().sum())
+            }
+            hospitals_data.append(hospital_data)
+        
+        # Sort by undocumented (highest first)
+        hospitals_data.sort(
+            key=lambda x: x['primary_undocumented'] + x['secondary_undocumented'], 
+            reverse=True
+        )
+        
+        return {
+            'total_records': int(total_records),
+            'total_hospitals': int(total_hospitals),
+            'drg_changes': int(drg_changes),
+            'undocumented_total': int(undocumented_total),
+            'primary_undocumented': int(total_primary_undoc),
+            'secondary_undocumented': int(total_secondary_undoc),
+            'hospitals_data': hospitals_data
+        }
+        
+    except Exception as e:
+        logger.error(f"Error processing Excel file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
+
 # ========== Include Router ==========
 app.include_router(api_router)
 
