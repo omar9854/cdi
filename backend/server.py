@@ -1738,6 +1738,18 @@ async def upload_cdi_data(
                     for diag, count in pdx_counter.most_common(15)
                 ]
         
+        # Overall Top PDX due to CDI (only added)
+        top_pdx_due_to_cdi_overall = []
+        if pdx_after_col and 'pdx_added' in df.columns:
+            pdx_added_all_df = df[df['pdx_added'] == True]
+            pdx_added_all = pdx_added_all_df[pdx_after_col].dropna()
+            if len(pdx_added_all) > 0:
+                pdx_added_counter = Counter(pdx_added_all)
+                top_pdx_due_to_cdi_overall = [
+                    {"diagnosis": str(diag), "count": count, "percentage": round(count/len(pdx_added_all)*100, 2)} 
+                    for diag, count in pdx_added_counter.most_common(15)
+                ]
+        
         # Overall Top ADX Diagnoses
         top_adx_overall = []
         if adx_col:
