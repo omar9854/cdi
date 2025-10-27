@@ -6,7 +6,7 @@
 
 1. **اذهب إلى صفحة التسجيل:**
    ```
-   https://medidoc-ai.preview.emergentagent.com/register
+   https://docimprove.preview.emergentagent.com/register
    ```
 
 2. **املأ البيانات:**
@@ -66,7 +66,7 @@
 
 1. **انسخ الرابط:**
    ```
-   https://medidoc-ai.preview.emergentagent.com
+   https://docimprove.preview.emergentagent.com
    ```
 
 2. **أرسله للفريق الطبي عبر:**

@@ -11,7 +11,7 @@ from datetime import datetime
 import time
 
 class MedicalCodingAPITester:
-    def __init__(self, base_url="https://medidoc-ai.preview.emergentagent.com"):
+    def __init__(self, base_url="https://docimprove.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.token = None

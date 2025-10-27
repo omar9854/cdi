@@ -432,7 +432,7 @@ Omar Almaghthawi
 Omar Almaghthawi
 
 **رابط التطبيق:**
-https://medidoc-ai.preview.emergentagent.com
+https://docimprove.preview.emergentagent.com
 
 **حساب الأدمن:**
 📧 admin@cdi-center.sa
