@@ -853,6 +853,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
             {renderSummaryCards()}
             {renderCharts()}
             {renderRecommendations()}
+            {renderHospitalDetailedAnalysis()}
             {renderHospitalsAnalysis()}
             {renderTopDiagnoses()}
             {renderSpecialtyAnalysis()}
