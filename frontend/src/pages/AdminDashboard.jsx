@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Users, FileText, BarChart3, Download, Activity, Calendar } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/contexts/LanguageContext';
+import Footer from '@/components/Footer';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;

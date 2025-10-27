@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { FileText, Plus, History, LogOut, Loader2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/contexts/LanguageContext';
+import Footer from '@/components/Footer';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
