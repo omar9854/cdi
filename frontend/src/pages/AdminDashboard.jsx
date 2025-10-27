@@ -25,6 +25,8 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [exporting, setExporting] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [editFormData, setEditFormData] = useState({});
+  const [changePasswordUser, setChangePasswordUser] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
 
   useEffect(() => {
     if (user.role !== 'admin') {
