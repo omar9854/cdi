@@ -1503,7 +1503,7 @@ async def upload_cdi_data(
     file: UploadFile = File(...),
     supervisor: dict = Depends(require_supervisor)
 ):
-    """Upload and analyze monthly CDI Excel data with comprehensive indicators"""
+    """Upload and analyze monthly CDI Excel data with comprehensive professional indicators"""
     import pandas as pd
     from collections import Counter
     
@@ -1516,7 +1516,7 @@ async def upload_cdi_data(
         contents = await file.read()
         df = pd.read_excel(io.BytesIO(contents))
         
-        # Normalize column names for flexible matching
+        # Normalize column names
         df.columns = df.columns.str.lower().str.strip()
         
         # Function to find column by keywords
@@ -1527,162 +1527,224 @@ async def upload_cdi_data(
                     return matches[0]
             return None
         
-        # Find required columns flexibly
-        cds_col = find_column(['cds', 'specialist', 'doctor'])
-        hospital_col = find_column(['hospital', 'facility', 'مستشفى'])
-        admission_col = find_column(['admission', 'admit', 'date'])
-        primary_col = find_column(['primary', 'principal', 'main', 'رئيسي'])
-        secondary_col = find_column(['secondary', 'additional', 'ثانوي'])
-        drg_before_col = find_column(['drg before', 'before', 'drgbefore', 'previous'])
-        drg_after_col = find_column(['drg after', 'after', 'drgafter', 'current'])
+        # Find all columns flexibly
+        cds_col = find_column(['cds', 'specialist', 'doctor', 'physician'])
+        hospital_col = find_column(['hospital', 'facility', 'مستشفى', 'مستشفيات'])
+        admission_col = find_column(['admission', 'admit', 'date', 'تاريخ'])
+        
+        # Principal Diagnosis columns
+        pdx_before_col = find_column(['pdx before', 'principal before', 'primary before', 'pdxbefore'])
+        pdx_after_col = find_column(['pdx after', 'principal after', 'primary after', 'pdxafter', 'pdx/after cdi'])
+        
+        # Additional Diagnosis columns  
+        adx_col = find_column(['adx', 'additional', 'secondary', 'adx due to cdi'])
+        
+        # DRG columns
+        drg_before_col = find_column(['drg before', 'before drg', 'drgbefore', 'previous drg'])
+        drg_after_col = find_column(['drg after', 'after drg', 'drgafter', 'current drg', 'new drg'])
         drg_change_col = find_column(['drg change', 'change', 'drgchange', 'impact'])
-        specialty_col = find_column(['specialty', 'speciality', 'تخصص', 'department', 'dept'])
+        
+        # Specialty column
+        specialty_col = find_column(['specialty', 'speciality', 'تخصص', 'department', 'dept', 'service'])
         
         # Check critical columns
         if not hospital_col:
-            raise HTTPException(status_code=400, detail="Could not find Hospital column. Please include 'Hospital Name' or similar column.")
+            raise HTTPException(status_code=400, detail="تعذر العثور على عمود المستشفى. يرجى التأكد من وجود عمود 'Hospital Name' أو مشابه.")
         
-        # Total records
+        # Basic Statistics
         total_records = len(df)
-        
-        # Hospitals analysis
-        hospitals = df[hospital_col].unique() if hospital_col else []
+        hospitals = df[hospital_col].dropna().unique()
         total_hospitals = len(hospitals)
         
-        # DRG Changes
+        # DRG Analysis
+        drg_changes_count = 0
         if drg_change_col:
-            # Check for both numeric changes and yes/no indicators
             df['has_drg_change'] = df[drg_change_col].notna() & (df[drg_change_col] != 0) & (df[drg_change_col].astype(str).str.lower() != 'no')
-            drg_changes = df['has_drg_change'].sum()
+            drg_changes_count = int(df['has_drg_change'].sum())
+        elif drg_before_col and drg_after_col:
+            df['has_drg_change'] = (df[drg_before_col] != df[drg_after_col]) & df[drg_before_col].notna() & df[drg_after_col].notna()
+            drg_changes_count = int(df['has_drg_change'].sum())
         else:
-            drg_changes = 0
+            df['has_drg_change'] = False
         
-        # Undocumented diagnoses analysis
-        if primary_col:
-            df['primary_undocumented'] = (
-                df[primary_col].isna() | 
-                (df[primary_col].astype(str).str.strip() == '') | 
-                (df[primary_col].astype(str).str.lower().str.contains('not documented|غير موثق|missing', na=False))
-            )
-            total_primary_undoc = df['primary_undocumented'].sum()
-        else:
-            df['primary_undocumented'] = False
-            total_primary_undoc = 0
+        # PDX Analysis (Principal Diagnosis after CDI)
+        pdx_changes = 0
+        pdx_added = 0
+        if pdx_before_col and pdx_after_col:
+            df['pdx_changed'] = (df[pdx_before_col] != df[pdx_after_col]) & df[pdx_before_col].notna() & df[pdx_after_col].notna()
+            df['pdx_added'] = df[pdx_before_col].isna() & df[pdx_after_col].notna()
+            pdx_changes = int(df['pdx_changed'].sum())
+            pdx_added = int(df['pdx_added'].sum())
         
-        if secondary_col:
-            df['secondary_undocumented'] = (
-                df[secondary_col].isna() | 
-                (df[secondary_col].astype(str).str.strip() == '') | 
-                (df[secondary_col].astype(str).str.lower().str.contains('not documented|غير موثق|missing', na=False))
-            )
-            total_secondary_undoc = df['secondary_undocumented'].sum()
-        else:
-            df['secondary_undocumented'] = False
-            total_secondary_undoc = 0
+        # ADX Analysis (Additional Diagnosis due to CDI)
+        adx_added = 0
+        if adx_col:
+            df['has_adx'] = df[adx_col].notna() & (df[adx_col].astype(str).str.strip() != '')
+            adx_added = int(df['has_adx'].sum())
         
-        undocumented_total = total_primary_undoc + total_secondary_undoc
+        # Calculate documentation metrics
+        total_pdx_after = int(df[pdx_after_col].notna().sum()) if pdx_after_col else 0
+        total_adx = int(df[adx_col].notna().sum()) if adx_col else 0
         
-        # Top undocumented diagnoses (most frequently missing)
-        top_undocumented_primary = []
-        top_undocumented_secondary = []
-        
-        if primary_col and not df['primary_undocumented'].all():
-            # Get diagnoses that appear with undocumented secondary
-            primary_diagnoses = df[~df['primary_undocumented'] & df['secondary_undocumented']][primary_col]
-            if len(primary_diagnoses) > 0:
-                diagnosis_counts = Counter(primary_diagnoses.dropna())
-                top_undocumented_primary = [
-                    {"diagnosis": diag, "count": count} 
-                    for diag, count in diagnosis_counts.most_common(10)
-                ]
-        
-        # Specialty analysis (if available)
-        specialty_data = []
-        if specialty_col:
-            specialties = df[specialty_col].unique()
-            for specialty in specialties:
-                if pd.notna(specialty) and str(specialty).strip():
-                    specialty_df = df[df[specialty_col] == specialty]
-                    specialty_data.append({
-                        'specialty': str(specialty),
-                        'total_cases': len(specialty_df),
-                        'primary_undocumented': int(specialty_df['primary_undocumented'].sum()),
-                        'secondary_undocumented': int(specialty_df['secondary_undocumented'].sum()),
-                        'drg_changes': int(specialty_df['has_drg_change'].sum()) if drg_change_col else 0
-                    })
-            
-            # Sort by undocumented count
-            specialty_data.sort(key=lambda x: x['primary_undocumented'] + x['secondary_undocumented'], reverse=True)
-        
-        # Hospital-level detailed analysis
+        # Hospital-Level Comprehensive Analysis
         hospitals_data = []
         for hospital in hospitals:
             if pd.notna(hospital) and str(hospital).strip():
                 hospital_df = df[df[hospital_col] == hospital]
                 
+                # PDX/After CDI Analysis for this hospital
+                pdx_diagnoses = []
+                if pdx_after_col:
+                    pdx_list = hospital_df[pdx_after_col].dropna()
+                    if len(pdx_list) > 0:
+                        pdx_counter = Counter(pdx_list)
+                        pdx_diagnoses = [
+                            {"diagnosis": str(diag), "count": count} 
+                            for diag, count in pdx_counter.most_common(10)
+                        ]
+                
+                # ADX Analysis for this hospital
+                adx_diagnoses = []
+                if adx_col:
+                    adx_list = hospital_df[adx_col].dropna()
+                    if len(adx_list) > 0:
+                        adx_counter = Counter(adx_list)
+                        adx_diagnoses = [
+                            {"diagnosis": str(diag), "count": count} 
+                            for diag, count in adx_counter.most_common(10)
+                        ]
+                
                 hospital_data = {
                     'hospital_name': str(hospital),
-                    'total_records': len(hospital_df),
-                    'primary_undocumented': int(hospital_df['primary_undocumented'].sum()),
-                    'secondary_undocumented': int(hospital_df['secondary_undocumented'].sum()),
-                    'drg_changes': int(hospital_df['has_drg_change'].sum()) if drg_change_col else 0,
-                    'documentation_rate': round((1 - (hospital_df['primary_undocumented'].sum() + hospital_df['secondary_undocumented'].sum()) / (len(hospital_df) * 2)) * 100, 2) if len(hospital_df) > 0 else 0
+                    'total_cases': len(hospital_df),
+                    'drg_changes': int(hospital_df['has_drg_change'].sum()) if 'has_drg_change' in hospital_df.columns else 0,
+                    'pdx_changes': int(hospital_df['pdx_changed'].sum()) if 'pdx_changed' in hospital_df.columns else 0,
+                    'pdx_added': int(hospital_df['pdx_added'].sum()) if 'pdx_added' in hospital_df.columns else 0,
+                    'adx_added': int(hospital_df['has_adx'].sum()) if 'has_adx' in hospital_df.columns else 0,
+                    'top_pdx_diagnoses': pdx_diagnoses,
+                    'top_adx_diagnoses': adx_diagnoses,
+                    'drg_impact_rate': round((hospital_df['has_drg_change'].sum() / len(hospital_df) * 100), 2) if len(hospital_df) > 0 and 'has_drg_change' in hospital_df.columns else 0
                 }
                 hospitals_data.append(hospital_data)
         
-        # Sort by undocumented (highest first)
-        hospitals_data.sort(
-            key=lambda x: x['primary_undocumented'] + x['secondary_undocumented'], 
-            reverse=True
-        )
+        # Sort by DRG impact
+        hospitals_data.sort(key=lambda x: x['drg_changes'], reverse=True)
         
-        # CDS/Specialist performance (if available)
+        # Overall Top Diagnoses (PDX/After CDI)
+        top_pdx_overall = []
+        if pdx_after_col:
+            pdx_all = df[pdx_after_col].dropna()
+            if len(pdx_all) > 0:
+                pdx_counter = Counter(pdx_all)
+                top_pdx_overall = [
+                    {"diagnosis": str(diag), "count": count, "percentage": round(count/len(pdx_all)*100, 2)} 
+                    for diag, count in pdx_counter.most_common(15)
+                ]
+        
+        # Overall Top ADX Diagnoses
+        top_adx_overall = []
+        if adx_col:
+            adx_all = df[adx_col].dropna()
+            if len(adx_all) > 0:
+                adx_counter = Counter(adx_all)
+                top_adx_overall = [
+                    {"diagnosis": str(diag), "count": count, "percentage": round(count/len(adx_all)*100, 2)} 
+                    for diag, count in adx_counter.most_common(15)
+                ]
+        
+        # Specialty Analysis
+        specialty_data = []
+        if specialty_col:
+            specialties = df[specialty_col].dropna().unique()
+            for specialty in specialties:
+                if str(specialty).strip():
+                    specialty_df = df[df[specialty_col] == specialty]
+                    
+                    specialty_data.append({
+                        'specialty': str(specialty),
+                        'total_cases': len(specialty_df),
+                        'drg_changes': int(specialty_df['has_drg_change'].sum()) if 'has_drg_change' in specialty_df.columns else 0,
+                        'pdx_changes': int(specialty_df['pdx_changed'].sum()) if 'pdx_changed' in specialty_df.columns else 0,
+                        'adx_added': int(specialty_df['has_adx'].sum()) if 'has_adx' in specialty_df.columns else 0,
+                        'impact_rate': round((specialty_df['has_drg_change'].sum() / len(specialty_df) * 100), 2) if len(specialty_df) > 0 and 'has_drg_change' in specialty_df.columns else 0
+                    })
+            
+            specialty_data.sort(key=lambda x: x['drg_changes'], reverse=True)
+        
+        # CDS Performance
         cds_performance = []
         if cds_col:
-            cds_specialists = df[cds_col].unique()
+            cds_specialists = df[cds_col].dropna().unique()
             for cds in cds_specialists:
-                if pd.notna(cds) and str(cds).strip():
+                if str(cds).strip():
                     cds_df = df[df[cds_col] == cds]
+                    
                     cds_performance.append({
                         'cds_name': str(cds),
                         'total_cases': len(cds_df),
-                        'queries_generated': int(cds_df['primary_undocumented'].sum() + cds_df['secondary_undocumented'].sum()),
-                        'drg_impact': int(cds_df['has_drg_change'].sum()) if drg_change_col else 0,
-                        'success_rate': round((cds_df['has_drg_change'].sum() / len(cds_df) * 100), 2) if drg_change_col and len(cds_df) > 0 else 0
+                        'drg_impact': int(cds_df['has_drg_change'].sum()) if 'has_drg_change' in cds_df.columns else 0,
+                        'pdx_queries': int(cds_df['pdx_changed'].sum() + cds_df['pdx_added'].sum()) if 'pdx_changed' in cds_df.columns else 0,
+                        'adx_queries': int(cds_df['has_adx'].sum()) if 'has_adx' in cds_df.columns else 0,
+                        'success_rate': round((cds_df['has_drg_change'].sum() / len(cds_df) * 100), 2) if len(cds_df) > 0 and 'has_drg_change' in cds_df.columns else 0
                     })
             
-            # Sort by DRG impact
             cds_performance.sort(key=lambda x: x['drg_impact'], reverse=True)
         
-        # Overall documentation quality
-        total_possible_docs = total_records * 2  # primary + secondary
-        documented_count = total_possible_docs - undocumented_total
-        documentation_rate = round((documented_count / total_possible_docs * 100), 2) if total_possible_docs > 0 else 0
-        
-        # Calculate average DRG impact rate
-        drg_impact_rate = round((drg_changes / total_records * 100), 2) if total_records > 0 else 0
+        # Calculate rates
+        drg_impact_rate = round((drg_changes_count / total_records * 100), 2) if total_records > 0 else 0
+        pdx_change_rate = round((pdx_changes / total_records * 100), 2) if total_records > 0 else 0
+        adx_rate = round((adx_added / total_records * 100), 2) if total_records > 0 else 0
         
         return {
-            # Summary statistics
-            'total_records': int(total_records),
-            'total_hospitals': int(total_hospitals),
-            'drg_changes': int(drg_changes),
-            'drg_impact_rate': drg_impact_rate,
-            'undocumented_total': int(undocumented_total),
-            'primary_undocumented': int(total_primary_undoc),
-            'secondary_undocumented': int(total_secondary_undoc),
-            'documentation_rate': documentation_rate,
+            # Summary Statistics
+            'summary': {
+                'total_records': int(total_records),
+                'total_hospitals': int(total_hospitals),
+                'total_specialties': len(specialty_data) if specialty_data else 0,
+                'total_cds': len(cds_performance) if cds_performance else 0,
+                'analysis_date': datetime.now(timezone.utc).isoformat()
+            },
             
-            # Detailed breakdowns
-            'hospitals_data': hospitals_data[:20],  # Top 20 hospitals
-            'specialty_data': specialty_data[:15],  # Top 15 specialties
-            'cds_performance': cds_performance[:15],  # Top 15 CDS specialists
-            'top_undocumented_diagnoses': top_undocumented_primary[:10],  # Top 10
+            # DRG Metrics
+            'drg_metrics': {
+                'total_changes': int(drg_changes_count),
+                'change_rate': drg_impact_rate,
+                'no_change': int(total_records - drg_changes_count)
+            },
             
-            # Data completeness indicators
-            'has_specialty_data': bool(specialty_col),
-            'has_cds_data': bool(cds_col),
-            'has_drg_data': bool(drg_change_col)
+            # PDX Metrics (Principal Diagnosis)
+            'pdx_metrics': {
+                'total_after_cdi': int(total_pdx_after),
+                'changes': int(pdx_changes),
+                'newly_added': int(pdx_added),
+                'change_rate': pdx_change_rate
+            },
+            
+            # ADX Metrics (Additional Diagnosis)
+            'adx_metrics': {
+                'total_added': int(adx_added),
+                'addition_rate': adx_rate
+            },
+            
+            # Top Diagnoses Overall
+            'top_diagnoses': {
+                'pdx_after_cdi': top_pdx_overall,
+                'adx_due_to_cdi': top_adx_overall
+            },
+            
+            # Detailed Breakdowns
+            'hospitals_analysis': hospitals_data,
+            'specialty_analysis': specialty_data[:20],
+            'cds_performance': cds_performance[:20],
+            
+            # Data Availability Flags
+            'data_flags': {
+                'has_pdx_data': bool(pdx_after_col),
+                'has_adx_data': bool(adx_col),
+                'has_specialty_data': bool(specialty_col),
+                'has_cds_data': bool(cds_col),
+                'has_drg_data': bool(drg_change_col or (drg_before_col and drg_after_col))
+            }
         }
         
     except HTTPException:
@@ -1691,7 +1753,7 @@ async def upload_cdi_data(
         logger.error(f"Error processing Excel file: {str(e)}")
         import traceback
         traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"خطأ في معالجة الملف: {str(e)}")
 
 
 # ========== Include Router ==========
