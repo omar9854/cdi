@@ -446,6 +446,39 @@ const AdminDashboard = ({ user, onLogout }) => {
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Change Password Dialog */}
+        {changePasswordUser && (
+          <Dialog open={!!changePasswordUser} onOpenChange={() => {setChangePasswordUser(null); setNewPassword('');}}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{language === 'ar' ? 'تغيير كلمة المرور' : 'Change Password'}</DialogTitle>
+                <DialogDescription>
+                  {language === 'ar' ? `تغيير كلمة المرور للمستخدم: ${changePasswordUser.full_name}` : `Change password for: ${changePasswordUser.full_name}`}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label>{language === 'ar' ? 'كلمة المرور الجديدة' : 'New Password'}</Label>
+                  <Input
+                    type="password"
+                    placeholder={language === 'ar' ? 'أدخل كلمة المرور الجديدة (6 أحرف على الأقل)' : 'Enter new password (min 6 characters)'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button variant="outline" onClick={() => {setChangePasswordUser(null); setNewPassword('');}}>
+                    {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                  </Button>
+                  <Button onClick={handleChangePassword} className="medical-blue">
+                    {language === 'ar' ? 'تغيير كلمة المرور' : 'Change Password'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </main>
       <Footer />
     </div>
