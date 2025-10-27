@@ -1503,8 +1503,9 @@ async def upload_cdi_data(
     file: UploadFile = File(...),
     supervisor: dict = Depends(require_supervisor)
 ):
-    """Upload and analyze monthly CDI Excel data"""
+    """Upload and analyze monthly CDI Excel data with comprehensive indicators"""
     import pandas as pd
+    from collections import Counter
     
     # Validate file type
     if not (file.filename.endswith('.xlsx') or file.filename.endswith('.xls')):
@@ -1515,65 +1516,119 @@ async def upload_cdi_data(
         contents = await file.read()
         df = pd.read_excel(io.BytesIO(contents))
         
-        # Expected columns (flexible matching)
-        expected_columns = ['cds name', 'hospital name', 'admission date', 'primary diagnosis', 
-                          'secondary diagnosis', 'drg before', 'drg after', 'drg change']
-        
-        # Normalize column names for matching
+        # Normalize column names for flexible matching
         df.columns = df.columns.str.lower().str.strip()
         
-        # Check if required columns exist
-        missing_columns = []
-        for col in expected_columns:
-            if col not in df.columns:
-                # Try partial matching
-                matches = [c for c in df.columns if col.replace(' ', '') in c.replace(' ', '')]
-                if not matches:
-                    missing_columns.append(col)
+        # Function to find column by keywords
+        def find_column(keywords):
+            for keyword in keywords:
+                matches = [c for c in df.columns if keyword.lower() in c.lower()]
+                if matches:
+                    return matches[0]
+            return None
         
-        if missing_columns:
-            raise HTTPException(
-                status_code=400, 
-                detail=f"Missing required columns: {', '.join(missing_columns)}"
-            )
+        # Find required columns flexibly
+        cds_col = find_column(['cds', 'specialist', 'doctor'])
+        hospital_col = find_column(['hospital', 'facility', 'مستشفى'])
+        admission_col = find_column(['admission', 'admit', 'date'])
+        primary_col = find_column(['primary', 'principal', 'main', 'رئيسي'])
+        secondary_col = find_column(['secondary', 'additional', 'ثانوي'])
+        drg_before_col = find_column(['drg before', 'before', 'drgbefore', 'previous'])
+        drg_after_col = find_column(['drg after', 'after', 'drgafter', 'current'])
+        drg_change_col = find_column(['drg change', 'change', 'drgchange', 'impact'])
+        specialty_col = find_column(['specialty', 'speciality', 'تخصص', 'department', 'dept'])
+        
+        # Check critical columns
+        if not hospital_col:
+            raise HTTPException(status_code=400, detail="Could not find Hospital column. Please include 'Hospital Name' or similar column.")
         
         # Total records
         total_records = len(df)
         
-        # Get unique hospitals
-        hospital_col = [c for c in df.columns if 'hospital' in c][0]
-        hospitals = df[hospital_col].unique()
+        # Hospitals analysis
+        hospitals = df[hospital_col].unique() if hospital_col else []
         total_hospitals = len(hospitals)
         
-        # Calculate DRG changes
-        drg_change_col = [c for c in df.columns if 'drg' in c and 'change' in c][0]
-        drg_changes = df[drg_change_col].notna().sum()
+        # DRG Changes
+        if drg_change_col:
+            # Check for both numeric changes and yes/no indicators
+            df['has_drg_change'] = df[drg_change_col].notna() & (df[drg_change_col] != 0) & (df[drg_change_col].astype(str).str.lower() != 'no')
+            drg_changes = df['has_drg_change'].sum()
+        else:
+            drg_changes = 0
         
-        # Calculate undocumented diagnoses
-        primary_col = [c for c in df.columns if 'primary' in c and 'diagnosis' in c][0]
-        secondary_col = [c for c in df.columns if 'secondary' in c and 'diagnosis' in c][0]
+        # Undocumented diagnoses analysis
+        if primary_col:
+            df['primary_undocumented'] = (
+                df[primary_col].isna() | 
+                (df[primary_col].astype(str).str.strip() == '') | 
+                (df[primary_col].astype(str).str.lower().str.contains('not documented|غير موثق|missing', na=False))
+            )
+            total_primary_undoc = df['primary_undocumented'].sum()
+        else:
+            df['primary_undocumented'] = False
+            total_primary_undoc = 0
         
-        # Identify undocumented (missing or empty diagnoses)
-        df['primary_undocumented'] = df[primary_col].isna() | (df[primary_col] == '') | (df[primary_col].str.lower() == 'not documented')
-        df['secondary_undocumented'] = df[secondary_col].isna() | (df[secondary_col] == '') | (df[secondary_col].str.lower() == 'not documented')
+        if secondary_col:
+            df['secondary_undocumented'] = (
+                df[secondary_col].isna() | 
+                (df[secondary_col].astype(str).str.strip() == '') | 
+                (df[secondary_col].astype(str).str.lower().str.contains('not documented|غير موثق|missing', na=False))
+            )
+            total_secondary_undoc = df['secondary_undocumented'].sum()
+        else:
+            df['secondary_undocumented'] = False
+            total_secondary_undoc = 0
         
-        total_primary_undoc = df['primary_undocumented'].sum()
-        total_secondary_undoc = df['secondary_undocumented'].sum()
         undocumented_total = total_primary_undoc + total_secondary_undoc
         
-        # Hospital-level analysis
+        # Top undocumented diagnoses (most frequently missing)
+        top_undocumented_primary = []
+        top_undocumented_secondary = []
+        
+        if primary_col and not df['primary_undocumented'].all():
+            # Get diagnoses that appear with undocumented secondary
+            primary_diagnoses = df[~df['primary_undocumented'] & df['secondary_undocumented']][primary_col]
+            if len(primary_diagnoses) > 0:
+                diagnosis_counts = Counter(primary_diagnoses.dropna())
+                top_undocumented_primary = [
+                    {"diagnosis": diag, "count": count} 
+                    for diag, count in diagnosis_counts.most_common(10)
+                ]
+        
+        # Specialty analysis (if available)
+        specialty_data = []
+        if specialty_col:
+            specialties = df[specialty_col].unique()
+            for specialty in specialties:
+                if pd.notna(specialty) and str(specialty).strip():
+                    specialty_df = df[df[specialty_col] == specialty]
+                    specialty_data.append({
+                        'specialty': str(specialty),
+                        'total_cases': len(specialty_df),
+                        'primary_undocumented': int(specialty_df['primary_undocumented'].sum()),
+                        'secondary_undocumented': int(specialty_df['secondary_undocumented'].sum()),
+                        'drg_changes': int(specialty_df['has_drg_change'].sum()) if drg_change_col else 0
+                    })
+            
+            # Sort by undocumented count
+            specialty_data.sort(key=lambda x: x['primary_undocumented'] + x['secondary_undocumented'], reverse=True)
+        
+        # Hospital-level detailed analysis
         hospitals_data = []
         for hospital in hospitals:
-            hospital_df = df[df[hospital_col] == hospital]
-            
-            hospital_data = {
-                'hospital_name': str(hospital),
-                'total_records': len(hospital_df),
-                'primary_undocumented': int(hospital_df['primary_undocumented'].sum()),
-                'secondary_undocumented': int(hospital_df['secondary_undocumented'].sum()),
-                'drg_changes': int(hospital_df[drg_change_col].notna().sum())
-            }
-            hospitals_data.append(hospital_data)
+            if pd.notna(hospital) and str(hospital).strip():
+                hospital_df = df[df[hospital_col] == hospital]
+                
+                hospital_data = {
+                    'hospital_name': str(hospital),
+                    'total_records': len(hospital_df),
+                    'primary_undocumented': int(hospital_df['primary_undocumented'].sum()),
+                    'secondary_undocumented': int(hospital_df['secondary_undocumented'].sum()),
+                    'drg_changes': int(hospital_df['has_drg_change'].sum()) if drg_change_col else 0,
+                    'documentation_rate': round((1 - (hospital_df['primary_undocumented'].sum() + hospital_df['secondary_undocumented'].sum()) / (len(hospital_df) * 2)) * 100, 2) if len(hospital_df) > 0 else 0
+                }
+                hospitals_data.append(hospital_data)
         
         # Sort by undocumented (highest first)
         hospitals_data.sort(
@@ -1581,19 +1636,63 @@ async def upload_cdi_data(
             reverse=True
         )
         
+        # CDS/Specialist performance (if available)
+        cds_performance = []
+        if cds_col:
+            cds_specialists = df[cds_col].unique()
+            for cds in cds_specialists:
+                if pd.notna(cds) and str(cds).strip():
+                    cds_df = df[df[cds_col] == cds]
+                    cds_performance.append({
+                        'cds_name': str(cds),
+                        'total_cases': len(cds_df),
+                        'queries_generated': int(cds_df['primary_undocumented'].sum() + cds_df['secondary_undocumented'].sum()),
+                        'drg_impact': int(cds_df['has_drg_change'].sum()) if drg_change_col else 0,
+                        'success_rate': round((cds_df['has_drg_change'].sum() / len(cds_df) * 100), 2) if drg_change_col and len(cds_df) > 0 else 0
+                    })
+            
+            # Sort by DRG impact
+            cds_performance.sort(key=lambda x: x['drg_impact'], reverse=True)
+        
+        # Overall documentation quality
+        total_possible_docs = total_records * 2  # primary + secondary
+        documented_count = total_possible_docs - undocumented_total
+        documentation_rate = round((documented_count / total_possible_docs * 100), 2) if total_possible_docs > 0 else 0
+        
+        # Calculate average DRG impact rate
+        drg_impact_rate = round((drg_changes / total_records * 100), 2) if total_records > 0 else 0
+        
         return {
+            # Summary statistics
             'total_records': int(total_records),
             'total_hospitals': int(total_hospitals),
             'drg_changes': int(drg_changes),
+            'drg_impact_rate': drg_impact_rate,
             'undocumented_total': int(undocumented_total),
             'primary_undocumented': int(total_primary_undoc),
             'secondary_undocumented': int(total_secondary_undoc),
-            'hospitals_data': hospitals_data
+            'documentation_rate': documentation_rate,
+            
+            # Detailed breakdowns
+            'hospitals_data': hospitals_data[:20],  # Top 20 hospitals
+            'specialty_data': specialty_data[:15],  # Top 15 specialties
+            'cds_performance': cds_performance[:15],  # Top 15 CDS specialists
+            'top_undocumented_diagnoses': top_undocumented_primary[:10],  # Top 10
+            
+            # Data completeness indicators
+            'has_specialty_data': bool(specialty_col),
+            'has_cds_data': bool(cds_col),
+            'has_drg_data': bool(drg_change_col)
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error processing Excel file: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
+
 
 # ========== Include Router ==========
 app.include_router(api_router)
