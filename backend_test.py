@@ -402,6 +402,371 @@ class MedicalCodingAPITester:
             self.log_test("Export Excel", False, str(e))
             return False
 
+    # ========== ADMIN MANAGEMENT TESTS ==========
+    
+    def test_admin_users_statistics(self):
+        """Test GET /api/admin/users-statistics - verify includes 'role' and 'is_active' fields"""
+        if not self.admin_token:
+            self.log_test("Admin Users Statistics", False, "No admin authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(
+                f"{self.api_url}/admin/users-statistics",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                statistics = data.get('statistics', [])
+                if statistics:
+                    # Check if first user has required fields
+                    first_user = statistics[0]
+                    has_role = 'role' in first_user
+                    has_is_active = 'is_active' in first_user
+                    details = f"Retrieved {len(statistics)} users, has_role: {has_role}, has_is_active: {has_is_active}"
+                    success = has_role and has_is_active
+                else:
+                    details = "No users found in statistics"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Admin Users Statistics", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Admin Users Statistics", False, str(e))
+            return False
+
+    def test_assign_supervisor(self, user_id):
+        """Test POST /api/admin/assign-supervisor/{user_id}"""
+        if not self.admin_token or not user_id:
+            self.log_test("Assign Supervisor", False, "No admin token or user ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.post(
+                f"{self.api_url}/admin/assign-supervisor/{user_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                details = f"User promoted to supervisor: {data.get('message', '')}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Assign Supervisor", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Assign Supervisor", False, str(e))
+            return False
+
+    def test_remove_supervisor(self, user_id):
+        """Test POST /api/admin/remove-supervisor/{user_id}"""
+        if not self.admin_token or not user_id:
+            self.log_test("Remove Supervisor", False, "No admin token or user ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.post(
+                f"{self.api_url}/admin/remove-supervisor/{user_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                details = f"Supervisor demoted to user: {data.get('message', '')}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Remove Supervisor", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Remove Supervisor", False, str(e))
+            return False
+
+    def test_edit_user(self, user_id):
+        """Test PUT /api/admin/users/{user_id} - edit user data"""
+        if not self.admin_token or not user_id:
+            self.log_test("Edit User", False, "No admin token or user ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            update_data = {
+                "full_name": "د. سارة أحمد المحدثة",
+                "email": f"updated_employee_{datetime.now().strftime('%H%M%S')}@hospital.com",
+                "phone_number": "966509876543"
+            }
+            response = requests.put(
+                f"{self.api_url}/admin/users/{user_id}",
+                json=update_data,
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                details = f"User updated: {data.get('message', '')}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Edit User", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Edit User", False, str(e))
+            return False
+
+    def test_suspend_user(self, user_id):
+        """Test POST /api/admin/suspend-user/{user_id}"""
+        if not self.admin_token or not user_id:
+            self.log_test("Suspend User", False, "No admin token or user ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.post(
+                f"{self.api_url}/admin/suspend-user/{user_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                details = f"User suspended: {data.get('message', '')}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Suspend User", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Suspend User", False, str(e))
+            return False
+
+    def test_activate_user(self, user_id):
+        """Test POST /api/admin/activate-user/{user_id}"""
+        if not self.admin_token or not user_id:
+            self.log_test("Activate User", False, "No admin token or user ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.post(
+                f"{self.api_url}/admin/activate-user/{user_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                details = f"User activated: {data.get('message', '')}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Activate User", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Activate User", False, str(e))
+            return False
+
+    def test_delete_user(self, user_id):
+        """Test DELETE /api/admin/users/{user_id}"""
+        if not self.admin_token or not user_id:
+            self.log_test("Delete User", False, "No admin token or user ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.delete(
+                f"{self.api_url}/admin/users/{user_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                details = f"User deleted: {data.get('message', '')}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Delete User", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Delete User", False, str(e))
+            return False
+
+    # ========== SUPERVISOR TESTS ==========
+    
+    def test_supervisor_employees(self):
+        """Test GET /api/supervisor/employees - verify includes 'notes_count' and 'analyses_count' fields"""
+        if not self.admin_token:
+            self.log_test("Supervisor Employees", False, "No admin authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(
+                f"{self.api_url}/supervisor/employees",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                if data:
+                    # Check if employees have required fields
+                    first_employee = data[0] if data else {}
+                    has_notes_count = 'notes_count' in first_employee
+                    has_analyses_count = 'analyses_count' in first_employee
+                    details = f"Retrieved {len(data)} employees, has_notes_count: {has_notes_count}, has_analyses_count: {has_analyses_count}"
+                    success = has_notes_count and has_analyses_count
+                else:
+                    details = "No employees found"
+                    success = True  # Empty list is valid
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Supervisor Employees", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Supervisor Employees", False, str(e))
+            return False
+
+    # ========== CDI EXCEL UPLOAD TESTS ==========
+    
+    def create_sample_cdi_excel(self):
+        """Create a sample Excel file with CDI data"""
+        try:
+            # Create sample data
+            data = {
+                'CDS Name': [
+                    'د. أحمد محمد',
+                    'د. فاطمة علي', 
+                    'د. محمد حسن',
+                    'د. نورا سالم',
+                    'د. خالد أحمد'
+                ],
+                'Hospital Name': [
+                    'مستشفى الملك فهد',
+                    'مستشفى الملك فيصل',
+                    'مستشفى الملك فهد',
+                    'مستشفى الأمير سلطان',
+                    'مستشفى الملك فيصل'
+                ],
+                'Admission Date': [
+                    '2024-01-15',
+                    '2024-01-16',
+                    '2024-01-17',
+                    '2024-01-18',
+                    '2024-01-19'
+                ],
+                'Primary Diagnosis': [
+                    'Diabetes Mellitus Type 2',
+                    '',  # Empty to test undocumented detection
+                    'Hypertension',
+                    'Not documented',  # Explicit undocumented
+                    'Pneumonia'
+                ],
+                'Secondary Diagnosis': [
+                    'Hypertension',
+                    'Diabetes',
+                    '',  # Empty to test undocumented detection
+                    'Diabetes Mellitus',
+                    ''  # Empty
+                ],
+                'DRG Before': [
+                    '641',
+                    '642',
+                    '643',
+                    '644',
+                    '645'
+                ],
+                'DRG After': [
+                    '641',
+                    '643',  # Changed
+                    '643',
+                    '645',  # Changed
+                    '645'
+                ],
+                'DRG Change': [
+                    '',
+                    'Yes',
+                    '',
+                    'Yes',
+                    ''
+                ]
+            }
+            
+            # Create DataFrame
+            df = pd.DataFrame(data)
+            
+            # Save to BytesIO
+            excel_buffer = io.BytesIO()
+            with pd.ExcelWriter(excel_buffer, engine='openpyxl') as writer:
+                df.to_excel(writer, index=False, sheet_name='CDI Data')
+            
+            excel_buffer.seek(0)
+            return excel_buffer
+            
+        except Exception as e:
+            print(f"Error creating sample Excel: {str(e)}")
+            return None
+
+    def test_upload_cdi_data(self):
+        """Test POST /api/supervisor/upload-cdi-data with Excel file"""
+        if not self.admin_token:
+            self.log_test("Upload CDI Data", False, "No admin authentication token")
+            return False
+        
+        try:
+            # Create sample Excel file
+            excel_file = self.create_sample_cdi_excel()
+            if not excel_file:
+                self.log_test("Upload CDI Data", False, "Failed to create sample Excel file")
+                return False
+            
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            files = {
+                'file': ('cdi_sample_data.xlsx', excel_file, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            }
+            
+            response = requests.post(
+                f"{self.api_url}/supervisor/upload-cdi-data",
+                headers=headers,
+                files=files,
+                timeout=30
+            )
+            
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                # Verify required fields in response
+                required_fields = ['total_records', 'total_hospitals', 'drg_changes', 
+                                 'undocumented_total', 'primary_undocumented', 
+                                 'secondary_undocumented', 'hospitals_data']
+                
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if not missing_fields:
+                    details = f"CDI analysis complete - Records: {data.get('total_records')}, Hospitals: {data.get('total_hospitals')}, Undocumented: {data.get('undocumented_total')}"
+                else:
+                    success = False
+                    details = f"Missing required fields: {', '.join(missing_fields)}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Upload CDI Data", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Upload CDI Data", False, str(e))
+            return False
+
     def run_all_tests(self):
         """Run all API tests"""
         print("🚀 Starting Arabic Medical Coding API Tests")
