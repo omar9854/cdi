@@ -624,6 +624,17 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                   <span>{language === 'ar' ? 'جاري التحليل...' : 'Analyzing...'}</span>
                 </div>
               )}
+              {analysis && (
+                <div className="flex gap-3 mt-4">
+                  <Button 
+                    onClick={handleDownloadExcel}
+                    className="medical-blue flex items-center gap-2"
+                  >
+                    <FileSpreadsheet className="h-4 w-4" />
+                    {language === 'ar' ? 'تحميل تقرير Excel شامل' : 'Download Comprehensive Excel Report'}
+                  </Button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -632,6 +643,8 @@ const SupervisorDashboard = ({ user, onLogout }) => {
         {analysis && (
           <>
             {renderSummaryCards()}
+            {renderCharts()}
+            {renderRecommendations()}
             {renderHospitalsAnalysis()}
             {renderTopDiagnoses()}
             {renderSpecialtyAnalysis()}
