@@ -1063,7 +1063,8 @@ async def assign_supervisor(user_id: str, admin: dict = Depends(require_admin)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
-    if user['role'] == 'admin':
+    # Check if user is admin (use .get() to handle users without role field)
+    if user.get('role') == 'admin':
         raise HTTPException(status_code=400, detail="Cannot change admin role")
     
     # Update user role to supervisor
