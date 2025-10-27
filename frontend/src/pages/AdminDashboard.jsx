@@ -350,6 +350,16 @@ const AdminDashboard = ({ user, onLogout }) => {
                             <Edit className="h-4 w-4" />
                           </Button>
                           
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-blue-600"
+                            onClick={() => setChangePasswordUser(userStat)}
+                            title={language === 'ar' ? 'تغيير كلمة المرور' : 'Change Password'}
+                          >
+                            <Lock className="h-4 w-4" />
+                          </Button>
+                          
                           {userStat.role !== 'supervisor' ? (
                             <Button
                               size="sm"
