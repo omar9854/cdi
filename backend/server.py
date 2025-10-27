@@ -1129,6 +1129,13 @@ async def get_supervisor_employees(supervisor: dict = Depends(require_supervisor
             {"_id": 0, "password_hash": 0}
         ).to_list(1000)
     
+    # Add notes and analyses counts
+    for employee in employees:
+        notes_count = await db.clinical_notes.count_documents({"user_id": employee['id']})
+        analyses_count = await db.analyses.count_documents({"user_id": employee['id']})
+        employee['notes_count'] = notes_count
+        employee['analyses_count'] = analyses_count
+    
     return employees
 
 @api_router.get("/supervisor/employee-notes/{employee_id}")
