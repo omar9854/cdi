@@ -1755,6 +1755,226 @@ async def upload_cdi_data(
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"خطأ في معالجة الملف: {str(e)}")
 
+@api_router.post("/supervisor/generate-excel-report")
+async def generate_excel_report(
+    analysis_data: dict,
+    supervisor: dict = Depends(require_supervisor)
+):
+    """Generate comprehensive Excel report with recommendations"""
+    try:
+        wb = Workbook()
+        
+        # Summary Sheet
+        ws_summary = wb.active
+        ws_summary.title = "ملخص التحليل"
+        
+        # Header styling
+        header_fill = PatternFill(start_color="1F4788", end_color="1F4788", fill_type="solid")
+        header_font = Font(color="FFFFFF", bold=True, size=12)
+        
+        # Title
+        ws_summary['A1'] = 'تقرير تحليل CDI الشامل'
+        ws_summary['A1'].font = Font(bold=True, size=16)
+        ws_summary.merge_cells('A1:D1')
+        
+        # Summary data
+        ws_summary['A3'] = 'المؤشر'
+        ws_summary['B3'] = 'القيمة'
+        ws_summary['A3'].fill = header_fill
+        ws_summary['A3'].font = header_font
+        ws_summary['B3'].fill = header_fill
+        ws_summary['B3'].font = header_font
+        
+        summary = analysis_data.get('summary', {})
+        row = 4
+        ws_summary[f'A{row}'] = 'إجمالي الحالات'
+        ws_summary[f'B{row}'] = summary.get('total_records', 0)
+        row += 1
+        ws_summary[f'A{row}'] = 'عدد المستشفيات'
+        ws_summary[f'B{row}'] = summary.get('total_hospitals', 0)
+        row += 1
+        
+        # DRG Metrics
+        drg = analysis_data.get('drg_metrics', {})
+        ws_summary[f'A{row}'] = 'تغييرات DRG'
+        ws_summary[f'B{row}'] = drg.get('total_changes', 0)
+        row += 1
+        ws_summary[f'A{row}'] = 'معدل تغيير DRG'
+        ws_summary[f'B{row}'] = f"{drg.get('change_rate', 0)}%"
+        row += 1
+        
+        # PDX Metrics
+        pdx = analysis_data.get('pdx_metrics', {})
+        ws_summary[f'A{row}'] = 'PDX/After CDI'
+        ws_summary[f'B{row}'] = pdx.get('total_after_cdi', 0)
+        row += 1
+        ws_summary[f'A{row}'] = 'PDX المتغيرة'
+        ws_summary[f'B{row}'] = pdx.get('changes', 0)
+        row += 1
+        
+        # ADX Metrics
+        adx = analysis_data.get('adx_metrics', {})
+        ws_summary[f'A{row}'] = 'ADX due to CDI'
+        ws_summary[f'B{row}'] = adx.get('total_added', 0)
+        
+        # Hospitals Analysis Sheet
+        ws_hospitals = wb.create_sheet(title="تحليل المستشفيات")
+        headers = ['المستشفى', 'الحالات', 'DRG Changes', 'PDX Changes', 'PDX Added', 'ADX Added', 'معدل التأثير %']
+        for col_idx, header in enumerate(headers, 1):
+            cell = ws_hospitals.cell(row=1, column=col_idx)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+        
+        hospitals = analysis_data.get('hospitals_analysis', [])
+        for row_idx, hospital in enumerate(hospitals, 2):
+            ws_hospitals.cell(row=row_idx, column=1).value = hospital.get('hospital_name', '')
+            ws_hospitals.cell(row=row_idx, column=2).value = hospital.get('total_cases', 0)
+            ws_hospitals.cell(row=row_idx, column=3).value = hospital.get('drg_changes', 0)
+            ws_hospitals.cell(row=row_idx, column=4).value = hospital.get('pdx_changes', 0)
+            ws_hospitals.cell(row=row_idx, column=5).value = hospital.get('pdx_added', 0)
+            ws_hospitals.cell(row=row_idx, column=6).value = hospital.get('adx_added', 0)
+            ws_hospitals.cell(row=row_idx, column=7).value = hospital.get('drg_impact_rate', 0)
+        
+        # Top PDX Diagnoses Sheet
+        if analysis_data.get('top_diagnoses', {}).get('pdx_after_cdi'):
+            ws_pdx = wb.create_sheet(title="Top PDX Diagnoses")
+            ws_pdx['A1'] = 'التشخيص'
+            ws_pdx['B1'] = 'العدد'
+            ws_pdx['C1'] = 'النسبة %'
+            for col in ['A1', 'B1', 'C1']:
+                ws_pdx[col].fill = header_fill
+                ws_pdx[col].font = header_font
+            
+            for row_idx, diag in enumerate(analysis_data['top_diagnoses']['pdx_after_cdi'], 2):
+                ws_pdx.cell(row=row_idx, column=1).value = diag.get('diagnosis', '')
+                ws_pdx.cell(row=row_idx, column=2).value = diag.get('count', 0)
+                ws_pdx.cell(row=row_idx, column=3).value = diag.get('percentage', 0)
+        
+        # Recommendations Sheet
+        ws_recommendations = wb.create_sheet(title="التوصيات")
+        ws_recommendations['A1'] = 'التوصيات والتوجيهات للتحسين'
+        ws_recommendations['A1'].font = Font(bold=True, size=14)
+        ws_recommendations.merge_cells('A1:B1')
+        
+        recommendations = generate_recommendations(analysis_data)
+        row_idx = 3
+        for rec in recommendations:
+            ws_recommendations.cell(row=row_idx, column=1).value = rec['category']
+            ws_recommendations.cell(row=row_idx, column=1).font = Font(bold=True)
+            ws_recommendations.cell(row=row_idx, column=1).fill = PatternFill(start_color="E7E6E6", end_color="E7E6E6", fill_type="solid")
+            row_idx += 1
+            ws_recommendations.cell(row=row_idx, column=1).value = rec['recommendation']
+            ws_recommendations.cell(row=row_idx, column=1).alignment = Alignment(wrap_text=True)
+            ws_recommendations.row_dimensions[row_idx].height = 40
+            row_idx += 2
+        
+        # Adjust column widths
+        for ws in wb.worksheets:
+            for column in ws.columns:
+                max_length = 0
+                column_letter = column[0].column_letter
+                for cell in column:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(cell.value)
+                    except:
+                        pass
+                adjusted_width = min(max_length + 2, 50)
+                ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Save to BytesIO
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        
+        return StreamingResponse(
+            buffer,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename=CDI_Report_{datetime.now().strftime('%Y%m%d')}.xlsx"}
+        )
+    
+    except Exception as e:
+        logger.error(f"Error generating Excel report: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating report: {str(e)}")
+
+def generate_recommendations(analysis_data):
+    """Generate smart recommendations based on analysis data"""
+    recommendations = []
+    
+    drg_metrics = analysis_data.get('drg_metrics', {})
+    pdx_metrics = analysis_data.get('pdx_metrics', {})
+    adx_metrics = analysis_data.get('adx_metrics', {})
+    hospitals = analysis_data.get('hospitals_analysis', [])
+    
+    # DRG Impact Analysis
+    drg_rate = drg_metrics.get('change_rate', 0)
+    if drg_rate < 20:
+        recommendations.append({
+            'category': '⚠️ معدل تأثير DRG منخفض',
+            'recommendation': f'معدل تغيير DRG الحالي {drg_rate}% أقل من المتوقع. يُنصح بتكثيف جهود CDI والتركيز على المراجعة الدقيقة للملفات قبل الترميز النهائي.'
+        })
+    elif drg_rate > 60:
+        recommendations.append({
+            'category': '✅ معدل تأثير DRG ممتاز',
+            'recommendation': f'معدل تغيير DRG الحالي {drg_rate}% يعتبر ممتازاً. استمروا في تطبيق نفس المعايير والممارسات الحالية.'
+        })
+    
+    # PDX Documentation Analysis
+    pdx_rate = pdx_metrics.get('change_rate', 0)
+    if pdx_rate > 30:
+        recommendations.append({
+            'category': '📋 تحسين التوثيق الرئيسي مطلوب',
+            'recommendation': f'نسبة {pdx_rate}% من التشخيصات الرئيسية تم تعديلها. يجب تدريب الأطباء على توثيق التشخيص الرئيسي بدقة منذ البداية.'
+        })
+    
+    # Hospital-Specific Recommendations
+    if hospitals:
+        # Find hospitals with low performance
+        low_performers = [h for h in hospitals if h.get('drg_impact_rate', 0) < 20]
+        if low_performers:
+            hospital_names = ', '.join([h['hospital_name'] for h in low_performers[:3]])
+            recommendations.append({
+                'category': '🏥 مستشفيات تحتاج تحسين',
+                'recommendation': f'المستشفيات التالية تحتاج إلى تحسين في التوثيق: {hospital_names}. يُنصح بعقد ورش عمل تدريبية وزيادة التواصل مع فريق التوثيق.'
+            })
+        
+        # Find hospitals with high undocumented cases
+        high_undoc = sorted(hospitals, key=lambda x: x.get('pdx_added', 0) + x.get('adx_added', 0), reverse=True)[:3]
+        if high_undoc and (high_undoc[0].get('pdx_added', 0) + high_undoc[0].get('adx_added', 0)) > 50:
+            recommendations.append({
+                'category': '📝 نقص في التوثيق',
+                'recommendation': f'المستشفى {high_undoc[0]["hospital_name"]} يحتاج إلى تحسين كبير في توثيق التشخيصات. تم إضافة {high_undoc[0].get("pdx_added", 0)} تشخيص رئيسي و {high_undoc[0].get("adx_added", 0)} تشخيص إضافي بعد مراجعة CDI.'
+            })
+    
+    # Top Diagnoses Recommendations
+    top_pdx = analysis_data.get('top_diagnoses', {}).get('pdx_after_cdi', [])
+    if top_pdx:
+        top_3 = ', '.join([d['diagnosis'] for d in top_pdx[:3]])
+        recommendations.append({
+            'category': '🎯 التشخيصات الأكثر شيوعاً',
+            'recommendation': f'التشخيصات الأكثر شيوعاً بعد CDI: {top_3}. يُنصح بإنشاء بروتوكولات توثيق محددة لهذه الحالات لتقليل الحاجة للتعديل مستقبلاً.'
+        })
+    
+    # Specialty Recommendations
+    specialties = analysis_data.get('specialty_analysis', [])
+    if specialties:
+        low_spec = [s for s in specialties if s.get('impact_rate', 0) < 15]
+        if low_spec:
+            spec_names = ', '.join([s['specialty'] for s in low_spec[:2]])
+            recommendations.append({
+                'category': '🔬 تخصصات تحتاج دعم',
+                'recommendation': f'التخصصات التالية تحتاج إلى دعم إضافي في التوثيق: {spec_names}. يُفضل تعيين CDS متخصص لهذه الأقسام.'
+            })
+    
+    # General Best Practices
+    recommendations.append({
+        'category': '💡 أفضل الممارسات',
+        'recommendation': 'استمروا في المراجعة الدورية للملفات، وتحديث البروتوكولات بناءً على أحدث إرشادات ICD-10، وعقد اجتماعات دورية بين فريق CDI والأطباء.'
+    })
+    
+    return recommendations
+
 
 # ========== Include Router ==========
 app.include_router(api_router)
