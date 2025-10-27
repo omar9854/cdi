@@ -1587,43 +1587,92 @@ async def upload_cdi_data(
         total_adx = int(df[adx_col].notna().sum()) if adx_col else 0
         
         # Hospital-Level Comprehensive Analysis
+        # Hospital-Level PRECISE Analysis
         hospitals_data = []
         for hospital in hospitals:
             if pd.notna(hospital) and str(hospital).strip():
-                hospital_df = df[df[hospital_col] == hospital]
+                # Get exact match for this hospital
+                hospital_df = df[df[hospital_col] == hospital].copy()
+                total_cases_hospital = len(hospital_df)
                 
-                # PDX/After CDI Analysis for this hospital
+                # PDX/After CDI Analysis - PRECISE counting
                 pdx_diagnoses = []
-                if pdx_after_col:
+                pdx_diagnoses_full = []
+                if pdx_after_col and pdx_after_col in hospital_df.columns:
+                    # Only count non-null, non-empty values
                     pdx_list = hospital_df[pdx_after_col].dropna()
+                    pdx_list = pdx_list[pdx_list.astype(str).str.strip() != '']
+                    
                     if len(pdx_list) > 0:
                         pdx_counter = Counter(pdx_list)
+                        # Top 10 for display
                         pdx_diagnoses = [
-                            {"diagnosis": str(diag), "count": count} 
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
                             for diag, count in pdx_counter.most_common(10)
                         ]
-                
-                # ADX Analysis for this hospital
-                adx_diagnoses = []
-                if adx_col:
-                    adx_list = hospital_df[adx_col].dropna()
-                    if len(adx_list) > 0:
-                        adx_counter = Counter(adx_list)
-                        adx_diagnoses = [
-                            {"diagnosis": str(diag), "count": count} 
-                            for diag, count in adx_counter.most_common(10)
+                        # All diagnoses for comprehensive report
+                        pdx_diagnoses_full = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in pdx_counter.most_common()
                         ]
                 
+                # ADX due to CDI Analysis - PRECISE counting
+                adx_diagnoses = []
+                adx_diagnoses_full = []
+                if adx_col and adx_col in hospital_df.columns:
+                    # Only count non-null, non-empty values
+                    adx_list = hospital_df[adx_col].dropna()
+                    adx_list = adx_list[adx_list.astype(str).str.strip() != '']
+                    
+                    if len(adx_list) > 0:
+                        adx_counter = Counter(adx_list)
+                        # Top 10 for display
+                        adx_diagnoses = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in adx_counter.most_common(10)
+                        ]
+                        # All diagnoses for comprehensive report
+                        adx_diagnoses_full = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in adx_counter.most_common()
+                        ]
+                
+                # Calculate metrics with validation
+                drg_changes_hospital = 0
+                if 'has_drg_change' in hospital_df.columns:
+                    drg_changes_hospital = int(hospital_df['has_drg_change'].sum())
+                
+                pdx_changes_hospital = 0
+                if 'pdx_changed' in hospital_df.columns:
+                    pdx_changes_hospital = int(hospital_df['pdx_changed'].sum())
+                
+                pdx_added_hospital = 0
+                if 'pdx_added' in hospital_df.columns:
+                    pdx_added_hospital = int(hospital_df['pdx_added'].sum())
+                
+                adx_added_hospital = 0
+                if 'has_adx' in hospital_df.columns:
+                    adx_added_hospital = int(hospital_df['has_adx'].sum())
+                
+                # Calculate impact rate
+                drg_impact_rate_hospital = 0.0
+                if total_cases_hospital > 0 and 'has_drg_change' in hospital_df.columns:
+                    drg_impact_rate_hospital = round((drg_changes_hospital / total_cases_hospital * 100), 2)
+                
                 hospital_data = {
-                    'hospital_name': str(hospital),
-                    'total_cases': len(hospital_df),
-                    'drg_changes': int(hospital_df['has_drg_change'].sum()) if 'has_drg_change' in hospital_df.columns else 0,
-                    'pdx_changes': int(hospital_df['pdx_changed'].sum()) if 'pdx_changed' in hospital_df.columns else 0,
-                    'pdx_added': int(hospital_df['pdx_added'].sum()) if 'pdx_added' in hospital_df.columns else 0,
-                    'adx_added': int(hospital_df['has_adx'].sum()) if 'has_adx' in hospital_df.columns else 0,
+                    'hospital_name': str(hospital).strip(),
+                    'total_cases': total_cases_hospital,
+                    'drg_changes': drg_changes_hospital,
+                    'pdx_changes': pdx_changes_hospital,
+                    'pdx_added': pdx_added_hospital,
+                    'adx_added': adx_added_hospital,
                     'top_pdx_diagnoses': pdx_diagnoses,
                     'top_adx_diagnoses': adx_diagnoses,
-                    'drg_impact_rate': round((hospital_df['has_drg_change'].sum() / len(hospital_df) * 100), 2) if len(hospital_df) > 0 and 'has_drg_change' in hospital_df.columns else 0
+                    'all_pdx_diagnoses': pdx_diagnoses_full,
+                    'all_adx_diagnoses': adx_diagnoses_full,
+                    'drg_impact_rate': drg_impact_rate_hospital,
+                    'pdx_diagnoses_count': len(pdx_diagnoses_full),
+                    'adx_diagnoses_count': len(adx_diagnoses_full)
                 }
                 hospitals_data.append(hospital_data)
         
