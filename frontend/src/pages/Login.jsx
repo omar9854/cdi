@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Lock, Mail } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Footer from '@/components/Footer';
+import Footer from '@/components/Footer';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
