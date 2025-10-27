@@ -1671,7 +1671,7 @@ async def upload_cdi_data(
             
             specialty_data.sort(key=lambda x: x['drg_changes'], reverse=True)
         
-        # CDS Performance with Status Analysis
+        # CDS Performance with Status Analysis - PRECISE CALCULATION
         cds_performance = []
         status_col = find_column(['status', 'حالة', 'state', 'condition'])
         
@@ -1679,42 +1679,85 @@ async def upload_cdi_data(
             cds_specialists = df[cds_col].dropna().unique()
             for cds in cds_specialists:
                 if str(cds).strip():
-                    cds_df = df[df[cds_col] == cds]
+                    # Get all rows for this CDS specialist (exact match)
+                    cds_df = df[df[cds_col] == cds].copy()
+                    total_cases_cds = len(cds_df)
                     
-                    # Status Analysis
+                    # PRECISE Status Analysis with validation
                     status_done = 0
                     status_to_start = 0
                     status_working = 0
                     status_empty = 0
                     
-                    if status_col:
-                        for status_val in cds_df[status_col]:
-                            if pd.notna(status_val) and str(status_val).strip():
-                                status_lower = str(status_val).lower().strip()
-                                if 'done' in status_lower or 'تم' in status_lower or 'منتهي' in status_lower:
+                    if status_col and status_col in cds_df.columns:
+                        for idx, status_val in cds_df[status_col].items():
+                            # Check if value exists and is not null/empty
+                            if pd.notna(status_val):
+                                status_str = str(status_val).strip().lower()
+                                
+                                # Empty string check
+                                if not status_str or status_str == '' or status_str == 'nan':
+                                    status_empty += 1
+                                # Done status (exact matching)
+                                elif status_str in ['done', 'تم', 'منتهي', 'complete', 'completed', 'finished']:
                                     status_done += 1
-                                elif 'to start' in status_lower or 'للبدء' in status_lower or 'لم يبدأ' in status_lower:
+                                # To Start status
+                                elif status_str in ['to start', 'للبدء', 'لم يبدأ', 'not started', 'pending']:
                                     status_to_start += 1
-                                elif 'working' in status_lower or 'جاري' in status_lower or 'قيد العمل' in status_lower:
+                                # Working status
+                                elif status_str in ['working', 'working on it', 'جاري', 'قيد العمل', 'in progress', 'ongoing']:
                                     status_working += 1
+                                # Any other text is considered as not categorized (empty)
                                 else:
                                     status_empty += 1
                             else:
+                                # Null/NaN values
                                 status_empty += 1
                     else:
-                        status_empty = len(cds_df)
+                        # No status column means all are empty
+                        status_empty = total_cases_cds
+                    
+                    # VALIDATION: Total should match
+                    status_total = status_done + status_to_start + status_working + status_empty
+                    if status_total != total_cases_cds:
+                        logger.warning(f"CDS {cds}: Status count mismatch. Total cases: {total_cases_cds}, Status sum: {status_total}")
+                    
+                    # Calculate DRG impact with validation
+                    drg_impact_cds = 0
+                    if 'has_drg_change' in cds_df.columns:
+                        drg_impact_cds = int(cds_df['has_drg_change'].sum())
+                    
+                    # Calculate PDX queries with validation
+                    pdx_queries_cds = 0
+                    if 'pdx_changed' in cds_df.columns and 'pdx_added' in cds_df.columns:
+                        pdx_changed_count = int(cds_df['pdx_changed'].sum())
+                        pdx_added_count = int(cds_df['pdx_added'].sum())
+                        pdx_queries_cds = pdx_changed_count + pdx_added_count
+                    
+                    # Calculate ADX queries with validation
+                    adx_queries_cds = 0
+                    if 'has_adx' in cds_df.columns:
+                        adx_queries_cds = int(cds_df['has_adx'].sum())
+                    
+                    # Calculate success rate with validation
+                    success_rate_cds = 0.0
+                    if total_cases_cds > 0 and 'has_drg_change' in cds_df.columns:
+                        success_rate_cds = round((drg_impact_cds / total_cases_cds * 100), 2)
                     
                     cds_performance.append({
                         'cds_name': str(cds),
-                        'total_cases': len(cds_df),
-                        'drg_impact': int(cds_df['has_drg_change'].sum()) if 'has_drg_change' in cds_df.columns else 0,
-                        'pdx_queries': int(cds_df['pdx_changed'].sum() + cds_df['pdx_added'].sum()) if 'pdx_changed' in cds_df.columns else 0,
-                        'adx_queries': int(cds_df['has_adx'].sum()) if 'has_adx' in cds_df.columns else 0,
-                        'success_rate': round((cds_df['has_drg_change'].sum() / len(cds_df) * 100), 2) if len(cds_df) > 0 and 'has_drg_change' in cds_df.columns else 0,
+                        'total_cases': total_cases_cds,
+                        'drg_impact': drg_impact_cds,
+                        'pdx_queries': pdx_queries_cds,
+                        'adx_queries': adx_queries_cds,
+                        'success_rate': success_rate_cds,
                         'status_done': status_done,
                         'status_to_start': status_to_start,
                         'status_working': status_working,
-                        'status_empty': status_empty
+                        'status_empty': status_empty,
+                        # Add validation field
+                        'status_total': status_total,
+                        'validation_passed': (status_total == total_cases_cds)
                     })
             
             cds_performance.sort(key=lambda x: x['drg_impact'], reverse=True)
