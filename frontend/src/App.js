@@ -12,6 +12,7 @@ import Analysis from '@/pages/Analysis';
 import History from '@/pages/History';
 import Chat from '@/pages/Chat';
 import AdminDashboard from '@/pages/AdminDashboard';
+import SupervisorDashboard from '@/pages/SupervisorDashboard';
 import WhatsAppSupport from '@/components/WhatsAppSupport';
 
 function AppContent() {
