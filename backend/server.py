@@ -1910,6 +1910,7 @@ async def upload_cdi_data(
             # Top Diagnoses Overall
             'top_diagnoses': {
                 'pdx_after_cdi': top_pdx_overall,
+                'pdx_due_to_cdi': top_pdx_due_to_cdi_overall,
                 'adx_due_to_cdi': top_adx_overall
             },
             
