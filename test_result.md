@@ -101,3 +101,153 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  المستخدم يطلب تطوير نظام كامل للمشرفين والأدمن في تطبيق CDI الطبي:
+  
+  1. **صفحة الأدمن**:
+     - عرض جميع العاملين مع بياناتهم
+     - تعديل بيانات العاملين
+     - تعليق وإلغاء تعليق الحسابات
+     - حذف الحسابات
+     - تعيين وإلغاء تعيين المشرفين
+  
+  2. **واجهة المشرف - أداة تحليل CDI**:
+     - رفع ملف Excel شهري
+     - تحليل البيانات لعرض:
+       * التشخيصات غير الموثقة لكل مستشفى
+       * تقسيم (تشخيصات رئيسية / ثانوية)
+       * تأثير على DRG
+       * إحصائيات دقيقة من الملف المرفوع
+
+backend:
+  - task: "Admin endpoints - User management"
+    implemented: true
+    working: "NA"
+    files: 
+      - "/app/backend/server.py"
+    endpoints:
+      - "/api/admin/assign-supervisor/{user_id}"
+      - "/api/admin/remove-supervisor/{user_id}"
+      - "/api/admin/suspend-user/{user_id}"
+      - "/api/admin/activate-user/{user_id}"
+      - "/api/admin/users/{user_id}" (PUT & DELETE)
+      - "/api/admin/users-statistics" (updated with role field)
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added all admin management endpoints - assign/remove supervisor, suspend/activate users, delete/edit users. Updated statistics endpoint to include role and is_active fields."
+
+  - task: "Supervisor endpoints - Employee management"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/backend/server.py"
+    endpoints:
+      - "/api/supervisor/employees" (updated with counts)
+      - "/api/supervisor/employee-notes/{employee_id}"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated supervisor/employees endpoint to include notes_count and analyses_count for each employee."
+
+  - task: "Excel upload and CDI analysis endpoint"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/backend/server.py"
+    endpoints:
+      - "/api/supervisor/upload-cdi-data" (POST with file upload)
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created new endpoint to upload Excel file and analyze CDI data. Returns statistics including: total_records, total_hospitals, drg_changes, undocumented diagnoses (primary/secondary) per hospital. Uses pandas for Excel processing."
+
+frontend:
+  - task: "Admin Dashboard - User management UI"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/frontend/src/pages/AdminDashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Replaced AdminDashboard.jsx with AdminDashboard_v2.jsx content. Now includes: view all users, edit user data (modal dialog), assign/remove supervisor role, suspend/activate accounts (not yet implemented on backend), delete accounts. Shows role badges (supervisor/user)."
+
+  - task: "Supervisor Dashboard - CDI Analysis Tool"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/frontend/src/pages/SupervisorDashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created SupervisorDashboard component with: Excel file upload, analysis display (summary cards showing total records, hospitals, DRG changes, undocumented diagnoses), hospital-level breakdown table (records, primary/secondary undocumented, DRG changes), employee list with notes and analyses counts."
+
+  - task: "Routing and Navigation for Supervisor"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/frontend/src/App.js"
+      - "/app/frontend/src/components/Navbar.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added /supervisor route in App.js accessible to both supervisors and admins. Added Supervisor navigation link in Navbar for users with supervisor or admin role."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Admin Dashboard - User management UI"
+    - "Supervisor Dashboard - CDI Analysis Tool"
+    - "Excel upload and CDI analysis endpoint"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Implementation complete for Admin and Supervisor system:
+      
+      **Backend Changes:**
+      1. Updated /api/admin/users-statistics to include 'role' and 'is_active' fields
+      2. Updated /api/supervisor/employees to include notes_count and analyses_count
+      3. Created /api/supervisor/upload-cdi-data endpoint for Excel analysis
+      4. Added File, UploadFile imports from FastAPI
+      
+      **Frontend Changes:**
+      1. Replaced AdminDashboard.jsx with full user management features
+      2. Created SupervisorDashboard.jsx with Excel upload and analysis display
+      3. Updated App.js with /supervisor route
+      4. Updated Navbar.jsx with Supervisor link for appropriate roles
+      
+      **Testing Needed:**
+      - Backend testing: Test all admin endpoints (assign supervisor, suspend, delete, edit)
+      - Backend testing: Test Excel upload with sample CDI data file
+      - Frontend testing: Test admin dashboard user management features
+      - Frontend testing: Test supervisor dashboard Excel upload and analysis display
+      - E2E testing: Create supervisor user, upload Excel, verify analysis results
