@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Backend API Testing for Arabic Medical Coding Application
-Tests all endpoints including auth, notes, analysis, and export functionality
+Tests all endpoints including auth, notes, analysis, admin, supervisor, and CDI Excel upload functionality
 """
 
 import requests
@@ -9,21 +9,34 @@ import sys
 import json
 from datetime import datetime
 import time
+import io
+import pandas as pd
+from openpyxl import Workbook
 
 class MedicalCodingAPITester:
     def __init__(self, base_url="https://docimprove.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.token = None
+        self.admin_token = None
         self.user_data = None
+        self.admin_data = None
+        self.test_user_id = None
         self.tests_run = 0
         self.tests_passed = 0
         self.test_results = []
         
-        # Arabic test data
+        # Admin credentials from ADMIN_CREDENTIALS.txt
+        self.admin_credentials = {
+            "email": "admin@cdi-center.sa",
+            "password": "CDI@2024#Admin"
+        }
+        
+        # Test user data
         self.test_user = {
-            "email": f"test_doctor_{datetime.now().strftime('%H%M%S')}@hospital.com",
-            "full_name": "د. أحمد محمد الطبيب",
+            "email": f"test_employee_{datetime.now().strftime('%H%M%S')}@hospital.com",
+            "full_name": "د. سارة أحمد المختصة",
+            "phone_number": "966501234567",
             "password": "TestPassword123!"
         }
         
