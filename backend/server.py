@@ -1139,6 +1139,28 @@ async def get_supervisor_employees(supervisor: dict = Depends(require_supervisor
     
     return employees
 
+@api_router.post("/admin/change-user-password/{user_id}")
+async def admin_change_user_password(
+    user_id: str,
+    new_password: str,
+    admin: dict = Depends(require_admin)
+):
+    """Admin can change any user's password"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Hash new password
+    hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+    
+    # Update password
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"password_hash": hashed_password.decode('utf-8')}}
+    )
+    
+    return {"message": "Password changed successfully"}
+
 @api_router.get("/supervisor/employee-notes/{employee_id}")
 async def get_employee_notes(employee_id: str, supervisor: dict = Depends(require_supervisor)):
     """Get all notes for a specific employee"""
