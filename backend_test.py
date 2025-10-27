@@ -144,6 +144,8 @@ class MedicalCodingAPITester:
             if success:
                 data = response.json()
                 self.token = data.get('access_token')
+                self.user_data = data.get('user')
+                self.test_user_id = self.user_data.get('id')
                 details = f"Login successful for: {data.get('user', {}).get('email')}"
             else:
                 details = f"Status: {response.status_code}, Error: {response.text}"
@@ -152,6 +154,29 @@ class MedicalCodingAPITester:
             return success
         except Exception as e:
             self.log_test("User Login", False, str(e))
+            return False
+
+    def test_admin_login(self):
+        """Test admin login"""
+        try:
+            response = requests.post(
+                f"{self.api_url}/auth/login",
+                json=self.admin_credentials,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                self.admin_token = data.get('access_token')
+                self.admin_data = data.get('user')
+                details = f"Admin login successful for: {data.get('user', {}).get('email')}, Role: {data.get('user', {}).get('role')}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Admin Login", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Admin Login", False, str(e))
             return False
 
     def test_create_clinical_note(self):
