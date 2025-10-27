@@ -1772,7 +1772,8 @@ async def upload_cdi_data(
                 'has_adx_data': bool(adx_col),
                 'has_specialty_data': bool(specialty_col),
                 'has_cds_data': bool(cds_col),
-                'has_drg_data': bool(drg_change_col or (drg_before_col and drg_after_col))
+                'has_drg_data': bool(drg_change_col or (drg_before_col and drg_after_col)),
+                'has_status_data': bool(status_col)
             }
         }
         
