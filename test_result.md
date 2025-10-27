@@ -232,7 +232,6 @@ test_plan:
   current_focus:
     - "Admin Dashboard - User management UI"
     - "Supervisor Dashboard - CDI Analysis Tool"
-    - "Excel upload and CDI analysis endpoint"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
