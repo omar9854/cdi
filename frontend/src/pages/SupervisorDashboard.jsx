@@ -8,13 +8,22 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Upload, FileSpreadsheet, TrendingUp, AlertTriangle, Activity, Hospital, Users, Award, BarChart3, Stethoscope } from 'lucide-react';
+import { 
+  Upload, FileSpreadsheet, TrendingUp, AlertTriangle, Activity, Hospital, 
+  Users, Award, BarChart3, Stethoscope, Download, PieChart 
+} from 'lucide-react';
+import {
+  BarChart, Bar, PieChart as RePieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
 import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Footer from '@/components/Footer';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d'];
 
 const SupervisorDashboard = ({ user, onLogout }) => {
   const navigate = useNavigate();
