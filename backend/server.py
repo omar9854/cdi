@@ -809,6 +809,8 @@ async def get_users_statistics(admin: dict = Depends(require_admin)):
             "full_name": user['full_name'],
             "email": user['email'],
             "phone_number": user.get('phone_number', ''),
+            "role": user.get('role', 'user'),
+            "is_active": user.get('is_active', True),
             "registration_date": user.get('created_at'),
             "last_activity": last_activity,
             "total_notes": total_notes,
