@@ -768,17 +768,24 @@ class MedicalCodingAPITester:
             return False
 
     def run_all_tests(self):
-        """Run all API tests"""
-        print("🚀 Starting Arabic Medical Coding API Tests")
+        """Run all API tests including Admin and Supervisor functionality"""
+        print("🚀 Starting CDI Medical Application API Tests")
         print(f"🔗 Testing API: {self.api_url}")
-        print("=" * 60)
+        print("=" * 80)
         
         # Basic connectivity
         if not self.test_health_check():
             print("❌ Health check failed - stopping tests")
             return self.generate_report()
         
-        # Authentication tests
+        # Admin Authentication
+        print("\n👑 Testing Admin Authentication...")
+        if not self.test_admin_login():
+            print("❌ Admin login failed - stopping admin tests")
+            return self.generate_report()
+        
+        # Test user registration and login for admin management tests
+        print("\n👤 Testing User Registration & Login...")
         if not self.test_user_registration():
             print("❌ User registration failed - stopping tests")
             return self.generate_report()
@@ -787,29 +794,64 @@ class MedicalCodingAPITester:
             print("❌ User login failed - stopping tests")
             return self.generate_report()
         
-        # Notes tests
-        success, note_id = self.test_create_clinical_note()
-        if not success:
-            print("❌ Note creation failed - stopping tests")
-            return self.generate_report()
+        # Admin User Management Tests
+        print("\n🔧 Testing Admin User Management Endpoints...")
         
-        self.test_get_notes()
-        self.test_get_single_note(note_id)
+        # Test initial users statistics
+        self.test_admin_users_statistics()
         
-        # AI Analysis tests (most critical)
-        print("\n🤖 Testing AI Analysis (Gemini 2.5-pro)...")
-        analysis_success, analysis_id = self.test_analyze_note(note_id)
-        
-        if analysis_success and analysis_id:
-            self.test_get_analyses(note_id)
-            self.test_get_history()
+        # Test assign supervisor
+        if self.test_user_id:
+            self.test_assign_supervisor(self.test_user_id)
             
-            # Export tests
-            print("\n📄 Testing Export Functions...")
-            self.test_export_pdf(analysis_id)
-            self.test_export_excel(analysis_id)
-        else:
-            print("⚠️ AI Analysis failed - skipping export tests")
+            # Test users statistics again to verify role change
+            print("🔄 Verifying role change in statistics...")
+            self.test_admin_users_statistics()
+            
+            # Test remove supervisor
+            self.test_remove_supervisor(self.test_user_id)
+            
+            # Test edit user data
+            self.test_edit_user(self.test_user_id)
+            
+            # Test suspend user
+            self.test_suspend_user(self.test_user_id)
+            
+            # Test activate user
+            self.test_activate_user(self.test_user_id)
+        
+        # Supervisor Employees Test
+        print("\n👥 Testing Supervisor Endpoints...")
+        self.test_supervisor_employees()
+        
+        # CDI Excel Upload Test
+        print("\n📊 Testing CDI Excel Upload & Analysis...")
+        self.test_upload_cdi_data()
+        
+        # Basic Notes and Analysis Tests (if time permits)
+        print("\n📝 Testing Basic Notes & Analysis...")
+        success, note_id = self.test_create_clinical_note()
+        if success:
+            self.test_get_notes()
+            self.test_get_single_note(note_id)
+            
+            # AI Analysis tests (optional for this focused test)
+            print("\n🤖 Testing AI Analysis (Optional)...")
+            analysis_success, analysis_id = self.test_analyze_note(note_id)
+            
+            if analysis_success and analysis_id:
+                self.test_get_analyses(note_id)
+                self.test_get_history()
+                
+                # Export tests
+                print("\n📄 Testing Export Functions...")
+                self.test_export_pdf(analysis_id)
+                self.test_export_excel(analysis_id)
+        
+        # Clean up - delete test user (optional, at the end)
+        if self.test_user_id:
+            print("\n🗑️ Cleaning up test data...")
+            self.test_delete_user(self.test_user_id)
         
         return self.generate_report()
 
