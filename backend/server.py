@@ -1712,11 +1712,14 @@ async def upload_cdi_data(
                     'pdx_added': pdx_added_hospital,
                     'adx_added': adx_added_hospital,
                     'top_pdx_diagnoses': pdx_diagnoses,
+                    'top_pdx_due_to_cdi_diagnoses': pdx_due_to_cdi_diagnoses,
                     'top_adx_diagnoses': adx_diagnoses,
                     'all_pdx_diagnoses': pdx_diagnoses_full,
+                    'all_pdx_due_to_cdi_diagnoses': pdx_due_to_cdi_diagnoses_full,
                     'all_adx_diagnoses': adx_diagnoses_full,
                     'drg_impact_rate': drg_impact_rate_hospital,
                     'pdx_diagnoses_count': len(pdx_diagnoses_full),
+                    'pdx_due_to_cdi_count': len(pdx_due_to_cdi_diagnoses_full),
                     'adx_diagnoses_count': len(adx_diagnoses_full)
                 }
                 hospitals_data.append(hospital_data)
