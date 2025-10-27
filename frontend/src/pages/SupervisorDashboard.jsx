@@ -412,9 +412,17 @@ const SupervisorDashboard = ({ user, onLogout }) => {
               <TableBody>
                 {analysis.cds_performance.map((cds, index) => (
                   <TableRow key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
-                    <TableCell className="text-center font-medium">{cds.cds_name}</TableCell>
+                    <TableCell className="text-center font-medium">
+                      {cds.cds_name}
+                      {cds.validation_passed === false && (
+                        <span className="ml-2 text-xs text-red-600" title="تحذير: عدم تطابق في العد">⚠️</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-center">
                       <span className="font-bold text-gray-800">{cds.total_cases}</span>
+                      {hasStatusData && cds.status_total && (
+                        <div className="text-xs text-gray-500">({cds.status_total})</div>
+                      )}
                     </TableCell>
                     <TableCell className="text-center">
                       <span className="font-bold text-purple-600">{cds.drg_impact}</span>
