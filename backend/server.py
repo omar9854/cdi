@@ -1671,13 +1671,38 @@ async def upload_cdi_data(
             
             specialty_data.sort(key=lambda x: x['drg_changes'], reverse=True)
         
-        # CDS Performance
+        # CDS Performance with Status Analysis
         cds_performance = []
+        status_col = find_column(['status', 'حالة', 'state', 'condition'])
+        
         if cds_col:
             cds_specialists = df[cds_col].dropna().unique()
             for cds in cds_specialists:
                 if str(cds).strip():
                     cds_df = df[df[cds_col] == cds]
+                    
+                    # Status Analysis
+                    status_done = 0
+                    status_to_start = 0
+                    status_working = 0
+                    status_empty = 0
+                    
+                    if status_col:
+                        for status_val in cds_df[status_col]:
+                            if pd.notna(status_val) and str(status_val).strip():
+                                status_lower = str(status_val).lower().strip()
+                                if 'done' in status_lower or 'تم' in status_lower or 'منتهي' in status_lower:
+                                    status_done += 1
+                                elif 'to start' in status_lower or 'للبدء' in status_lower or 'لم يبدأ' in status_lower:
+                                    status_to_start += 1
+                                elif 'working' in status_lower or 'جاري' in status_lower or 'قيد العمل' in status_lower:
+                                    status_working += 1
+                                else:
+                                    status_empty += 1
+                            else:
+                                status_empty += 1
+                    else:
+                        status_empty = len(cds_df)
                     
                     cds_performance.append({
                         'cds_name': str(cds),
@@ -1685,7 +1710,11 @@ async def upload_cdi_data(
                         'drg_impact': int(cds_df['has_drg_change'].sum()) if 'has_drg_change' in cds_df.columns else 0,
                         'pdx_queries': int(cds_df['pdx_changed'].sum() + cds_df['pdx_added'].sum()) if 'pdx_changed' in cds_df.columns else 0,
                         'adx_queries': int(cds_df['has_adx'].sum()) if 'has_adx' in cds_df.columns else 0,
-                        'success_rate': round((cds_df['has_drg_change'].sum() / len(cds_df) * 100), 2) if len(cds_df) > 0 and 'has_drg_change' in cds_df.columns else 0
+                        'success_rate': round((cds_df['has_drg_change'].sum() / len(cds_df) * 100), 2) if len(cds_df) > 0 and 'has_drg_change' in cds_df.columns else 0,
+                        'status_done': status_done,
+                        'status_to_start': status_to_start,
+                        'status_working': status_working,
+                        'status_empty': status_empty
                     })
             
             cds_performance.sort(key=lambda x: x['drg_impact'], reverse=True)
