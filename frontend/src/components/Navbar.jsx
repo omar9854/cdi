@@ -47,6 +47,17 @@ const Navbar = ({ user, onLogout }) => {
                   {language === 'ar' ? 'الأدمن' : 'Admin'}
                 </Button>
               )}
+              {(user.role === 'supervisor' || user.role === 'admin') && (
+                <Button
+                  variant={isActive('/supervisor') ? 'secondary' : 'ghost'}
+                  onClick={() => navigate('/supervisor')}
+                  className={isActive('/supervisor') ? '' : 'text-white hover:bg-white/10'}
+                  data-testid="nav-supervisor"
+                >
+                  {language === 'ar' ? <FileText className="ml-2 w-4 h-4" /> : <FileText className="mr-2 w-4 h-4" />}
+                  {language === 'ar' ? 'المشرف' : 'Supervisor'}
+                </Button>
+              )}
               <Button
                 variant={isActive('/history') ? 'secondary' : 'ghost'}
                 onClick={() => navigate('/history')}
