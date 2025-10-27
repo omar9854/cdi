@@ -32,6 +32,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
   const [uploading, setUploading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [employees, setEmployees] = useState([]);
+  const [selectedHospital, setSelectedHospital] = useState(null);
 
   useEffect(() => {
     if (user.role !== 'supervisor' && user.role !== 'admin') {
