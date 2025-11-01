@@ -61,17 +61,17 @@ const Login = ({ setUser }) => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex healthcare-bg digital-health-pattern">
       {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-white">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-white/90 backdrop-blur-sm">
         <div className="w-full max-w-md space-y-8 animate-fade-in">
           {/* Logo and Title */}
           <div className="text-center space-y-4">
-            <div className="mx-auto w-24 h-24 flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+            <div className="mx-auto w-24 h-24 flex items-center justify-center bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-300 digital-pulse">
               <img src="/logo.jpeg" alt="Logo" className="w-20 h-20 object-contain rounded-xl" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold gradient-text-health mb-2">
                 {language === 'ar' ? 'مرحباً بك' : 'Welcome Back'}
               </h1>
               <p className="text-gray-600 text-lg">
@@ -79,11 +79,14 @@ const Login = ({ setUser }) => {
                   ? 'مركز الترميز الطبي وتحسين التوثيق السريري' 
                   : 'Medical Coding & CDI Center'}
               </p>
+              <p className="text-sm text-green-600 mt-2 font-semibold">
+                {language === 'ar' ? 'رؤية 2030 - التحول الرقمي الصحي' : 'Vision 2030 - Digital Health Transformation'}
+              </p>
             </div>
           </div>
 
           {/* Login Form */}
-          <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-gray-50">
+          <Card className="border-0 shadow-2xl vision-card">
             <CardHeader className="space-y-1 pb-6">
               <CardTitle className="text-2xl font-bold text-center text-gray-800">
                 {language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
