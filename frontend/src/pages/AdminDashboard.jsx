@@ -389,6 +389,16 @@ const AdminDashboard = ({ user, onLogout }) => {
                             <Lock className="h-4 w-4" />
                           </Button>
                           
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-green-600"
+                            onClick={() => handleImpersonateUser(userStat.user_id, userStat.full_name)}
+                            title={language === 'ar' ? 'الدخول للحساب' : 'Impersonate User'}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          
                           {userStat.role !== 'supervisor' ? (
                             <Button
                               size="sm"
