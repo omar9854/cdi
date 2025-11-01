@@ -183,16 +183,16 @@ const SupervisorDashboard = ({ user, onLogout }) => {
           </CardContent>
         </Card>
 
-        <Card className="medical-card bg-gradient-to-br from-green-50 to-green-100">
+        <Card className="medical-card bg-gradient-to-br from-blue-50 to-indigo-100">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               {language === 'ar' ? 'PDX/After CDI' : 'PDX/After CDI'}
             </CardTitle>
-            <Stethoscope className="h-5 w-5 text-green-600" />
+            <Stethoscope className="h-5 w-5 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-700">{analysis.pdx_metrics.total_after_cdi}</div>
-            <p className="text-xs text-green-600 mt-1">
+            <div className="text-3xl font-bold text-blue-600">{analysis.pdx_metrics.total_after_cdi}</div>
+            <p className="text-xs text-blue-600 mt-1">
               {analysis.pdx_metrics.changes} {language === 'ar' ? 'تغييرات' : 'changes'} | {analysis.pdx_metrics.newly_added} {language === 'ar' ? 'جديد' : 'new'}
             </p>
           </CardContent>
