@@ -230,6 +230,41 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "Replaced AdminDashboard.jsx with AdminDashboard_v2.jsx content. Now includes: view all users, edit user data (modal dialog), assign/remove supervisor role, suspend/activate accounts (not yet implemented on backend), delete accounts. Shows role badges (supervisor/user)."
+      - working: "NA"
+        agent: "main"
+        comment: "Added Impersonate User button with Eye icon. When clicked, admin can log in as any user to view their account. Stores original admin token and sets impersonated user token. Redirects to dashboard after impersonation."
+
+  - task: "Messages UI - Internal messaging system"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/frontend/src/pages/Messages.jsx"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created Messages.jsx component with Inbox, Sent, and Drafts tabs. Includes compose dialog with recipient selection."
+      - working: false
+        agent: "user"
+        comment: "User reported Select.Item error due to empty string value in recipient dropdown. Also reported that messages can only be sent to 'all', not specific users."
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed user selection: now fetches from response.data.statistics array and filters out users with empty user_id. Added 'ALL' option and individual user selection with names and emails displayed."
+
+  - task: "Navbar - Exit Impersonation feature"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/frontend/src/components/Navbar.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added 'Exit Impersonation' button that appears in Navbar when admin is impersonating a user. Restores original admin token and redirects to admin dashboard."
 
   - task: "Supervisor Dashboard - CDI Analysis Tool"
     implemented: true
