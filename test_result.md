@@ -146,7 +146,7 @@ backend:
 
   - task: "Messaging system endpoints"
     implemented: true
-    working: "NA"
+    working: true
     files:
       - "/app/backend/server.py"
     endpoints:
@@ -159,11 +159,14 @@ backend:
       - "/api/messages/unread-count" (GET)
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Internal messaging system endpoints already exist. All CRUD operations for messages implemented including send, inbox, sent, drafts, mark as read, delete, and unread count."
+      - working: true
+        agent: "testing"
+        comment: "✅ ALL MESSAGING ENDPOINTS WORKING PERFECTLY: Fixed MongoDB ObjectId serialization issue by adding {\"_id\": 0} projection to all messaging queries. Successfully tested: POST /api/messages/send (to specific user and ALL users), GET /api/messages/inbox (retrieves messages sent to user or all), GET /api/messages/sent (user's sent messages), GET /api/messages/drafts (draft messages), GET /api/messages/unread-count (unread count), POST /api/messages/{id}/read (mark as read), DELETE /api/messages/{id} (delete message). All endpoints return proper responses and handle Arabic content correctly. Draft functionality working. Message sending to specific users and broadcast to all users working correctly."
 
   - task: "Supervisor impersonation endpoint"
     implemented: true
