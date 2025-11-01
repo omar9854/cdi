@@ -2273,7 +2273,7 @@ async def get_sent_messages(current_user: dict = Depends(get_current_user)):
     messages = await db.messages.find({
         "from_user_id": current_user['id'],
         "is_draft": False
-    }).sort("created_at", -1).to_list(1000)
+    }, {"_id": 0}).sort("created_at", -1).to_list(1000)
     
     # Convert datetime
     for msg in messages:
