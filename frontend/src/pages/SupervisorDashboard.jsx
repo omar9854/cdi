@@ -1051,17 +1051,17 @@ const SupervisorDashboard = ({ user, onLogout }) => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Navbar user={user} onLogout={onLogout} />
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">
-            {language === 'ar' ? 'لوحة تحكم المشرف - أداة تحليل CDI الاحترافية' : 'Supervisor Dashboard - Professional CDI Analysis Tool'}
+        <div className="mb-8 animate-fade-in">
+          <h1 className="text-4xl font-bold gradient-text mb-2">
+            {language === 'ar' ? 'لوحة تحكم المشرف' : 'Supervisor Dashboard'}
           </h1>
-          <p className="text-gray-600">
-            {language === 'ar' ? 'تحليل شامل لبيانات تحسين التوثيق السريري مع مؤشرات تفصيلية' : 'Comprehensive CDI Data Analysis with Detailed Indicators'}
+          <p className="text-gray-600 text-lg">
+            {language === 'ar' ? 'أداة تحليل CDI الاحترافية والمتابعة الشاملة' : 'Professional CDI Analysis & Comprehensive Monitoring Tool'}
           </p>
         </div>
 
         {/* Employees Section - Moved to top */}
-        <Card className="medical-card mb-8">
+        <Card className="professional-card mb-8 animate-slide-in">
           <CardHeader>
             <CardTitle className="text-2xl text-gray-800 flex items-center gap-2">
               <Users className="h-6 w-6" />
