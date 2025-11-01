@@ -206,6 +206,35 @@ const AdminDashboard = ({ user, onLogout }) => {
     }
   };
 
+  const handleImpersonateUser = async (userId, userName) => {
+    if (!window.confirm(language === 'ar' ? `هل تريد الدخول إلى حساب ${userName}؟` : `Do you want to access ${userName}'s account?`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${API}/admin/impersonate/${userId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Store original admin token
+      localStorage.setItem('admin_token_backup', token);
+      localStorage.setItem('is_impersonating', 'true');
+      
+      // Set the impersonated user's token
+      localStorage.setItem('token', response.data.access_token);
+      
+      toast.success(language === 'ar' ? `تم الدخول إلى حساب ${userName}` : `Now viewing ${userName}'s account`);
+      
+      // Reload to dashboard
+      window.location.href = '/dashboard';
+    } catch (error) {
+      toast.error(language === 'ar' ? 'فشل الدخول للحساب' : 'Failed to impersonate user');
+    }
+  };
+
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
     try {
