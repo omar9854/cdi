@@ -150,7 +150,7 @@ const Login = ({ setUser }) => {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 medical-blue text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+                  className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
                   data-testid="login-button"
                 >
                   {loading ? (
