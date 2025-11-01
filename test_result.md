@@ -265,16 +265,23 @@ frontend:
 
   - task: "Login page - Error message display"
     implemented: true
-    working: "NA"
+    working: true
     files:
       - "/app/frontend/src/pages/Login.jsx"
+      - "/app/frontend/src/App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Enhanced error handling in login form. Now displays clear error message in Arabic/English when credentials are invalid: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' / 'Invalid email or password'. Toast message styled with red background and bold text for visibility."
+      - working: false
+        agent: "user"
+        comment: "User reported that error message doesn't show when entering wrong credentials."
+      - working: true
+        agent: "main"
+        comment: "Fixed by adding Toaster component to App.js. Error message now displays correctly in Arabic with red background. Message checks for status 401 or 'Login failed' and shows appropriate Arabic/English message."
 
   - task: "Supervisor Dashboard - Employee list with impersonation"
     implemented: true
