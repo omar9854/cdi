@@ -48,6 +48,7 @@ function AppContent() {
 
   return (
     <div className="App">
+      <Toaster position="top-center" richColors closeButton />
       <BrowserRouter>
         <WhatsAppSupport />
         <Routes>
