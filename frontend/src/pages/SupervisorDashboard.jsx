@@ -1098,7 +1098,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                           <span className="font-bold text-blue-600">{emp.notes_count || 0}</span>
                         </TableCell>
                         <TableCell className="text-center">
-                          <span className="font-bold text-green-600">{emp.analyses_count || 0}</span>
+                          <span className="font-bold text-blue-600">{emp.analyses_count || 0}</span>
                         </TableCell>
                         <TableCell className="text-center">
                           <Button
