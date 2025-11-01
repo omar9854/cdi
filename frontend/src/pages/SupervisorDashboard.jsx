@@ -1061,15 +1061,21 @@ const SupervisorDashboard = ({ user, onLogout }) => {
         </div>
 
         {/* Employees Section - Moved to top */}
-        {employees.length > 0 && (
-          <Card className="medical-card mb-8">
-            <CardHeader>
-              <CardTitle className="text-2xl text-gray-800 flex items-center gap-2">
-                <Users className="h-6 w-6" />
-                {language === 'ar' ? 'الموظفون - الاطلاع على الحسابات' : 'Employees - View Accounts'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+        <Card className="medical-card mb-8">
+          <CardHeader>
+            <CardTitle className="text-2xl text-gray-800 flex items-center gap-2">
+              <Users className="h-6 w-6" />
+              {language === 'ar' ? 'الموظفون - الاطلاع على الحسابات' : 'Employees - View Accounts'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {employees.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Users className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg">{language === 'ar' ? 'لا يوجد موظفون حالياً' : 'No employees found'}</p>
+                <p className="text-sm mt-2">{language === 'ar' ? 'سيظهر الموظفون هنا عند إضافتهم' : 'Employees will appear here when added'}</p>
+              </div>
+            ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
@@ -1111,9 +1117,9 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                   </TableBody>
                 </Table>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
 
         {/* Upload Section */}
         <Card className="medical-card mb-8">
