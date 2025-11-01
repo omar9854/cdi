@@ -638,6 +638,329 @@ class MedicalCodingAPITester:
             self.log_test("Supervisor Employees", False, str(e))
             return False
 
+    # ========== MESSAGING SYSTEM TESTS ==========
+    
+    def test_send_message_to_user(self, recipient_user_id):
+        """Test POST /api/messages/send - Send message to specific user"""
+        if not self.admin_token or not recipient_user_id:
+            self.log_test("Send Message to User", False, "No admin token or recipient user ID")
+            return False, None
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            message_data = {
+                "to_user_id": recipient_user_id,
+                "subject": "رسالة اختبار للموظف",
+                "body": "هذه رسالة اختبار من المدير إلى الموظف المحدد. يرجى التأكد من استلام الرسالة.",
+                "is_draft": False
+            }
+            response = requests.post(
+                f"{self.api_url}/messages/send",
+                json=message_data,
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            message_id = None
+            if success:
+                data = response.json()
+                message_id = data.get('id')
+                details = f"Message sent to user: {data.get('message', '')}, ID: {message_id}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Send Message to User", success, details, response.json() if success else None)
+            return success, message_id
+        except Exception as e:
+            self.log_test("Send Message to User", False, str(e))
+            return False, None
+
+    def test_send_message_to_all(self):
+        """Test POST /api/messages/send - Send message to all users"""
+        if not self.admin_token:
+            self.log_test("Send Message to All", False, "No admin token")
+            return False, None
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            message_data = {
+                "to_user_id": "ALL",
+                "subject": "إعلان عام لجميع الموظفين",
+                "body": "هذا إعلان عام لجميع موظفي مركز الترميز الطبي. يرجى قراءة الرسالة والاطلاع على التحديثات الجديدة.",
+                "is_draft": False
+            }
+            response = requests.post(
+                f"{self.api_url}/messages/send",
+                json=message_data,
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            message_id = None
+            if success:
+                data = response.json()
+                message_id = data.get('id')
+                details = f"Message sent to all users: {data.get('message', '')}, ID: {message_id}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Send Message to All", success, details, response.json() if success else None)
+            return success, message_id
+        except Exception as e:
+            self.log_test("Send Message to All", False, str(e))
+            return False, None
+
+    def test_get_inbox_messages(self):
+        """Test GET /api/messages/inbox"""
+        if not self.token:
+            self.log_test("Get Inbox Messages", False, "No user token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = requests.get(
+                f"{self.api_url}/messages/inbox",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                details = f"Retrieved {len(data)} inbox messages"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Get Inbox Messages", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Get Inbox Messages", False, str(e))
+            return False
+
+    def test_get_sent_messages(self):
+        """Test GET /api/messages/sent"""
+        if not self.admin_token:
+            self.log_test("Get Sent Messages", False, "No admin token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(
+                f"{self.api_url}/messages/sent",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                details = f"Retrieved {len(data)} sent messages"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Get Sent Messages", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Get Sent Messages", False, str(e))
+            return False
+
+    def test_get_draft_messages(self):
+        """Test GET /api/messages/drafts"""
+        if not self.admin_token:
+            self.log_test("Get Draft Messages", False, "No admin token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(
+                f"{self.api_url}/messages/drafts",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                details = f"Retrieved {len(data)} draft messages"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Get Draft Messages", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Get Draft Messages", False, str(e))
+            return False
+
+    def test_get_unread_count(self):
+        """Test GET /api/messages/unread-count"""
+        if not self.token:
+            self.log_test("Get Unread Count", False, "No user token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = requests.get(
+                f"{self.api_url}/messages/unread-count",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                count = data.get('count', 0)
+                details = f"Unread messages count: {count}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Get Unread Count", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Get Unread Count", False, str(e))
+            return False
+
+    def test_mark_message_as_read(self, message_id):
+        """Test POST /api/messages/{message_id}/read"""
+        if not self.token or not message_id:
+            self.log_test("Mark Message as Read", False, "No user token or message ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = requests.post(
+                f"{self.api_url}/messages/{message_id}/read",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                details = f"Message marked as read: {data.get('message', '')}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Mark Message as Read", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Mark Message as Read", False, str(e))
+            return False
+
+    def test_delete_message(self, message_id):
+        """Test DELETE /api/messages/{message_id}"""
+        if not self.admin_token or not message_id:
+            self.log_test("Delete Message", False, "No admin token or message ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.delete(
+                f"{self.api_url}/messages/{message_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                details = f"Message deleted: {data.get('message', '')}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Delete Message", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Delete Message", False, str(e))
+            return False
+
+    def test_save_draft_message(self):
+        """Test POST /api/messages/send - Save draft message"""
+        if not self.admin_token:
+            self.log_test("Save Draft Message", False, "No admin token")
+            return False, None
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            message_data = {
+                "to_user_id": "ALL",
+                "subject": "مسودة رسالة",
+                "body": "هذه مسودة رسالة لم يتم إرسالها بعد.",
+                "is_draft": True
+            }
+            response = requests.post(
+                f"{self.api_url}/messages/send",
+                json=message_data,
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            message_id = None
+            if success:
+                data = response.json()
+                message_id = data.get('id')
+                details = f"Draft message saved: {data.get('message', '')}, ID: {message_id}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Save Draft Message", success, details, response.json() if success else None)
+            return success, message_id
+        except Exception as e:
+            self.log_test("Save Draft Message", False, str(e))
+            return False, None
+
+    # ========== SUPERVISOR IMPERSONATION TESTS ==========
+    
+    def test_admin_impersonate_user(self, target_user_id):
+        """Test POST /api/admin/impersonate/{user_id}"""
+        if not self.admin_token or not target_user_id:
+            self.log_test("Admin Impersonate User", False, "No admin token or target user ID")
+            return False, None
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.post(
+                f"{self.api_url}/admin/impersonate/{target_user_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            impersonated_token = None
+            if success:
+                data = response.json()
+                impersonated_token = data.get('access_token')
+                user_info = data.get('user', {})
+                is_impersonating = user_info.get('is_impersonating', False)
+                impersonated_by = user_info.get('impersonated_by')
+                details = f"Admin impersonation successful - User: {user_info.get('full_name')}, Is_impersonating: {is_impersonating}, Impersonated_by: {impersonated_by}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Admin Impersonate User", success, details, response.json() if success else None)
+            return success, impersonated_token
+        except Exception as e:
+            self.log_test("Admin Impersonate User", False, str(e))
+            return False, None
+
+    def test_impersonated_token_access(self, impersonated_token):
+        """Test that impersonated token can access user endpoints"""
+        if not impersonated_token:
+            self.log_test("Impersonated Token Access", False, "No impersonated token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {impersonated_token}"}
+            response = requests.get(
+                f"{self.api_url}/notes",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                details = f"Impersonated token successfully accessed user notes: {len(data)} notes found"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Impersonated Token Access", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Impersonated Token Access", False, str(e))
+            return False
+
     # ========== CDI EXCEL UPLOAD TESTS ==========
     
     def create_sample_cdi_excel(self):
