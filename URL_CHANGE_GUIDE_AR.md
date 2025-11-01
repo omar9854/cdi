@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://docimprove.preview.emergentagent.com
+https://clinical-notes-pro-1.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://docimprove.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://docimprove.preview.emergentagent.com
+   https://clinical-notes-pro-1.preview.emergentagent.com
    ```
 
 ---

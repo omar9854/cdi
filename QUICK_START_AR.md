@@ -6,7 +6,7 @@
 
 1. **اذهب إلى صفحة التسجيل:**
    ```
-   https://docimprove.preview.emergentagent.com/register
+   https://clinical-notes-pro-1.preview.emergentagent.com/register
    ```
 
 2. **املأ البيانات:**
@@ -66,7 +66,7 @@
 
 1. **انسخ الرابط:**
    ```
-   https://docimprove.preview.emergentagent.com
+   https://clinical-notes-pro-1.preview.emergentagent.com
    ```
 
 2. **أرسله للفريق الطبي عبر:**
