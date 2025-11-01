@@ -2364,7 +2364,11 @@ async def impersonate_user(
         raise HTTPException(status_code=403, detail="Cannot impersonate admin")
     
     # Create access token for the target user
-    access_token = create_access_token(data={"sub": user['email']})
+    access_token = create_access_token({
+        "user_id": user['id'], 
+        "email": user['email'],
+        "role": user.get('role', 'user')
+    })
     
     # Add impersonation info
     user['is_impersonated'] = True
