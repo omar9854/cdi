@@ -54,6 +54,35 @@ const SupervisorDashboard = ({ user, onLogout }) => {
     }
   };
 
+  const handleImpersonateEmployee = async (employeeId, employeeName) => {
+    if (!window.confirm(language === 'ar' ? `هل تريد الدخول إلى حساب ${employeeName}؟` : `Do you want to access ${employeeName}'s account?`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${API}/admin/impersonate/${employeeId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Store original supervisor token
+      localStorage.setItem('supervisor_token_backup', token);
+      localStorage.setItem('is_impersonating', 'true');
+      
+      // Set the impersonated user's token
+      localStorage.setItem('token', response.data.access_token);
+      
+      toast.success(language === 'ar' ? `تم الدخول إلى حساب ${employeeName}` : `Now viewing ${employeeName}'s account`);
+      
+      // Reload to dashboard
+      window.location.href = '/dashboard';
+    } catch (error) {
+      toast.error(language === 'ar' ? 'فشل الدخول للحساب' : 'Failed to impersonate user');
+    }
+  };
+
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
