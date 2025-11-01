@@ -516,7 +516,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                       </>
                     )}
                     <TableCell className="text-center">
-                      <span className="font-bold text-green-600">{cds.success_rate}%</span>
+                      <span className="font-bold text-blue-600">{cds.success_rate}%</span>
                     </TableCell>
                   </TableRow>
                 ))}
