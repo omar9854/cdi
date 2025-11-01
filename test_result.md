@@ -144,6 +144,42 @@ backend:
         agent: "testing"
         comment: "✅ ALL ADMIN ENDPOINTS WORKING PERFECTLY: Successfully tested admin login with credentials from ADMIN_CREDENTIALS.txt. GET /api/admin/users-statistics correctly includes 'role' and 'is_active' fields. POST /api/admin/assign-supervisor/{user_id} successfully promotes user to supervisor role. POST /api/admin/remove-supervisor/{user_id} successfully demotes supervisor to user. PUT /api/admin/users/{user_id} successfully updates user data (full_name, email, phone_number). POST /api/admin/suspend-user/{user_id} and POST /api/admin/activate-user/{user_id} work correctly. DELETE /api/admin/users/{user_id} successfully removes user and all associated data. All endpoints return proper status codes and response messages."
 
+  - task: "Messaging system endpoints"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/backend/server.py"
+    endpoints:
+      - "/api/messages/send" (POST)
+      - "/api/messages/inbox" (GET)
+      - "/api/messages/sent" (GET)
+      - "/api/messages/drafts" (GET)
+      - "/api/messages/{message_id}/read" (POST)
+      - "/api/messages/{message_id}" (DELETE)
+      - "/api/messages/unread-count" (GET)
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Internal messaging system endpoints already exist. All CRUD operations for messages implemented including send, inbox, sent, drafts, mark as read, delete, and unread count."
+
+  - task: "Supervisor impersonation endpoint"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/backend/server.py"
+    endpoints:
+      - "/api/admin/impersonate/{user_id}" (POST)
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added new endpoint for admin/supervisor to impersonate users. Generates a new JWT token for the target user and returns user info with impersonation flag. This allows supervisors to view employee accounts."
+
   - task: "Supervisor endpoints - Employee management"
     implemented: true
     working: true
