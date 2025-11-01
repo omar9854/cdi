@@ -422,7 +422,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                       <span className="font-bold text-orange-600">{spec.adx_added}</span>
                     </TableCell>
                     <TableCell className="text-center">
-                      <span className="font-bold text-green-600">{spec.impact_rate}%</span>
+                      <span className="font-bold text-blue-600">{spec.impact_rate}%</span>
                     </TableCell>
                   </TableRow>
                 ))}
