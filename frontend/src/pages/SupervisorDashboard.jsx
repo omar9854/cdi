@@ -1057,6 +1057,61 @@ const SupervisorDashboard = ({ user, onLogout }) => {
           </p>
         </div>
 
+        {/* Employees Section - Moved to top */}
+        {employees.length > 0 && (
+          <Card className="medical-card mb-8">
+            <CardHeader>
+              <CardTitle className="text-2xl text-gray-800 flex items-center gap-2">
+                <Users className="h-6 w-6" />
+                {language === 'ar' ? 'الموظفون - الاطلاع على الحسابات' : 'Employees - View Accounts'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-center">{language === 'ar' ? 'الاسم' : 'Name'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'البريد' : 'Email'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'الجوال' : 'Phone'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'الملاحظات' : 'Notes'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'التحليلات' : 'Analyses'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {employees.map((emp, index) => (
+                      <TableRow key={emp.id} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                        <TableCell className="text-center font-medium">{emp.full_name}</TableCell>
+                        <TableCell className="text-center text-sm">{emp.email}</TableCell>
+                        <TableCell className="text-center text-sm">{emp.phone_number || '-'}</TableCell>
+                        <TableCell className="text-center">
+                          <span className="font-bold text-blue-600">{emp.notes_count || 0}</span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="font-bold text-green-600">{emp.analyses_count || 0}</span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-green-600 hover:bg-green-50"
+                            onClick={() => handleImpersonateEmployee(emp.id, emp.full_name)}
+                            title={language === 'ar' ? 'الدخول للحساب' : 'View Account'}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            {language === 'ar' ? 'عرض الحساب' : 'View'}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Upload Section */}
         <Card className="medical-card mb-8">
           <CardHeader>
