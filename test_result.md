@@ -301,8 +301,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Admin Dashboard - User management UI"
-    - "Supervisor Dashboard - CDI Analysis Tool"
+    - "Messaging system endpoints"
+    - "Supervisor impersonation endpoint"
+    - "Messages UI - Internal messaging system"
+    - "Admin Dashboard - Impersonate User button"
+    - "Navbar - Exit Impersonation feature"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -359,3 +362,28 @@ agent_communication:
       **📊 TEST RESULTS: 22/22 TESTS PASSED (100% SUCCESS RATE)**
       
       **🚀 READY FOR PRODUCTION:** All backend admin and supervisor functionality is working perfectly and ready for frontend integration testing.
+  - agent: "main"
+    message: |
+      🔧 **NEW FEATURES IMPLEMENTED - MESSAGING & IMPERSONATION:**
+      
+      **Issues Fixed:**
+      1. Messages UI - Fixed user selection dropdown error by:
+         - Fetching users from response.data.statistics array
+         - Filtering out empty user_id values
+         - Adding both "ALL" option and individual user selection
+      
+      2. Supervisor Impersonation - Full implementation:
+         - Backend: Created /api/admin/impersonate/{user_id} endpoint
+         - Generates new JWT token for impersonated user
+         - Frontend: Added Eye icon button in AdminDashboard for each user
+         - Stores original admin token for restoration
+         - Added "Exit Impersonation" button in Navbar when impersonating
+         - Redirects appropriately after entering/exiting impersonation
+      
+      **Testing Needed:**
+      - Backend: Test /api/messages/* endpoints (send, inbox, sent, drafts, delete)
+      - Backend: Test /api/admin/impersonate/{user_id} endpoint
+      - Frontend: Test message composition with user selection dropdown
+      - Frontend: Test sending messages to specific users and "ALL"
+      - Frontend: Test impersonate button and exit impersonation flow
+      - E2E: Full impersonation flow from admin dashboard to user view and back
