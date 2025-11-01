@@ -1133,6 +1133,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                       <TableHead className="text-center">{language === 'ar' ? 'الجوال' : 'Phone'}</TableHead>
                       <TableHead className="text-center">{language === 'ar' ? 'الملاحظات' : 'Notes'}</TableHead>
                       <TableHead className="text-center">{language === 'ar' ? 'التحليلات' : 'Analyses'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1146,6 +1147,18 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                         </TableCell>
                         <TableCell className="text-center">
                           <span className="font-bold text-green-600">{emp.analyses_count || 0}</span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-green-600 hover:bg-green-50"
+                            onClick={() => handleImpersonateEmployee(emp.id, emp.full_name)}
+                            title={language === 'ar' ? 'الدخول للحساب' : 'View Account'}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            {language === 'ar' ? 'عرض الحساب' : 'View'}
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
