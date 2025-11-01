@@ -91,6 +91,16 @@ const Navbar = ({ user, onLogout }) => {
           </div>
 
           <div className="flex items-center gap-4">
+            {isImpersonating && (
+              <Button
+                variant="destructive"
+                onClick={handleExitImpersonation}
+                className="bg-red-600 hover:bg-red-700"
+                title={language === 'ar' ? 'الخروج من الحساب' : 'Exit Impersonation'}
+              >
+                {language === 'ar' ? '← الخروج من الحساب' : 'Exit Impersonation →'}
+              </Button>
+            )}
             <Button
               variant="ghost"
               onClick={toggleLanguage}
