@@ -1128,15 +1128,27 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                           <span className="font-bold text-blue-600">{emp.analyses_count || 0}</span>
                         </TableCell>
                         <TableCell className="text-center">
-                          <Button
-                            size="sm"
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
-                            onClick={() => handleImpersonateEmployee(emp.id, emp.full_name)}
-                            title={language === 'ar' ? 'الدخول للحساب' : 'View Account'}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            {language === 'ar' ? 'عرض الحساب' : 'View'}
-                          </Button>
+                          <div className="flex items-center justify-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-orange-600 hover:bg-orange-50 border-orange-300"
+                              onClick={() => setChangePasswordUser(emp)}
+                              title={language === 'ar' ? 'تغيير كلمة المرور' : 'Change Password'}
+                            >
+                              <Lock className="h-4 w-4" />
+                            </Button>
+                            
+                            <Button
+                              size="sm"
+                              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                              onClick={() => handleImpersonateEmployee(emp.id, emp.full_name)}
+                              title={language === 'ar' ? 'الدخول للحساب' : 'View Account'}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              {language === 'ar' ? 'عرض' : 'View'}
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
