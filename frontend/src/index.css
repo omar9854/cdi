@@ -2,14 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Saudi Vision 2030 Healthcare Digital Theme */
+/* Modern Professional Theme - Clean & Beautiful */
 :root {
-  --primary-green: #00a651;
-  --primary-teal: #00b4d8;
-  --primary-blue: #0077b6;
-  --accent-gold: #ffd60a;
-  --bg-gradient-start: #e8f5e9;
-  --bg-gradient-end: #e1f5fe;
+  --primary-blue: #3b82f6;
+  --primary-indigo: #6366f1;
+  --dark-blue: #1e40af;
+  --light-blue: #dbeafe;
+  --success-green: #10b981;
+  --warning-orange: #f59e0b;
+  --danger-red: #ef4444;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --bg-light: #f9fafb;
+  --bg-white: #ffffff;
 }
 
 body {
