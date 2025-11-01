@@ -2191,19 +2191,25 @@ async def send_message(
     """Send a message to a user or all users"""
     # Get recipient name if specific user
     to_user_name = None
-    if message.to_user_id:
+    to_user_id_final = None
+    
+    if message.to_user_id and message.to_user_id != "ALL":
         recipient = await db.users.find_one({"id": message.to_user_id}, {"_id": 0, "full_name": 1})
         if not recipient:
             raise HTTPException(status_code=404, detail="Recipient not found")
         to_user_name = recipient['full_name']
+        to_user_id_final = message.to_user_id
+    else:
+        to_user_name = "الكل"
+        to_user_id_final = None
     
     # Create message document
     message_doc = {
         "id": str(uuid.uuid4()),
         "from_user_id": current_user['id'],
         "from_user_name": current_user['full_name'],
-        "to_user_id": message.to_user_id,
-        "to_user_name": to_user_name or "الكل",
+        "to_user_id": to_user_id_final,
+        "to_user_name": to_user_name,
         "subject": message.subject,
         "body": message.body,
         "is_draft": message.is_draft,
