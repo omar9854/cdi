@@ -1180,6 +1180,33 @@ async def admin_change_user_password(
     
     return {"message": "Password changed successfully"}
 
+@api_router.post("/admin/impersonate/{user_id}")
+async def impersonate_user(
+    user_id: str,
+    admin: dict = Depends(require_admin)
+):
+    """Admin/Supervisor can impersonate any user to view their account"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Generate a new token for the impersonated user
+    access_token = create_access_token(data={"sub": user['email']})
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user['id'],
+            "email": user['email'],
+            "full_name": user['full_name'],
+            "role": user['role'],
+            "phone_number": user.get('phone_number', ''),
+            "is_impersonating": True,
+            "impersonated_by": admin['id']
+        }
+    }
+
 @api_router.get("/supervisor/employee-notes/{employee_id}")
 async def get_employee_notes(employee_id: str, supervisor: dict = Depends(require_supervisor)):
     """Get all notes for a specific employee"""
