@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { LogOut, FileText, History, Home, Languages } from 'lucide-react';
+import { LogOut, FileText, History, Home, Languages, Mail } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Navbar = ({ user, onLogout }) => {
