@@ -48,9 +48,12 @@ const SupervisorDashboard = ({ user, onLogout }) => {
       const response = await axios.get(`${API}/supervisor/employees`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setEmployees(response.data);
+      console.log('Employees fetched:', response.data);
+      console.log('Number of employees:', response.data?.length);
+      setEmployees(response.data || []);
     } catch (error) {
       console.error('Failed to fetch employees:', error);
+      toast.error(language === 'ar' ? 'فشل تحميل قائمة الموظفين' : 'Failed to load employees');
     }
   };
 
