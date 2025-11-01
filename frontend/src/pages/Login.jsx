@@ -34,10 +34,18 @@ const Login = ({ setUser }) => {
       navigate('/dashboard');
     } catch (error) {
       // Show clear error message for invalid credentials
-      const errorMessage = error.response?.data?.detail || 
-                          (language === 'ar' 
-                            ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' 
-                            : 'Invalid email or password');
+      const backendMessage = error.response?.data?.detail;
+      let errorMessage;
+      
+      // If backend returns "Login failed" or similar, show custom message
+      if (backendMessage === "Login failed" || error.response?.status === 401) {
+        errorMessage = language === 'ar' 
+          ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' 
+          : 'Invalid email or password';
+      } else {
+        errorMessage = backendMessage || (language === 'ar' ? 'حدث خطأ في تسجيل الدخول' : 'Login error');
+      }
+      
       toast.error(errorMessage, {
         duration: 4000,
         style: {
