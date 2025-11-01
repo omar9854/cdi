@@ -31,7 +31,7 @@ const Navbar = ({ user, onLogout }) => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="medical-blue text-white shadow-lg" data-testid="navbar">
+    <nav className="medical-blue text-white shadow-2xl" data-testid="navbar">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
