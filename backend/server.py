@@ -2181,6 +2181,171 @@ def generate_recommendations(analysis_data):
     return recommendations
 
 
+# ========== Messaging System ==========
+
+@api_router.post("/messages/send")
+async def send_message(
+    message: MessageCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Send a message to a user or all users"""
+    # Get recipient name if specific user
+    to_user_name = None
+    if message.to_user_id:
+        recipient = await db.users.find_one({"id": message.to_user_id}, {"_id": 0, "full_name": 1})
+        if not recipient:
+            raise HTTPException(status_code=404, detail="Recipient not found")
+        to_user_name = recipient['full_name']
+    
+    # Create message document
+    message_doc = {
+        "id": str(uuid.uuid4()),
+        "from_user_id": current_user['id'],
+        "from_user_name": current_user['full_name'],
+        "to_user_id": message.to_user_id,
+        "to_user_name": to_user_name or "الكل",
+        "subject": message.subject,
+        "body": message.body,
+        "is_draft": message.is_draft,
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.messages.insert_one(message_doc)
+    
+    return {"message": "Message sent successfully", "id": message_doc['id']}
+
+@api_router.get("/messages/inbox")
+async def get_inbox(current_user: dict = Depends(get_current_user)):
+    """Get inbox messages for current user"""
+    # Messages sent to this user or to all users
+    messages = await db.messages.find({
+        "$or": [
+            {"to_user_id": current_user['id']},
+            {"to_user_id": None}
+        ],
+        "is_draft": False
+    }).sort("created_at", -1).to_list(1000)
+    
+    # Convert datetime
+    for msg in messages:
+        if isinstance(msg.get('created_at'), str):
+            msg['created_at'] = datetime.fromisoformat(msg['created_at'])
+    
+    return messages
+
+@api_router.get("/messages/sent")
+async def get_sent_messages(current_user: dict = Depends(get_current_user)):
+    """Get sent messages for current user"""
+    messages = await db.messages.find({
+        "from_user_id": current_user['id'],
+        "is_draft": False
+    }).sort("created_at", -1).to_list(1000)
+    
+    # Convert datetime
+    for msg in messages:
+        if isinstance(msg.get('created_at'), str):
+            msg['created_at'] = datetime.fromisoformat(msg['created_at'])
+    
+    return messages
+
+@api_router.get("/messages/drafts")
+async def get_draft_messages(current_user: dict = Depends(get_current_user)):
+    """Get draft messages for current user"""
+    messages = await db.messages.find({
+        "from_user_id": current_user['id'],
+        "is_draft": True
+    }).sort("created_at", -1).to_list(1000)
+    
+    # Convert datetime
+    for msg in messages:
+        if isinstance(msg.get('created_at'), str):
+            msg['created_at'] = datetime.fromisoformat(msg['created_at'])
+    
+    return messages
+
+@api_router.post("/messages/{message_id}/read")
+async def mark_message_as_read(
+    message_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Mark message as read"""
+    await db.messages.update_one(
+        {"id": message_id, "to_user_id": current_user['id']},
+        {"$set": {"is_read": True}}
+    )
+    return {"message": "Marked as read"}
+
+@api_router.delete("/messages/{message_id}")
+async def delete_message(
+    message_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a message"""
+    result = await db.messages.delete_one({
+        "id": message_id,
+        "$or": [
+            {"from_user_id": current_user['id']},
+            {"to_user_id": current_user['id']}
+        ]
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Message not found")
+    
+    return {"message": "Message deleted"}
+
+@api_router.get("/messages/unread-count")
+async def get_unread_count(current_user: dict = Depends(get_current_user)):
+    """Get count of unread messages"""
+    count = await db.messages.count_documents({
+        "$or": [
+            {"to_user_id": current_user['id']},
+            {"to_user_id": None}
+        ],
+        "is_draft": False,
+        "is_read": False
+    })
+    return {"count": count}
+
+
+# ========== Supervisor Impersonation ==========
+
+@api_router.post("/supervisor/impersonate/{user_id}")
+async def impersonate_user(
+    user_id: str,
+    supervisor: dict = Depends(require_supervisor)
+):
+    """Supervisor can impersonate (login as) any user"""
+    # Get target user
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Don't allow impersonating admin
+    if user.get('role') == 'admin':
+        raise HTTPException(status_code=403, detail="Cannot impersonate admin")
+    
+    # Create access token for the target user
+    access_token = create_access_token(data={"sub": user['email']})
+    
+    # Add impersonation info
+    user['is_impersonated'] = True
+    user['impersonated_by'] = supervisor['id']
+    user['impersonated_by_name'] = supervisor['full_name']
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user,
+        "original_supervisor": {
+            "id": supervisor['id'],
+            "name": supervisor['full_name'],
+            "email": supervisor['email']
+        }
+    }
+
+
 # ========== Include Router ==========
 app.include_router(api_router)
 
