@@ -1137,15 +1137,15 @@ async def require_supervisor(user: dict = Depends(get_current_user)):
 async def get_supervisor_employees(supervisor: dict = Depends(require_supervisor)):
     """Get all employees under this supervisor"""
     if supervisor['role'] == 'admin':
-        # Admin sees all users
+        # Admin sees all non-admin, non-supervisor users (all regular employees)
         employees = await db.users.find(
-            {"role": "user"},
+            {"role": {"$nin": ["admin", "supervisor"]}},
             {"_id": 0, "password_hash": 0}
         ).to_list(1000)
     else:
         # Supervisor sees only assigned employees
         employees = await db.users.find(
-            {"supervisor_id": supervisor['id']},
+            {"supervisor_id": supervisor['id'], "role": {"$ne": "admin"}},
             {"_id": 0, "password_hash": 0}
         ).to_list(1000)
     
