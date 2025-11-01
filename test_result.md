@@ -298,6 +298,9 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "Added 'Exit Impersonation' button that appears in Navbar when admin is impersonating a user. Restores original admin token and redirects to admin dashboard."
+      - working: "NA"
+        agent: "main"
+        comment: "Enhanced exit impersonation to support both admin and supervisor. Now checks for both admin_token_backup and supervisor_token_backup, and redirects to appropriate dashboard (/admin or /supervisor). Also hides Messages link when impersonating as per user request - supervisor should not see employee's messages."
 
   - task: "Supervisor Dashboard - CDI Analysis Tool"
     implemented: true
