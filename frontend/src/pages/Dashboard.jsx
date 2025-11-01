@@ -48,14 +48,17 @@ const Dashboard = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen healthcare-bg digital-health-pattern">
       <Navbar user={user} onLogout={onLogout} />
       
       <main className="container mx-auto px-4 py-8 max-w-7xl" data-testid="dashboard-main">
         {/* Header */}
         <div className="mb-8 fade-in">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">لوحة التحكم</h1>
-          <p className="text-gray-600 text-lg">مرحباً بك، {user.full_name}</p>
+          <h1 className="text-4xl font-bold gradient-text-health mb-2">لوحة التحكم</h1>
+          <p className="text-gray-700 text-lg">مرحباً بك، {user.full_name}</p>
+          <p className="text-sm text-green-600 font-medium mt-1">
+            🇸🇦 رؤية 2030 - التحول الرقمي في الرعاية الصحية
+          </p>
         </div>
 
         {/* Action Cards */}
