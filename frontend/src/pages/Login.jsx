@@ -33,7 +33,20 @@ const Login = ({ setUser }) => {
       toast.success(t('loginSuccess'));
       navigate('/dashboard');
     } catch (error) {
-      toast.error(error.response?.data?.detail || t('error'));
+      // Show clear error message for invalid credentials
+      const errorMessage = error.response?.data?.detail || 
+                          (language === 'ar' 
+                            ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' 
+                            : 'Invalid email or password');
+      toast.error(errorMessage, {
+        duration: 4000,
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          fontSize: '16px',
+          fontWeight: 'bold'
+        }
+      });
     } finally {
       setLoading(false);
     }
