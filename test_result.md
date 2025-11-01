@@ -205,6 +205,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ SUPERVISOR ENDPOINTS WORKING: GET /api/supervisor/employees successfully returns employee list with required 'notes_count' and 'analyses_count' fields. Admin can access supervisor endpoints as expected. Response format is correct and includes all necessary employee data."
+      - working: true
+        agent: "testing"
+        comment: "✅ SUPERVISOR EMPLOYEES ENDPOINT RE-VERIFIED: Successfully tested with admin credentials (admin@cdi-center.sa / CDI@2024#Admin). Endpoint returns 7 employees with correct structure including id, full_name, email, notes_count, analyses_count fields. Database contains 13 total users (11 regular users, 2 supervisors). Admin can access supervisor endpoints as expected. Response format is correct and all required fields are present."
 
   - task: "Excel upload and CDI analysis endpoint"
     implemented: true
