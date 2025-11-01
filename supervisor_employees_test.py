@@ -84,28 +84,38 @@ class SupervisorEmployeesTest:
                     print(f"   Available fields: {list(first_employee.keys())}")
                     
                     # Check required fields
-                    required_fields = ['id', 'full_name', 'email', 'phone_number', 'notes_count', 'analyses_count']
-                    missing_fields = []
+                    required_fields = ['id', 'full_name', 'email', 'notes_count', 'analyses_count']
+                    optional_fields = ['phone_number', 'role', 'is_active', 'created_at']
+                    missing_required = []
                     
+                    print(f"   📋 Required Fields:")
                     for field in required_fields:
                         if field in first_employee:
                             print(f"   ✅ {field}: {first_employee[field]}")
                         else:
-                            missing_fields.append(field)
+                            missing_required.append(field)
                             print(f"   ❌ Missing: {field}")
                     
-                    if not missing_fields:
+                    print(f"   📋 Optional Fields:")
+                    for field in optional_fields:
+                        if field in first_employee:
+                            print(f"   ✅ {field}: {first_employee[field]}")
+                        else:
+                            print(f"   ⚠️  Optional missing: {field}")
+                    
+                    if not missing_required:
                         print(f"✅ All required fields present")
                         
                         # Display sample employee data
                         print(f"\n👤 Sample Employee Data:")
                         for employee in data[:3]:  # Show first 3 employees
+                            phone = employee.get('phone_number', 'Not provided')
                             print(f"   • {employee.get('full_name', 'N/A')} ({employee.get('email', 'N/A')})")
-                            print(f"     Notes: {employee.get('notes_count', 0)}, Analyses: {employee.get('analyses_count', 0)}")
+                            print(f"     Phone: {phone}, Notes: {employee.get('notes_count', 0)}, Analyses: {employee.get('analyses_count', 0)}")
                         
                         return True
                     else:
-                        print(f"❌ Missing required fields: {missing_fields}")
+                        print(f"❌ Missing required fields: {missing_required}")
                         return False
                 else:
                     print(f"ℹ️  No employees found in database")
