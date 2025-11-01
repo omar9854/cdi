@@ -224,25 +224,31 @@ const Messages = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <Navbar user={user} onLogout={onLogout} />
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              {language === 'ar' ? '📬 البريد الداخلي' : '📬 Internal Mail'}
-            </h1>
-            <p className="text-gray-600">
-              {language === 'ar' ? 'نظام المراسلة الداخلي' : 'Internal messaging system'}
-            </p>
-          </div>
-          <Button onClick={() => setShowCompose(true)} className="medical-blue flex items-center gap-2">
-            <Plus className="h-4 w-4" />
+      <main className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Header */}
+        <div className="mb-8 animate-fade-in">
+          <h1 className="text-4xl font-bold gradient-text mb-2">البريد الداخلي</h1>
+          <p className="text-gray-600 text-lg">إدارة الرسائل والتواصل مع الفريق</p>
+        </div>
+
+        {/* New Message Button */}
+        <div className="mb-6 animate-slide-in">
+          <Button
+            onClick={() => {
+              setShowCompose(true);
+              fetchAllUsers();
+            }}
+            className="medical-blue px-6 py-3 rounded-xl shadow-lg hover:shadow-xl"
+          >
+            <Plus className="mr-2 h-5 w-5" />
             {language === 'ar' ? 'رسالة جديدة' : 'New Message'}
           </Button>
         </div>
 
-        <Card className="medical-card">
+        {/* Tabs */}
+        <Card className="professional-card animate-fade-in">
           <CardContent className="p-6">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-3">
