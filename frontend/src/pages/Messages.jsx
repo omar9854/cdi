@@ -80,7 +80,9 @@ const Messages = ({ user, onLogout }) => {
       const response = await axios.get(`${API}/admin/users-statistics`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setAllUsers(response.data.users || []);
+      // Filter out users with empty user_id and extract from statistics array
+      const users = (response.data.statistics || []).filter(u => u.user_id && u.user_id.trim() !== '');
+      setAllUsers(users);
     } catch (error) {
       console.error('Failed to fetch users:', error);
     }
