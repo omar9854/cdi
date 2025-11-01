@@ -1419,10 +1419,37 @@ class MedicalCodingAPITester:
             "critical_failures": failed_tests
         }
 
+    def run_supervisor_focused_test(self):
+        """Run focused test for supervisor employee access issue"""
+        print("🚀 Starting Focused Supervisor Employee Access Test")
+        print(f"🔗 Testing API: {self.api_url}")
+        print("=" * 80)
+        
+        # Basic connectivity
+        if not self.test_health_check():
+            print("❌ Health check failed - stopping tests")
+            return self.generate_report()
+        
+        # Admin Authentication (required for setup)
+        print("\n👑 Testing Admin Authentication...")
+        if not self.test_admin_login():
+            print("❌ Admin login failed - stopping tests")
+            return self.generate_report()
+        
+        # Run the focused supervisor test
+        self.test_supervisor_account_employees_access()
+        
+        return self.generate_report()
+
 def main():
     """Main test execution"""
     tester = MedicalCodingAPITester()
-    results = tester.run_all_tests()
+    
+    # Check if we should run focused test
+    if len(sys.argv) > 1 and sys.argv[1] == "--supervisor-test":
+        results = tester.run_supervisor_focused_test()
+    else:
+        results = tester.run_all_tests()
     
     # Return appropriate exit code
     return 0 if results["failed_tests"] == 0 else 1
