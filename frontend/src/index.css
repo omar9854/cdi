@@ -168,7 +168,41 @@ code {
 
 /* Medical Theme Styling */
 .medical-card {
-    @apply shadow-lg hover:shadow-2xl transition-all duration-300;
+    @apply shadow-lg hover:shadow-2xl transition-all duration-300 bg-white border-l-4 border-green-500;
+}
+
+/* Saudi Vision 2030 Healthcare Digital Background */
+.healthcare-bg {
+    background: linear-gradient(135deg, #e8f5e9 0%, #e1f5fe 50%, #f3e5f5 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.healthcare-bg::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: 
+        repeating-linear-gradient(45deg, transparent, transparent 50px, rgba(0, 166, 81, 0.02) 50px, rgba(0, 166, 81, 0.02) 100px),
+        repeating-linear-gradient(-45deg, transparent, transparent 50px, rgba(0, 119, 182, 0.02) 50px, rgba(0, 119, 182, 0.02) 100px);
+    animation: healthcare-pattern 60s linear infinite;
+}
+
+@keyframes healthcare-pattern {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Digital Healthcare Icons Pattern */
+.digital-health-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300a651' fill-opacity='0.05'%3E%3Cpath d='M30 30c0-5.523-4.477-10-10-10s-10 4.477-10 10 4.477 10 10 10 10-4.477 10-10zm10 0c0-5.523-4.477-10-10-10s-10 4.477-10 10 4.477 10 10 10 10-4.477 10-10zM10 10c0-5.523-4.477-10-10-10s-10 4.477-10 10 4.477 10 10 10 10-4.477 10-10zm40 0c0-5.523-4.477-10-10-10s-10 4.477-10 10 4.477 10 10 10 10-4.477 10-10zM10 50c0-5.523-4.477-10-10-10s-10 4.477-10 10 4.477 10 10 10 10-4.477 10-10zm40 0c0-5.523-4.477-10-10-10s-10 4.477-10 10 4.477 10 10 10 10-4.477 10-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* Smooth transitions for inputs */
