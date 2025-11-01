@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { 
   Upload, FileSpreadsheet, TrendingUp, AlertTriangle, Activity, Hospital, 
-  Users, Award, BarChart3, Stethoscope, Download, PieChart, Eye 
+  Users, Award, BarChart3, Stethoscope, Download, PieChart, Eye, Lock 
 } from 'lucide-react';
 import {
   BarChart, Bar, PieChart as RePieChart, Pie, Cell,
