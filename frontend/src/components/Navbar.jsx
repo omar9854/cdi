@@ -11,12 +11,20 @@ const Navbar = ({ user, onLogout }) => {
   const isImpersonating = localStorage.getItem('is_impersonating') === 'true';
 
   const handleExitImpersonation = () => {
+    // Check if it was admin or supervisor who impersonated
     const adminToken = localStorage.getItem('admin_token_backup');
+    const supervisorToken = localStorage.getItem('supervisor_token_backup');
+    
     if (adminToken) {
       localStorage.setItem('token', adminToken);
       localStorage.removeItem('admin_token_backup');
       localStorage.removeItem('is_impersonating');
       window.location.href = '/admin';
+    } else if (supervisorToken) {
+      localStorage.setItem('token', supervisorToken);
+      localStorage.removeItem('supervisor_token_backup');
+      localStorage.removeItem('is_impersonating');
+      window.location.href = '/supervisor';
     }
   };
 
