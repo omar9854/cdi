@@ -1103,8 +1103,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                         <TableCell className="text-center">
                           <Button
                             size="sm"
-                            variant="outline"
-                            className="text-green-600 hover:bg-green-50"
+                            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
                             onClick={() => handleImpersonateEmployee(emp.id, emp.full_name)}
                             title={language === 'ar' ? 'الدخول للحساب' : 'View Account'}
                           >
