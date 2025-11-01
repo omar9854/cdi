@@ -61,9 +61,9 @@ const Login = ({ setUser }) => {
   };
 
   return (
-    <div className="min-h-screen flex healthcare-bg digital-health-pattern">
+    <div className="min-h-screen flex bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-white/90 backdrop-blur-sm">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-white/95 backdrop-blur-sm">
         <div className="w-full max-w-md space-y-8 animate-fade-in">
           {/* Logo and Title */}
           <div className="text-center space-y-4">
