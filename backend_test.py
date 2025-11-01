@@ -1151,6 +1151,47 @@ class MedicalCodingAPITester:
         print("\n📊 Testing CDI Excel Upload & Analysis...")
         self.test_upload_cdi_data()
         
+        # ========== MESSAGING SYSTEM TESTS ==========
+        print("\n💬 Testing Messaging System...")
+        
+        # Test sending messages
+        message_success, message_id = self.test_send_message_to_user(self.test_user_id) if self.test_user_id else (False, None)
+        all_message_success, all_message_id = self.test_send_message_to_all()
+        
+        # Test draft functionality
+        draft_success, draft_id = self.test_save_draft_message()
+        
+        # Test retrieving messages (admin perspective)
+        self.test_get_sent_messages()
+        self.test_get_draft_messages()
+        
+        # Test retrieving messages (user perspective)
+        self.test_get_inbox_messages()
+        self.test_get_unread_count()
+        
+        # Test message interactions
+        if message_id:
+            self.test_mark_message_as_read(message_id)
+        
+        # Test message deletion (clean up)
+        if message_id:
+            self.test_delete_message(message_id)
+        if all_message_id:
+            self.test_delete_message(all_message_id)
+        if draft_id:
+            self.test_delete_message(draft_id)
+        
+        # ========== SUPERVISOR IMPERSONATION TESTS ==========
+        print("\n👤 Testing Supervisor Impersonation...")
+        
+        if self.test_user_id:
+            # Test admin impersonation
+            impersonate_success, impersonated_token = self.test_admin_impersonate_user(self.test_user_id)
+            
+            # Test that impersonated token works
+            if impersonate_success and impersonated_token:
+                self.test_impersonated_token_access(impersonated_token)
+        
         # Basic Notes and Analysis Tests (if time permits)
         print("\n📝 Testing Basic Notes & Analysis...")
         success, note_id = self.test_create_clinical_note()
