@@ -308,8 +308,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Messaging system endpoints"
-    - "Supervisor impersonation endpoint"
     - "Messages UI - Internal messaging system"
     - "Admin Dashboard - Impersonate User button"
     - "Navbar - Exit Impersonation feature"
