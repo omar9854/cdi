@@ -260,6 +260,32 @@ frontend:
         agent: "main"
         comment: "Fixed user selection: now fetches from response.data.statistics array and filters out users with empty user_id. Added 'ALL' option and individual user selection with names and emails displayed."
 
+  - task: "Login page - Error message display"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/frontend/src/pages/Login.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Enhanced error handling in login form. Now displays clear error message in Arabic/English when credentials are invalid: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' / 'Invalid email or password'. Toast message styled with red background and bold text for visibility."
+
+  - task: "Supervisor Dashboard - Employee list with impersonation"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/frontend/src/pages/SupervisorDashboard.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "User requested supervisor to see list of employees with ability to impersonate. Moved employee list to top of page. Added 'View Account' button with Eye icon for each employee. When clicked, supervisor is logged into employee's account for monitoring purposes. Stores supervisor token for exit functionality."
+
   - task: "Navbar - Exit Impersonation feature"
     implemented: true
     working: "NA"
