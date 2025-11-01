@@ -78,15 +78,17 @@ const Navbar = ({ user, onLogout }) => {
                 {language === 'ar' ? <History className="ml-2 w-4 h-4" /> : <History className="mr-2 w-4 h-4" />}
                 {t('history')}
               </Button>
-              <Button
-                variant={isActive('/messages') ? 'secondary' : 'ghost'}
-                onClick={() => navigate('/messages')}
-                className={isActive('/messages') ? '' : 'text-white hover:bg-white/10'}
-                data-testid="nav-messages"
-              >
-                {language === 'ar' ? <Mail className="ml-2 w-4 h-4" /> : <Mail className="mr-2 w-4 h-4" />}
-                {language === 'ar' ? 'البريد' : 'Messages'}
-              </Button>
+              {!isImpersonating && (
+                <Button
+                  variant={isActive('/messages') ? 'secondary' : 'ghost'}
+                  onClick={() => navigate('/messages')}
+                  className={isActive('/messages') ? '' : 'text-white hover:bg-white/10'}
+                  data-testid="nav-messages"
+                >
+                  {language === 'ar' ? <Mail className="ml-2 w-4 h-4" /> : <Mail className="mr-2 w-4 h-4" />}
+                  {language === 'ar' ? 'البريد' : 'Messages'}
+                </Button>
+              )}
             </div>
           </div>
 
