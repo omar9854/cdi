@@ -181,9 +181,13 @@ code {
     animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* Medical Theme Styling */
+/* Professional Card Styling */
 .medical-card {
-    @apply shadow-lg hover:shadow-2xl transition-all duration-300 bg-white border border-gray-100;
+    @apply bg-white shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 rounded-xl;
+}
+
+.professional-card {
+    @apply bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 border border-blue-100 rounded-2xl;
 }
 
 /* Modern Professional Background */
