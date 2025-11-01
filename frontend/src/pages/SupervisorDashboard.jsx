@@ -1217,6 +1217,55 @@ const SupervisorDashboard = ({ user, onLogout }) => {
           </>
         )}
       </main>
+      
+      {/* Change Password Dialog */}
+      {changePasswordUser && (
+        <Dialog open={!!changePasswordUser} onOpenChange={() => setChangePasswordUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {language === 'ar' ? 'تغيير كلمة المرور' : 'Change Password'}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-700">
+                  {language === 'ar' ? 'المستخدم:' : 'User:'} <span className="font-bold">{changePasswordUser.full_name}</span>
+                </Label>
+              </div>
+              <div>
+                <Label htmlFor="new-password">{language === 'ar' ? 'كلمة المرور الجديدة' : 'New Password'}</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder={language === 'ar' ? 'أدخل كلمة المرور الجديدة (6 أحرف على الأقل)' : 'Enter new password (min 6 characters)'}
+                  className="mt-2"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setChangePasswordUser(null);
+                  setNewPassword('');
+                }}
+              >
+                {language === 'ar' ? 'إلغاء' : 'Cancel'}
+              </Button>
+              <Button
+                onClick={handleChangePassword}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {language === 'ar' ? 'تغيير كلمة المرور' : 'Change Password'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+      
       <Footer />
     </div>
   );
