@@ -253,7 +253,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                   </div>
                   
                   <div className="bg-green-50 p-3 rounded-lg">
-                    <div className="text-xs text-green-600 mb-1">{language === 'ar' ? 'PDX المضافة' : 'PDX Added'}</div>
+                    <div className="text-xs text-blue-600 mb-1">{language === 'ar' ? 'PDX المضافة' : 'PDX Added'}</div>
                     <div className="text-2xl font-bold text-green-700">{hospital.pdx_added}</div>
                   </div>
                   
