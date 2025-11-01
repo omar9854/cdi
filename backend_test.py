@@ -638,6 +638,179 @@ class MedicalCodingAPITester:
             self.log_test("Supervisor Employees", False, str(e))
             return False
 
+    def test_supervisor_account_employees_access(self):
+        """Test supervisor account (not admin) access to GET /api/supervisor/employees"""
+        print("\n🔍 FOCUSED TEST: Supervisor Account Employee Access")
+        print("=" * 60)
+        
+        # Step 1: Create a supervisor account
+        supervisor_user = {
+            "email": f"supervisor_test_{datetime.now().strftime('%H%M%S')}@hospital.com",
+            "full_name": "د. مشرف اختبار",
+            "phone_number": "966507654321",
+            "password": "SupervisorTest123!"
+        }
+        
+        # Register supervisor user
+        try:
+            response = requests.post(
+                f"{self.api_url}/auth/register",
+                json=supervisor_user,
+                timeout=10
+            )
+            if response.status_code != 200:
+                self.log_test("Create Supervisor Account", False, f"Registration failed: {response.text}")
+                return False
+            
+            supervisor_data = response.json()
+            supervisor_user_id = supervisor_data.get('user', {}).get('id')
+            self.log_test("Create Supervisor Account", True, f"Supervisor registered: {supervisor_user['email']}")
+        except Exception as e:
+            self.log_test("Create Supervisor Account", False, str(e))
+            return False
+        
+        # Step 2: Promote user to supervisor using admin
+        if not self.admin_token or not supervisor_user_id:
+            self.log_test("Promote to Supervisor", False, "No admin token or supervisor user ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.post(
+                f"{self.api_url}/admin/assign-supervisor/{supervisor_user_id}",
+                headers=headers,
+                timeout=10
+            )
+            if response.status_code != 200:
+                self.log_test("Promote to Supervisor", False, f"Promotion failed: {response.text}")
+                return False
+            
+            self.log_test("Promote to Supervisor", True, "User promoted to supervisor role")
+        except Exception as e:
+            self.log_test("Promote to Supervisor", False, str(e))
+            return False
+        
+        # Step 3: Login as supervisor to get supervisor token
+        try:
+            login_data = {
+                "email": supervisor_user["email"],
+                "password": supervisor_user["password"]
+            }
+            response = requests.post(
+                f"{self.api_url}/auth/login",
+                json=login_data,
+                timeout=10
+            )
+            if response.status_code != 200:
+                self.log_test("Supervisor Login", False, f"Login failed: {response.text}")
+                return False
+            
+            login_response = response.json()
+            supervisor_token = login_response.get('access_token')
+            supervisor_role = login_response.get('user', {}).get('role')
+            
+            if supervisor_role != 'supervisor':
+                self.log_test("Supervisor Login", False, f"Expected role 'supervisor', got '{supervisor_role}'")
+                return False
+            
+            self.log_test("Supervisor Login", True, f"Supervisor login successful, role: {supervisor_role}")
+        except Exception as e:
+            self.log_test("Supervisor Login", False, str(e))
+            return False
+        
+        # Step 4: Test admin access to employees (baseline)
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(
+                f"{self.api_url}/supervisor/employees",
+                headers=headers,
+                timeout=10
+            )
+            admin_success = response.status_code == 200
+            admin_employees = []
+            if admin_success:
+                admin_employees = response.json()
+                self.log_test("Admin Employee Access", True, f"Admin sees {len(admin_employees)} employees")
+            else:
+                self.log_test("Admin Employee Access", False, f"Admin access failed: {response.text}")
+        except Exception as e:
+            self.log_test("Admin Employee Access", False, str(e))
+            admin_success = False
+            admin_employees = []
+        
+        # Step 5: Test supervisor access to employees (main test)
+        try:
+            headers = {"Authorization": f"Bearer {supervisor_token}"}
+            response = requests.get(
+                f"{self.api_url}/supervisor/employees",
+                headers=headers,
+                timeout=10
+            )
+            supervisor_success = response.status_code == 200
+            supervisor_employees = []
+            
+            if supervisor_success:
+                supervisor_employees = response.json()
+                
+                # Verify response structure
+                if supervisor_employees:
+                    first_employee = supervisor_employees[0]
+                    required_fields = ['id', 'full_name', 'email', 'notes_count', 'analyses_count']
+                    missing_fields = [field for field in required_fields if field not in first_employee]
+                    
+                    if missing_fields:
+                        supervisor_success = False
+                        details = f"Missing required fields: {', '.join(missing_fields)}"
+                    else:
+                        details = f"Supervisor sees {len(supervisor_employees)} employees with all required fields"
+                else:
+                    details = "Supervisor sees 0 employees"
+                
+                # Compare with admin results
+                if admin_success and len(admin_employees) != len(supervisor_employees):
+                    details += f" (Admin sees {len(admin_employees)}, difference detected!)"
+                    supervisor_success = False
+                elif admin_success:
+                    details += f" (Same as admin: {len(admin_employees)} employees)"
+                
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Supervisor Employee Access", supervisor_success, details, response.json() if supervisor_success else None)
+            
+        except Exception as e:
+            self.log_test("Supervisor Employee Access", False, str(e))
+            supervisor_success = False
+        
+        # Step 6: Clean up - delete supervisor account
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.delete(
+                f"{self.api_url}/admin/users/{supervisor_user_id}",
+                headers=headers,
+                timeout=10
+            )
+            cleanup_success = response.status_code == 200
+            self.log_test("Cleanup Supervisor Account", cleanup_success, "Supervisor account deleted" if cleanup_success else f"Cleanup failed: {response.text}")
+        except Exception as e:
+            self.log_test("Cleanup Supervisor Account", False, str(e))
+        
+        # Summary
+        print(f"\n📊 SUPERVISOR ACCESS TEST SUMMARY:")
+        print(f"   Admin Access: {'✅ SUCCESS' if admin_success else '❌ FAILED'} ({len(admin_employees)} employees)")
+        print(f"   Supervisor Access: {'✅ SUCCESS' if supervisor_success else '❌ FAILED'} ({len(supervisor_employees)} employees)")
+        
+        if admin_success and supervisor_success:
+            if len(admin_employees) == len(supervisor_employees):
+                print(f"   ✅ RESULT: Both admin and supervisor see the same {len(admin_employees)} employees")
+                return True
+            else:
+                print(f"   ❌ ISSUE: Admin sees {len(admin_employees)} employees, supervisor sees {len(supervisor_employees)}")
+                return False
+        else:
+            print(f"   ❌ ISSUE: One or both access methods failed")
+            return False
+
     # ========== MESSAGING SYSTEM TESTS ==========
     
     def test_send_message_to_user(self, recipient_user_id):
