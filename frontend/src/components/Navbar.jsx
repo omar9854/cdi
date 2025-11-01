@@ -8,6 +8,17 @@ const Navbar = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { language, toggleLanguage, t } = useLanguage();
+  const isImpersonating = localStorage.getItem('is_impersonating') === 'true';
+
+  const handleExitImpersonation = () => {
+    const adminToken = localStorage.getItem('admin_token_backup');
+    if (adminToken) {
+      localStorage.setItem('token', adminToken);
+      localStorage.removeItem('admin_token_backup');
+      localStorage.removeItem('is_impersonating');
+      window.location.href = '/admin';
+    }
+  };
 
   const isActive = (path) => location.pathname === path;
 
