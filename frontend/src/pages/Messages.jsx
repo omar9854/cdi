@@ -77,17 +77,27 @@ const Messages = ({ user, onLogout }) => {
   const fetchAllUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/admin/users-statistics`, {
+      // Try to get all users from supervisor/employees endpoint (works for both admin and supervisor)
+      const response = await axios.get(`${API}/supervisor/employees`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('Users response:', response.data);
-      // Filter out users with empty user_id and extract from statistics array
-      const users = (response.data.statistics || []).filter(u => u.user_id && u.user_id.trim() !== '');
-      console.log('Filtered users for messages:', users);
-      setAllUsers(users);
+      console.log('Users for messages:', response.data);
+      // These users already have id, full_name, email
+      setAllUsers(response.data || []);
     } catch (error) {
       console.error('Failed to fetch users:', error);
-      toast.error(language === 'ar' ? 'فشل تحميل قائمة المستخدمين' : 'Failed to load users');
+      // Fallback to admin/users-statistics if supervisor endpoint fails
+      try {
+        const response = await axios.get(`${API}/admin/users-statistics`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const users = (response.data.statistics || []).filter(u => u.user_id && u.user_id.trim() !== '');
+        console.log('Users from statistics:', users);
+        setAllUsers(users);
+      } catch (err) {
+        console.error('Failed to fetch users from statistics:', err);
+        toast.error(language === 'ar' ? 'فشل تحميل قائمة المستخدمين' : 'Failed to load users');
+      }
     }
   };
 
