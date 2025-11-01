@@ -1135,19 +1135,12 @@ async def require_supervisor(user: dict = Depends(get_current_user)):
 
 @api_router.get("/supervisor/employees")
 async def get_supervisor_employees(supervisor: dict = Depends(require_supervisor)):
-    """Get all employees under this supervisor"""
-    if supervisor['role'] == 'admin':
-        # Admin sees all non-admin, non-supervisor users (all regular employees)
-        employees = await db.users.find(
-            {"role": {"$nin": ["admin", "supervisor"]}},
-            {"_id": 0, "password_hash": 0}
-        ).to_list(1000)
-    else:
-        # Supervisor sees only assigned employees
-        employees = await db.users.find(
-            {"supervisor_id": supervisor['id'], "role": {"$ne": "admin"}},
-            {"_id": 0, "password_hash": 0}
-        ).to_list(1000)
+    """Get all employees - both admin and supervisor see all regular employees"""
+    # Both admin and supervisor see all non-admin, non-supervisor users
+    employees = await db.users.find(
+        {"role": {"$nin": ["admin", "supervisor"]}},
+        {"_id": 0, "password_hash": 0}
+    ).to_list(1000)
     
     # Add notes and analyses counts
     for employee in employees:
