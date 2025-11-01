@@ -148,7 +148,26 @@ class Token(BaseModel):
 
 class DoctorNote(BaseModel):
     text: str
-    specialty: str
+    specialty: Optional[str] = None
+
+class Message(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    from_user_id: str
+    from_user_name: str
+    to_user_id: Optional[str] = None  # None means "All"
+    to_user_name: Optional[str] = None
+    subject: str
+    body: str
+    is_draft: bool = False
+    is_read: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+class MessageCreate(BaseModel):
+    to_user_id: Optional[str] = None  # None for "All"
+    subject: str
+    body: str
+    is_draft: bool = False
 
 class ClinicalNote(BaseModel):
     model_config = ConfigDict(extra="ignore")
