@@ -288,7 +288,7 @@ const Messages = ({ user, onLogout }) => {
                       <SelectValue placeholder={language === 'ar' ? 'اختر المستلم' : 'Select recipient'} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{language === 'ar' ? 'الكل' : 'All Users'}</SelectItem>
+                      <SelectItem value="ALL">{language === 'ar' ? 'الكل' : 'All Users'}</SelectItem>
                       {allUsers.map((u) => (
                         <SelectItem key={u.user_id} value={u.user_id}>
                           {u.full_name} ({u.email})
