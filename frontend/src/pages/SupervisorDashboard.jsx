@@ -345,12 +345,12 @@ const SupervisorDashboard = ({ user, onLogout }) => {
             <CardContent>
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {analysis.top_diagnoses.pdx_due_to_cdi.map((diag, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100 transition">
+                  <div key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition">
                     <div className="flex-1">
                       <div className="font-medium text-gray-800 text-sm">{diag.diagnosis}</div>
                       <div className="text-xs text-gray-600">{diag.percentage}%</div>
                     </div>
-                    <div className="text-xl font-bold text-green-600">{diag.count}</div>
+                    <div className="text-xl font-bold text-blue-600">{diag.count}</div>
                   </div>
                 ))}
               </div>
