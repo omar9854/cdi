@@ -298,13 +298,19 @@ const Messages = ({ user, onLogout }) => {
                     <SelectTrigger>
                       <SelectValue placeholder={language === 'ar' ? 'اختر المستلم' : 'Select recipient'} />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[300px] overflow-y-auto">
                       <SelectItem value="ALL">{language === 'ar' ? 'الكل' : 'All Users'}</SelectItem>
-                      {allUsers.map((u) => (
-                        <SelectItem key={u.user_id} value={u.user_id}>
-                          {u.full_name} ({u.email})
+                      {allUsers && allUsers.length > 0 ? (
+                        allUsers.map((u) => (
+                          <SelectItem key={u.user_id || u.id} value={u.user_id || u.id}>
+                            {u.full_name} ({u.email})
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="loading" disabled>
+                          {language === 'ar' ? 'جاري التحميل...' : 'Loading...'}
                         </SelectItem>
-                      ))}
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
