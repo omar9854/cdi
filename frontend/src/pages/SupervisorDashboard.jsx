@@ -88,6 +88,30 @@ const SupervisorDashboard = ({ user, onLogout }) => {
     }
   };
 
+  const handleChangePassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      toast.error(language === 'ar' ? 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' : 'Password must be at least 6 characters');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `${API}/admin/change-user-password/${changePasswordUser.id}`,
+        null,
+        {
+          params: { new_password: newPassword },
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      toast.success(language === 'ar' ? 'تم تغيير كلمة المرور بنجاح' : 'Password changed successfully');
+      setChangePasswordUser(null);
+      setNewPassword('');
+    } catch (error) {
+      toast.error(language === 'ar' ? 'فشل تغيير كلمة المرور' : 'Failed to change password');
+    }
+  };
+
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
