@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Saudi Vision 2030 Healthcare Digital Theme */
+:root {
+  --primary-green: #00a651;
+  --primary-teal: #00b4d8;
+  --primary-blue: #0077b6;
+  --accent-gold: #ffd60a;
+  --bg-gradient-start: #e8f5e9;
+  --bg-gradient-end: #e1f5fe;
+}
+
 body {
     margin: 0;
     font-family:
