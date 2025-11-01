@@ -337,8 +337,9 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Login page - Error message display"
+    - "Supervisor Dashboard - Employee list with impersonation"
     - "Messages UI - Internal messaging system"
-    - "Admin Dashboard - Impersonate User button"
     - "Navbar - Exit Impersonation feature"
   stuck_tasks: []
   test_all: false
