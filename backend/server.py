@@ -1184,7 +1184,11 @@ async def impersonate_user(
         raise HTTPException(status_code=404, detail="User not found")
     
     # Generate a new token for the impersonated user
-    access_token = create_access_token(data={"sub": user['email']})
+    access_token = create_access_token(data={
+        "user_id": user['id'], 
+        "email": user['email'],
+        "role": user.get('role', 'user')
+    })
     
     return {
         "access_token": access_token,
