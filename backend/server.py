@@ -1176,7 +1176,7 @@ async def admin_change_user_password(
 @api_router.post("/admin/impersonate/{user_id}")
 async def impersonate_user(
     user_id: str,
-    admin: dict = Depends(require_admin)
+    current_user: dict = Depends(require_supervisor)  # Allow both admin and supervisor
 ):
     """Admin/Supervisor can impersonate any user to view their account"""
     user = await db.users.find_one({"id": user_id}, {"_id": 0})
@@ -1184,11 +1184,7 @@ async def impersonate_user(
         raise HTTPException(status_code=404, detail="User not found")
     
     # Generate a new token for the impersonated user
-    access_token = create_access_token({
-        "user_id": user['id'], 
-        "email": user['email'],
-        "role": user.get('role', 'user')
-    })
+    access_token = create_access_token(data={"sub": user['email']})
     
     return {
         "access_token": access_token,
@@ -1197,10 +1193,10 @@ async def impersonate_user(
             "id": user['id'],
             "email": user['email'],
             "full_name": user['full_name'],
-            "role": user['role'],
+            "role": user.get('role', 'user'),
             "phone_number": user.get('phone_number', ''),
             "is_impersonating": True,
-            "impersonated_by": admin['id']
+            "impersonated_by": current_user['id']
         }
     }
 
