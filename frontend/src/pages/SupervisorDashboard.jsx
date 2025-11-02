@@ -73,18 +73,29 @@ const SupervisorDashboard = ({ user, onLogout }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Store original supervisor token
-      localStorage.setItem('supervisor_token_backup', token);
+      console.log('Impersonation response:', response.data);
+
+      // Store original token (works for both admin and supervisor)
+      const currentUser = JSON.parse(localStorage.getItem('user'));
+      if (currentUser?.role === 'admin') {
+        localStorage.setItem('admin_token_backup', token);
+      } else {
+        localStorage.setItem('supervisor_token_backup', token);
+      }
       localStorage.setItem('is_impersonating', 'true');
       
       // Set the impersonated user's token
       localStorage.setItem('token', response.data.access_token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
       
       toast.success(language === 'ar' ? `تم الدخول إلى حساب ${employeeName}` : `Now viewing ${employeeName}'s account`);
       
       // Reload to dashboard
-      window.location.href = '/dashboard';
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 500);
     } catch (error) {
+      console.error('Impersonation error:', error);
       toast.error(language === 'ar' ? 'فشل الدخول للحساب' : 'Failed to impersonate user');
     }
   };
