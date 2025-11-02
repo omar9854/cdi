@@ -186,6 +186,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ SUPERVISOR IMPERSONATION WORKING PERFECTLY: Fixed JWT token generation issue by using proper token payload format with user_id, email, and role instead of just {\"sub\": email}. Successfully tested POST /api/admin/impersonate/{user_id} - admin can impersonate any user and receive valid JWT token for target user. Impersonated token successfully accesses user endpoints like /api/notes. Response includes proper user info with is_impersonating flag and impersonated_by field. Both admin and supervisor impersonation endpoints available and working correctly."
+      - working: true
+        agent: "testing"
+        comment: "✅ SUPERVISOR IMPERSONATION FIX VERIFIED: User reported issue 'عند دخول المشرف على حساب الأعضاء تأتي رسالة بفشل الدخول لحساب العضو' has been RESOLVED. Fixed critical JWT token payload issue in /api/admin/impersonate/{user_id} endpoint - changed from {\"sub\": email} to {\"user_id\": id, \"email\": email, \"role\": role} format. Comprehensive testing completed: ✅ Supervisor can login and access employee list (11 employees found), ✅ Supervisor impersonation of employees works correctly, ✅ Generated tokens are valid and can access user endpoints (/api/notes), ✅ Admin impersonation still works as expected, ✅ Both endpoints return proper response format with is_impersonating flag. The reported failure message no longer occurs - supervisors can now successfully impersonate employee accounts."
 
   - task: "Supervisor endpoints - Employee management"
     implemented: true
