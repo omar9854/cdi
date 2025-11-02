@@ -1695,8 +1695,13 @@ def main():
     tester = MedicalCodingAPITester()
     
     # Check if we should run focused test
-    if len(sys.argv) > 1 and sys.argv[1] == "--supervisor-test":
-        results = tester.run_supervisor_focused_test()
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--supervisor-test":
+            results = tester.run_supervisor_focused_test()
+        elif sys.argv[1] == "--impersonation-test":
+            results = tester.run_supervisor_impersonation_test()
+        else:
+            results = tester.run_all_tests()
     else:
         results = tester.run_all_tests()
     
