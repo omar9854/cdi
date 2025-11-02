@@ -1668,6 +1668,28 @@ class MedicalCodingAPITester:
         
         return self.generate_report()
 
+    def run_supervisor_impersonation_test(self):
+        """Run focused test for supervisor impersonation feature after fix"""
+        print("🚀 Starting Supervisor Impersonation Test After Fix")
+        print(f"🔗 Testing API: {self.api_url}")
+        print("=" * 80)
+        
+        # Basic connectivity
+        if not self.test_health_check():
+            print("❌ Health check failed - stopping tests")
+            return self.generate_report()
+        
+        # Admin Authentication (required for setup)
+        print("\n👑 Testing Admin Authentication...")
+        if not self.test_admin_login():
+            print("❌ Admin login failed - stopping tests")
+            return self.generate_report()
+        
+        # Run the comprehensive supervisor impersonation test
+        self.test_supervisor_impersonation_comprehensive()
+        
+        return self.generate_report()
+
 def main():
     """Main test execution"""
     tester = MedicalCodingAPITester()
