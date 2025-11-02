@@ -1108,6 +1108,37 @@ class MedicalCodingAPITester:
             self.log_test("Admin Impersonate User", False, str(e))
             return False, None
 
+    def test_supervisor_impersonate_user(self, supervisor_token, target_user_id):
+        """Test POST /api/admin/impersonate/{user_id} with supervisor credentials"""
+        if not supervisor_token or not target_user_id:
+            self.log_test("Supervisor Impersonate User", False, "No supervisor token or target user ID")
+            return False, None
+        
+        try:
+            headers = {"Authorization": f"Bearer {supervisor_token}"}
+            response = requests.post(
+                f"{self.api_url}/admin/impersonate/{target_user_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            impersonated_token = None
+            if success:
+                data = response.json()
+                impersonated_token = data.get('access_token')
+                user_info = data.get('user', {})
+                is_impersonating = user_info.get('is_impersonating', False)
+                impersonated_by = user_info.get('impersonated_by')
+                details = f"Supervisor impersonation successful - User: {user_info.get('full_name')}, Is_impersonating: {is_impersonating}, Impersonated_by: {impersonated_by}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Supervisor Impersonate User", success, details, response.json() if success else None)
+            return success, impersonated_token
+        except Exception as e:
+            self.log_test("Supervisor Impersonate User", False, str(e))
+            return False, None
+
     def test_impersonated_token_access(self, impersonated_token):
         """Test that impersonated token can access user endpoints"""
         if not impersonated_token:
@@ -1133,6 +1164,202 @@ class MedicalCodingAPITester:
         except Exception as e:
             self.log_test("Impersonated Token Access", False, str(e))
             return False
+
+    def test_supervisor_impersonation_comprehensive(self):
+        """Comprehensive test for supervisor impersonation feature after fix"""
+        print("\n🎯 COMPREHENSIVE SUPERVISOR IMPERSONATION TEST")
+        print("=" * 70)
+        print("Testing the fix for: 'عند دخول المشرف على حساب الأعضاء تأتي رسالة بفشل الدخول لحساب العضو'")
+        print("=" * 70)
+        
+        # Step 1: Get supervisor credentials (try ex012@hotmail.com first)
+        supervisor_credentials = {
+            "email": "ex012@hotmail.com",
+            "password": "123456"  # Common password, will try variations if needed
+        }
+        
+        # Try to login with existing supervisor
+        supervisor_token = None
+        supervisor_user_id = None
+        
+        try:
+            response = requests.post(
+                f"{self.api_url}/auth/login",
+                json=supervisor_credentials,
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                supervisor_token = data.get('access_token')
+                supervisor_data = data.get('user', {})
+                supervisor_user_id = supervisor_data.get('id')
+                role = supervisor_data.get('role')
+                
+                if role == 'supervisor':
+                    self.log_test("Existing Supervisor Login", True, f"Logged in as supervisor: {supervisor_credentials['email']}")
+                else:
+                    self.log_test("Existing Supervisor Login", False, f"User exists but role is '{role}', not 'supervisor'")
+                    supervisor_token = None
+            else:
+                self.log_test("Existing Supervisor Login", False, f"Login failed: {response.text}")
+        except Exception as e:
+            self.log_test("Existing Supervisor Login", False, str(e))
+        
+        # Step 2: If no existing supervisor, create a test supervisor
+        if not supervisor_token:
+            print("\n📝 Creating test supervisor account...")
+            
+            # Create supervisor user
+            test_supervisor = {
+                "email": f"test_supervisor_{datetime.now().strftime('%H%M%S')}@hospital.com",
+                "full_name": "د. مشرف الاختبار",
+                "phone_number": "966507777777",
+                "password": "SupervisorTest123!"
+            }
+            
+            try:
+                # Register user
+                response = requests.post(
+                    f"{self.api_url}/auth/register",
+                    json=test_supervisor,
+                    timeout=10
+                )
+                if response.status_code != 200:
+                    self.log_test("Create Test Supervisor", False, f"Registration failed: {response.text}")
+                    return False
+                
+                supervisor_reg_data = response.json()
+                supervisor_user_id = supervisor_reg_data.get('user', {}).get('id')
+                
+                # Promote to supervisor using admin
+                if not self.admin_token:
+                    self.log_test("Create Test Supervisor", False, "No admin token to promote user")
+                    return False
+                
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                response = requests.post(
+                    f"{self.api_url}/admin/assign-supervisor/{supervisor_user_id}",
+                    headers=headers,
+                    timeout=10
+                )
+                if response.status_code != 200:
+                    self.log_test("Create Test Supervisor", False, f"Promotion failed: {response.text}")
+                    return False
+                
+                # Login as supervisor
+                login_data = {
+                    "email": test_supervisor["email"],
+                    "password": test_supervisor["password"]
+                }
+                response = requests.post(
+                    f"{self.api_url}/auth/login",
+                    json=login_data,
+                    timeout=10
+                )
+                if response.status_code != 200:
+                    self.log_test("Create Test Supervisor", False, f"Supervisor login failed: {response.text}")
+                    return False
+                
+                login_response = response.json()
+                supervisor_token = login_response.get('access_token')
+                supervisor_credentials = test_supervisor
+                
+                self.log_test("Create Test Supervisor", True, f"Test supervisor created and logged in: {test_supervisor['email']}")
+                
+            except Exception as e:
+                self.log_test("Create Test Supervisor", False, str(e))
+                return False
+        
+        # Step 3: Get list of employees
+        print("\n👥 Getting list of employees...")
+        employees = []
+        try:
+            headers = {"Authorization": f"Bearer {supervisor_token}"}
+            response = requests.get(
+                f"{self.api_url}/supervisor/employees",
+                headers=headers,
+                timeout=10
+            )
+            if response.status_code == 200:
+                employees = response.json()
+                self.log_test("Get Employee List", True, f"Retrieved {len(employees)} employees")
+            else:
+                self.log_test("Get Employee List", False, f"Failed to get employees: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Get Employee List", False, str(e))
+            return False
+        
+        if not employees:
+            self.log_test("Employee Availability", False, "No employees found to test impersonation")
+            return False
+        
+        # Step 4: Try to impersonate an employee using supervisor credentials
+        target_employee = employees[0]
+        target_user_id = target_employee.get('id')
+        target_name = target_employee.get('full_name', 'Unknown')
+        
+        print(f"\n🎭 Testing supervisor impersonation of employee: {target_name}")
+        
+        supervisor_impersonate_success, supervisor_impersonated_token = self.test_supervisor_impersonate_user(
+            supervisor_token, target_user_id
+        )
+        
+        # Step 5: Verify token is generated correctly and works
+        if supervisor_impersonate_success and supervisor_impersonated_token:
+            print("\n✅ Testing impersonated token functionality...")
+            token_works = self.test_impersonated_token_access(supervisor_impersonated_token)
+            
+            if token_works:
+                self.log_test("Supervisor Impersonation Complete", True, 
+                            f"Supervisor successfully impersonated {target_name} and token works correctly")
+            else:
+                self.log_test("Supervisor Impersonation Complete", False, 
+                            "Impersonation succeeded but token doesn't work for user endpoints")
+        else:
+            self.log_test("Supervisor Impersonation Complete", False, 
+                        "Supervisor impersonation failed - this is the reported issue")
+        
+        # Step 6: Test admin impersonation (should still work)
+        print(f"\n👑 Testing admin impersonation of same employee: {target_name}")
+        admin_impersonate_success, admin_impersonated_token = self.test_admin_impersonate_user(target_user_id)
+        
+        if admin_impersonate_success and admin_impersonated_token:
+            admin_token_works = self.test_impersonated_token_access(admin_impersonated_token)
+            if admin_token_works:
+                self.log_test("Admin Impersonation Verification", True, 
+                            "Admin impersonation still works correctly")
+            else:
+                self.log_test("Admin Impersonation Verification", False, 
+                            "Admin impersonation succeeded but token doesn't work")
+        else:
+            self.log_test("Admin Impersonation Verification", False, 
+                        "Admin impersonation failed - this should not happen")
+        
+        # Step 7: Summary and cleanup
+        print("\n📊 SUPERVISOR IMPERSONATION TEST SUMMARY:")
+        print(f"   Supervisor Login: {'✅ SUCCESS' if supervisor_token else '❌ FAILED'}")
+        print(f"   Employee List Access: {'✅ SUCCESS' if employees else '❌ FAILED'} ({len(employees)} employees)")
+        print(f"   Supervisor Impersonation: {'✅ SUCCESS' if supervisor_impersonate_success else '❌ FAILED'}")
+        print(f"   Admin Impersonation: {'✅ SUCCESS' if admin_impersonate_success else '❌ FAILED'}")
+        
+        # Cleanup test supervisor if created
+        if supervisor_user_id and supervisor_credentials.get('email', '').startswith('test_supervisor_'):
+            try:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                response = requests.delete(
+                    f"{self.api_url}/admin/users/{supervisor_user_id}",
+                    headers=headers,
+                    timeout=10
+                )
+                cleanup_success = response.status_code == 200
+                self.log_test("Cleanup Test Supervisor", cleanup_success, 
+                            "Test supervisor deleted" if cleanup_success else f"Cleanup failed: {response.text}")
+            except Exception as e:
+                self.log_test("Cleanup Test Supervisor", False, str(e))
+        
+        # Return overall success
+        return supervisor_impersonate_success and admin_impersonate_success
 
     # ========== CDI EXCEL UPLOAD TESTS ==========
     
