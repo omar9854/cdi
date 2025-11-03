@@ -278,7 +278,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-4 gap-4 mb-4">
+                <div className="grid md:grid-cols-3 gap-4 mb-4">
                   <div className="bg-purple-50 p-3 rounded-lg">
                     <div className="text-xs text-purple-600 mb-1">{language === 'ar' ? 'تغييرات DRG' : 'DRG Changes'}</div>
                     <div className="text-2xl font-bold text-purple-700">{hospital.drg_changes}</div>
