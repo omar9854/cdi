@@ -1139,15 +1139,18 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                 </div>
               )}
 
-              {/* ADX Diagnoses Chart & Table */}
+              {/* ADX due to CDI Diagnoses Chart & Table */}
               {currentHospital.top_adx_diagnoses && currentHospital.top_adx_diagnoses.length > 0 && (
                 <div className="grid md:grid-cols-2 gap-6 mt-6">
-                  {/* ADX Chart */}
+                  {/* ADX due to CDI Chart */}
                   <Card className="bg-orange-50">
                     <CardHeader>
                       <CardTitle className="text-lg text-gray-800">
                         {language === 'ar' ? '📊 رسم بياني - تشخيصات ADX due to CDI' : '📊 Chart - ADX due to CDI Diagnoses'}
                       </CardTitle>
+                      <CardDescription className="text-xs">
+                        {language === 'ar' ? '(التشخيصات الإضافية المضافة بسبب CDI)' : '(Secondary diagnoses added due to CDI)'}
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <ResponsiveContainer width="100%" height={300}>
@@ -1169,7 +1172,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                     </CardContent>
                   </Card>
 
-                  {/* ADX Table */}
+                  {/* ADX due to CDI Table */}
                   <Card className="bg-orange-50">
                     <CardHeader>
                       <CardTitle className="text-lg text-gray-800">
@@ -1177,7 +1180,100 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="max-h-80 overflow-y-auto">
+                      <div className="max-h-96 overflow-y-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-center">{language === 'ar' ? 'التشخيص' : 'Diagnosis'}</TableHead>
+                              <TableHead className="text-center">{language === 'ar' ? 'العدد' : 'Count'}</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {currentHospital.top_adx_diagnoses.map((diag, index) => (
+                              <TableRow key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-orange-100/30'}>
+                                <TableCell className="text-sm">{diag.diagnosis}</TableCell>
+                                <TableCell className="text-center">
+                                  <span className="inline-block bg-orange-600 text-white px-3 py-1 rounded-full font-bold">
+                                    {diag.count}
+                                  </span>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* ADX/After CDI Diagnoses Chart & Table - NEW! */}
+              {currentHospital.top_adx_after_diagnoses && currentHospital.top_adx_after_diagnoses.length > 0 && (
+                <div className="grid md:grid-cols-2 gap-6 mt-6">
+                  {/* ADX/After CDI Chart */}
+                  <Card className="bg-cyan-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-800">
+                        {language === 'ar' ? '📊 رسم بياني - تشخيصات ADX/After CDI' : '📊 Chart - ADX/After CDI Diagnoses'}
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        {language === 'ar' ? '(جميع التشخيصات الإضافية بعد CDI)' : '(All secondary diagnoses after CDI)'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={currentHospital.top_adx_after_diagnoses.slice(0, 10)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis 
+                            dataKey="diagnosis" 
+                            angle={-45} 
+                            textAnchor="end" 
+                            height={120} 
+                            fontSize={9}
+                            interval={0}
+                          />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="count" fill="#06b6d4" name={language === 'ar' ? 'التكرار' : 'Count'} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  {/* ADX/After CDI Table */}
+                  <Card className="bg-cyan-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-800">
+                        {language === 'ar' ? '📋 جدول - تشخيصات ADX/After CDI' : '📋 Table - ADX/After CDI Diagnoses'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="max-h-96 overflow-y-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-center">{language === 'ar' ? 'التشخيص' : 'Diagnosis'}</TableHead>
+                              <TableHead className="text-center">{language === 'ar' ? 'العدد' : 'Count'}</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {currentHospital.top_adx_after_diagnoses.map((diag, index) => (
+                              <TableRow key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-cyan-100/30'}>
+                                <TableCell className="text-sm">{diag.diagnosis}</TableCell>
+                                <TableCell className="text-center">
+                                  <span className="inline-block bg-cyan-600 text-white px-3 py-1 rounded-full font-bold">
+                                    {diag.count}
+                                  </span>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
                         <Table>
                           <TableHeader>
                             <TableRow>
