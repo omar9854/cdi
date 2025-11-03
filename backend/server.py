@@ -1610,7 +1610,7 @@ async def upload_cdi_data(
         
         # Principal Diagnosis columns
         pdx_before_col = find_column(['pdx before', 'principal before', 'primary before', 'pdxbefore'])
-        pdx_after_col = find_column(['pdx after', 'principal after', 'primary after', 'pdxafter', 'pdx/after cdi', 'pdx after cdi'])
+        pdx_after_col = find_column(['pdx after', 'principal after', 'primary after', 'pdxafter', 'pdx/after cdi', 'pdx /after cdi', 'pdx after cdi'])
         pdx_due_to_cdi_col = find_column(['pdx due to cdi', 'pdx added'])
         
         # Additional Diagnosis columns - SEPARATED for accuracy
