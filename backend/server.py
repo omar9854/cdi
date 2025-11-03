@@ -1656,13 +1656,13 @@ async def upload_cdi_data(
         
         # ADX Analysis (Additional Diagnosis due to CDI)
         adx_added = 0
-        if adx_col:
-            df['has_adx'] = df[adx_col].notna() & (df[adx_col].astype(str).str.strip() != '')
+        if adx_due_to_cdi_col:
+            df['has_adx'] = df[adx_due_to_cdi_col].notna() & (df[adx_due_to_cdi_col].astype(str).str.strip() != '')
             adx_added = int(df['has_adx'].sum())
         
         # Calculate documentation metrics
         total_pdx_after = int(df[pdx_after_col].notna().sum()) if pdx_after_col else 0
-        total_adx = int(df[adx_col].notna().sum()) if adx_col else 0
+        total_adx = int(df[adx_due_to_cdi_col].notna().sum()) if adx_due_to_cdi_col else 0
         
         # Hospital-Level Comprehensive Analysis
         # Hospital-Level PRECISE Analysis
@@ -1720,9 +1720,9 @@ async def upload_cdi_data(
                 # ADX due to CDI Analysis - PRECISE counting
                 adx_diagnoses = []
                 adx_diagnoses_full = []
-                if adx_col and adx_col in hospital_df.columns:
+                if adx_due_to_cdi_col and adx_due_to_cdi_col in hospital_df.columns:
                     # Only count non-null, non-empty values
-                    adx_list = hospital_df[adx_col].dropna()
+                    adx_list = hospital_df[adx_due_to_cdi_col].dropna()
                     adx_list = adx_list[adx_list.astype(str).str.strip() != '']
                     
                     if len(adx_list) > 0:
@@ -1758,7 +1758,7 @@ async def upload_cdi_data(
                             {"diagnosis": str(diag).strip(), "count": int(count)} 
                             for diag, count in adx_after_counter.most_common()
                         ]
-                elif adx_col and adx_col in hospital_df.columns:
+                elif adx_due_to_cdi_col and adx_due_to_cdi_col in hospital_df.columns:
                     # Fallback: if no separate ADX/After column, use ADX due to CDI
                     adx_after_diagnoses = adx_diagnoses
                     adx_after_diagnoses_full = adx_diagnoses_full
@@ -1835,8 +1835,8 @@ async def upload_cdi_data(
         
         # Overall Top ADX Diagnoses
         top_adx_overall = []
-        if adx_col:
-            adx_all = df[adx_col].dropna()
+        if adx_due_to_cdi_col:
+            adx_all = df[adx_due_to_cdi_col].dropna()
             if len(adx_all) > 0:
                 adx_counter = Counter(adx_all)
                 top_adx_overall = [
@@ -2005,7 +2005,7 @@ async def upload_cdi_data(
             # Data Availability Flags
             'data_flags': {
                 'has_pdx_data': bool(pdx_after_col),
-                'has_adx_data': bool(adx_col),
+                'has_adx_data': bool(adx_due_to_cdi_col),
                 'has_specialty_data': bool(specialty_col),
                 'has_cds_data': bool(cds_col),
                 'has_drg_data': bool(drg_change_col or (drg_before_col and drg_after_col)),
