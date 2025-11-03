@@ -843,8 +843,8 @@ const SupervisorDashboard = ({ user, onLogout }) => {
 
           {currentHospital && (
             <div className="space-y-6">
-              {/* Hospital Summary */}
-              <div className="grid md:grid-cols-4 gap-4 mb-6">
+              {/* Hospital Summary - Enhanced with PDX/After and ADX/After */}
+              <div className="grid md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-blue-100 p-4 rounded-lg text-center">
                   <div className="text-sm text-blue-600 mb-1">{language === 'ar' ? 'إجمالي الحالات' : 'Total Cases'}</div>
                   <div className="text-3xl font-bold text-blue-700">{currentHospital.total_cases}</div>
@@ -853,13 +853,40 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                   <div className="text-sm text-purple-600 mb-1">{language === 'ar' ? 'تغييرات DRG' : 'DRG Changes'}</div>
                   <div className="text-3xl font-bold text-purple-700">{currentHospital.drg_changes}</div>
                 </div>
-                <div className="bg-green-100 p-4 rounded-lg text-center">
-                  <div className="text-sm text-green-600 mb-1">{language === 'ar' ? 'PDX المضافة' : 'PDX Added'}</div>
-                  <div className="text-3xl font-bold text-green-700">{currentHospital.pdx_added}</div>
+                <div className="bg-indigo-100 p-4 rounded-lg text-center">
+                  <div className="text-sm text-indigo-600 mb-1">{language === 'ar' ? 'معدل التأثير' : 'Impact Rate'}</div>
+                  <div className="text-3xl font-bold text-indigo-700">{currentHospital.drg_impact_rate}%</div>
                 </div>
-                <div className="bg-orange-100 p-4 rounded-lg text-center">
-                  <div className="text-sm text-orange-600 mb-1">{language === 'ar' ? 'ADX المضافة' : 'ADX Added'}</div>
-                  <div className="text-3xl font-bold text-orange-700">{currentHospital.adx_added}</div>
+              </div>
+
+              {/* Diagnosis Indicators Grid */}
+              <div className="grid md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-green-100 p-4 rounded-lg text-center border-l-4 border-green-500">
+                  <div className="text-xs text-green-600 mb-1">{language === 'ar' ? 'PDX المضافة (due to CDI)' : 'PDX Added (due to CDI)'}</div>
+                  <div className="text-2xl font-bold text-green-700">{currentHospital.pdx_added}</div>
+                  <div className="text-xs text-green-600 mt-1">{language === 'ar' ? 'التشخيصات المضافة فقط' : 'Added diagnoses only'}</div>
+                </div>
+                
+                <div className="bg-purple-100 p-4 rounded-lg text-center border-l-4 border-purple-500">
+                  <div className="text-xs text-purple-600 mb-1">{language === 'ar' ? 'PDX/After CDI' : 'PDX/After CDI'}</div>
+                  <div className="text-2xl font-bold text-purple-700">
+                    {currentHospital.top_pdx_diagnoses ? currentHospital.top_pdx_diagnoses.reduce((sum, d) => sum + d.count, 0) : 0}
+                  </div>
+                  <div className="text-xs text-purple-600 mt-1">{language === 'ar' ? 'جميع التشخيصات الرئيسية' : 'All primary diagnoses'}</div>
+                </div>
+
+                <div className="bg-orange-100 p-4 rounded-lg text-center border-l-4 border-orange-500">
+                  <div className="text-xs text-orange-600 mb-1">{language === 'ar' ? 'ADX المضافة (due to CDI)' : 'ADX Added (due to CDI)'}</div>
+                  <div className="text-2xl font-bold text-orange-700">{currentHospital.adx_added}</div>
+                  <div className="text-xs text-orange-600 mt-1">{language === 'ar' ? 'التشخيصات المضافة فقط' : 'Added diagnoses only'}</div>
+                </div>
+                
+                <div className="bg-cyan-100 p-4 rounded-lg text-center border-l-4 border-cyan-500">
+                  <div className="text-xs text-cyan-600 mb-1">{language === 'ar' ? 'ADX/After CDI' : 'ADX/After CDI'}</div>
+                  <div className="text-2xl font-bold text-cyan-700">
+                    {currentHospital.top_adx_after_diagnoses ? currentHospital.top_adx_after_diagnoses.reduce((sum, d) => sum + d.count, 0) : 0}
+                  </div>
+                  <div className="text-xs text-cyan-600 mt-1">{language === 'ar' ? 'جميع التشخيصات الإضافية' : 'All secondary diagnoses'}</div>
                 </div>
               </div>
 
