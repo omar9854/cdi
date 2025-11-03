@@ -1614,6 +1614,7 @@ async def upload_cdi_data(
         
         # Additional Diagnosis columns  
         adx_col = find_column(['adx', 'additional', 'secondary', 'adx due to cdi'])
+        adx_after_col = find_column(['adx after', 'adx/after cdi', 'secondary after', 'additional after'])
         
         # DRG columns
         drg_before_col = find_column(['drg before', 'before drg', 'drgbefore', 'previous drg'])
