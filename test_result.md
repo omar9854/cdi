@@ -392,9 +392,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Login page - Error message display"
-    - "Supervisor Dashboard - Employee list with impersonation"
-    - "Messages UI - Internal messaging system"
+    - "Excel upload and CDI analysis endpoint"
+    - "Supervisor Dashboard - CDI Analysis Tool"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
