@@ -628,6 +628,17 @@ async def login(credentials: UserLogin):
         }
     }
 
+@api_router.get("/auth/me")
+async def get_current_user_info(current_user: dict = Depends(get_current_user)):
+    """Get current logged in user info"""
+    return {
+        "id": current_user['id'],
+        "email": current_user['email'],
+        "full_name": current_user['full_name'],
+        "phone_number": current_user.get('phone_number', ''),
+        "role": current_user.get('role', 'user')
+    }
+
 @api_router.post("/auth/forgot-password")
 async def forgot_password(request: PasswordResetRequest):
     """Request password reset - sends code via WhatsApp"""
