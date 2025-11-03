@@ -235,14 +235,14 @@ backend:
 
   - task: "Excel upload and CDI analysis endpoint"
     implemented: true
-    working: true
+    working: false
     files:
       - "/app/backend/server.py"
     endpoints:
       - "/api/supervisor/upload-cdi-data" (POST with file upload)
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
@@ -250,6 +250,12 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ CDI EXCEL UPLOAD WORKING PERFECTLY: POST /api/supervisor/upload-cdi-data successfully accepts .xlsx files and performs comprehensive CDI analysis. Created test Excel file with sample CDI data including CDS Name, Hospital Name, Admission Date, Primary/Secondary Diagnosis, DRG Before/After, DRG Change columns. Successfully detects undocumented diagnoses (empty values and 'not documented' entries). Response includes all required fields: total_records, total_hospitals, drg_changes, undocumented_total, primary_undocumented, secondary_undocumented, hospitals_data array with hospital-level breakdown. Analysis correctly identifies missing documentation and provides accurate statistics."
+      - working: false
+        agent: "user"
+        comment: "User reported PDX/After CDI indicator showing 0 values despite having data in Excel column"
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed backend calculation for total_pdx_after in server.py line 1664. Issue: was counting all non-null values including empty strings. Fix: Added empty string filter like ADX: (df[pdx_after_col].notna() & (df[pdx_after_col].astype(str).str.strip() != '')).sum(). This ensures only cells with actual data are counted, not empty strings."
 
 frontend:
   - task: "Admin Dashboard - User management UI"
