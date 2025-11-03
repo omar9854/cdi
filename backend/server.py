@@ -1785,9 +1785,12 @@ async def upload_cdi_data(
                 if 'pdx_changed' in hospital_df.columns:
                     pdx_changes_hospital = int(hospital_df['pdx_changed'].sum())
                 
+                # PDX Added: count non-empty values from PDX/After CDI column
                 pdx_added_hospital = 0
-                if 'pdx_added' in hospital_df.columns:
-                    pdx_added_hospital = int(hospital_df['pdx_added'].sum())
+                if pdx_after_col and pdx_after_col in hospital_df.columns:
+                    pdx_added_list = hospital_df[pdx_after_col].dropna()
+                    pdx_added_list = pdx_added_list[pdx_added_list.astype(str).str.strip() != '']
+                    pdx_added_hospital = len(pdx_added_list)
                 
                 adx_added_hospital = 0
                 if 'has_adx' in hospital_df.columns:
