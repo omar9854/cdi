@@ -1660,9 +1660,9 @@ async def upload_cdi_data(
             df['has_adx'] = df[adx_due_to_cdi_col].notna() & (df[adx_due_to_cdi_col].astype(str).str.strip() != '')
             adx_added = int(df['has_adx'].sum())
         
-        # Calculate documentation metrics
-        total_pdx_after = int(df[pdx_after_col].notna().sum()) if pdx_after_col else 0
-        total_adx = int(df[adx_due_to_cdi_col].notna().sum()) if adx_due_to_cdi_col else 0
+        # Calculate documentation metrics - with empty string filtering
+        total_pdx_after = int((df[pdx_after_col].notna() & (df[pdx_after_col].astype(str).str.strip() != '')).sum()) if pdx_after_col else 0
+        total_adx = int((df[adx_due_to_cdi_col].notna() & (df[adx_due_to_cdi_col].astype(str).str.strip() != '')).sum()) if adx_due_to_cdi_col else 0
         
         # Hospital-Level Comprehensive Analysis
         # Hospital-Level PRECISE Analysis
