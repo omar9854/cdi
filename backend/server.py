@@ -1637,7 +1637,11 @@ async def upload_cdi_data(
         # DRG Analysis
         drg_changes_count = 0
         if drg_change_col:
-            df['has_drg_change'] = df[drg_change_col].notna() & (df[drg_change_col] != 0) & (df[drg_change_col].astype(str).str.lower() != 'no')
+            # Check for Yes/No values, or numeric values, or compare before/after
+            df['has_drg_change'] = df[drg_change_col].notna() & (
+                (df[drg_change_col].astype(str).str.strip().str.lower().isin(['yes', 'نعم', 'true', '1'])) |
+                ((df[drg_change_col] != 0) & (df[drg_change_col].astype(str).str.lower() != 'no'))
+            )
             drg_changes_count = int(df['has_drg_change'].sum())
         elif drg_before_col and drg_after_col:
             df['has_drg_change'] = (df[drg_before_col] != df[drg_after_col]) & df[drg_before_col].notna() & df[drg_after_col].notna()
