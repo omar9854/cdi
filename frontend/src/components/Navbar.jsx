@@ -10,7 +10,7 @@ const Navbar = ({ user, onLogout }) => {
   const { language, toggleLanguage, t } = useLanguage();
   const isImpersonating = localStorage.getItem('is_impersonating') === 'true';
 
-  const handleExitImpersonation = () => {
+  const handleExitImpersonation = async () => {
     // Check if it was admin or supervisor who impersonated
     const adminToken = localStorage.getItem('admin_token_backup');
     const supervisorToken = localStorage.getItem('supervisor_token_backup');
@@ -19,11 +19,33 @@ const Navbar = ({ user, onLogout }) => {
       localStorage.setItem('token', adminToken);
       localStorage.removeItem('admin_token_backup');
       localStorage.removeItem('is_impersonating');
+      
+      // Fetch admin user data
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${adminToken}` }
+        });
+        localStorage.setItem('user', JSON.stringify(response.data));
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+      
       window.location.href = '/admin';
     } else if (supervisorToken) {
       localStorage.setItem('token', supervisorToken);
       localStorage.removeItem('supervisor_token_backup');
       localStorage.removeItem('is_impersonating');
+      
+      // Fetch supervisor user data
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${supervisorToken}` }
+        });
+        localStorage.setItem('user', JSON.stringify(response.data));
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+      
       window.location.href = '/supervisor';
     }
   };
