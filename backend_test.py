@@ -1756,17 +1756,35 @@ class MedicalCodingAPITester:
             return None
 
     def test_upload_cdi_data(self):
-        """Test POST /api/supervisor/upload-cdi-data with Excel file"""
+        """Test POST /api/supervisor/upload-cdi-data with Excel file - Focus on PDX/ADX metrics"""
         if not self.admin_token:
             self.log_test("Upload CDI Data", False, "No admin authentication token")
             return False
         
+        print("\n🔍 TESTING CDI EXCEL UPLOAD - PDX/ADX INDICATOR FIX")
+        print("=" * 70)
+        print("User Issue: PDX/After CDI indicator showing 0 values despite having data")
+        print("Fix Applied: Added empty string filter in server.py line 1664")
+        print("=" * 70)
+        
         try:
-            # Create sample Excel file
+            # Create sample Excel file with specific PDX/ADX data
             excel_file = self.create_sample_cdi_excel()
             if not excel_file:
                 self.log_test("Upload CDI Data", False, "Failed to create sample Excel file")
                 return False
+            
+            # Expected counts based on our test data:
+            # PDX/After CDI: 5 entries with actual data (excluding empty strings and whitespace)
+            # ADX due to CDI: 4 entries with actual data (excluding empty strings)
+            expected_pdx_count = 5
+            expected_adx_count = 4
+            
+            print(f"📊 Expected Results:")
+            print(f"   PDX/After CDI entries with data: {expected_pdx_count}")
+            print(f"   ADX due to CDI entries with data: {expected_adx_count}")
+            print(f"   Total records: 7")
+            print(f"   Hospitals: 4 unique hospitals")
             
             headers = {"Authorization": f"Bearer {self.admin_token}"}
             files = {
@@ -1783,25 +1801,70 @@ class MedicalCodingAPITester:
             success = response.status_code == 200
             if success:
                 data = response.json()
-                # Verify required fields in response
-                required_fields = ['total_records', 'total_hospitals', 'drg_changes', 
-                                 'undocumented_total', 'primary_undocumented', 
-                                 'secondary_undocumented', 'hospitals_data']
                 
-                missing_fields = [field for field in required_fields if field not in data]
+                # Verify critical PDX/ADX metrics that were reported as 0
+                pdx_metrics = data.get('pdx_metrics', {})
+                adx_metrics = data.get('adx_metrics', {})
                 
-                if not missing_fields:
-                    details = f"CDI analysis complete - Records: {data.get('total_records')}, Hospitals: {data.get('total_hospitals')}, Undocumented: {data.get('undocumented_total')}"
-                else:
+                pdx_total_after_cdi = pdx_metrics.get('total_after_cdi', 0)
+                adx_total_added = adx_metrics.get('total_added', 0)
+                
+                print(f"\n📈 Actual Results:")
+                print(f"   PDX/After CDI total_after_cdi: {pdx_total_after_cdi}")
+                print(f"   ADX due to CDI total_added: {adx_total_added}")
+                print(f"   Total records: {data.get('total_records', 0)}")
+                print(f"   Total hospitals: {data.get('total_hospitals', 0)}")
+                
+                # Critical validation: PDX/After CDI should NOT be 0
+                if pdx_total_after_cdi == 0:
                     success = False
-                    details = f"Missing required fields: {', '.join(missing_fields)}"
+                    details = f"❌ CRITICAL: PDX/After CDI showing 0 values - the reported bug is NOT fixed!"
+                elif pdx_total_after_cdi != expected_pdx_count:
+                    success = False
+                    details = f"❌ PDX/After CDI count mismatch: expected {expected_pdx_count}, got {pdx_total_after_cdi}"
+                elif adx_total_added == 0:
+                    success = False
+                    details = f"❌ CRITICAL: ADX due to CDI showing 0 values - calculation error!"
+                elif adx_total_added != expected_adx_count:
+                    success = False
+                    details = f"❌ ADX due to CDI count mismatch: expected {expected_adx_count}, got {adx_total_added}"
+                else:
+                    # Verify other required fields
+                    required_fields = ['total_records', 'total_hospitals', 'drg_changes', 
+                                     'hospitals_analysis', 'pdx_metrics', 'adx_metrics']
+                    
+                    missing_fields = [field for field in required_fields if field not in data]
+                    
+                    if missing_fields:
+                        success = False
+                        details = f"Missing required fields: {', '.join(missing_fields)}"
+                    else:
+                        # Verify hospitals_analysis has hospital-level breakdown
+                        hospitals_analysis = data.get('hospitals_analysis', [])
+                        if not hospitals_analysis:
+                            success = False
+                            details = "Missing hospitals_analysis array"
+                        else:
+                            # Check if hospitals have top_pdx_diagnoses and top_adx_diagnoses
+                            first_hospital = hospitals_analysis[0]
+                            if 'top_pdx_diagnoses' not in first_hospital or 'top_adx_diagnoses' not in first_hospital:
+                                success = False
+                                details = "Hospital analysis missing top_pdx_diagnoses or top_adx_diagnoses arrays"
+                            else:
+                                details = f"✅ CDI analysis successful - PDX: {pdx_total_after_cdi}, ADX: {adx_total_added}, Records: {data.get('total_records')}, Hospitals: {len(hospitals_analysis)}"
+                
+                print(f"\n🎯 Test Result: {details}")
+                
             else:
                 details = f"Status: {response.status_code}, Error: {response.text}"
+                print(f"\n❌ Upload Failed: {details}")
             
             self.log_test("Upload CDI Data", success, details, response.json() if success else None)
             return success
         except Exception as e:
-            self.log_test("Upload CDI Data", False, str(e))
+            error_msg = str(e)
+            print(f"\n💥 Exception: {error_msg}")
+            self.log_test("Upload CDI Data", False, error_msg)
             return False
 
     def run_all_tests(self):
