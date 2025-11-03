@@ -1737,6 +1737,31 @@ async def upload_cdi_data(
                             for diag, count in adx_counter.most_common()
                         ]
                 
+                # ADX/After CDI Analysis - ALL secondary diagnoses after CDI
+                adx_after_diagnoses = []
+                adx_after_diagnoses_full = []
+                if adx_after_col and adx_after_col in hospital_df.columns:
+                    # Count all ADX after CDI
+                    adx_after_list = hospital_df[adx_after_col].dropna()
+                    adx_after_list = adx_after_list[adx_after_list.astype(str).str.strip() != '']
+                    
+                    if len(adx_after_list) > 0:
+                        adx_after_counter = Counter(adx_after_list)
+                        # Top 10 for display
+                        adx_after_diagnoses = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in adx_after_counter.most_common(10)
+                        ]
+                        # All diagnoses for comprehensive report
+                        adx_after_diagnoses_full = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in adx_after_counter.most_common()
+                        ]
+                elif adx_col and adx_col in hospital_df.columns:
+                    # Fallback: if no separate ADX/After column, use ADX due to CDI
+                    adx_after_diagnoses = adx_diagnoses
+                    adx_after_diagnoses_full = adx_diagnoses_full
+                
                 # Calculate metrics with validation
                 drg_changes_hospital = 0
                 if 'has_drg_change' in hospital_df.columns:
