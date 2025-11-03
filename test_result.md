@@ -190,6 +190,24 @@ backend:
         agent: "testing"
         comment: "✅ SUPERVISOR IMPERSONATION FIX VERIFIED: User reported issue 'عند دخول المشرف على حساب الأعضاء تأتي رسالة بفشل الدخول لحساب العضو' has been RESOLVED. Fixed critical JWT token payload issue in /api/admin/impersonate/{user_id} endpoint - changed from {\"sub\": email} to {\"user_id\": id, \"email\": email, \"role\": role} format. Comprehensive testing completed: ✅ Supervisor can login and access employee list (11 employees found), ✅ Supervisor impersonation of employees works correctly, ✅ Generated tokens are valid and can access user endpoints (/api/notes), ✅ Admin impersonation still works as expected, ✅ Both endpoints return proper response format with is_impersonating flag. The reported failure message no longer occurs - supervisors can now successfully impersonate employee accounts."
 
+  - task: "Auth me endpoint for user data retrieval"
+    implemented: true
+    working: true
+    files:
+      - "/app/backend/server.py"
+    endpoints:
+      - "/api/auth/me" (GET)
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added new GET /api/auth/me endpoint to fetch current user data. This endpoint is critical for exit impersonation functionality to verify user identity and role."
+      - working: true
+        agent: "testing"
+        comment: "✅ GET /api/auth/me ENDPOINT WORKING PERFECTLY: Comprehensive testing completed for the new endpoint. Successfully tested with admin, supervisor, and regular user tokens. Returns complete user data including id, email, full_name, phone_number, and role fields. Critical for exit impersonation functionality - supervisor tokens work correctly after impersonation cycles. Endpoint properly validates JWT tokens and returns accurate user information for all user types. This resolves the supervisor exit impersonation issue by providing reliable user data retrieval."
+
   - task: "Supervisor endpoints - Employee management"
     implemented: true
     working: true
