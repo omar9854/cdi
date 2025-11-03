@@ -1829,29 +1829,40 @@ class MedicalCodingAPITester:
                     success = False
                     details = f"❌ ADX due to CDI count mismatch: expected {expected_adx_count}, got {adx_total_added}"
                 else:
-                    # Verify other required fields
-                    required_fields = ['total_records', 'total_hospitals', 'drg_changes', 
-                                     'hospitals_analysis', 'pdx_metrics', 'adx_metrics']
+                    # Verify other required fields in new response structure
+                    summary = data.get('summary', {})
+                    drg_metrics = data.get('drg_metrics', {})
                     
-                    missing_fields = [field for field in required_fields if field not in data]
+                    required_top_fields = ['summary', 'drg_metrics', 'pdx_metrics', 'adx_metrics', 'hospitals_analysis']
+                    missing_top_fields = [field for field in required_top_fields if field not in data]
                     
-                    if missing_fields:
+                    if missing_top_fields:
                         success = False
-                        details = f"Missing required fields: {', '.join(missing_fields)}"
+                        details = f"Missing top-level fields: {', '.join(missing_top_fields)}"
                     else:
-                        # Verify hospitals_analysis has hospital-level breakdown
-                        hospitals_analysis = data.get('hospitals_analysis', [])
-                        if not hospitals_analysis:
+                        # Check summary fields
+                        required_summary_fields = ['total_records', 'total_hospitals']
+                        missing_summary_fields = [field for field in required_summary_fields if field not in summary]
+                        
+                        if missing_summary_fields:
                             success = False
-                            details = "Missing hospitals_analysis array"
+                            details = f"Missing summary fields: {', '.join(missing_summary_fields)}"
                         else:
-                            # Check if hospitals have top_pdx_diagnoses and top_adx_diagnoses
-                            first_hospital = hospitals_analysis[0]
-                            if 'top_pdx_diagnoses' not in first_hospital or 'top_adx_diagnoses' not in first_hospital:
+                            # Verify hospitals_analysis has hospital-level breakdown
+                            hospitals_analysis = data.get('hospitals_analysis', [])
+                            if not hospitals_analysis:
                                 success = False
-                                details = "Hospital analysis missing top_pdx_diagnoses or top_adx_diagnoses arrays"
+                                details = "Missing hospitals_analysis array"
                             else:
-                                details = f"✅ CDI analysis successful - PDX: {pdx_total_after_cdi}, ADX: {adx_total_added}, Records: {data.get('total_records')}, Hospitals: {len(hospitals_analysis)}"
+                                # Check if hospitals have top_pdx_diagnoses and top_adx_diagnoses
+                                first_hospital = hospitals_analysis[0]
+                                if 'top_pdx_diagnoses' not in first_hospital or 'top_adx_diagnoses' not in first_hospital:
+                                    success = False
+                                    details = "Hospital analysis missing top_pdx_diagnoses or top_adx_diagnoses arrays"
+                                else:
+                                    total_records = summary.get('total_records', 0)
+                                    total_hospitals = summary.get('total_hospitals', 0)
+                                    details = f"✅ CDI analysis successful - PDX: {pdx_total_after_cdi}, ADX: {adx_total_added}, Records: {total_records}, Hospitals: {total_hospitals}"
                 
                 print(f"\n🎯 Test Result: {details}")
                 
