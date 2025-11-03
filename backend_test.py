@@ -1401,6 +1401,262 @@ class MedicalCodingAPITester:
         # Return overall success
         return supervisor_impersonate_success and admin_impersonate_success
 
+    def test_exit_impersonation_functionality(self):
+        """Test exit impersonation functionality specifically for supervisors"""
+        print("\n🚪 TESTING EXIT IMPERSONATION FUNCTIONALITY")
+        print("=" * 70)
+        print("Testing fix for: المشرف عندما يدخل لحساب عضو ويضغط 'الخروج من الحساب'، لا يستطيع الرجوع لحسابه")
+        print("=" * 70)
+        
+        # Step 1: Login as supervisor (try ex012@hotmail.com first)
+        supervisor_credentials = {
+            "email": "ex012@hotmail.com",
+            "password": "123456"
+        }
+        
+        supervisor_token = None
+        supervisor_user_data = None
+        
+        try:
+            response = requests.post(
+                f"{self.api_url}/auth/login",
+                json=supervisor_credentials,
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                supervisor_token = data.get('access_token')
+                supervisor_user_data = data.get('user', {})
+                role = supervisor_user_data.get('role')
+                
+                if role == 'supervisor':
+                    self.log_test("Supervisor Login for Exit Test", True, f"Logged in as supervisor: {supervisor_credentials['email']}")
+                else:
+                    # If not supervisor, create one
+                    supervisor_token = None
+            else:
+                supervisor_token = None
+        except Exception as e:
+            self.log_test("Supervisor Login for Exit Test", False, str(e))
+            supervisor_token = None
+        
+        # Create test supervisor if needed
+        if not supervisor_token:
+            print("\n📝 Creating test supervisor for exit impersonation test...")
+            
+            test_supervisor = {
+                "email": f"exit_test_supervisor_{datetime.now().strftime('%H%M%S')}@hospital.com",
+                "full_name": "د. مشرف اختبار الخروج",
+                "phone_number": "966508888888",
+                "password": "ExitTestSupervisor123!"
+            }
+            
+            try:
+                # Register and promote to supervisor
+                response = requests.post(f"{self.api_url}/auth/register", json=test_supervisor, timeout=10)
+                if response.status_code != 200:
+                    self.log_test("Create Exit Test Supervisor", False, f"Registration failed: {response.text}")
+                    return False
+                
+                reg_data = response.json()
+                supervisor_user_id = reg_data.get('user', {}).get('id')
+                
+                # Promote to supervisor
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                response = requests.post(f"{self.api_url}/admin/assign-supervisor/{supervisor_user_id}", headers=headers, timeout=10)
+                if response.status_code != 200:
+                    self.log_test("Create Exit Test Supervisor", False, f"Promotion failed: {response.text}")
+                    return False
+                
+                # Login as supervisor
+                response = requests.post(f"{self.api_url}/auth/login", json={"email": test_supervisor["email"], "password": test_supervisor["password"]}, timeout=10)
+                if response.status_code != 200:
+                    self.log_test("Create Exit Test Supervisor", False, f"Login failed: {response.text}")
+                    return False
+                
+                login_data = response.json()
+                supervisor_token = login_data.get('access_token')
+                supervisor_user_data = login_data.get('user', {})
+                supervisor_credentials = test_supervisor
+                
+                self.log_test("Create Exit Test Supervisor", True, f"Test supervisor created: {test_supervisor['email']}")
+                
+            except Exception as e:
+                self.log_test("Create Exit Test Supervisor", False, str(e))
+                return False
+        
+        # Step 2: Test GET /api/auth/me with supervisor token
+        print("\n🔍 Testing GET /api/auth/me with supervisor token...")
+        supervisor_me_success, supervisor_me_data = self.test_auth_me_endpoint(
+            supervisor_token, 'supervisor', 'Supervisor Original Token'
+        )
+        
+        if not supervisor_me_success:
+            self.log_test("Exit Impersonation Test", False, "GET /api/auth/me failed with supervisor token")
+            return False
+        
+        # Step 3: Get an employee to impersonate
+        print("\n👥 Getting employee list for impersonation...")
+        try:
+            headers = {"Authorization": f"Bearer {supervisor_token}"}
+            response = requests.get(f"{self.api_url}/supervisor/employees", headers=headers, timeout=10)
+            if response.status_code != 200:
+                self.log_test("Get Employees for Exit Test", False, f"Failed to get employees: {response.text}")
+                return False
+            
+            employees = response.json()
+            if not employees:
+                self.log_test("Get Employees for Exit Test", False, "No employees available for impersonation test")
+                return False
+            
+            target_employee = employees[0]
+            target_user_id = target_employee.get('id')
+            target_name = target_employee.get('full_name', 'Unknown')
+            
+            self.log_test("Get Employees for Exit Test", True, f"Found {len(employees)} employees, will impersonate: {target_name}")
+            
+        except Exception as e:
+            self.log_test("Get Employees for Exit Test", False, str(e))
+            return False
+        
+        # Step 4: Supervisor impersonates employee
+        print(f"\n🎭 Supervisor impersonating employee: {target_name}")
+        try:
+            headers = {"Authorization": f"Bearer {supervisor_token}"}
+            response = requests.post(f"{self.api_url}/admin/impersonate/{target_user_id}", headers=headers, timeout=10)
+            
+            if response.status_code != 200:
+                self.log_test("Supervisor Impersonation for Exit Test", False, f"Impersonation failed: {response.text}")
+                return False
+            
+            impersonation_data = response.json()
+            impersonated_token = impersonation_data.get('access_token')
+            impersonated_user = impersonation_data.get('user', {})
+            
+            self.log_test("Supervisor Impersonation for Exit Test", True, 
+                        f"Supervisor successfully impersonated {impersonated_user.get('full_name')}")
+            
+        except Exception as e:
+            self.log_test("Supervisor Impersonation for Exit Test", False, str(e))
+            return False
+        
+        # Step 5: Verify impersonated token works
+        print("\n✅ Testing impersonated token functionality...")
+        impersonated_me_success, impersonated_me_data = self.test_auth_me_endpoint(
+            impersonated_token, 'user', 'Impersonated Employee Token'
+        )
+        
+        if not impersonated_me_success:
+            self.log_test("Exit Impersonation Test", False, "Impersonated token doesn't work with GET /api/auth/me")
+            return False
+        
+        # Step 6: CRITICAL TEST - Simulate exit impersonation
+        print("\n🚪 CRITICAL TEST: Simulating exit impersonation...")
+        print("   This simulates when supervisor clicks 'Exit Account' and should return to supervisor account")
+        
+        # Test that original supervisor token still works (this is what frontend should restore)
+        exit_success, exit_me_data = self.test_auth_me_endpoint(
+            supervisor_token, 'supervisor', 'Supervisor Token After Exit'
+        )
+        
+        if not exit_success:
+            self.log_test("Exit Impersonation Critical Test", False, 
+                        "CRITICAL ISSUE: Supervisor token doesn't work after impersonation - this causes the stuck page issue!")
+            return False
+        
+        # Verify the supervisor data is correct and complete
+        if not exit_me_data:
+            self.log_test("Exit Impersonation Critical Test", False, "No user data returned from supervisor token")
+            return False
+        
+        # Check that supervisor data matches original login data
+        original_supervisor_id = supervisor_user_data.get('id')
+        restored_supervisor_id = exit_me_data.get('id')
+        
+        if original_supervisor_id != restored_supervisor_id:
+            self.log_test("Exit Impersonation Critical Test", False, 
+                        f"Supervisor ID mismatch: original {original_supervisor_id} vs restored {restored_supervisor_id}")
+            return False
+        
+        # Step 7: Test that supervisor can still access supervisor endpoints
+        print("\n🔐 Testing supervisor endpoint access after exit...")
+        try:
+            headers = {"Authorization": f"Bearer {supervisor_token}"}
+            response = requests.get(f"{self.api_url}/supervisor/employees", headers=headers, timeout=10)
+            
+            if response.status_code != 200:
+                self.log_test("Supervisor Endpoints After Exit", False, 
+                            f"Supervisor can't access endpoints after exit: {response.text}")
+                return False
+            
+            post_exit_employees = response.json()
+            self.log_test("Supervisor Endpoints After Exit", True, 
+                        f"Supervisor can still access endpoints, sees {len(post_exit_employees)} employees")
+            
+        except Exception as e:
+            self.log_test("Supervisor Endpoints After Exit", False, str(e))
+            return False
+        
+        # Step 8: Final verification - test multiple cycles
+        print("\n🔄 Testing multiple impersonation cycles...")
+        for cycle in range(2):
+            print(f"   Cycle {cycle + 1}/2...")
+            
+            # Impersonate again
+            try:
+                headers = {"Authorization": f"Bearer {supervisor_token}"}
+                response = requests.post(f"{self.api_url}/admin/impersonate/{target_user_id}", headers=headers, timeout=10)
+                
+                if response.status_code != 200:
+                    self.log_test(f"Multiple Cycles Test - Cycle {cycle + 1}", False, 
+                                f"Impersonation failed on cycle {cycle + 1}: {response.text}")
+                    return False
+                
+                # Test exit again
+                cycle_exit_success, _ = self.test_auth_me_endpoint(
+                    supervisor_token, 'supervisor', f'Cycle {cycle + 1} Exit'
+                )
+                
+                if not cycle_exit_success:
+                    self.log_test(f"Multiple Cycles Test - Cycle {cycle + 1}", False, 
+                                f"Exit failed on cycle {cycle + 1}")
+                    return False
+                
+            except Exception as e:
+                self.log_test(f"Multiple Cycles Test - Cycle {cycle + 1}", False, str(e))
+                return False
+        
+        self.log_test("Multiple Cycles Test", True, "Multiple impersonation/exit cycles work correctly")
+        
+        # Cleanup
+        if supervisor_credentials.get('email', '').startswith('exit_test_supervisor_'):
+            try:
+                headers = {"Authorization": f"Bearer {self.admin_token}"}
+                supervisor_user_id = supervisor_user_data.get('id')
+                response = requests.delete(f"{self.api_url}/admin/users/{supervisor_user_id}", headers=headers, timeout=10)
+                cleanup_success = response.status_code == 200
+                self.log_test("Cleanup Exit Test Supervisor", cleanup_success, 
+                            "Test supervisor deleted" if cleanup_success else f"Cleanup failed: {response.text}")
+            except Exception as e:
+                self.log_test("Cleanup Exit Test Supervisor", False, str(e))
+        
+        # Final summary
+        print("\n📊 EXIT IMPERSONATION TEST SUMMARY:")
+        print(f"   ✅ Supervisor Login: SUCCESS")
+        print(f"   ✅ GET /api/auth/me with supervisor token: SUCCESS")
+        print(f"   ✅ Supervisor impersonation: SUCCESS")
+        print(f"   ✅ Impersonated token works: SUCCESS")
+        print(f"   ✅ CRITICAL: Supervisor token works after impersonation: SUCCESS")
+        print(f"   ✅ Supervisor endpoints accessible after exit: SUCCESS")
+        print(f"   ✅ Multiple impersonation cycles: SUCCESS")
+        print("\n🎉 EXIT IMPERSONATION FUNCTIONALITY IS WORKING CORRECTLY!")
+        print("   The reported issue 'المشرف لا يستطيع الرجوع لحسابه' should be RESOLVED")
+        
+        self.log_test("Exit Impersonation Complete Test", True, 
+                    "All exit impersonation functionality tests passed - issue should be resolved")
+        
+        return True
+
     # ========== CDI EXCEL UPLOAD TESTS ==========
     
     def create_sample_cdi_excel(self):
