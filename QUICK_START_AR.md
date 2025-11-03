@@ -6,7 +6,7 @@
 
 1. **اذهب إلى صفحة التسجيل:**
    ```
-   https://clinical-notes-pro-1.preview.emergentagent.com/register
+   https://cdi-health.preview.emergentagent.com/register
    ```
 
 2. **املأ البيانات:**
@@ -66,7 +66,7 @@
 
 1. **انسخ الرابط:**
    ```
-   https://clinical-notes-pro-1.preview.emergentagent.com
+   https://cdi-health.preview.emergentagent.com
    ```
 
 2. **أرسله للفريق الطبي عبر:**

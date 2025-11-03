@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://clinical-notes-pro-1.preview.emergentagent.com
+https://cdi-health.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://clinical-notes-pro-1.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://clinical-notes-pro-1.preview.emergentagent.com
+   https://cdi-health.preview.emergentagent.com
    ```
 
 ---
