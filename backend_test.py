@@ -1660,65 +1660,83 @@ class MedicalCodingAPITester:
     # ========== CDI EXCEL UPLOAD TESTS ==========
     
     def create_sample_cdi_excel(self):
-        """Create a sample Excel file with CDI data"""
+        """Create a sample Excel file with CDI data - Updated for PDX/ADX testing"""
         try:
-            # Create sample data
+            # Create sample data with specific focus on PDX/After CDI and ADX due to CDI columns
             data = {
                 'CDS Name': [
-                    'د. أحمد محمد',
-                    'د. فاطمة علي', 
-                    'د. محمد حسن',
-                    'د. نورا سالم',
-                    'د. خالد أحمد'
+                    'د. أحمد محمد الطبيب',
+                    'د. فاطمة علي المختصة', 
+                    'د. محمد حسن الاستشاري',
+                    'د. نورا سالم الطبيبة',
+                    'د. خالد أحمد المقيم',
+                    'د. سارة محمود الطبيبة',
+                    'د. عبدالله يوسف الاستشاري'
                 ],
                 'Hospital Name': [
-                    'مستشفى الملك فهد',
-                    'مستشفى الملك فيصل',
-                    'مستشفى الملك فهد',
+                    'مستشفى الملك فهد الجامعي',
+                    'مستشفى الملك فيصل التخصصي',
+                    'مستشفى الملك فهد الجامعي',
                     'مستشفى الأمير سلطان',
-                    'مستشفى الملك فيصل'
+                    'مستشفى الملك فيصل التخصصي',
+                    'مستشفى الملك عبدالعزيز',
+                    'مستشفى الملك فهد الجامعي'
                 ],
                 'Admission Date': [
                     '2024-01-15',
                     '2024-01-16',
                     '2024-01-17',
                     '2024-01-18',
-                    '2024-01-19'
+                    '2024-01-19',
+                    '2024-01-20',
+                    '2024-01-21'
                 ],
-                'Primary Diagnosis': [
-                    'Diabetes Mellitus Type 2',
-                    '',  # Empty to test undocumented detection
-                    'Hypertension',
-                    'Not documented',  # Explicit undocumented
-                    'Pneumonia'
+                # PDX/After CDI column - This is the key column that was showing 0 values
+                'PDX/After CDI': [
+                    'E11.9 - Type 2 diabetes mellitus without complications',  # Has data
+                    'I10 - Essential hypertension',  # Has data
+                    '',  # Empty string - should NOT be counted
+                    'J44.1 - Chronic obstructive pulmonary disease with acute exacerbation',  # Has data
+                    'N18.6 - End stage renal disease',  # Has data
+                    '   ',  # Whitespace only - should NOT be counted
+                    'F32.9 - Major depressive disorder, single episode, unspecified'  # Has data
                 ],
-                'Secondary Diagnosis': [
-                    'Hypertension',
-                    'Diabetes',
-                    '',  # Empty to test undocumented detection
-                    'Diabetes Mellitus',
-                    ''  # Empty
+                # ADX due to CDI column - Additional diagnoses added due to CDI
+                'ADX due to CDI': [
+                    'Z79.4 - Long term use of insulin',  # Has data
+                    '',  # Empty - should NOT be counted
+                    'E78.5 - Hyperlipidemia, unspecified',  # Has data
+                    '',  # Empty - should NOT be counted
+                    'N25.81 - Secondary hyperparathyroidism of renal origin',  # Has data
+                    'D64.9 - Anemia, unspecified',  # Has data
+                    ''  # Empty - should NOT be counted
                 ],
                 'DRG Before': [
                     '641',
                     '642',
                     '643',
                     '644',
-                    '645'
+                    '645',
+                    '646',
+                    '647'
                 ],
                 'DRG After': [
                     '641',
                     '643',  # Changed
                     '643',
                     '645',  # Changed
-                    '645'
+                    '645',
+                    '647',  # Changed
+                    '647'
                 ],
                 'DRG Change': [
-                    '',
+                    'No',
                     'Yes',
-                    '',
+                    'No',
                     'Yes',
-                    ''
+                    'No',
+                    'Yes',
+                    'No'
                 ]
             }
             
