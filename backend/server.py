@@ -1873,11 +1873,18 @@ async def upload_cdi_data(
                 if str(specialty).strip():
                     specialty_df = df[df[specialty_col] == specialty]
                     
+                    # Calculate PDX count from PDX/After CDI column directly
+                    pdx_count_specialty = 0
+                    if pdx_after_col and pdx_after_col in specialty_df.columns:
+                        pdx_list = specialty_df[pdx_after_col].dropna()
+                        pdx_list = pdx_list[pdx_list.astype(str).str.strip() != '']
+                        pdx_count_specialty = len(pdx_list)
+                    
                     specialty_data.append({
                         'specialty': str(specialty),
                         'total_cases': len(specialty_df),
                         'drg_changes': int(specialty_df['has_drg_change'].sum()) if 'has_drg_change' in specialty_df.columns else 0,
-                        'pdx_changes': int(specialty_df['pdx_changed'].sum()) if 'pdx_changed' in specialty_df.columns else 0,
+                        'pdx_changes': pdx_count_specialty,
                         'adx_added': int(specialty_df['has_adx'].sum()) if 'has_adx' in specialty_df.columns else 0,
                         'impact_rate': round((specialty_df['has_drg_change'].sum() / len(specialty_df) * 100), 2) if len(specialty_df) > 0 and 'has_drg_change' in specialty_df.columns else 0
                     })
