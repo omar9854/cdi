@@ -1809,11 +1809,16 @@ class MedicalCodingAPITester:
                 pdx_total_after_cdi = pdx_metrics.get('total_after_cdi', 0)
                 adx_total_added = adx_metrics.get('total_added', 0)
                 
+                # Get summary data
+                summary = data.get('summary', {})
+                total_records = summary.get('total_records', 0)
+                total_hospitals = summary.get('total_hospitals', 0)
+                
                 print(f"\n📈 Actual Results:")
                 print(f"   PDX/After CDI total_after_cdi: {pdx_total_after_cdi}")
                 print(f"   ADX due to CDI total_added: {adx_total_added}")
-                print(f"   Total records: {data.get('total_records', 0)}")
-                print(f"   Total hospitals: {data.get('total_hospitals', 0)}")
+                print(f"   Total records: {total_records}")
+                print(f"   Total hospitals: {total_hospitals}")
                 
                 # Critical validation: PDX/After CDI should NOT be 0
                 if pdx_total_after_cdi == 0:
