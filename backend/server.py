@@ -1697,25 +1697,38 @@ async def upload_cdi_data(
                 # PDX due to CDI Analysis - Only added PDX diagnoses
                 pdx_due_to_cdi_diagnoses = []
                 pdx_due_to_cdi_diagnoses_full = []
-                if pdx_after_col and pdx_after_col in hospital_df.columns:
-                    # Get only the rows where PDX was added (pdx_added = True)
-                    if 'pdx_added' in hospital_df.columns:
-                        pdx_added_df = hospital_df[hospital_df['pdx_added'] == True]
-                        pdx_added_list = pdx_added_df[pdx_after_col].dropna()
-                        pdx_added_list = pdx_added_list[pdx_added_list.astype(str).str.strip() != '']
-                        
-                        if len(pdx_added_list) > 0:
-                            pdx_added_counter = Counter(pdx_added_list)
-                            # Top 10 for display
-                            pdx_due_to_cdi_diagnoses = [
-                                {"diagnosis": str(diag).strip(), "count": int(count)} 
-                                for diag, count in pdx_added_counter.most_common(10)
-                            ]
-                            # All diagnoses for comprehensive report
-                            pdx_due_to_cdi_diagnoses_full = [
-                                {"diagnosis": str(diag).strip(), "count": int(count)} 
-                                for diag, count in pdx_added_counter.most_common()
-                            ]
+                
+                # First, try to find a dedicated PDX due to CDI column
+                if pdx_due_to_cdi_col and pdx_due_to_cdi_col in hospital_df.columns:
+                    pdx_due_list = hospital_df[pdx_due_to_cdi_col].dropna()
+                    pdx_due_list = pdx_due_list[pdx_due_list.astype(str).str.strip() != '']
+                    
+                    if len(pdx_due_list) > 0:
+                        pdx_due_counter = Counter(pdx_due_list)
+                        pdx_due_to_cdi_diagnoses = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in pdx_due_counter.most_common(10)
+                        ]
+                        pdx_due_to_cdi_diagnoses_full = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in pdx_due_counter.most_common()
+                        ]
+                # Fallback: use pdx_added flag if no dedicated column
+                elif pdx_after_col and pdx_after_col in hospital_df.columns and 'pdx_added' in hospital_df.columns:
+                    pdx_added_df = hospital_df[hospital_df['pdx_added'] == True]
+                    pdx_added_list = pdx_added_df[pdx_after_col].dropna()
+                    pdx_added_list = pdx_added_list[pdx_added_list.astype(str).str.strip() != '']
+                    
+                    if len(pdx_added_list) > 0:
+                        pdx_added_counter = Counter(pdx_added_list)
+                        pdx_due_to_cdi_diagnoses = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in pdx_added_counter.most_common(10)
+                        ]
+                        pdx_due_to_cdi_diagnoses_full = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in pdx_added_counter.most_common()
+                        ]
                 
                 # ADX due to CDI Analysis - PRECISE counting
                 adx_diagnoses = []
