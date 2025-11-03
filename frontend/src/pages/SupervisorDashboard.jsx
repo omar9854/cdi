@@ -1003,6 +1003,142 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                 </div>
               )}
 
+              {/* PDX due to CDI Diagnoses Chart & Table */}
+              {currentHospital.top_pdx_due_to_cdi_diagnoses && currentHospital.top_pdx_due_to_cdi_diagnoses.length > 0 && (
+                <div className="grid md:grid-cols-2 gap-6 mt-6">
+                  {/* PDX due to CDI Chart */}
+                  <Card className="bg-green-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-800">
+                        {language === 'ar' ? '📊 رسم بياني - تشخيصات PDX due to CDI' : '📊 Chart - PDX due to CDI Diagnoses'}
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        {language === 'ar' ? '(التشخيصات الرئيسية المضافة بسبب CDI)' : '(Primary diagnoses added due to CDI)'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={currentHospital.top_pdx_due_to_cdi_diagnoses.slice(0, 10)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis 
+                            dataKey="diagnosis" 
+                            angle={-45} 
+                            textAnchor="end" 
+                            height={120} 
+                            fontSize={9}
+                            interval={0}
+                          />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="count" fill="#10b981" name={language === 'ar' ? 'التكرار' : 'Count'} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  {/* PDX due to CDI Table */}
+                  <Card className="bg-green-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-800">
+                        {language === 'ar' ? '📋 جدول - تشخيصات PDX due to CDI' : '📋 Table - PDX due to CDI Diagnoses'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="max-h-96 overflow-y-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-center">{language === 'ar' ? 'التشخيص' : 'Diagnosis'}</TableHead>
+                              <TableHead className="text-center">{language === 'ar' ? 'العدد' : 'Count'}</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {currentHospital.top_pdx_due_to_cdi_diagnoses.map((diag, index) => (
+                              <TableRow key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-green-100/30'}>
+                                <TableCell className="text-sm">{diag.diagnosis}</TableCell>
+                                <TableCell className="text-center">
+                                  <span className="inline-block bg-green-600 text-white px-3 py-1 rounded-full font-bold">
+                                    {diag.count}
+                                  </span>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* PDX/After CDI Diagnoses Chart & Table */}
+              {currentHospital.top_pdx_diagnoses && currentHospital.top_pdx_diagnoses.length > 0 && (
+                <div className="grid md:grid-cols-2 gap-6 mt-6">
+                  {/* PDX/After CDI Chart */}
+                  <Card className="bg-purple-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-800">
+                        {language === 'ar' ? '📊 رسم بياني - تشخيصات PDX/After CDI' : '📊 Chart - PDX/After CDI Diagnoses'}
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        {language === 'ar' ? '(جميع التشخيصات الرئيسية بعد CDI)' : '(All primary diagnoses after CDI)'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={currentHospital.top_pdx_diagnoses.slice(0, 10)}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis 
+                            dataKey="diagnosis" 
+                            angle={-45} 
+                            textAnchor="end" 
+                            height={120} 
+                            fontSize={9}
+                            interval={0}
+                          />
+                          <YAxis />
+                          <Tooltip />
+                          <Bar dataKey="count" fill="#a855f7" name={language === 'ar' ? 'التكرار' : 'Count'} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  {/* PDX/After CDI Table */}
+                  <Card className="bg-purple-50">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-800">
+                        {language === 'ar' ? '📋 جدول - تشخيصات PDX/After CDI' : '📋 Table - PDX/After CDI Diagnoses'}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="max-h-96 overflow-y-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-center">{language === 'ar' ? 'التشخيص' : 'Diagnosis'}</TableHead>
+                              <TableHead className="text-center">{language === 'ar' ? 'العدد' : 'Count'}</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {currentHospital.top_pdx_diagnoses.map((diag, index) => (
+                              <TableRow key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-purple-100/30'}>
+                                <TableCell className="text-sm">{diag.diagnosis}</TableCell>
+                                <TableCell className="text-center">
+                                  <span className="inline-block bg-purple-600 text-white px-3 py-1 rounded-full font-bold">
+                                    {diag.count}
+                                  </span>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
               {/* ADX Diagnoses Chart & Table */}
               {currentHospital.top_adx_diagnoses && currentHospital.top_adx_diagnoses.length > 0 && (
                 <div className="grid md:grid-cols-2 gap-6 mt-6">
