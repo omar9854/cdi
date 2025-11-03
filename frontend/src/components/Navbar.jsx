@@ -25,12 +25,12 @@ const Navbar = ({ user, onLogout }) => {
       
       // Fetch admin user data
       try {
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/auth/me`, {
+        const response = await axios.get(`${API}/api/auth/me`, {
           headers: { Authorization: `Bearer ${adminToken}` }
         });
         localStorage.setItem('user', JSON.stringify(response.data));
       } catch (error) {
-        console.error('Failed to fetch user data:', error);
+        console.error('Failed to fetch admin data:', error);
       }
       
       window.location.href = '/admin';
@@ -41,12 +41,12 @@ const Navbar = ({ user, onLogout }) => {
       
       // Fetch supervisor user data
       try {
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/auth/me`, {
+        const response = await axios.get(`${API}/api/auth/me`, {
           headers: { Authorization: `Bearer ${supervisorToken}` }
         });
         localStorage.setItem('user', JSON.stringify(response.data));
       } catch (error) {
-        console.error('Failed to fetch user data:', error);
+        console.error('Failed to fetch supervisor data:', error);
       }
       
       window.location.href = '/supervisor';
