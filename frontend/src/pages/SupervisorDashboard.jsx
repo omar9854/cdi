@@ -1274,33 +1274,6 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                   </Card>
                 </div>
               )}
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead className="text-center">#</TableHead>
-                              <TableHead>{language === 'ar' ? 'التشخيص' : 'Diagnosis'}</TableHead>
-                              <TableHead className="text-center">{language === 'ar' ? 'التكرار' : 'Count'}</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {currentHospital.top_adx_diagnoses.map((diag, index) => (
-                              <TableRow key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-orange-100'}>
-                                <TableCell className="text-center font-bold text-orange-600">{index + 1}</TableCell>
-                                <TableCell className="text-sm">{diag.diagnosis}</TableCell>
-                                <TableCell className="text-center">
-                                  <span className="inline-block bg-orange-600 text-white px-3 py-1 rounded-full font-bold">
-                                    {diag.count}
-                                  </span>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
 
               {/* No Data Message */}
               {(!currentHospital.top_pdx_diagnoses || currentHospital.top_pdx_diagnoses.length === 0) && 
