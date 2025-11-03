@@ -356,13 +356,19 @@ frontend:
     working: "NA"
     files:
       - "/app/frontend/src/pages/SupervisorDashboard.jsx"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Created SupervisorDashboard component with: Excel file upload, analysis display (summary cards showing total records, hospitals, DRG changes, undocumented diagnoses), hospital-level breakdown table (records, primary/secondary undocumented, DRG changes), employee list with notes and analyses counts."
+      - working: false
+        agent: "user"
+        comment: "User requested to show only 2 indicators: PDX/After CDI and ADX due to CDI. Reported indicators showing 0 values and repetition in detailed hospital analysis."
+      - working: "NA"
+        agent: "main"
+        comment: "Updated SupervisorDashboard.jsx to show only 2 indicators per user request: 1) PDX/After CDI (purple cards, using top_pdx_diagnoses data), 2) ADX due to CDI (orange cards, using top_adx_diagnoses data). Removed duplicate sections: removed duplicate PDX due to CDI sections (lines 950-1087), removed ADX/After CDI section (lines 1225-1291). Updated indicator grid from 3 columns to 2 columns. Charts and tables now display only PDX/After CDI and ADX due to CDI for each hospital."
 
   - task: "Routing and Navigation for Supervisor"
     implemented: true
