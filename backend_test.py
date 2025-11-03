@@ -1984,6 +1984,10 @@ class MedicalCodingAPITester:
         # Run the comprehensive supervisor impersonation test
         self.test_supervisor_impersonation_comprehensive()
         
+        # NEW: Exit Impersonation Functionality Test (Critical for reported issue)
+        print("\n🚪 Testing Exit Impersonation Functionality (Critical for Supervisor Issue)...")
+        self.test_exit_impersonation_functionality()
+        
         return self.generate_report()
 
 def main():
