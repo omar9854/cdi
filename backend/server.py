@@ -1947,12 +1947,12 @@ async def upload_cdi_data(
                     if 'has_drg_change' in cds_df.columns:
                         drg_impact_cds = int(cds_df['has_drg_change'].sum())
                     
-                    # Calculate PDX queries with validation
+                    # Calculate PDX queries from PDX/After CDI column directly
                     pdx_queries_cds = 0
-                    if 'pdx_changed' in cds_df.columns and 'pdx_added' in cds_df.columns:
-                        pdx_changed_count = int(cds_df['pdx_changed'].sum())
-                        pdx_added_count = int(cds_df['pdx_added'].sum())
-                        pdx_queries_cds = pdx_changed_count + pdx_added_count
+                    if pdx_after_col and pdx_after_col in cds_df.columns:
+                        pdx_list_cds = cds_df[pdx_after_col].dropna()
+                        pdx_list_cds = pdx_list_cds[pdx_list_cds.astype(str).str.strip() != '']
+                        pdx_queries_cds = len(pdx_list_cds)
                     
                     # Calculate ADX queries with validation
                     adx_queries_cds = 0
