@@ -395,7 +395,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Excel upload and CDI analysis endpoint"
     - "Supervisor Dashboard - CDI Analysis Tool"
   stuck_tasks: []
   test_all: false
