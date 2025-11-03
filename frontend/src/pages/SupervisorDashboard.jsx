@@ -285,13 +285,8 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                     <div className="text-xs text-purple-600">{hospital.drg_impact_rate}%</div>
                   </div>
                   
-                  <div className="bg-blue-50 p-3 rounded-lg">
-                    <div className="text-xs text-blue-600 mb-1">{language === 'ar' ? 'PDX المتغيرة' : 'PDX Changes'}</div>
-                    <div className="text-2xl font-bold text-blue-700">{hospital.pdx_changes}</div>
-                  </div>
-                  
                   <div className="bg-green-50 p-3 rounded-lg">
-                    <div className="text-xs text-blue-600 mb-1">{language === 'ar' ? 'PDX المضافة' : 'PDX Added'}</div>
+                    <div className="text-xs text-green-600 mb-1">{language === 'ar' ? 'PDX المضافة' : 'PDX Added'}</div>
                     <div className="text-2xl font-bold text-green-700">{hospital.pdx_added}</div>
                   </div>
                   
