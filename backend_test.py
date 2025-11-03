@@ -1075,6 +1075,46 @@ class MedicalCodingAPITester:
             self.log_test("Save Draft Message", False, str(e))
             return False, None
 
+    # ========== AUTH/ME ENDPOINT TESTS ==========
+    
+    def test_auth_me_endpoint(self, token, expected_role, test_name):
+        """Test GET /api/auth/me endpoint"""
+        if not token:
+            self.log_test(f"Auth Me - {test_name}", False, "No authentication token")
+            return False, None
+        
+        try:
+            headers = {"Authorization": f"Bearer {token}"}
+            response = requests.get(
+                f"{self.api_url}/auth/me",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            user_data = None
+            if success:
+                user_data = response.json()
+                actual_role = user_data.get('role')
+                required_fields = ['id', 'email', 'full_name', 'role']
+                missing_fields = [field for field in required_fields if field not in user_data]
+                
+                if missing_fields:
+                    success = False
+                    details = f"Missing required fields: {', '.join(missing_fields)}"
+                elif expected_role and actual_role != expected_role:
+                    success = False
+                    details = f"Expected role '{expected_role}', got '{actual_role}'"
+                else:
+                    details = f"User data retrieved - Role: {actual_role}, Name: {user_data.get('full_name')}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test(f"Auth Me - {test_name}", success, details, user_data if success else None)
+            return success, user_data
+        except Exception as e:
+            self.log_test(f"Auth Me - {test_name}", False, str(e))
+            return False, None
+
     # ========== SUPERVISOR IMPERSONATION TESTS ==========
     
     def test_admin_impersonate_user(self, target_user_id):
