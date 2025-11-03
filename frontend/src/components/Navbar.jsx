@@ -3,6 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogOut, FileText, History, Home, Languages, Mail } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import axios from 'axios';
+
+const API = process.env.REACT_APP_BACKEND_URL;
 
 const Navbar = ({ user, onLogout }) => {
   const navigate = useNavigate();
