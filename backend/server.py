@@ -1648,11 +1648,16 @@ async def upload_cdi_data(
         # PDX Analysis (Principal Diagnosis after CDI)
         pdx_changes = 0
         pdx_added = 0
-        if pdx_before_col and pdx_after_col:
-            df['pdx_changed'] = (df[pdx_before_col] != df[pdx_after_col]) & df[pdx_before_col].notna() & df[pdx_after_col].notna()
-            df['pdx_added'] = df[pdx_before_col].isna() & df[pdx_after_col].notna()
-            pdx_changes = int(df['pdx_changed'].sum())
-            pdx_added = int(df['pdx_added'].sum())
+        if pdx_after_col:
+            # PDX Added: count all non-empty values in PDX/After CDI column
+            pdx_added_series = df[pdx_after_col].dropna()
+            pdx_added_series = pdx_added_series[pdx_added_series.astype(str).str.strip() != '']
+            pdx_added = len(pdx_added_series)
+            
+            # PDX Changes: only if we have before column
+            if pdx_before_col:
+                df['pdx_changed'] = (df[pdx_before_col] != df[pdx_after_col]) & df[pdx_before_col].notna() & df[pdx_after_col].notna()
+                pdx_changes = int(df['pdx_changed'].sum())
         
         # ADX Analysis (Additional Diagnosis due to CDI)
         adx_added = 0
