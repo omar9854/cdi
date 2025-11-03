@@ -648,3 +648,30 @@ agent_communication:
       - Frontend can safely restore supervisor token and redirect to supervisor dashboard
       
       **Status:** ✅ **EXIT IMPERSONATION ISSUE COMPLETELY RESOLVED** - The reported "stuck page" issue should no longer occur. Supervisors can now successfully exit impersonation and return to their accounts.
+  - agent: "main"
+    message: |
+      🔧 **PDX/ADX INDICATOR FIX - BACKEND & FRONTEND UPDATES:**
+      
+      **User Issue:** "PDX/After CDI indicator showing 0 values despite having data in Excel column. Requests only 2 indicators: PDX/After CDI and ADX due to CDI"
+      
+      **Backend Fix (server.py line 1664):**
+      - **Problem:** `total_pdx_after` was counting ALL non-null values including empty strings
+      - **Solution:** Added empty string filter: `(df[pdx_after_col].notna() & (df[pdx_after_col].astype(str).str.strip() != '')).sum()`
+      - Now only counts cells with actual data, matching ADX logic
+      
+      **Frontend Updates (SupervisorDashboard.jsx):**
+      1. **Summary Cards:** Already showing only 2 indicators (PDX/After CDI, ADX due to CDI) ✅
+      2. **Hospital Detail Indicators:** Changed from 3-column to 2-column grid:
+         - Removed: PDX due to CDI (green), ADX/After CDI (cyan)
+         - Kept: PDX/After CDI (purple), ADX due to CDI (orange)
+      3. **Detailed Charts/Tables:** Removed duplicate and unwanted sections:
+         - Removed: Duplicate PDX due to CDI sections (2 occurrences)
+         - Removed: ADX/After CDI section
+         - Kept: PDX/After CDI chart & table, ADX due to CDI chart & table
+      
+      **Testing Needed:**
+      - Backend: Test Excel upload with actual user data to verify PDX/After CDI counts are accurate (not 0)
+      - Backend: Verify ADX due to CDI counts are also correct
+      - Frontend: Verify only 2 indicators show in hospital detail cards
+      - Frontend: Verify detailed sections show only PDX/After CDI and ADX due to CDI
+      - E2E: Upload Excel file and confirm all indicators display correct, non-zero values
