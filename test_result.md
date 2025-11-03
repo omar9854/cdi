@@ -383,7 +383,6 @@ test_plan:
     - "Login page - Error message display"
     - "Supervisor Dashboard - Employee list with impersonation"
     - "Messages UI - Internal messaging system"
-    - "Navbar - Exit Impersonation feature"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
