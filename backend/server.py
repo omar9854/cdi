@@ -1677,6 +1677,19 @@ async def upload_cdi_data(
         total_pdx_after = int((df[pdx_after_col].notna() & (df[pdx_after_col].astype(str).str.strip() != '')).sum()) if pdx_after_col else 0
         total_adx = int((df[adx_due_to_cdi_col].notna() & (df[adx_due_to_cdi_col].astype(str).str.strip() != '')).sum()) if adx_due_to_cdi_col else 0
         
+        # Calculate Query and Review metrics
+        total_queries = 0
+        if query_col:
+            # Sum numeric values in query column
+            query_series = pd.to_numeric(df[query_col], errors='coerce').fillna(0)
+            total_queries = int(query_series.sum())
+        
+        total_reviews = 0
+        if review_col:
+            # Sum numeric values in review column
+            review_series = pd.to_numeric(df[review_col], errors='coerce').fillna(0)
+            total_reviews = int(review_series.sum())
+        
         # Hospital-Level Comprehensive Analysis
         # Hospital-Level PRECISE Analysis
         hospitals_data = []
