@@ -60,20 +60,52 @@ const ChatWidget = ({ user }) => {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API}/admin/users-statistics`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
       
-      if (response.data.statistics) {
-        const userList = response.data.statistics
-          .filter(u => u.id && u.id !== user.id)
-          .map(u => ({
-            id: u.id,
-            name: u.full_name || u.email,
-            email: u.email,
-            role: u.role
-          }));
-        setUsers(userList);
+      // Try supervisor/employees endpoint first (works for admin and supervisor)
+      try {
+        const response = await axios.get(`${API}/supervisor/employees`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (response.data && Array.isArray(response.data)) {
+          const userList = response.data
+            .filter(u => u.id && u.id !== user.id)
+            .map(u => ({
+              id: u.id,
+              name: u.full_name || u.email,
+              email: u.email,
+              role: u.role || 'user'
+            }));
+          setUsers(userList);
+          console.log('Users loaded from /supervisor/employees:', userList.length);
+          return;
+        }
+      } catch (error) {
+        console.log('Could not fetch from /supervisor/employees, trying /admin/users-statistics');
+      }
+      
+      // Fallback to admin endpoint
+      try {
+        const response = await axios.get(`${API}/admin/users-statistics`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (response.data.statistics) {
+          const userList = response.data.statistics
+            .filter(u => u.id && u.id !== user.id)
+            .map(u => ({
+              id: u.id,
+              name: u.full_name || u.email,
+              email: u.email,
+              role: u.role || 'user'
+            }));
+          setUsers(userList);
+          console.log('Users loaded from /admin/users-statistics:', userList.length);
+        }
+      } catch (error) {
+        console.error('Could not fetch users from any endpoint:', error);
+        // Load at least the current user's info
+        setUsers([]);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
