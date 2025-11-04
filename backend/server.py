@@ -1827,6 +1827,17 @@ async def upload_cdi_data(
                 if total_cases_hospital > 0 and 'has_drg_change' in hospital_df.columns:
                     drg_impact_rate_hospital = round((drg_changes_hospital / total_cases_hospital * 100), 2)
                 
+                # Calculate queries and reviews for this hospital
+                queries_hospital = 0
+                if query_col and query_col in hospital_df.columns:
+                    query_series_hospital = pd.to_numeric(hospital_df[query_col], errors='coerce').fillna(0)
+                    queries_hospital = int(query_series_hospital.sum())
+                
+                reviews_hospital = 0
+                if review_col and review_col in hospital_df.columns:
+                    review_series_hospital = pd.to_numeric(hospital_df[review_col], errors='coerce').fillna(0)
+                    reviews_hospital = int(review_series_hospital.sum())
+                
                 hospital_data = {
                     'hospital_name': str(hospital).strip(),
                     'total_cases': total_cases_hospital,
