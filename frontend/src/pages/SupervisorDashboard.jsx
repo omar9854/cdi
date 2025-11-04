@@ -585,6 +585,11 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                     <TableCell className="text-center">
                       <span className="font-bold text-orange-600">{cds.adx_queries}</span>
                     </TableCell>
+                    <TableCell className="text-center">
+                      <span className="inline-block bg-cyan-600 text-white px-3 py-1.5 rounded-full text-sm font-bold">
+                        {cds.total_queries || 0}
+                      </span>
+                    </TableCell>
                     {hasStatusData && (
                       <>
                         <TableCell className="text-center">
