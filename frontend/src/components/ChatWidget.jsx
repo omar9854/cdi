@@ -120,6 +120,8 @@ const ChatWidget = ({ user }) => {
       });
       
       if (response.data.messages) {
+        console.log('Messages fetched:', response.data.messages.length);
+        console.log('Sample message:', response.data.messages[0]);
         setMessages(response.data.messages);
         
         // Count unread messages
