@@ -1691,6 +1691,12 @@ async def upload_cdi_data(
             review_series = pd.to_numeric(df[review_col], errors='coerce').fillna(0)
             total_reviews = int(review_series.sum())
         
+        total_responses = 0
+        if response_col:
+            # Sum numeric values in response column
+            response_series = pd.to_numeric(df[response_col], errors='coerce').fillna(0)
+            total_responses = int(response_series.sum())
+        
         # Hospital-Level Comprehensive Analysis
         # Hospital-Level PRECISE Analysis
         hospitals_data = []
