@@ -2387,17 +2387,12 @@ async def get_inbox(current_user: dict = Depends(get_current_user)):
     messages = await db.messages.find({
         "$or": [
             {"to_user_id": current_user['id']},
-            {"to_user_id": None}
+            {"to_user_id": "ALL"}
         ],
         "is_draft": False
     }, {"_id": 0}).sort("created_at", -1).to_list(1000)
     
-    # Convert datetime
-    for msg in messages:
-        if isinstance(msg.get('created_at'), str):
-            msg['created_at'] = datetime.fromisoformat(msg['created_at'])
-    
-    return messages
+    return {"messages": messages}
 
 @api_router.get("/messages/sent")
 async def get_sent_messages(current_user: dict = Depends(get_current_user)):
