@@ -2074,6 +2074,10 @@ async def upload_cdi_data(
                 'total_reviews': int(total_reviews)
             },
             
+            'response_metrics': {
+                'total_responses': int(total_responses)
+            },
+            
             # Top Diagnoses Overall
             'top_diagnoses': {
                 'pdx_after_cdi': top_pdx_overall,
