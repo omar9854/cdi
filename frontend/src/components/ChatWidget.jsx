@@ -170,14 +170,38 @@ const ChatWidget = ({ user }) => {
   const markAsRead = async (messageId) => {
     try {
       const token = localStorage.getItem('token');
+      console.log('Marking message as read:', messageId);
       await axios.post(`${API}/messages/${messageId}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      fetchMessages();
+      
+      // Update messages state immediately without full refresh
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg.id === messageId ? { ...msg, is_read: true } : msg
+        )
+      );
+      
+      // Update unread count
+      setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Error marking as read:', error);
     }
   };
+
+  // Mark all visible unread messages as read when chat opens
+  useEffect(() => {
+    if (isOpen && filteredMessages.length > 0) {
+      const unreadMessages = filteredMessages.filter(msg => 
+        !msg.is_read && msg.from_user_id !== user.id
+      );
+      
+      // Mark each unread message as read
+      unreadMessages.forEach(msg => {
+        markAsRead(msg.id);
+      });
+    }
+  }, [isOpen, selectedUser]); // Trigger when opening chat or changing user
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
