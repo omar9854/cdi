@@ -104,7 +104,10 @@ const ChatWidget = ({ user }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API}/messages/send`, {
+      console.log('Sending message to:', selectedUser);
+      console.log('Message:', newMessage);
+      
+      const response = await axios.post(`${API}/messages/send`, {
         to_user_id: selectedUser,
         subject: language === 'ar' ? 'رسالة شات' : 'Chat Message',
         message: newMessage,
@@ -113,10 +116,17 @@ const ChatWidget = ({ user }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
+      console.log('Message sent successfully:', response.data);
       setNewMessage('');
-      fetchMessages(); // Refresh messages
+      
+      // Immediate refresh
+      setTimeout(() => {
+        fetchMessages();
+      }, 500);
     } catch (error) {
       console.error('Error sending message:', error);
+      console.error('Error details:', error.response?.data);
+      alert(language === 'ar' ? 'فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.' : 'Failed to send message. Please try again.');
     }
   };
 
