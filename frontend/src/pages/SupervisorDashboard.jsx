@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { toast } from 'sonner';
 import { 
   Upload, FileSpreadsheet, TrendingUp, AlertTriangle, Activity, Hospital, 
-  Users, Award, BarChart3, Stethoscope, Download, PieChart, Eye, Lock 
+  Users, Award, BarChart3, Stethoscope, Download, PieChart, Eye, Lock, MessageSquare, FileText
 } from 'lucide-react';
 import {
   BarChart, Bar, PieChart as RePieChart, Pie, Cell,
