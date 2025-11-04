@@ -1628,6 +1628,7 @@ async def upload_cdi_data(
         # Query and Review columns
         query_col = find_column(['numbers of query', 'query', 'queries', 'استفسار', 'استفسارات', 'number of query'])
         review_col = find_column(['numbers of review', 'review', 'reviews', 'مراجعة', 'مراجعات', 'number of review'])
+        response_col = find_column(['numbers of response', 'numbers of respons', 'response', 'responses', 'رد', 'ردود', 'number of response'])
         
         # Check critical columns
         if not hospital_col:
