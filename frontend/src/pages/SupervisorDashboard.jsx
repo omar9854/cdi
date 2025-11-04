@@ -280,6 +280,21 @@ const SupervisorDashboard = ({ user, onLogout }) => {
             </p>
           </CardContent>
         </Card>
+
+        <Card className="medical-card bg-gradient-to-br from-indigo-50 to-indigo-100">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {language === 'ar' ? 'عدد الردود' : 'Numbers of Response'}
+            </CardTitle>
+            <Award className="h-5 w-5 text-indigo-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-indigo-700">{analysis.response_metrics?.total_responses || 0}</div>
+            <p className="text-xs text-indigo-600 mt-1">
+              {language === 'ar' ? 'إجمالي الردود' : 'Total responses'}
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   };
