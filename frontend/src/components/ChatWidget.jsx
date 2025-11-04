@@ -270,7 +270,7 @@ const ChatWidget = ({ user }) => {
                       {!isMyMessage && (
                         <div className="text-xs font-semibold mb-1 opacity-75 flex items-center gap-1">
                           {getRoleIcon(users.find(u => u.id === msg.from_user_id)?.role)}
-                          {msg.from_user_name || (language === 'ar' ? 'مستخدم' : 'User')}
+                          {getUserName(msg.from_user_id)}
                         </div>
                       )}
                       {isToAll && (
