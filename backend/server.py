@@ -2052,6 +2052,15 @@ async def upload_cdi_data(
                 'addition_rate': adx_rate
             },
             
+            # Query and Review Metrics
+            'query_metrics': {
+                'total_queries': int(total_queries)
+            },
+            
+            'review_metrics': {
+                'total_reviews': int(total_reviews)
+            },
+            
             # Top Diagnoses Overall
             'top_diagnoses': {
                 'pdx_after_cdi': top_pdx_overall,
