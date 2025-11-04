@@ -2348,6 +2348,8 @@ async def send_message(
     current_user: dict = Depends(get_current_user)
 ):
     """Send a message to a user or all users"""
+    logger.info(f"User {current_user['id']} sending message to {message.to_user_id}")
+    
     # Get recipient name if specific user
     to_user_name = None
     to_user_id_final = None
@@ -2355,12 +2357,15 @@ async def send_message(
     if message.to_user_id and message.to_user_id != "ALL":
         recipient = await db.users.find_one({"id": message.to_user_id}, {"_id": 0, "full_name": 1})
         if not recipient:
+            logger.error(f"Recipient {message.to_user_id} not found")
             raise HTTPException(status_code=404, detail="Recipient not found")
         to_user_name = recipient['full_name']
         to_user_id_final = message.to_user_id
+        logger.info(f"Sending to specific user: {to_user_name} ({to_user_id_final})")
     else:
         to_user_name = "الكل"
-        to_user_id_final = "ALL"  # Changed from None to "ALL"
+        to_user_id_final = "ALL"
+        logger.info("Sending to ALL users")
     
     # Create message document
     message_doc = {
@@ -2377,6 +2382,7 @@ async def send_message(
     }
     
     await db.messages.insert_one(message_doc)
+    logger.info(f"Message saved with id: {message_doc['id']}")
     
     return {"message": "Message sent successfully", "id": message_doc['id']}
 
