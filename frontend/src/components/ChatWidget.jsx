@@ -124,9 +124,12 @@ const ChatWidget = ({ user }) => {
         console.log('Sample message:', response.data.messages[0]);
         setMessages(response.data.messages);
         
-        // Count unread messages
-        const unread = response.data.messages.filter(m => !m.is_read).length;
+        // Count unread messages that are NOT from current user (only received messages)
+        const unread = response.data.messages.filter(m => 
+          !m.is_read && m.from_user_id !== user.id
+        ).length;
         setUnreadCount(unread);
+        console.log('Unread count:', unread);
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
