@@ -2388,16 +2388,18 @@ async def send_message(
 
 @api_router.get("/messages/inbox")
 async def get_inbox(current_user: dict = Depends(get_current_user)):
-    """Get inbox messages for current user"""
-    # Messages sent to this user or to all users (ascending order - oldest first)
+    """Get inbox messages for current user - includes sent and received"""
+    # Messages sent TO this user, TO all users, OR FROM this user (ascending order - oldest first)
     messages = await db.messages.find({
         "$or": [
-            {"to_user_id": current_user['id']},
-            {"to_user_id": "ALL"}
+            {"to_user_id": current_user['id']},  # Messages to me
+            {"to_user_id": "ALL"},                # Public messages
+            {"from_user_id": current_user['id']}  # Messages I sent
         ],
         "is_draft": False
-    }, {"_id": 0}).sort("created_at", 1).to_list(1000)  # Changed from -1 to 1 for ascending
+    }, {"_id": 0}).sort("created_at", 1).to_list(1000)
     
+    logger.info(f"Retrieved {len(messages)} messages for user {current_user['id']}")
     return {"messages": messages}
 
 @api_router.get("/messages/sent")
