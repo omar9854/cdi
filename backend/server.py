@@ -1625,6 +1625,10 @@ async def upload_cdi_data(
         # Specialty column
         specialty_col = find_column(['specialty', 'speciality', 'تخصص', 'department', 'dept', 'service'])
         
+        # Query and Review columns
+        query_col = find_column(['numbers of query', 'query', 'queries', 'استفسار', 'استفسارات', 'number of query'])
+        review_col = find_column(['numbers of review', 'review', 'reviews', 'مراجعة', 'مراجعات', 'number of review'])
+        
         # Check critical columns
         if not hospital_col:
             raise HTTPException(status_code=400, detail="تعذر العثور على عمود المستشفى. يرجى التأكد من وجود عمود 'Hospital Name' أو مشابه.")
