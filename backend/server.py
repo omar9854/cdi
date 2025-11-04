@@ -1870,7 +1870,8 @@ async def upload_cdi_data(
                     'pdx_due_to_cdi_count': len(pdx_due_to_cdi_diagnoses_full),
                     'adx_diagnoses_count': len(adx_diagnoses_full),
                     'total_queries': queries_hospital,
-                    'total_reviews': reviews_hospital
+                    'total_reviews': reviews_hospital,
+                    'total_responses': responses_hospital
                 }
                 hospitals_data.append(hospital_data)
         
