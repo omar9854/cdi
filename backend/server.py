@@ -1845,6 +1845,11 @@ async def upload_cdi_data(
                     review_series_hospital = pd.to_numeric(hospital_df[review_col], errors='coerce').fillna(0)
                     reviews_hospital = int(review_series_hospital.sum())
                 
+                responses_hospital = 0
+                if response_col and response_col in hospital_df.columns:
+                    response_series_hospital = pd.to_numeric(hospital_df[response_col], errors='coerce').fillna(0)
+                    responses_hospital = int(response_series_hospital.sum())
+                
                 hospital_data = {
                     'hospital_name': str(hospital).strip(),
                     'total_cases': total_cases_hospital,
