@@ -2360,7 +2360,7 @@ async def send_message(
         to_user_id_final = message.to_user_id
     else:
         to_user_name = "الكل"
-        to_user_id_final = None
+        to_user_id_final = "ALL"  # Changed from None to "ALL"
     
     # Create message document
     message_doc = {
@@ -2370,7 +2370,7 @@ async def send_message(
         "to_user_id": to_user_id_final,
         "to_user_name": to_user_name,
         "subject": message.subject,
-        "body": message.body,
+        "message": message.body,  # Store as 'message' for frontend compatibility
         "is_draft": message.is_draft,
         "is_read": False,
         "created_at": datetime.now(timezone.utc).isoformat()
