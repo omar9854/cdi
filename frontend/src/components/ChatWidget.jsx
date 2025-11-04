@@ -184,8 +184,21 @@ const ChatWidget = ({ user }) => {
 
   const getUserName = (userId) => {
     if (userId === 'ALL') return language === 'ar' ? 'الكل' : 'All';
+    if (userId === user.id) return language === 'ar' ? 'أنت' : 'You';
+    
     const foundUser = users.find(u => u.id === userId);
-    return foundUser ? foundUser.name : (language === 'ar' ? 'مستخدم' : 'User');
+    if (foundUser) return foundUser.name;
+    
+    // Fallback: try to get from messages
+    const msg = messages.find(m => m.from_user_id === userId);
+    if (msg && msg.from_user_name) return msg.from_user_name;
+    
+    return language === 'ar' ? 'مستخدم' : 'User';
+  };
+
+  const getUserRole = (userId) => {
+    const foundUser = users.find(u => u.id === userId);
+    return foundUser?.role || 'user';
   };
 
   const getRoleIcon = (role) => {
