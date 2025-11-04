@@ -2006,6 +2006,12 @@ async def upload_cdi_data(
                     if 'has_adx' in cds_df.columns:
                         adx_queries_cds = int(cds_df['has_adx'].sum())
                     
+                    # Calculate total queries from Numbers of Query column
+                    total_queries_cds = 0
+                    if query_col and query_col in cds_df.columns:
+                        query_series_cds = pd.to_numeric(cds_df[query_col], errors='coerce').fillna(0)
+                        total_queries_cds = int(query_series_cds.sum())
+                    
                     # Calculate success rate with validation
                     success_rate_cds = 0.0
                     if total_cases_cds > 0 and 'has_drg_change' in cds_df.columns:
@@ -2017,6 +2023,7 @@ async def upload_cdi_data(
                         'drg_impact': drg_impact_cds,
                         'pdx_queries': pdx_queries_cds,
                         'adx_queries': adx_queries_cds,
+                        'total_queries': total_queries_cds,
                         'success_rate': success_rate_cds,
                         'status_done': status_done,
                         'status_to_start': status_to_start,
