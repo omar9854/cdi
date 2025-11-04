@@ -16,6 +16,7 @@ import AdminDashboard from '@/pages/AdminDashboard';
 import SupervisorDashboard from '@/pages/SupervisorDashboard';
 import Messages from '@/pages/Messages';
 import WhatsAppSupport from '@/components/WhatsAppSupport';
+import ChatWidget from '@/components/ChatWidget';
 
 function AppContent() {
   const { t } = useLanguage();
