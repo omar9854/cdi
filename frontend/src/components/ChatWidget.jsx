@@ -110,7 +110,7 @@ const ChatWidget = ({ user }) => {
       const response = await axios.post(`${API}/messages/send`, {
         to_user_id: selectedUser,
         subject: language === 'ar' ? 'رسالة شات' : 'Chat Message',
-        message: newMessage,
+        body: newMessage,  // Changed from 'message' to 'body'
         is_draft: false
       }, {
         headers: { Authorization: `Bearer ${token}` }
