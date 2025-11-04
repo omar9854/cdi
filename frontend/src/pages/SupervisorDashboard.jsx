@@ -250,6 +250,36 @@ const SupervisorDashboard = ({ user, onLogout }) => {
             </p>
           </CardContent>
         </Card>
+
+        <Card className="medical-card bg-gradient-to-br from-cyan-50 to-cyan-100">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {language === 'ar' ? 'عدد الاستفسارات' : 'Numbers of Query'}
+            </CardTitle>
+            <MessageSquare className="h-5 w-5 text-cyan-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-cyan-700">{analysis.query_metrics?.total_queries || 0}</div>
+            <p className="text-xs text-cyan-600 mt-1">
+              {language === 'ar' ? 'إجمالي الاستفسارات' : 'Total queries'}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="medical-card bg-gradient-to-br from-teal-50 to-teal-100">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {language === 'ar' ? 'عدد المراجعات' : 'Numbers of Review'}
+            </CardTitle>
+            <FileText className="h-5 w-5 text-teal-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-teal-700">{analysis.review_metrics?.total_reviews || 0}</div>
+            <p className="text-xs text-teal-600 mt-1">
+              {language === 'ar' ? 'إجمالي المراجعات' : 'Total reviews'}
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   };
