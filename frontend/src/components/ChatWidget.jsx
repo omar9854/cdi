@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { MessageCircle, X, Send, Minimize2, Users, User } from 'lucide-react';
+import { MessageCircle, X, Send, Minimize2, Users, User, Check, CheckCheck } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -10,6 +10,7 @@ const ChatWidget = ({ user }) => {
   const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [filteredMessages, setFilteredMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [selectedUser, setSelectedUser] = useState('ALL');
   const [users, setUsers] = useState([]);
@@ -32,10 +33,25 @@ const ChatWidget = ({ user }) => {
     }
   }, [user]);
 
+  // Filter messages based on selected user
+  useEffect(() => {
+    if (selectedUser === 'ALL') {
+      setFilteredMessages(messages);
+    } else {
+      // Show messages between current user and selected user
+      const filtered = messages.filter(msg => 
+        (msg.from_user_id === user.id && msg.to_user_id === selectedUser) ||
+        (msg.from_user_id === selectedUser && msg.to_user_id === user.id) ||
+        msg.to_user_id === 'ALL'
+      );
+      setFilteredMessages(filtered);
+    }
+  }, [messages, selectedUser, user]);
+
   // Auto-scroll to bottom
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [filteredMessages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -54,7 +70,8 @@ const ChatWidget = ({ user }) => {
           .map(u => ({
             id: u.id,
             name: u.full_name || u.email,
-            email: u.email
+            email: u.email,
+            role: u.role
           }));
         setUsers(userList);
       }
@@ -123,6 +140,18 @@ const ChatWidget = ({ user }) => {
     });
   };
 
+  const getUserName = (userId) => {
+    if (userId === 'ALL') return language === 'ar' ? 'الكل' : 'All';
+    const foundUser = users.find(u => u.id === userId);
+    return foundUser ? foundUser.name : (language === 'ar' ? 'مستخدم' : 'User');
+  };
+
+  const getRoleIcon = (role) => {
+    if (role === 'admin') return '👑';
+    if (role === 'supervisor') return '👨‍💼';
+    return '👤';
+  };
+
   if (!user) return null;
 
   return (
@@ -131,12 +160,12 @@ const ChatWidget = ({ user }) => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-2xl transition-all duration-300 z-50 flex items-center justify-center"
+          className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-2xl transition-all duration-300 z-50 flex items-center justify-center hover:scale-110"
         >
           <MessageCircle className="h-6 w-6" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold animate-pulse">
-              {unreadCount}
+              {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
         </button>
@@ -149,7 +178,15 @@ const ChatWidget = ({ user }) => {
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-2xl flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
-              <h3 className="font-bold">{language === 'ar' ? 'المحادثات' : 'Chat'}</h3>
+              <div>
+                <h3 className="font-bold">{language === 'ar' ? 'المحادثات' : 'Chat'}</h3>
+                <p className="text-xs text-blue-100">
+                  {selectedUser === 'ALL' 
+                    ? (language === 'ar' ? 'محادثة جماعية' : 'Group chat')
+                    : (language === 'ar' ? 'محادثة خاصة' : 'Private chat')
+                  }
+                </p>
+              </div>
             </div>
             <div className="flex gap-2">
               <button
@@ -168,36 +205,50 @@ const ChatWidget = ({ user }) => {
           </div>
 
           {/* User Selector */}
-          <div className="bg-gray-50 p-3 border-b">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-3 border-b">
+            <label className="text-xs text-gray-600 mb-1 block font-medium">
+              {language === 'ar' ? 'إرسال إلى:' : 'Send to:'}
+            </label>
             <select
               value={selectedUser}
-              onChange={(e) => setSelectedUser(e.target_value)}
-              className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) => setSelectedUser(e.target.value)}
+              className="w-full p-2.5 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
             >
-              <option value="ALL">{language === 'ar' ? '📢 الكل' : '📢 All'}</option>
-              {users.map(u => (
-                <option key={u.id} value={u.id}>
-                  👤 {u.name}
-                </option>
-              ))}
+              <option value="ALL">
+                📢 {language === 'ar' ? 'الجميع (محادثة عامة)' : 'Everyone (Public chat)'}
+              </option>
+              <optgroup label={language === 'ar' ? 'المستخدمون' : 'Users'}>
+                {users.map(u => (
+                  <option key={u.id} value={u.id}>
+                    {getRoleIcon(u.role)} {u.name}
+                  </option>
+                ))}
+              </optgroup>
             </select>
           </div>
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
-            {messages.length === 0 ? (
+            {filteredMessages.length === 0 ? (
               <div className="text-center text-gray-400 mt-20">
                 <MessageCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                <p>{language === 'ar' ? 'لا توجد رسائل' : 'No messages'}</p>
+                <p className="text-sm">
+                  {selectedUser === 'ALL' 
+                    ? (language === 'ar' ? 'لا توجد رسائل عامة' : 'No public messages')
+                    : (language === 'ar' ? 'ابدأ محادثة جديدة' : 'Start a new conversation')
+                  }
+                </p>
               </div>
             ) : (
-              messages.map((msg) => {
+              filteredMessages.map((msg) => {
                 const isMyMessage = msg.from_user_id === user.id;
+                const isToAll = msg.to_user_id === 'ALL';
+                
                 return (
                   <div
                     key={msg.id}
                     className={`flex ${isMyMessage ? 'justify-end' : 'justify-start'}`}
-                    onClick={() => !msg.is_read && markAsRead(msg.id)}
+                    onClick={() => !msg.is_read && !isMyMessage && markAsRead(msg.id)}
                   >
                     <div
                       className={`max-w-[75%] rounded-2xl p-3 ${
@@ -207,13 +258,24 @@ const ChatWidget = ({ user }) => {
                       }`}
                     >
                       {!isMyMessage && (
-                        <div className="text-xs font-semibold mb-1 opacity-75">
-                          {msg.from_user_name || language === 'ar' ? 'مستخدم' : 'User'}
+                        <div className="text-xs font-semibold mb-1 opacity-75 flex items-center gap-1">
+                          {getRoleIcon(users.find(u => u.id === msg.from_user_id)?.role)}
+                          {msg.from_user_name || (language === 'ar' ? 'مستخدم' : 'User')}
+                        </div>
+                      )}
+                      {isToAll && (
+                        <div className={`text-[10px] mb-1 ${isMyMessage ? 'text-blue-200' : 'text-gray-500'}`}>
+                          📢 {language === 'ar' ? 'رسالة عامة' : 'Public message'}
                         </div>
                       )}
                       <p className="text-sm break-words">{msg.message}</p>
-                      <div className={`text-xs mt-1 ${isMyMessage ? 'text-blue-100' : 'text-gray-400'}`}>
+                      <div className={`text-xs mt-1 flex items-center gap-1 ${isMyMessage ? 'text-blue-100 justify-end' : 'text-gray-400'}`}>
                         {formatTime(msg.created_at)}
+                        {isMyMessage && (
+                          <span>
+                            {msg.is_read ? <CheckCheck className="h-3 w-3" /> : <Check className="h-3 w-3" />}
+                          </span>
+                        )}
                         {!msg.is_read && !isMyMessage && (
                           <span className="ml-2 bg-red-500 text-white px-2 py-0.5 rounded-full text-[10px]">
                             {language === 'ar' ? 'جديد' : 'New'}
@@ -236,16 +298,26 @@ const ChatWidget = ({ user }) => {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder={language === 'ar' ? 'اكتب رسالة...' : 'Type a message...'}
-                className="flex-1 p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                placeholder={
+                  selectedUser === 'ALL'
+                    ? (language === 'ar' ? 'رسالة للجميع...' : 'Message to everyone...')
+                    : (language === 'ar' ? `رسالة إلى ${getUserName(selectedUser)}...` : `Message to ${getUserName(selectedUser)}...`)
+                }
+                className="flex-1 p-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
               <button
                 onClick={sendMessage}
                 disabled={!newMessage.trim()}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white p-3 rounded-xl transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white p-3 rounded-xl transition-all hover:scale-105"
               >
                 <Send className="h-5 w-5" />
               </button>
+            </div>
+            <div className="text-xs text-gray-500 mt-2 text-center">
+              {language === 'ar' 
+                ? 'اضغط Enter للإرسال' 
+                : 'Press Enter to send'
+              }
             </div>
           </div>
         </div>
