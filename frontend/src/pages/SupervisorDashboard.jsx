@@ -549,6 +549,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                   <TableHead className="text-center">{language === 'ar' ? 'تأثير DRG' : 'DRG Impact'}</TableHead>
                   <TableHead className="text-center">{language === 'ar' ? 'PDX' : 'PDX'}</TableHead>
                   <TableHead className="text-center">{language === 'ar' ? 'ADX' : 'ADX'}</TableHead>
+                  <TableHead className="text-center">{language === 'ar' ? 'مجموع الاستفسارات' : 'Total Queries'}</TableHead>
                   {hasStatusData && (
                     <>
                       <TableHead className="text-center">{language === 'ar' ? 'تم ✅' : 'Done ✅'}</TableHead>
