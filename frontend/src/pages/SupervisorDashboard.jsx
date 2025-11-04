@@ -323,7 +323,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-5 gap-4 mb-4">
+                <div className="grid md:grid-cols-6 gap-4 mb-4">
                   <div className="bg-purple-50 p-3 rounded-lg">
                     <div className="text-xs text-purple-600 mb-1">{language === 'ar' ? 'تغييرات DRG' : 'DRG Changes'}</div>
                     <div className="text-2xl font-bold text-purple-700">{hospital.drg_changes}</div>
@@ -348,6 +348,11 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                   <div className="bg-teal-50 p-3 rounded-lg">
                     <div className="text-xs text-teal-600 mb-1">{language === 'ar' ? 'المراجعات' : 'Reviews'}</div>
                     <div className="text-2xl font-bold text-teal-700">{hospital.total_reviews || 0}</div>
+                  </div>
+                  
+                  <div className="bg-indigo-50 p-3 rounded-lg">
+                    <div className="text-xs text-indigo-600 mb-1">{language === 'ar' ? 'الردود' : 'Responses'}</div>
+                    <div className="text-2xl font-bold text-indigo-700">{hospital.total_responses || 0}</div>
                   </div>
                 </div>
 
