@@ -177,7 +177,8 @@ const Messages = ({ user, onLogout }) => {
   };
 
   const renderMessagesList = (messages, type) => {
-    if (messages.length === 0) {
+    // Ensure messages is an array
+    if (!Array.isArray(messages) || messages.length === 0) {
       return (
         <div className="text-center py-12 text-gray-500">
           <Mail className="h-16 w-16 mx-auto mb-4 text-gray-300" />
