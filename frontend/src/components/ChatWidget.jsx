@@ -121,16 +121,16 @@ const ChatWidget = ({ user }) => {
       });
       
       if (response.data.messages) {
-        console.log('Messages fetched:', response.data.messages.length);
-        console.log('Sample message:', response.data.messages[0]);
         setMessages(response.data.messages);
         
         // Count unread messages that are NOT from current user (only received messages)
+        // Also exclude messages that have been marked as read in our ref
         const unread = response.data.messages.filter(m => 
-          !m.is_read && m.from_user_id !== user.id
+          !m.is_read && 
+          m.from_user_id !== user.id &&
+          !markedAsReadRef.current.has(m.id)
         ).length;
         setUnreadCount(unread);
-        console.log('Unread count:', unread);
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
