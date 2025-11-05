@@ -260,6 +260,26 @@ backend:
         agent: "testing"
         comment: "✅ PDX/AFTER CDI FIX VERIFIED AND WORKING PERFECTLY: Comprehensive testing completed with 3 different scenarios. CRITICAL ISSUE RESOLVED: PDX/After CDI indicator no longer shows 0 values when data exists. Test Results: (1) Mixed data with empty strings: PDX=3, ADX=3 ✅ (2) All empty data edge case: PDX=0, ADX=0 ✅ (3) All valid data: PDX=3, ADX=3 ✅. The fix in server.py line 1664 correctly filters empty strings and whitespace using (df[pdx_after_col].notna() & (df[pdx_after_col].astype(str).str.strip() != '')).sum(). Response structure verified: summary.total_records, summary.total_hospitals, pdx_metrics.total_after_cdi, adx_metrics.total_added, hospitals_analysis array with top_pdx_diagnoses and top_adx_diagnoses. User reported issue COMPLETELY RESOLVED."
 
+  - task: "Note management endpoints - Edit and Delete functionality"
+    implemented: true
+    working: true
+    files:
+      - "/app/backend/server.py"
+    endpoints:
+      - "PUT /api/notes/{note_id}" (Update existing note)
+      - "DELETE /api/notes/{note_id}" (Delete note and related analyses)
+      - "GET /api/notes/{note_id}" (Retrieve specific note)
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added PUT /api/notes/{note_id} endpoint for updating notes with new title and modified doctor_notes. Added DELETE /api/notes/{note_id} endpoint for deleting notes and all related analyses. Enhanced GET /api/notes/{note_id} endpoint. Added updated_at field to ClinicalNote model."
+      - working: true
+        agent: "testing"
+        comment: "✅ ALL NOTE MANAGEMENT ENDPOINTS WORKING PERFECTLY: Comprehensive testing completed for newly implemented note management functionality. PUT /api/notes/{note_id}: Successfully updates note title, doctor_notes array, adds updated_at timestamp, validates user ownership, returns 404 for invalid IDs. DELETE /api/notes/{note_id}: Successfully deletes notes and cascades to delete all related analyses, validates user ownership, returns proper success message, returns 404 for invalid IDs. GET /api/notes/{note_id}: Returns complete note data including doctor_notes array with proper structure (text, specialty fields), includes all required fields (id, user_id, title, doctor_notes, created_at, updated_at). Security: Users cannot update/delete other users' notes (returns 404 for security). All error handling working correctly. Full workflow tested: create → get → update → get → delete with proper validation and cascade deletion."
+
 frontend:
   - task: "Admin Dashboard - User management UI"
     implemented: true
