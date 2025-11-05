@@ -7,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Save, ArrowRight, Plus, X } from 'lucide-react';
+import { Save, ArrowRight, Plus, X, AlertTriangle } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -22,6 +23,7 @@ const NewNote = ({ user, onLogout }) => {
   const [doctorNotes, setDoctorNotes] = useState([{ text: '', specialty: '' }]);
   const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showPrivacyDialog, setShowPrivacyDialog] = useState(true);
 
   useEffect(() => {
     fetchSpecialties();
