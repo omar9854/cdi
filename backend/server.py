@@ -1429,27 +1429,44 @@ Answer questions professionally, provide clarifications, and help improve the do
     
     # Use analysis_id as session for continuity
     try:
-        chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=request.analysis_id,
-            system_message=system_message
-        ).with_model("gemini", "gemini-2.5-pro")
+        # Use Google Gemini API directly
+        model = genai.GenerativeModel(
+            'gemini-1.5-flash',
+            system_instruction=system_message
+        )
         
-        message = UserMessage(text=request.message)
-        response = await chat.send_message(message)
+        # Get chat history for context
+        chat_history = []
+        previous_messages = await db.chat_messages.find(
+            {"analysis_id": request.analysis_id}
+        ).sort("created_at", 1).to_list(100)
+        
+        # Build chat history
+        for msg in previous_messages:
+            if msg['role'] == 'user':
+                chat_history.append({'role': 'user', 'parts': [msg['message']]})
+            else:
+                chat_history.append({'role': 'model', 'parts': [msg['message']]})
+        
+        # Start chat with history
+        chat = model.start_chat(history=chat_history)
+        
+        # Send message
+        response = chat.send_message(request.message)
+        response_text = response.text
         
         # Save assistant message
         assistant_msg = ChatMessage(
             analysis_id=request.analysis_id,
             user_id=user['id'],
             role='assistant',
-            message=response
+            message=response_text
         )
         assistant_doc = assistant_msg.model_dump()
         assistant_doc['created_at'] = assistant_doc['created_at'].isoformat()
         await db.chat_messages.insert_one(assistant_doc)
         
-        return {"message": response}
+        return {"message": response_text}
         
     except Exception as e:
         logging.error(f"Error in chat: {str(e)}")
