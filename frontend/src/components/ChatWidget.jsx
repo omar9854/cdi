@@ -192,17 +192,31 @@ const ChatWidget = ({ user }) => {
 
   // Mark all visible unread messages as read when chat opens
   useEffect(() => {
-    if (isOpen && filteredMessages.length > 0 && users.length > 0) {
+    if (isOpen && filteredMessages.length > 0) {
       const unreadMessages = filteredMessages.filter(msg => 
-        !msg.is_read && msg.from_user_id !== user.id
+        !msg.is_read && 
+        msg.from_user_id !== user.id &&
+        !markedAsReadRef.current.has(msg.id) // Don't mark if already marked
       );
       
       // Mark each unread message as read
       unreadMessages.forEach(msg => {
+        markedAsReadRef.current.add(msg.id); // Track that we've marked this
         markAsRead(msg.id);
       });
     }
-  }, [isOpen, selectedUser, filteredMessages.length]); // Trigger when opening chat or changing user
+  }, [isOpen, selectedUser]); // Only trigger when opening chat or changing user, not on message changes
+  
+  // Clean up marked messages tracking when messages change
+  useEffect(() => {
+    // Remove marked IDs that no longer exist in messages
+    const currentMessageIds = new Set(messages.map(m => m.id));
+    markedAsReadRef.current.forEach(id => {
+      if (!currentMessageIds.has(id)) {
+        markedAsReadRef.current.delete(id);
+      }
+    });
+  }, [messages]);
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
