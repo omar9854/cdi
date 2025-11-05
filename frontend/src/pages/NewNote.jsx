@@ -92,9 +92,65 @@ const NewNote = ({ user, onLogout }) => {
     }
   };
 
+  const handleAcceptPrivacy = () => {
+    setShowPrivacyDialog(false);
+  };
+
+  const handleRejectPrivacy = () => {
+    navigate('/dashboard');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Navbar user={user} onLogout={onLogout} />
+      
+      {/* Privacy Warning Dialog */}
+      <Dialog open={showPrivacyDialog} onOpenChange={setShowPrivacyDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-600">
+              <AlertTriangle className="h-5 w-5" />
+              {language === 'ar' ? 'تنبيه الخصوصية' : 'Privacy Warning'}
+            </DialogTitle>
+            <DialogDescription className="text-base pt-4">
+              {language === 'ar' ? (
+                <>
+                  <p className="mb-3 font-semibold">يرجى الانتباه:</p>
+                  <ul className="list-disc list-inside space-y-2 text-gray-700">
+                    <li>استخدم رقم المريض بدلاً من الاسم للحفاظ على الخصوصية</li>
+                    <li>تأكد من عدم إدخال معلومات شخصية حساسة</li>
+                    <li>جميع البيانات محمية ومشفرة</li>
+                  </ul>
+                </>
+              ) : (
+                <>
+                  <p className="mb-3 font-semibold">Please note:</p>
+                  <ul className="list-disc list-inside space-y-2 text-gray-700">
+                    <li>Use Patient ID instead of name to maintain privacy</li>
+                    <li>Ensure no sensitive personal information is entered</li>
+                    <li>All data is protected and encrypted</li>
+                  </ul>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={handleRejectPrivacy}
+              className="flex-1"
+            >
+              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </Button>
+            <Button
+              onClick={handleAcceptPrivacy}
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
+            >
+              {language === 'ar' ? 'فهمت، المتابعة' : 'Understood, Continue'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       <main className="container mx-auto px-4 py-8 max-w-6xl" data-testid="new-note-page">
         <div className="mb-6 fade-in">
