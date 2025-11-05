@@ -500,8 +500,8 @@ Please respond in the following JSON format:
 }}}}"""
 
     try:
-        # Use Google Gemini API directly
-        model = genai.GenerativeModel('gemini-1.5-flash')  # Using free tier model
+        # Use Google Gemini API directly - using correct model name
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')  # Correct model name for free tier
         
         # Combine system message and user prompt
         full_prompt = f"{system_message}\n\n{user_prompt}"
