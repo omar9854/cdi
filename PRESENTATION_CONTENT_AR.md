@@ -432,7 +432,7 @@ Omar Almaghthawi
 Omar Almaghthawi
 
 **رابط التطبيق:**
-https://cdi-health.preview.emergentagent.com
+https://clinical-doc-ai-1.preview.emergentagent.com
 
 **حساب الأدمن:**
 📧 admin@cdi-center.sa

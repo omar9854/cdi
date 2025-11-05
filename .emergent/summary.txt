@@ -1,92 +1,107 @@
 <analysis>
-The AI engineer successfully iterated on a Clinical Documentation Improvement (CDI) web application, enhancing its core features. Initially, work focused on fixing the messaging system's user selection dropdown error (empty string) and enabling supervisor impersonation. The engineer implemented backend endpoints for impersonation and , and corresponding frontend UI elements, including an Exit Impersonation button. Several UI/UX overhauls were performed, including a complete redesign to align with digital health and Vision 2030, followed by refinements based on user feedback to remove specific design elements and ensure professional aesthetics.
+The trajectory details the AI engineer's work on a CDI web application, primarily focusing on bug fixes and feature enhancements following an initial build. The initial phase involved rectifying display issues on the Supervisor Dashboard, particularly concerning  and  indicators. Key decisions included filtering empty strings in Excel data processing in  (Chat Message 34) and refining frontend display logic in  to remove duplicate sections and correctly render metrics (Chat Message 45, 51, 53, 143).
 
-A significant effort was dedicated to refining the Excel analysis tool on the Supervisor Dashboard. This involved differentiating between various ADX/PDX categories (, , ) at the backend and ensuring their distinct, detailed display on the frontend for each hospital, including summary indicators and tables. Throughout the process, the engineer addressed critical frontend JSX errors and missing component imports. The last few interactions focused on ensuring accurate and separate display of PDX/ADX indicators, rectifying grouping errors, and refining the supervisor's dashboard summary cards.
+Significant effort was directed at enhancing data analytics, adding Numbers of Query, Numbers of Review, and Numbers of Response to both summary cards and detailed hospital views (Chat Message 227-298). A real-time chat widget was implemented (, ), which then required extensive debugging to fix message sending, user name display, message order, and notification issues (Chat Message 362-437).
+
+A major architectural shift occurred when addressing an LLM budget error, transitioning from  to Google Gemini Free API (Chat Message 444-452). This involved removing , adding  to , and refactoring  to use  with model name adjustments (Chat Message 459-500). To increase API limits, a rotation mechanism for three Gemini API keys was implemented (Chat Message 513-523).
+
+The final set of tasks, initiated just before this summary, involved fixing a persistent chat notification issue, changing Patient Name to Patient ID in the New Note section, and implementing a privacy warning dialog when creating new notes (Chat Message 565-596). The engineer was in the process of adding the warning dialog.
 </analysis>
 
 <product_requirements>
-The application's core goal is an AI-powered CDI web application that analyzes patient notes, identifies gaps, determines diagnoses (ICD-10-CM), and generates physician queries.
+The application is an AI-powered Clinical Documentation Improvement (CDI) web app for analyzing patient notes, identifying gaps, determining ICD-10-CM diagnoses, and generating physician queries.
 
-**Implemented Features:**
-- AI analysis using Gemini LLM.
+**Implemented Features (from previous trajectory analysis and current trajectory):**
+- Core AI analysis using Gemini LLM.
 - User authentication, note saving, multi-language support (Arabic/English).
-- Interactive AI chat, multi-note input with specialty selection.
-- Admin account system for user management, branding, history, and HTML presentation.
-- Password reset via email/WhatsApp, welcome emails, WhatsApp support button.
+- Interactive AI chat with multi-note input and specialty selection.
+- Admin system for user management, branding, history, and HTML presentation.
+- Password reset via email/WhatsApp, welcome emails, WhatsApp support.
 - Admin dashboard with user statistics, Excel export, and supervisor assignment.
-- Supervisor dashboard for CDI data analysis: undocumented diagnoses (PDX/ADX), DRG impact, detailed specialist performance, CDS status.
-- Enhanced login/registration UI/UX.
-- Internal messaging system between supervisors and employees.
-- Supervisor impersonation to view employee accounts.
-- Supervisor password reset for employees.
-- Redesigned UI for digital health and KSA Vision 2030 aesthetic.
+- Supervisor dashboard for CDI data analysis, including undocumented diagnoses (PDX/ADX), DRG impact, specialist performance, and CDS status.
+- Enhanced UI/UX for login/registration with digital health and KSA Vision 2030 aesthetics.
+- Internal messaging system between supervisors and employees, now improved for specific member selection, correct message ordering, and notification handling.
+- Supervisor impersonation to view employee accounts and password reset for employees.
+- New analysis indicators: Numbers of Query (column O), Numbers of Review (column N), and Numbers of Response (column P) in both summary cards and detailed hospital views.
+- Total Queries per specialist added to CDS Performance table.
 
-**Current Problem & Pending Features:**
-- The messaging system's To: dropdown needs to correctly display all employees, not just All.
-- PDX/After CDI and ADX/After CDI Excel analysis indicators need precise, separate, and detailed display for each hospital, both in summary cards and detailed tables, without repetition or incorrect grouping.
+**Current Problem & Pending Features (as of the end of the trajectory):**
+- Chat notification badge remains stuck even after opening the chat.
+- Need edit functionality for notes after they have been saved, including adding multiple notes after an edit.
+- Change Patient Name field to Patient ID in the new note creation interface for privacy.
+- Display a privacy warning dialog before a new note can be created, requiring user acceptance.
 </product_requirements>
 
 <key_technical_concepts>
 - **FastAPI**: Python backend for API endpoints.
 - **React**: JavaScript frontend library (with Shadcn UI).
-- **MongoDB**: NoSQL database.
-- **Gemini LLM**: AI for clinical note analysis.
-- **JWT/Bcrypt**: Authentication.
+- **MongoDB**: NoSQL database for data storage.
+- **Google Gemini API**: LLM for clinical note analysis, replacing Emergent LLM Key.
+- **API Key Rotation**: Custom backend logic for managing multiple Gemini API keys.
+- **JWT/Bcrypt**: Authentication and authorization.
 - **Aiosmtplib/Openpyxl/Pandas**: Email, Excel processing, data manipulation.
-- **i18n**: Multi-language support.
-- **Recharts**: Data visualization.
-- **Supervisor**: Process control for services.
+- **i18n**: Multi-language support for internationalization.
+- **Recharts**: Data visualization library.
+- **Supervisor**: Process control for managing backend and frontend services.
 </key_technical_concepts>
 
 <code_architecture>
 
--   **/app/backend/server.py**: Core FastAPI backend.
-    -   **Importance**: Handles all API endpoints, database interactions, AI calls, email, and Excel processing.
-    -   **Changes**: Added  endpoint. Modified  to return all non-admin/non-supervisor users. Added  endpoint. Refactored  to explicitly differentiate , , and  for precise Excel analysis.
--   **/app/frontend/src/App.js**: Main React component.
-    -   **Importance**: Defines application routes and global context providers.
-    -   **Changes**: Added  component for displaying toast notifications (e.g., login errors).
--   **/app/frontend/src/pages/Login.jsx**: User login page.
-    -   **Importance**: Provides user authentication interface.
-    -   **Changes**: UI updated for digital health theme. Error message handling improved to display specific Arabic/English messages for failed logins. Removed Vision 2030 text and green borders.
--   **/app/frontend/src/pages/Dashboard.jsx**: Main user dashboard.
-    -   **Importance**: Displays welcome message and action cards.
-    -   **Changes**: UI updated for digital health theme, removing Vision 2030 text and green borders.
--   **/app/frontend/src/pages/Messages.jsx**: Internal messaging system page.
-    -   **Importance**: Facilitates communication.
-    -   **Changes**: Fixed user selection dropdown to display a list of specific employees (not just All) by correctly mapping s from backend data. UI updated for new design.  function was updated to use an improved endpoint.
--   **/app/frontend/src/pages/AdminDashboard.jsx**: Admin control page.
-    -   **Importance**: User management and supervisor assignment.
-    -   **Changes**: Added an Impersonate User button linked to the backend impersonation functionality.
--   **/app/frontend/src/pages/SupervisorDashboard.jsx**: Supervisor-specific dashboard.
-    -   **Importance**: Displays CDI data analysis.
-    -   **Changes**: Implemented View Account for impersonation. Added employee list section with Change Password (lock icon) button and its dialog for employees. Added detailed sections and summary cards for  and  analysis, ensuring distinct display and accurate statistics per hospital. Fixed multiple JSX errors (, ) and UI coloring. Removed green colors and hover effects, changing them to blue.
--   **/app/frontend/src/components/Navbar.jsx**: Navigation bar.
-    -   **Importance**: Global navigation.
-    -   **Changes**: Added Exit Impersonation button visible when a supervisor/admin is impersonating. Logic updated to correctly restore the original user's token and redirect supervisors after exiting impersonation, including importing  and  and using the new  endpoint.
--   **/app/frontend/src/index.css**: Global CSS styles.
-    -   **Importance**: Contains global styling for the application.
-    -   **Changes**: Added new digital health theme styles, removed old green/Vision 2030 styles, and addressed green hover effects.
+-   **/app/backend/server.py**: Core FastAPI backend handling API endpoints, database interactions, and AI calls.
+    -   **Importance**: Centralizes all business logic and data processing.
+    -   **Changes**:
+        -   Refactored  to explicitly differentiate , , and  and correctly filter empty strings for accurate Excel analysis (Chat Message 34, 177, 183).
+        -   Updated  and  calculations to accurately reflect user requirements (Chat Message 177, 183, 218).
+        -   Integrated new metrics: , ,  into overall and hospital-level analysis results (Chat Message 231, 235, 239, 243, 253, 284, 286, 288, 290, 292).
+        -   Modified  logic to correctly calculate  per specialist (Chat Message 339).
+        -   Extensive fixes for chat endpoints (, ) including  handling, message body parsing, and retrieving both sent and received messages (Chat Message 380, 382, 437, 424).
+        -   Transitioned from  to  for LLM calls, updating API key management to use  from  with rotation logic (Chat Message 469, 471, 473, 477, 517, 519, 521, 523).
+        -   Corrected Gemini model names to  for chat and analysis (Chat Message 488, 490, 498, 500).
+        -   Fixed a  for  by adjusting its definition scope (Chat Message 546).
+-   **/app/frontend/src/App.js**: Main React component defining application routes and global contexts.
+    -   **Importance**: Orchestrates the main application structure.
+    -   **Changes**: Integrated  as a global pop-up chat accessible across all pages (Chat Message 309, 313).
+-   **/app/frontend/src/pages/SupervisorDashboard.jsx**: Supervisor-specific dashboard displaying CDI data analysis.
+    -   **Importance**: Critical for supervisors to monitor CDI performance.
+    -   **Changes**:
+        -   Refined the display of  and  in summary cards and detailed hospital sections, removing  and duplicate PDX sections (Chat Message 45, 51, 53, 143).
+        -   Added display for , , and  in summary cards and per-hospital detailed views (Chat Message 263, 269, 275, 296, 298).
+        -   Added Total Queries column to the CDS Performance table (Chat Message 351, 355).
+        -   Adjusted  layout (Chat Message 166).
+-   **/app/frontend/src/pages/NewNote.jsx**: Page for creating new patient notes.
+    -   **Importance**: Core functionality for user input and AI analysis.
+    -   **Changes**: Started implementing a privacy warning dialog (Chat Message 594, 596) and updated field labels.
+-   **/app/frontend/src/components/ChatWidget.jsx**: New component for the real-time chat functionality.
+    -   **Importance**: Provides internal communication capabilities.
+    -   **Changes**:
+        -   Initial creation and implementation of basic chat (Chat Message 305).
+        -   Enhanced with features to send messages to specific users, filter conversations, display user names correctly, reverse message order, and fix notification badge logic (Chat Message 326, 368, 372, 378, 393, 395, 397, 399, 401, 416, 420, 572).
+-   **/app/frontend/src/contexts/LanguageContext.jsx**: Manages multi-language strings for the application.
+    -   **Importance**: Supports Arabic and English translations for UI elements.
+    -   **Changes**: Updated translation keys from Patient Name to Patient ID (Chat Message 588, 592).
+-   **/app/backend/.env**: Environment variables for backend configuration.
+    -   **Importance**: Stores sensitive keys and configuration parameters.
+    -   **Changes**: Added  to store multiple Gemini API keys for rotation (Chat Message 459, 515).
 </code_architecture>
 
 <pending_tasks>
-- Refine the display of PDX/ADX analysis indicators and detailed diagnosis statistics, ensuring they are accurately separated and displayed without showing 0 values due to incorrect data grouping in the summary cards.
+- Fix the chat notification badge which remains stuck even after the chat is opened.
+- Implement edit functionality for saved notes, allowing users to modify existing notes and add multiple new notes after an edit.
+- Change the display label Patient Name to Patient ID in the new note creation interface.
+- Add a privacy warning dialog that appears when a user attempts to create a new note, requiring acceptance before proceeding.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was addressing a persistent issue with the Excel analysis display on the . The user reported that while indicators for PDX/After CDI and ADX/After CDI were added, they were showing 0 values or were incorrectly grouped, particularly with ADX due to CDI.
+Immediately before this summary request, the AI engineer was working on a set of user-reported issues related to the newly implemented chat feature and the note creation process. The user explicitly requested fixes for the persistent chat notification badge, the ability to edit saved notes and add more notes after editing, changing Patient Name to Patient ID for privacy, and adding a warning message before creating a new note.
 
-The AI engineer's most recent work (Chat Message 549-573) focused on rectifying this by:
-1.  **Backend Fixes ()**:
-    *   Explicitly separating column identification for  (for ) and  (for ) to ensure distinct data extraction (Chat Message 550-552).
-    *   Updating existing code to use the new  where appropriate (Chat Message 553-556).
-    *   Adding explicit support for  to ensure  is also distinctly handled from general  (Chat Message 560-562).
-2.  **Frontend Fixes ()**:
-    *   The user's last request (Chat Message 569) indicated that ADX due to CDI in the summary cards needed to be replaced with PDX/After CDI to avoid repetition and ensure separate display of key metrics. The AI engineer interpreted this as a request to ensure 4 distinct, non-repeated indicators are shown in the main summary section. The last action was an edit to  (Chat Message 573) to adjust the display of summary cards, likely replacing one of the  cards with a distinct  metric.
+The engineer initiated work on these tasks sequentially:
+1.  **Chat Notification Fix**: Started by reviewing  (Chat Message 570) and made an edit to address a potential dependency issue in  related to message fetching and marking as read (Chat Message 572).
+2.  **Change Patient Name to Patient ID**: Explored  and . The change involved updating translation keys in  for both Arabic and English to reflect Patient ID instead of Patient Name (Chat Message 588, 592).
+3.  **Add Privacy Warning Dialog**: Began implementation in . The engineer added a  state and started structuring a  component to display the warning message when Add New Note is clicked (Chat Message 594, 596).
 
-The system is currently in a state where the backend has been restarted after the column separation logic, and the frontend is being restarted after the latest UI adjustments to the summary cards.
+The last action performed was an edit to  (Chat Message 596) to integrate the warning dialog, indicating this task is partially complete and was the immediate focus before the summary request. The frontend  has been updated with new labels, and  has an attempted fix for notifications. The next step would be to complete the warning dialog and move to the note editing features.
 </current_work>
 
 <optional_next_step>
-Restart the frontend and test the Supervisor Dashboard to verify that the PDX/ADX indicators are accurately displayed and separated without 0 values or repetition.
+Complete the implementation of the privacy warning dialog in  as per the user's explicit request.
 </optional_next_step>
