@@ -118,8 +118,32 @@ const History = ({ user, onLogout }) => {
                 data-testid={`history-item-${item.id}`}
               >
                 <CardHeader>
-                  <CardTitle className="text-xl text-gray-800">{item.note_title}</CardTitle>
-                  <p className="text-sm text-gray-500">{formatDate(item.created_at)}</p>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <CardTitle className="text-xl text-gray-800">{item.note_title}</CardTitle>
+                      <p className="text-sm text-gray-500">{formatDate(item.created_at)}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => handleEdit(e, item.note_id)}
+                        className="text-blue-600 hover:bg-blue-50 border-blue-300"
+                        data-testid={`edit-note-${item.id}`}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => handleDeleteClick(e, item)}
+                        className="text-red-600 hover:bg-red-50 border-red-300"
+                        data-testid={`delete-note-${item.id}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-4">
