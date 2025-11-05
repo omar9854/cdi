@@ -1429,9 +1429,9 @@ Answer questions professionally, provide clarifications, and help improve the do
     
     # Use analysis_id as session for continuity
     try:
-        # Use Google Gemini API directly - using correct model name
+        # Use Google Gemini API directly - using available free model
         model = genai.GenerativeModel(
-            'gemini-1.5-flash-latest',  # Correct model name
+            'gemini-flash-latest',  # Free model that works
             system_instruction=system_message
         )
         
