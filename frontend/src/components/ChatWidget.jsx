@@ -191,7 +191,7 @@ const ChatWidget = ({ user }) => {
 
   // Mark all visible unread messages as read when chat opens
   useEffect(() => {
-    if (isOpen && filteredMessages.length > 0) {
+    if (isOpen && filteredMessages.length > 0 && users.length > 0) {
       const unreadMessages = filteredMessages.filter(msg => 
         !msg.is_read && msg.from_user_id !== user.id
       );
@@ -201,7 +201,7 @@ const ChatWidget = ({ user }) => {
         markAsRead(msg.id);
       });
     }
-  }, [isOpen, selectedUser]); // Trigger when opening chat or changing user
+  }, [isOpen, selectedUser, filteredMessages.length]); // Trigger when opening chat or changing user
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
