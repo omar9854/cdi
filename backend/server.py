@@ -47,10 +47,30 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 # Emergent LLM Key
-GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+# Load Gemini API Keys (multiple for rotation)
+GEMINI_API_KEYS = [
+    os.environ.get('GEMINI_API_KEY_1'),
+    os.environ.get('GEMINI_API_KEY_2'),
+    os.environ.get('GEMINI_API_KEY_3')
+]
+# Filter out None values
+GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
 
-# Configure Google Gemini
-genai.configure(api_key=GEMINI_API_KEY)
+if not GEMINI_API_KEYS:
+    raise ValueError("No Gemini API keys found in environment variables")
+
+logger.info(f"Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation")
+
+# Helper function to get a random API key for load balancing
+def get_gemini_model(model_name='gemini-flash-latest', system_instruction=None):
+    """Get a Gemini model with a random API key for load balancing"""
+    api_key = random.choice(GEMINI_API_KEYS)
+    genai.configure(api_key=api_key)
+    
+    if system_instruction:
+        return genai.GenerativeModel(model_name, system_instruction=system_instruction)
+    else:
+        return genai.GenerativeModel(model_name)
 
 # Admin Secret Code (يمكن تغييره من .env)
 ADMIN_SECRET_CODE = os.environ.get('ADMIN_SECRET_CODE', 'CDI-ADMIN-2024')
