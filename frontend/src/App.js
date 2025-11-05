@@ -9,6 +9,7 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
 import NewNote from '@/pages/NewNote';
+import EditNote from '@/pages/EditNote';
 import Analysis from '@/pages/Analysis';
 import History from '@/pages/History';
 import Chat from '@/pages/Chat';
