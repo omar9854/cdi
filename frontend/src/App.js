@@ -64,6 +64,7 @@ function AppContent() {
           <Route path="/supervisor" element={user && (user.role === 'supervisor' || user.role === 'admin') ? <SupervisorDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
           <Route path="/messages" element={user ? <Messages user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
           <Route path="/new-note" element={user ? <NewNote user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
+          <Route path="/edit-note/:noteId" element={user ? <EditNote user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
           <Route path="/analysis/:noteId" element={user ? <Analysis user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
           <Route path="/chat/:analysisId" element={user ? <Chat user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
           <Route path="/history" element={user ? <History user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
