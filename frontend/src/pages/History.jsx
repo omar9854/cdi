@@ -18,6 +18,9 @@ const History = ({ user, onLogout }) => {
   const { language, t } = useLanguage();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchHistory();
