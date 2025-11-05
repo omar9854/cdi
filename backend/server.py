@@ -1343,7 +1343,7 @@ async def get_note(note_id: str, user: dict = Depends(get_current_user)):
     return note
 
 @api_router.put("/notes/{note_id}", response_model=ClinicalNote)
-async def update_note(note_id: str, request: NoteRequest, user: dict = Depends(get_current_user)):
+async def update_note(note_id: str, request: ClinicalNoteCreate, user: dict = Depends(get_current_user)):
     # Check if note exists and belongs to user
     existing_note = await db.clinical_notes.find_one(
         {"id": note_id, "user_id": user['id']},
