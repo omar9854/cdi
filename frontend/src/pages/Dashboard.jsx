@@ -18,6 +18,9 @@ const Dashboard = ({ user, onLogout }) => {
   const { language, t } = useLanguage();
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchNotes();
