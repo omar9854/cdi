@@ -403,42 +403,58 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      🎉 **NEW FEATURES IMPLEMENTED - RESPONSE INDICATOR & REAL-TIME CHAT**
+      🎉 **NEW FEATURES IMPLEMENTED - COMPLETE UPDATE**
       
-      **1. Numbers of Response Indicator (Column P):**
-      - Added to summary cards (indigo color)
-      - Added to hospital-level detailed analysis
-      - Calculates sum of numeric values from "Numbers of Respons" column
+      **1. Privacy Warning Dialog in NewNote.jsx:**
+      ✅ Added privacy warning dialog that shows when accessing new note page
+      ✅ Dialog explains to use Patient ID instead of name
+      ✅ User must accept to continue or cancel to go back
+      ✅ Available in Arabic and English
       
-      **Backend Changes:**
-      - Added response_col search in find_column()
-      - Added total_responses calculation (sum of column P values)
-      - Added responses_hospital for each hospital
-      - Added response_metrics to API response
+      **2. Patient Name → Patient ID Change:**
+      ✅ Updated LanguageContext.jsx translations (noteTitle keys)
+      ✅ Changed from "اسم المريض" to "رمز المريض" in Arabic
+      ✅ Changed from "Patient Name" to "Patient ID" in English
+      ✅ Placeholder text updated accordingly
       
-      **Frontend Changes (SupervisorDashboard.jsx):**
-      - Added Response summary card with Award icon
-      - Updated hospital detail grid from 5 to 6 columns
-      - Added Responses indicator for each hospital (indigo color)
+      **3. Chat Notification Fix:**
+      ✅ Fixed persistent notification badge issue in ChatWidget.jsx
+      ✅ Added markedAsReadRef to track which messages have been marked
+      ✅ Fixed useEffect dependencies to prevent infinite loops
+      ✅ Notifications clear properly when chat is opened
       
-      **Test Results:**
-      - Total Responses: 16 ✅ (7+4+5)
-      - Hospital breakdown working correctly
+      **4. Edit Note Functionality:**
+      ✅ Created new EditNote.jsx component
+      ✅ Added /edit-note/:noteId route in App.js
+      ✅ Added Edit button in History.jsx with pencil icon
+      ✅ Added Edit button in Dashboard.jsx with pencil icon
+      ✅ Backend: Added PUT /api/notes/{note_id} endpoint
+      ✅ Backend: Added GET /api/notes/{note_id} endpoint (already existed)
+      ✅ Users can modify all fields and add multiple notes after editing
       
-      **2. Real-Time Chat Widget:**
-      - Created ChatWidget.jsx component (WhatsApp-style)
-      - Floating button in bottom-right corner
-      - Shows unread message count with animation
-      - Features:
-        * Real-time message polling (5-second intervals)
-        * Send to "All" or specific user
-        * Message history with read/unread status
-        * Auto-scroll to latest message
-        * Responsive design
-      - Integrated in App.js for all logged-in users
-      - Available on all pages for all user roles
+      **5. Delete Note Functionality:**
+      ✅ Added Delete button in History.jsx with trash icon
+      ✅ Added Delete button in Dashboard.jsx with trash icon
+      ✅ Added confirmation dialog (نعم/لا) before deletion
+      ✅ Backend: Added DELETE /api/notes/{note_id} endpoint
+      ✅ Deletes note and all related analyses
+      ✅ Confirmation dialog available in Arabic and English
+      
+      **Files Modified:**
+      - /app/frontend/src/pages/NewNote.jsx (privacy dialog)
+      - /app/frontend/src/contexts/LanguageContext.jsx (translations)
+      - /app/frontend/src/components/ChatWidget.jsx (notification fix)
+      - /app/frontend/src/pages/History.jsx (edit/delete buttons + dialog)
+      - /app/frontend/src/pages/Dashboard.jsx (edit/delete buttons + dialog)
+      - /app/frontend/src/pages/EditNote.jsx (NEW FILE)
+      - /app/frontend/src/App.js (added edit route)
+      - /app/backend/server.py (PUT and DELETE endpoints)
       
       **Testing Needed:**
-      - Frontend: Test Response indicators in summary and hospital details
-      - Frontend: Test chat widget functionality (send, receive, real-time updates)
-      - E2E: Multiple users sending messages simultaneously
+      - Backend: Test PUT /api/notes/{note_id} endpoint
+      - Backend: Test DELETE /api/notes/{note_id} endpoint
+      - Frontend: Test privacy warning dialog on new note page
+      - Frontend: Test edit functionality from History and Dashboard
+      - Frontend: Test delete functionality with confirmation dialog
+      - Frontend: Test chat notification badge clearing
+      - E2E: Full note lifecycle (create → edit → delete)
