@@ -2365,6 +2365,10 @@ class MedicalCodingAPITester:
             if impersonate_success and impersonated_token:
                 self.test_impersonated_token_access(impersonated_token)
         
+        # Note Management Tests (PUT, DELETE endpoints)
+        print("\n📝 Testing Note Management Endpoints...")
+        self.test_note_management_workflow()
+        
         # Basic Notes and Analysis Tests (if time permits)
         print("\n📝 Testing Basic Notes & Analysis...")
         success, note_id = self.test_create_clinical_note()
