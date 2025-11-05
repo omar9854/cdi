@@ -1657,6 +1657,386 @@ class MedicalCodingAPITester:
         
         return True
 
+    # ========== NOTE MANAGEMENT TESTS ==========
+    
+    def test_update_note(self, note_id):
+        """Test PUT /api/notes/{note_id} endpoint"""
+        if not self.token or not note_id:
+            self.log_test("Update Note", False, "No authentication token or note ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            
+            # Updated note data with new title and modified doctor_notes
+            updated_note_data = {
+                "title": "ملاحظات سريرية محدثة - مريض السكري والضغط",
+                "doctor_notes": [
+                    {
+                        "text": """المريض: محمد أحمد، 45 سنة، ذكر (محدث)
+
+الشكوى الرئيسية:
+- ارتفاع مستوى السكر في الدم (غير منضبط)
+- تعب عام وإرهاق شديد
+- كثرة التبول والعطش المستمر
+- ألم في الأطراف السفلية
+
+التاريخ المرضي:
+- مصاب بداء السكري النوع الثاني منذ 5 سنوات
+- ارتفاع ضغط الدم غير المنضبط
+- تاريخ عائلي لأمراض القلب والسكري
+- عدم الالتزام بالأدوية""",
+                        "specialty": "internal_medicine"
+                    },
+                    {
+                        "text": """الفحص السريري المحدث:
+- ضغط الدم: 160/95 mmHg (مرتفع)
+- نبضات القلب: 92 نبضة/دقيقة
+- الوزن: 87 كغ، الطول: 170 سم
+- BMI: 30.1 (سمنة درجة أولى)
+
+نتائج المختبر الجديدة:
+- سكر الدم الصائم: 200 mg/dl
+- HbA1c: 9.2% (غير منضبط)
+- الكوليسترول الكلي: 240 mg/dl
+- وظائف الكلى: بداية تأثر (Creatinine: 1.3)""",
+                        "specialty": "endocrinology"
+                    },
+                    {
+                        "text": """التقييم القلبي:
+- تخطيط القلب: طبيعي
+- الإيكو: وظائف القلب طبيعية
+- لا توجد علامات قصور قلبي حاليًا
+- ينصح بالمتابعة الدورية""",
+                        "specialty": "cardiology"
+                    }
+                ]
+            }
+            
+            response = requests.put(
+                f"{self.api_url}/notes/{note_id}",
+                json=updated_note_data,
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                # Verify updated fields
+                title_updated = data.get('title') == updated_note_data['title']
+                doctor_notes_count = len(data.get('doctor_notes', []))
+                has_updated_at = 'updated_at' in data
+                details = f"Note updated - Title updated: {title_updated}, Doctor notes: {doctor_notes_count}, Has updated_at: {has_updated_at}"
+                success = title_updated and doctor_notes_count == 3 and has_updated_at
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Update Note", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Update Note", False, str(e))
+            return False
+
+    def test_update_note_invalid_id(self):
+        """Test PUT /api/notes/{note_id} with invalid note ID"""
+        if not self.token:
+            self.log_test("Update Note Invalid ID", False, "No authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            invalid_note_id = "invalid-note-id-12345"
+            
+            updated_note_data = {
+                "title": "Test Update",
+                "doctor_notes": [
+                    {
+                        "text": "Test note",
+                        "specialty": "internal_medicine"
+                    }
+                ]
+            }
+            
+            response = requests.put(
+                f"{self.api_url}/notes/{invalid_note_id}",
+                json=updated_note_data,
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 404
+            if success:
+                details = "Correctly returned 404 for invalid note ID"
+            else:
+                details = f"Expected 404, got {response.status_code}: {response.text}"
+            
+            self.log_test("Update Note Invalid ID", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Update Note Invalid ID", False, str(e))
+            return False
+
+    def test_update_note_wrong_user(self):
+        """Test PUT /api/notes/{note_id} with note that doesn't belong to user"""
+        if not self.admin_token:
+            self.log_test("Update Note Wrong User", False, "No admin authentication token")
+            return False
+        
+        try:
+            # First create a note with admin token
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            admin_note_data = {
+                "title": "Admin's Private Note",
+                "doctor_notes": [
+                    {
+                        "text": "This is admin's private clinical note",
+                        "specialty": "internal_medicine"
+                    }
+                ]
+            }
+            
+            response = requests.post(
+                f"{self.api_url}/notes",
+                json=admin_note_data,
+                headers=headers,
+                timeout=10
+            )
+            
+            if response.status_code != 200:
+                self.log_test("Update Note Wrong User", False, f"Failed to create admin note: {response.text}")
+                return False
+            
+            admin_note = response.json()
+            admin_note_id = admin_note.get('id')
+            
+            # Now try to update it with regular user token
+            if not self.token:
+                self.log_test("Update Note Wrong User", False, "No regular user token")
+                return False
+            
+            headers = {"Authorization": f"Bearer {self.token}"}
+            updated_note_data = {
+                "title": "Trying to hack admin's note",
+                "doctor_notes": [
+                    {
+                        "text": "Malicious update attempt",
+                        "specialty": "internal_medicine"
+                    }
+                ]
+            }
+            
+            response = requests.put(
+                f"{self.api_url}/notes/{admin_note_id}",
+                json=updated_note_data,
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 404  # Should return 404 (not found) for security
+            if success:
+                details = "Correctly returned 404 when trying to update another user's note"
+            else:
+                details = f"Expected 404, got {response.status_code}: {response.text}"
+            
+            # Cleanup: delete admin note
+            admin_headers = {"Authorization": f"Bearer {self.admin_token}"}
+            requests.delete(f"{self.api_url}/notes/{admin_note_id}", headers=admin_headers, timeout=10)
+            
+            self.log_test("Update Note Wrong User", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Update Note Wrong User", False, str(e))
+            return False
+
+    def test_delete_note(self, note_id):
+        """Test DELETE /api/notes/{note_id} endpoint"""
+        if not self.token or not note_id:
+            self.log_test("Delete Note", False, "No authentication token or note ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            
+            # First create an analysis for this note to test cascade deletion
+            analyze_data = {"note_id": note_id}
+            analysis_response = requests.post(
+                f"{self.api_url}/analyze",
+                json=analyze_data,
+                headers=headers,
+                timeout=60
+            )
+            
+            analysis_created = analysis_response.status_code == 200
+            analysis_id = None
+            if analysis_created:
+                analysis_data = analysis_response.json()
+                analysis_id = analysis_data.get('id')
+                print(f"   📊 Created analysis {analysis_id} for cascade deletion test")
+            
+            # Now delete the note
+            response = requests.delete(
+                f"{self.api_url}/notes/{note_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                message = data.get('message', '')
+                details = f"Note deleted successfully: {message}"
+                
+                # Verify note is actually deleted
+                get_response = requests.get(
+                    f"{self.api_url}/notes/{note_id}",
+                    headers=headers,
+                    timeout=10
+                )
+                note_deleted = get_response.status_code == 404
+                
+                # Verify related analyses are deleted if analysis was created
+                analyses_deleted = True
+                if analysis_created and analysis_id:
+                    analyses_response = requests.get(
+                        f"{self.api_url}/analyses/{note_id}",
+                        headers=headers,
+                        timeout=10
+                    )
+                    if analyses_response.status_code == 200:
+                        remaining_analyses = analyses_response.json()
+                        analyses_deleted = len(remaining_analyses) == 0
+                
+                success = note_deleted and analyses_deleted
+                details += f", Note deleted: {note_deleted}, Analyses deleted: {analyses_deleted}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Delete Note", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Delete Note", False, str(e))
+            return False
+
+    def test_delete_note_invalid_id(self):
+        """Test DELETE /api/notes/{note_id} with invalid note ID"""
+        if not self.token:
+            self.log_test("Delete Note Invalid ID", False, "No authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            invalid_note_id = "invalid-note-id-67890"
+            
+            response = requests.delete(
+                f"{self.api_url}/notes/{invalid_note_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 404
+            if success:
+                details = "Correctly returned 404 for invalid note ID"
+            else:
+                details = f"Expected 404, got {response.status_code}: {response.text}"
+            
+            self.log_test("Delete Note Invalid ID", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Delete Note Invalid ID", False, str(e))
+            return False
+
+    def test_get_single_note_comprehensive(self, note_id):
+        """Test GET /api/notes/{note_id} endpoint comprehensively"""
+        if not self.token or not note_id:
+            self.log_test("Get Single Note Comprehensive", False, "No authentication token or note ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = requests.get(
+                f"{self.api_url}/notes/{note_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                
+                # Verify required fields
+                required_fields = ['id', 'user_id', 'title', 'doctor_notes', 'created_at']
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                # Verify doctor_notes structure
+                doctor_notes = data.get('doctor_notes', [])
+                valid_doctor_notes = True
+                if doctor_notes:
+                    for note in doctor_notes:
+                        if not isinstance(note, dict) or 'text' not in note or 'specialty' not in note:
+                            valid_doctor_notes = False
+                            break
+                
+                success = len(missing_fields) == 0 and valid_doctor_notes
+                details = f"Retrieved note: {data.get('title', '')}, Doctor notes: {len(doctor_notes)}, Valid structure: {valid_doctor_notes}"
+                if missing_fields:
+                    details += f", Missing fields: {', '.join(missing_fields)}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Get Single Note Comprehensive", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Get Single Note Comprehensive", False, str(e))
+            return False
+
+    def test_note_management_workflow(self):
+        """Test complete note management workflow: create -> update -> get -> delete"""
+        print("\n🔄 TESTING COMPLETE NOTE MANAGEMENT WORKFLOW")
+        print("=" * 60)
+        
+        # Step 1: Create a note
+        note_created, note_id = self.test_create_clinical_note()
+        if not note_created or not note_id:
+            self.log_test("Note Management Workflow", False, "Failed to create initial note")
+            return False
+        
+        # Step 2: Get the note to verify creation
+        get_success = self.test_get_single_note_comprehensive(note_id)
+        if not get_success:
+            self.log_test("Note Management Workflow", False, "Failed to retrieve created note")
+            return False
+        
+        # Step 3: Update the note
+        update_success = self.test_update_note(note_id)
+        if not update_success:
+            self.log_test("Note Management Workflow", False, "Failed to update note")
+            return False
+        
+        # Step 4: Get the updated note to verify changes
+        get_updated_success = self.test_get_single_note_comprehensive(note_id)
+        if not get_updated_success:
+            self.log_test("Note Management Workflow", False, "Failed to retrieve updated note")
+            return False
+        
+        # Step 5: Test invalid operations
+        invalid_update_success = self.test_update_note_invalid_id()
+        invalid_delete_success = self.test_delete_note_invalid_id()
+        wrong_user_success = self.test_update_note_wrong_user()
+        
+        # Step 6: Delete the note (this will also test cascade deletion of analyses)
+        delete_success = self.test_delete_note(note_id)
+        if not delete_success:
+            self.log_test("Note Management Workflow", False, "Failed to delete note")
+            return False
+        
+        # Overall success
+        overall_success = all([
+            note_created, get_success, update_success, get_updated_success,
+            invalid_update_success, invalid_delete_success, wrong_user_success, delete_success
+        ])
+        
+        if overall_success:
+            self.log_test("Note Management Workflow", True, "Complete workflow successful: create -> get -> update -> get -> delete with proper error handling")
+        else:
+            self.log_test("Note Management Workflow", False, "One or more steps in the workflow failed")
+        
+        return overall_success
+
     # ========== CDI EXCEL UPLOAD TESTS ==========
     
     def create_sample_cdi_excel(self):
