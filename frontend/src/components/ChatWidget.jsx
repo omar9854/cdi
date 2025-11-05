@@ -16,6 +16,7 @@ const ChatWidget = ({ user }) => {
   const [users, setUsers] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const messagesEndRef = useRef(null);
+  const markedAsReadRef = useRef(new Set()); // Track which messages have been marked as read
 
   // Fetch users list
   useEffect(() => {
