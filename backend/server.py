@@ -1464,11 +1464,8 @@ Answer questions professionally, provide clarifications, and help improve the do
     
     # Use analysis_id as session for continuity
     try:
-        # Use Google Gemini API directly - using available free model
-        model = genai.GenerativeModel(
-            'gemini-flash-latest',  # Free model that works
-            system_instruction=system_message
-        )
+        # Use Google Gemini API with automatic key rotation
+        model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
         
         # Get chat history for context
         chat_history = []
@@ -1483,12 +1480,22 @@ Answer questions professionally, provide clarifications, and help improve the do
             else:
                 chat_history.append({'role': 'model', 'parts': [msg['message']]})
         
-        # Start chat with history
-        chat = model.start_chat(history=chat_history)
+        # Start chat with history and retry logic
+        max_retries = len(GEMINI_API_KEYS)
+        response_text = None
         
-        # Send message
-        response = chat.send_message(request.message)
-        response_text = response.text
+        for attempt in range(max_retries):
+            try:
+                chat = model.start_chat(history=chat_history)
+                response = chat.send_message(request.message)
+                response_text = response.text
+                break  # Success, exit retry loop
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    logger.warning(f"Chat retry {attempt + 1}/{max_retries} with different API key")
+                    model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+                else:
+                    raise e
         
         # Save assistant message
         assistant_msg = ChatMessage(
