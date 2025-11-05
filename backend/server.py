@@ -59,7 +59,8 @@ GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
 if not GEMINI_API_KEYS:
     raise ValueError("No Gemini API keys found in environment variables")
 
-logger.info(f"Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation")
+# Log will be done after logger is initialized
+print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation")
 
 # Helper function to get a random API key for load balancing
 def get_gemini_model(model_name='gemini-flash-latest', system_instruction=None):
