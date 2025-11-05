@@ -185,6 +185,66 @@ const Dashboard = ({ user, onLogout }) => {
           )}
         </div>
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600 flex items-center gap-2">
+              <Trash2 className="h-5 w-5" />
+              {language === 'ar' ? 'تأكيد الحذف' : 'Confirm Delete'}
+            </DialogTitle>
+            <DialogDescription className="text-base pt-4">
+              {language === 'ar' ? (
+                <>
+                  <p className="font-semibold mb-2">هل أنت متأكد من حذف هذه الملاحظة؟</p>
+                  <p className="text-gray-600">
+                    سيتم حذف الملاحظة "{noteToDelete?.title}" وجميع التحليلات المرتبطة بها بشكل نهائي.
+                  </p>
+                  <p className="text-red-600 mt-2">لا يمكن التراجع عن هذا الإجراء.</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold mb-2">Are you sure you want to delete this note?</p>
+                  <p className="text-gray-600">
+                    The note "{noteToDelete?.title}" and all its associated analyses will be permanently deleted.
+                  </p>
+                  <p className="text-red-600 mt-2">This action cannot be undone.</p>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setNoteToDelete(null);
+              }}
+              disabled={deleting}
+              className="flex-1"
+            >
+              {language === 'ar' ? 'لا، إلغاء' : 'No, Cancel'}
+            </Button>
+            <Button
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="flex-1 bg-red-600 hover:bg-red-700"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className={`h-4 w-4 animate-spin ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                  {language === 'ar' ? 'جاري الحذف...' : 'Deleting...'}
+                </>
+              ) : (
+                <>
+                  {language === 'ar' ? 'نعم، احذف' : 'Yes, Delete'}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
