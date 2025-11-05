@@ -1376,6 +1376,9 @@ async def update_note(note_id: str, request: ClinicalNoteCreate, user: dict = De
     if isinstance(note['created_at'], str):
         note['created_at'] = datetime.fromisoformat(note['created_at'])
     
+    
+    if note.get('updated_at') and isinstance(note['updated_at'], str):
+        note['updated_at'] = datetime.fromisoformat(note['updated_at'])
     return note
 
 @api_router.delete("/notes/{note_id}")
