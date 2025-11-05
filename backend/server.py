@@ -1342,6 +1342,60 @@ async def get_note(note_id: str, user: dict = Depends(get_current_user)):
     
     return note
 
+@api_router.put("/notes/{note_id}", response_model=ClinicalNote)
+async def update_note(note_id: str, request: NoteRequest, user: dict = Depends(get_current_user)):
+    # Check if note exists and belongs to user
+    existing_note = await db.clinical_notes.find_one(
+        {"id": note_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not existing_note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    # Update note data
+    updated_data = {
+        "title": request.title,
+        "doctor_notes": [{"text": n.text, "specialty": n.specialty} for n in request.doctor_notes],
+        "notes_text": " ".join([n.text for n in request.doctor_notes]),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.clinical_notes.update_one(
+        {"id": note_id, "user_id": user['id']},
+        {"$set": updated_data}
+    )
+    
+    # Get updated note
+    note = await db.clinical_notes.find_one(
+        {"id": note_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if isinstance(note['created_at'], str):
+        note['created_at'] = datetime.fromisoformat(note['created_at'])
+    
+    return note
+
+@api_router.delete("/notes/{note_id}")
+async def delete_note(note_id: str, user: dict = Depends(get_current_user)):
+    # Check if note exists and belongs to user
+    note = await db.clinical_notes.find_one(
+        {"id": note_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    # Delete the note
+    await db.clinical_notes.delete_one({"id": note_id, "user_id": user['id']})
+    
+    # Also delete all related analyses
+    await db.analyses.delete_many({"note_id": note_id, "user_id": user['id']})
+    
+    return {"message": "Note and related analyses deleted successfully"}
+
 # ========== Analysis Routes ==========
 @api_router.post("/analyze", response_model=Analysis)
 async def analyze_note(request: AnalyzeRequest, user: dict = Depends(get_current_user)):
