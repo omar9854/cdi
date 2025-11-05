@@ -171,10 +171,12 @@ const ChatWidget = ({ user }) => {
   const markAsRead = async (messageId) => {
     try {
       const token = localStorage.getItem('token');
-      console.log('Marking message as read:', messageId);
       await axios.post(`${API}/messages/${messageId}/read`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
+      // Add to marked as read tracking
+      markedAsReadRef.current.add(messageId);
       
       // Update messages state immediately without full refresh
       setMessages(prevMessages => 
@@ -183,7 +185,7 @@ const ChatWidget = ({ user }) => {
         )
       );
       
-      // Update unread count
+      // Update unread count - recalculate based on current messages
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Error marking as read:', error);
