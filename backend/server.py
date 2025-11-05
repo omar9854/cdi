@@ -521,15 +521,29 @@ Please respond in the following JSON format:
 }}}}"""
 
     try:
-        # Use Google Gemini API directly - using available free model
-        model = genai.GenerativeModel('gemini-flash-latest')  # Free model that works
+        # Use Google Gemini API with automatic key rotation
+        model = get_gemini_model('gemini-flash-latest')
         
         # Combine system message and user prompt
         full_prompt = f"{system_message}\n\n{user_prompt}"
         
-        # Generate response
-        response = model.generate_content(full_prompt)
-        response_text = response.text.strip()
+        # Generate response with retry logic
+        max_retries = len(GEMINI_API_KEYS)
+        last_error = None
+        
+        for attempt in range(max_retries):
+            try:
+                response = model.generate_content(full_prompt)
+                response_text = response.text.strip()
+                break  # Success, exit retry loop
+            except Exception as e:
+                last_error = e
+                if attempt < max_retries - 1:
+                    # Try with a different key
+                    logger.warning(f"Retry {attempt + 1}/{max_retries} with different API key")
+                    model = get_gemini_model('gemini-flash-latest')
+                else:
+                    raise e
         
         # Parse JSON response
         import json
