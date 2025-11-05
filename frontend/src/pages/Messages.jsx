@@ -54,11 +54,17 @@ const Messages = ({ user, onLogout }) => {
         axios.get(`${API}/messages/sent`, { headers: { Authorization: `Bearer ${token}` } }),
         axios.get(`${API}/messages/drafts`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
-      setInboxMessages(inbox.data);
-      setSentMessages(sent.data);
-      setDraftMessages(drafts.data);
+      
+      // Ensure we always set arrays, even if API returns different structure
+      setInboxMessages(inbox.data?.messages || inbox.data || []);
+      setSentMessages(sent.data?.messages || sent.data || []);
+      setDraftMessages(drafts.data?.messages || drafts.data || []);
     } catch (error) {
       console.error('Failed to fetch messages:', error);
+      // Set empty arrays on error
+      setInboxMessages([]);
+      setSentMessages([]);
+      setDraftMessages([]);
     }
   };
 
