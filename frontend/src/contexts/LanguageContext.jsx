@@ -141,8 +141,8 @@ export const translations = {
     
     // New Note
     newClinicalNote: 'New Clinical Note',
-    noteTitle: 'Note Title',
-    noteTitlePlaceholder: 'Example: Patient Notes - John Doe',
+    noteTitle: 'Patient ID',
+    noteTitlePlaceholder: 'Example: Patient ID - P12345',
     doctorNotes: "Doctor's Notes",
     specialty: 'Specialty',
     selectSpecialty: 'Select Specialty',
