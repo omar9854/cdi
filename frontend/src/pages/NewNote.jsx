@@ -115,18 +115,20 @@ const NewNote = ({ user, onLogout }) => {
             <DialogDescription className="text-base pt-4">
               {language === 'ar' ? (
                 <>
-                  <p className="mb-3 font-semibold">يرجى الانتباه:</p>
+                  <p className="mb-3 font-semibold text-red-600">تحذير هام:</p>
                   <ul className="list-disc list-inside space-y-2 text-gray-700">
-                    <li>استخدم رقم المريض بدلاً من الاسم للحفاظ على الخصوصية</li>
+                    <li className="font-semibold">لا تستخدم رقم ملف أو اسم المريض للحفاظ على السرية</li>
+                    <li>استخدم فقط رمز للحالة</li>
                     <li>تأكد من عدم إدخال معلومات شخصية حساسة</li>
                     <li>جميع البيانات محمية ومشفرة</li>
                   </ul>
                 </>
               ) : (
                 <>
-                  <p className="mb-3 font-semibold">Please note:</p>
+                  <p className="mb-3 font-semibold text-red-600">Important Warning:</p>
                   <ul className="list-disc list-inside space-y-2 text-gray-700">
-                    <li>Use Patient ID instead of name to maintain privacy</li>
+                    <li className="font-semibold">Do not use file number or patient name to maintain confidentiality</li>
+                    <li>Use only a case code</li>
                     <li>Ensure no sensitive personal information is entered</li>
                     <li>All data is protected and encrypted</li>
                   </ul>
