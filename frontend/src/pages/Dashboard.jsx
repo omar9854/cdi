@@ -149,8 +149,32 @@ const Dashboard = ({ user, onLogout }) => {
                   data-testid={`note-card-${note.id}`}
                 >
                   <CardHeader>
-                    <CardTitle className="text-xl text-gray-800">{note.title}</CardTitle>
-                    <p className="text-sm text-gray-500">{formatDate(note.created_at)}</p>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <CardTitle className="text-xl text-gray-800">{note.title}</CardTitle>
+                        <p className="text-sm text-gray-500">{formatDate(note.created_at)}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handleEdit(e, note.id)}
+                          className="text-blue-600 hover:bg-blue-50 border-blue-300"
+                          data-testid={`edit-note-${note.id}`}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handleDeleteClick(e, note)}
+                          className="text-red-600 hover:bg-red-50 border-red-300"
+                          data-testid={`delete-note-${note.id}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <p className="text-gray-700 line-clamp-2">{note.notes_text}</p>
