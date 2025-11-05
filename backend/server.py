@@ -12,6 +12,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 import bcrypt
 import jwt
+import random
 import google.generativeai as genai
 import io
 from reportlab.lib.pagesizes import letter, A4
