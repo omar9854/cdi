@@ -51,6 +51,38 @@ const Dashboard = ({ user, onLogout }) => {
     });
   };
 
+  const handleEdit = (e, noteId) => {
+    e.stopPropagation(); // Prevent card click
+    navigate(`/edit-note/${noteId}`);
+  };
+
+  const handleDeleteClick = (e, note) => {
+    e.stopPropagation(); // Prevent card click
+    setNoteToDelete(note);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!noteToDelete) return;
+    
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API}/notes/${noteToDelete.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      toast.success(language === 'ar' ? 'تم حذف الملاحظة بنجاح' : 'Note deleted successfully');
+      setDeleteDialogOpen(false);
+      setNoteToDelete(null);
+      fetchNotes(); // Refresh list
+    } catch (error) {
+      toast.error(language === 'ar' ? 'فشل حذف الملاحظة' : 'Failed to delete note');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <Navbar user={user} onLogout={onLogout} />
