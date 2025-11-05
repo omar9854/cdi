@@ -500,18 +500,18 @@ Please respond in the following JSON format:
 }}}}"""
 
     try:
-        chat = LlmChat(
-            api_key=EMERGENT_LLM_KEY,
-            session_id=str(uuid.uuid4()),
-            system_message=system_message
-        ).with_model("gemini", "gemini-2.5-pro")
+        # Use Google Gemini API directly
+        model = genai.GenerativeModel('gemini-1.5-flash')  # Using free tier model
         
-        message = UserMessage(text=user_prompt)
-        response = await chat.send_message(message)
+        # Combine system message and user prompt
+        full_prompt = f"{system_message}\n\n{user_prompt}"
+        
+        # Generate response
+        response = model.generate_content(full_prompt)
+        response_text = response.text.strip()
         
         # Parse JSON response
         import json
-        response_text = response.strip()
         if "```json" in response_text:
             response_text = response_text.split("```json")[1].split("```")[0].strip()
         elif "```" in response_text:
