@@ -201,6 +201,7 @@ class ClinicalNote(BaseModel):
     title: str
     doctor_notes: List[DoctorNote]
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = None
 
 class ClinicalNoteCreate(BaseModel):
     title: str
