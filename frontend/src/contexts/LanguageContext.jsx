@@ -43,8 +43,8 @@ export const translations = {
     
     // New Note
     newClinicalNote: 'ملاحظة سريرية جديدة',
-    noteTitle: 'عنوان الملاحظة',
-    noteTitlePlaceholder: 'مثال: ملاحظات المريض - أحمد محمد',
+    noteTitle: 'رمز المريض',
+    noteTitlePlaceholder: 'مثال: رمز المريض - P12345',
     doctorNotes: 'ملاحظات الأطباء',
     specialty: 'التخصص',
     selectSpecialty: 'اختر التخصص',
