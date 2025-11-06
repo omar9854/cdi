@@ -574,6 +574,9 @@ async def get_specialties():
 # ========== Auth Routes ==========
 @api_router.post("/auth/register", response_model=Token)
 async def register(user_data: UserRegister):
+    import re
+    from security_utils import log_audit
+    
     existing_user = await db.users.find_one({"email": user_data.email})
     if existing_user:
         raise HTTPException(status_code=400, detail="Registration failed")
@@ -583,6 +586,24 @@ async def register(user_data: UserRegister):
     if existing_phone:
         raise HTTPException(status_code=400, detail="Registration failed")
     
+    # Validate password strength
+    password = user_data.password
+    if len(password) < 12:
+        raise HTTPException(status_code=400, detail="Password must be at least 12 characters long")
+    if not re.search(r'[A-Z]', password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one uppercase letter")
+    if not re.search(r'[a-z]', password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one lowercase letter")
+    if not re.search(r'[0-9]', password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one digit")
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        raise HTTPException(status_code=400, detail="Password must contain at least one special character")
+    
+    # Check for common weak passwords
+    weak_passwords = ['Password123!', 'Welcome123!', 'Admin123!', 'User123456!']
+    if password in weak_passwords:
+        raise HTTPException(status_code=400, detail="This password is too common. Please choose a stronger password")
+    
     # Check if admin code is provided and valid
     role = "user"
     if user_data.admin_code:
@@ -590,6 +611,9 @@ async def register(user_data: UserRegister):
             role = "admin"
         else:
             raise HTTPException(status_code=400, detail="Invalid admin code")
+    
+    # Set password expiration (90 days from now)
+    password_expires_at = datetime.now(timezone.utc) + timedelta(days=90)
     
     user = User(
         email=user_data.email,
