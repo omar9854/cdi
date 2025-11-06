@@ -2639,8 +2639,16 @@ async def impersonate_user(
     }
 
 
-# ========== Include Router ==========
+# ========== Include Routers ==========
 app.include_router(api_router)
+
+# Import and include security router
+try:
+    from security_routes import security_router
+    app.include_router(security_router, prefix="/api")
+    print("✅ Security routes loaded successfully")
+except Exception as e:
+    print(f"⚠️ Warning: Could not load security routes: {str(e)}")
 
 app.add_middleware(
     CORSMiddleware,
