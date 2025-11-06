@@ -643,30 +643,235 @@ async def register(user_data: UserRegister):
         "whatsapp_welcome_link": whatsapp_link
     }
 
+@api_router.post("/auth/login-step1")
+async def login_step1(credentials: UserLogin):
+    """Step 1: Verify credentials and send OTP"""
+    try:
+        # Import security utils
+        from security_utils import (
+            check_rate_limit, record_login_attempt, 
+            unlock_account_if_expired, log_audit, 
+            generate_otp, send_otp_email
+        )
+        
+        # Check if account lockout expired
+        await unlock_account_if_expired(db, credentials.email)
+        
+        # Check rate limiting
+        is_allowed, remaining = await check_rate_limit(db, credentials.email)
+        if not is_allowed:
+            raise HTTPException(
+                status_code=429, 
+                detail="Account temporarily locked due to multiple failed login attempts. Please try again later."
+            )
+        
+        # Find user
+        user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
+        
+        # Check if user exists and password is correct
+        if not user or not verify_password(credentials.password, user['password']):
+            # Record failed attempt
+            await record_login_attempt(db, credentials.email, False)
+            await log_audit(
+                db,
+                action="login_failed",
+                user_email=credentials.email,
+                status="failure",
+                details={"reason": "Invalid credentials", "remaining_attempts": remaining - 1}
+            )
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        # Check if account is locked
+        if user.get('account_locked'):
+            raise HTTPException(status_code=403, detail="Account is locked. Please contact support.")
+        
+        # Check if MFA is enabled (default: true for security)
+        mfa_enabled = user.get('mfa_enabled', True)
+        
+        if mfa_enabled:
+            # Generate and send OTP
+            otp_code = generate_otp()
+            expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+            
+            # Save OTP to database
+            otp_doc = {
+                "id": str(uuid.uuid4()),
+                "user_id": user['id'],
+                "email": credentials.email,
+                "otp_code": otp_code,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "expires_at": expires_at.isoformat(),
+                "is_used": False,
+                "attempts": 0
+            }
+            await db.otp_records.insert_one(otp_doc)
+            
+            # Send OTP via email
+            user_name = user.get('full_name', 'المستخدم')
+            await send_otp_email(credentials.email, otp_code, user_name)
+            
+            # Log audit
+            await log_audit(
+                db,
+                action="login_otp_sent",
+                user_id=user['id'],
+                user_email=credentials.email,
+                status="success"
+            )
+            
+            return {
+                "requires_mfa": True,
+                "message": "OTP sent to your email",
+                "email": credentials.email
+            }
+        else:
+            # MFA disabled, login directly (not recommended)
+            await record_login_attempt(db, credentials.email, True)
+            
+            token = create_access_token({
+                "user_id": user['id'], 
+                "email": user['email'],
+                "role": user.get('role', 'user')
+            })
+            
+            # Log successful login
+            await log_audit(
+                db,
+                action="login_success",
+                user_id=user['id'],
+                user_email=credentials.email,
+                status="success"
+            )
+            
+            return {
+                "requires_mfa": False,
+                "access_token": token,
+                "token_type": "bearer",
+                "user": {
+                    "id": user['id'], 
+                    "email": user['email'], 
+                    "full_name": user['full_name'],
+                    "phone_number": user.get('phone_number', ''),
+                    "role": user.get('role', 'user')
+                }
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Login error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Login failed")
+
+@api_router.post("/auth/login-step2", response_model=Token)
+async def login_step2(email: str, otp_code: str):
+    """Step 2: Verify OTP and complete login"""
+    try:
+        from security_utils import log_audit, record_login_attempt
+        
+        # Find OTP record
+        otp_record = await db.otp_records.find_one({
+            "email": email,
+            "otp_code": otp_code,
+            "is_used": False
+        }, {"_id": 0})
+        
+        if not otp_record:
+            await log_audit(
+                db,
+                action="login_otp_failed",
+                user_email=email,
+                status="failure",
+                details={"reason": "Invalid OTP"}
+            )
+            raise HTTPException(status_code=400, detail="Invalid OTP code")
+        
+        # Check expiration
+        expires_at = datetime.fromisoformat(otp_record['expires_at'])
+        if datetime.now(timezone.utc) > expires_at:
+            await log_audit(
+                db,
+                action="login_otp_failed",
+                user_email=email,
+                status="failure",
+                details={"reason": "OTP expired"}
+            )
+            raise HTTPException(status_code=400, detail="OTP code has expired")
+        
+        # Mark OTP as used
+        await db.otp_records.update_one(
+            {"id": otp_record['id']},
+            {"$set": {"is_used": True}}
+        )
+        
+        # Get user
+        user = await db.users.find_one({"id": otp_record['user_id']}, {"_id": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Record successful login
+        await record_login_attempt(db, email, True)
+        
+        # Create session
+        token = create_access_token({
+            "user_id": user['id'], 
+            "email": user['email'],
+            "role": user.get('role', 'user')
+        })
+        
+        # Save session to database
+        session_expires = datetime.now(timezone.utc) + timedelta(days=7)
+        session_doc = {
+            "id": str(uuid.uuid4()),
+            "user_id": user['id'],
+            "token": token,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "last_activity": datetime.now(timezone.utc).isoformat(),
+            "expires_at": session_expires.isoformat(),
+            "is_active": True
+        }
+        await db.user_sessions.insert_one(session_doc)
+        
+        # Log successful login
+        await log_audit(
+            db,
+            action="login_success",
+            user_id=user['id'],
+            user_email=email,
+            status="success",
+            details={"method": "mfa"}
+        )
+        
+        return {
+            "access_token": token,
+            "token_type": "bearer",
+            "user": {
+                "id": user['id'], 
+                "email": user['email'], 
+                "full_name": user['full_name'],
+                "phone_number": user.get('phone_number', ''),
+                "role": user.get('role', 'user')
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"OTP verification error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Verification failed")
+
+# Keep old endpoint for backward compatibility (deprecated)
 @api_router.post("/auth/login", response_model=Token)
 async def login(credentials: UserLogin):
-    user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
-    
-    if not user or not verify_password(credentials.password, user['password_hash']):
-        raise HTTPException(status_code=401, detail="Login failed")
-    
-    token = create_access_token({
-        "user_id": user['id'], 
-        "email": user['email'],
-        "role": user.get('role', 'user')
-    })
-    
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "user": {
-            "id": user['id'], 
-            "email": user['email'], 
-            "full_name": user['full_name'],
-            "phone_number": user.get('phone_number', ''),
-            "role": user.get('role', 'user')
-        }
-    }
+    """Legacy login endpoint - redirects to new MFA flow"""
+    result = await login_step1(credentials)
+    if result.get('requires_mfa'):
+        raise HTTPException(
+            status_code=202,
+            detail={
+                "message": "MFA required",
+                "email": result['email'],
+                "requires_mfa": True
+            }
+        )
+    return result
 
 @api_router.get("/auth/me")
 async def get_current_user_info(current_user: dict = Depends(get_current_user)):
