@@ -725,8 +725,7 @@ async def login_step1(credentials: UserLogin):
         
         # Check if password field exists
         if 'password' not in user:
-            print(f"ERROR: Password field missing! User fields: {list(user.keys())}")
-            raise HTTPException(status_code=500, detail="User account corrupted - no password field")
+            raise HTTPException(status_code=500, detail="User account error - please contact support")
         
         # Check if password is correct
         if not verify_password(credentials.password, user['password']):
