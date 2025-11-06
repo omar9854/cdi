@@ -711,8 +711,11 @@ async def login_step1(credentials: UserLogin):
         # Find user
         user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
         
+        print(f"LOGIN DEBUG: Found user={user is not None}, Email={credentials.email}")
+        
         # Check if user exists
         if not user:
+            print("LOGIN DEBUG: User not found")
             await record_login_attempt(db, credentials.email, False)
             await log_audit(
                 db,
@@ -723,12 +726,18 @@ async def login_step1(credentials: UserLogin):
             )
             raise HTTPException(status_code=401, detail="Invalid email or password")
         
+        print(f"LOGIN DEBUG: User fields: {list(user.keys())}")
+        
         # Check if password field exists
         if 'password' not in user:
+            print("LOGIN DEBUG: Password field missing!")
             raise HTTPException(status_code=500, detail="User account error - please contact support")
+        
+        print(f"LOGIN DEBUG: Verifying password...")
         
         # Check if password is correct
         if not verify_password(credentials.password, user['password']):
+            print("LOGIN DEBUG: Password verification failed")
             # Record failed attempt
             await record_login_attempt(db, credentials.email, False)
             await log_audit(
