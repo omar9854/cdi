@@ -711,8 +711,20 @@ async def login_step1(credentials: UserLogin):
         # Find user
         user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
         
-        # Check if user exists and password is correct
-        if not user or not verify_password(credentials.password, user['password']):
+        # Check if user exists
+        if not user:
+            await record_login_attempt(db, credentials.email, False)
+            await log_audit(
+                db,
+                action="login_failed",
+                user_email=credentials.email,
+                status="failure",
+                details={"reason": "User not found"}
+            )
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        
+        # Check if password is correct
+        if not verify_password(credentials.password, user.get('password', '')):
             # Record failed attempt
             await record_login_attempt(db, credentials.email, False)
             await log_audit(
