@@ -23,22 +23,46 @@ const Login = ({ setUser }) => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API}/auth/login`, formData);
-      const { access_token, user } = response.data;
+      // Try new MFA flow first
+      const response = await axios.post(`${API}/auth/login-step1`, formData);
       
-      localStorage.setItem('token', access_token);
-      localStorage.setItem('user', JSON.stringify(user));
-      setUser(user);
-      
-      toast.success(t('loginSuccess'));
-      navigate('/dashboard');
+      if (response.data.requires_mfa) {
+        // Navigate to MFA verification page
+        toast.success(
+          language === 'ar' 
+            ? '✅ تم إرسال رمز التحقق إلى بريدك الإلكتروني' 
+            : '✅ Verification code sent to your email'
+        );
+        navigate('/mfa-verify', {
+          state: {
+            email: response.data.email,
+            tempToken: formData.password // We'll handle this differently in production
+          }
+        });
+      } else {
+        // MFA disabled, login directly
+        const { access_token, user } = response.data;
+        localStorage.setItem('token', access_token);
+        localStorage.setItem('user', JSON.stringify(user));
+        setUser(user);
+        
+        toast.success(t('loginSuccess'));
+        navigate('/dashboard');
+      }
     } catch (error) {
-      // Show clear error message for invalid credentials
+      // Handle errors
       const backendMessage = error.response?.data?.detail;
       let errorMessage;
       
-      // If backend returns "Login failed" or similar, show custom message
-      if (backendMessage === "Login failed" || error.response?.status === 401) {
+      if (error.response?.status === 429) {
+        errorMessage = language === 'ar'
+          ? '⚠️ تم قفل الحساب مؤقتاً بسبب محاولات فاشلة متعددة. حاول لاحقاً.'
+          : '⚠️ Account temporarily locked due to multiple failed attempts. Try again later.';
+      } else if (error.response?.status === 403) {
+        errorMessage = language === 'ar'
+          ? '⚠️ الحساب مقفل. يرجى الاتصال بالدعم الفني.'
+          : '⚠️ Account is locked. Please contact support.';
+      } else if (error.response?.status === 401) {
         errorMessage = language === 'ar' 
           ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' 
           : 'Invalid email or password';
