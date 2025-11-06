@@ -81,15 +81,26 @@ const Navbar = ({ user, onLogout }) => {
                 {t('home')}
               </Button>
               {user.role === 'admin' && (
-                <Button
-                  variant={isActive('/admin') ? 'secondary' : 'ghost'}
-                  onClick={() => navigate('/admin')}
-                  className={isActive('/admin') ? '' : 'text-white hover:bg-white/10'}
-                  data-testid="nav-admin"
-                >
-                  {language === 'ar' ? <History className="ml-2 w-4 h-4" /> : <History className="mr-2 w-4 h-4" />}
-                  {language === 'ar' ? 'الأدمن' : 'Admin'}
-                </Button>
+                <>
+                  <Button
+                    variant={isActive('/admin') ? 'secondary' : 'ghost'}
+                    onClick={() => navigate('/admin')}
+                    className={isActive('/admin') ? '' : 'text-white hover:bg-white/10'}
+                    data-testid="nav-admin"
+                  >
+                    {language === 'ar' ? <History className="ml-2 w-4 h-4" /> : <History className="mr-2 w-4 h-4" />}
+                    {language === 'ar' ? 'الأدمن' : 'Admin'}
+                  </Button>
+                  <Button
+                    variant={isActive('/security') ? 'secondary' : 'ghost'}
+                    onClick={() => navigate('/security')}
+                    className={isActive('/security') ? '' : 'text-white hover:bg-white/10'}
+                    data-testid="nav-security"
+                  >
+                    {language === 'ar' ? <Shield className="ml-2 w-4 h-4" /> : <Shield className="mr-2 w-4 h-4" />}
+                    {language === 'ar' ? 'الأمان' : 'Security'}
+                  </Button>
+                </>
               )}
               {(user.role === 'supervisor' || user.role === 'admin') && (
                 <Button
