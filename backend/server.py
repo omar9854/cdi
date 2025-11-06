@@ -711,6 +711,12 @@ async def login_step1(credentials: UserLogin):
         # Find user
         user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
         
+        # Debug logging
+        print(f"DEBUG: User found: {user is not None}")
+        if user:
+            print(f"DEBUG: User has password field: {'password' in user}")
+            print(f"DEBUG: User keys: {list(user.keys())}")
+        
         # Check if user exists
         if not user:
             await record_login_attempt(db, credentials.email, False)
@@ -725,6 +731,7 @@ async def login_step1(credentials: UserLogin):
         
         # Check if password field exists
         if 'password' not in user:
+            print(f"ERROR: Password field missing! User fields: {list(user.keys())}")
             raise HTTPException(status_code=500, detail="User account corrupted - no password field")
         
         # Check if password is correct
