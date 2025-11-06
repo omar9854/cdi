@@ -625,7 +625,26 @@ async def register(user_data: UserRegister):
     
     doc = user.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
+    
+    # Add security fields
+    doc['mfa_enabled'] = True  # Enable MFA by default for security
+    doc['password_last_changed'] = datetime.now(timezone.utc).isoformat()
+    doc['password_expires_at'] = password_expires_at.isoformat()
+    doc['account_locked'] = False
+    doc['locked_until'] = None
+    doc['failed_login_attempts'] = 0
+    
     await db.users.insert_one(doc)
+    
+    # Log registration in audit logs
+    await log_audit(
+        db,
+        action="user_registered",
+        user_id=user.id,
+        user_email=user.email,
+        status="success",
+        details={"role": role}
+    )
     
     # Send welcome email (async, non-blocking)
     try:
