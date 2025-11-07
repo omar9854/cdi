@@ -1711,6 +1711,55 @@ async def analyze_note(request: AnalyzeRequest, user: dict = Depends(get_current
     
     return analysis
 
+@api_router.post("/analysis/reanalyze/{note_id}", response_model=Analysis)
+async def reanalyze_note(note_id: str, user: dict = Depends(get_current_user)):
+    """Reanalyze an existing note (useful after edits)"""
+    note = await db.clinical_notes.find_one(
+        {"id": note_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    # Analyze with Gemini
+    result = await analyze_with_gemini(note['title'], note.get('doctor_notes', []))
+    
+    # Create new analysis record
+    analysis = Analysis(
+        note_id=note_id,
+        user_id=user['id'],
+        diagnoses_to_document=[DiagnosisBilingual(**d) for d in result.get('diagnoses_to_document', [])],
+        missing_documentation=result.get('missing_documentation', []),
+        gaps_ar=result.get('gaps_ar', []),
+        gaps_en=result.get('gaps_en', []),
+        queries_ar=result.get('queries_ar', []),
+        queries_en=result.get('queries_en', []),
+        recommendations_ar=result.get('recommendations_ar', []),
+        recommendations_en=result.get('recommendations_en', []),
+        summary_ar=result.get('summary_ar', ''),
+        summary_en=result.get('summary_en', '')
+    )
+    
+    doc = analysis.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['diagnoses_to_document'] = [d.model_dump() if hasattr(d, 'model_dump') else d for d in doc['diagnoses_to_document']]
+    await db.analyses.insert_one(doc)
+    
+    # Log audit
+    from security_utils import log_audit
+    await log_audit(
+        db,
+        action="reanalyze_note",
+        user_id=user['id'],
+        user_email=user.get('email'),
+        resource_type="note",
+        resource_id=note_id,
+        status="success"
+    )
+    
+    return analysis
+
 @api_router.get("/analyses/{note_id}", response_model=List[Analysis])
 async def get_analyses(note_id: str, user: dict = Depends(get_current_user)):
     analyses = await db.analyses.find(
