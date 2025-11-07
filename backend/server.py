@@ -721,7 +721,7 @@ async def get_specialties():
 @limiter.limit("3/hour")
 async def register(request: Request, user_data: UserRegister):
     import re
-    from security_utils import log_audit
+    from security_utils import log_audit, send_welcome_email
     
     existing_user = await db.users.find_one({"email": user_data.email})
     if existing_user:
