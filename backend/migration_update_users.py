@@ -164,8 +164,19 @@ async def main():
     
     print()
     
-    # 3. إنشاء Indexes لتحسين الأداء
-    print("3️⃣ إنشاء Indexes...")
+    # 3. تنظيف OTP و login attempts القديمة
+    print("3️⃣ تنظيف البيانات القديمة...")
+    
+    otp_deleted = await db.otp_records.delete_many({})
+    print(f"   ✅ تم حذف {otp_deleted.deleted_count} سجل OTP قديم")
+    
+    attempts_deleted = await db.login_attempts.delete_many({})
+    print(f"   ✅ تم حذف {attempts_deleted.deleted_count} محاولة تسجيل دخول")
+    
+    print()
+    
+    # 4. إنشاء Indexes لتحسين الأداء
+    print("4️⃣ إنشاء Indexes...")
     
     try:
         # Users
