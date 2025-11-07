@@ -2115,6 +2115,22 @@ async def export_pdf(analysis_id: str, user: dict = Depends(get_current_user)):
         headers={"Content-Disposition": f"attachment; filename=analysis_{analysis_id}.pdf"}
     )
 
+@api_router.get("/download/security-documentation")
+async def download_security_documentation():
+    """Download comprehensive security documentation"""
+    import os
+    
+    file_path = "/app/COMPREHENSIVE_SECURITY_IT_DOCUMENTATION_AR.md"
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Documentation file not found")
+    
+    return FileResponse(
+        path=file_path,
+        filename="COMPREHENSIVE_SECURITY_IT_DOCUMENTATION_AR.md",
+        media_type="text/markdown"
+    )
+
 @api_router.get("/export/excel/{analysis_id}")
 async def export_excel(analysis_id: str, user: dict = Depends(get_current_user)):
     analysis = await db.analyses.find_one(
