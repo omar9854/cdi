@@ -100,8 +100,9 @@ async def main():
         hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
         
         await db.users.update_one(
-            {'email': 'admin@cdi-center.sa'},
+            {'id': admin['id']},
             {'$set': {
+                'email': 'medidocai@gmail.com',
                 'password_hash': hashed.decode('utf-8'),
                 'role': 'admin',
                 'mfa_enabled': True,
@@ -111,7 +112,7 @@ async def main():
             }}
         )
         print("   ✅ تم تحديث حساب Admin")
-        print(f"   📧 Email: admin@cdi-center.sa")
+        print(f"   📧 Email: medidocai@gmail.com (تم التحديث)")
         print(f"   🔑 Password: {new_password}")
     else:
         # إنشاء حساب Admin جديد
