@@ -213,8 +213,8 @@ async def main():
     
     print()
     
-    # 4. إحصائيات نهائية
-    print("4️⃣ الإحصائيات النهائية:")
+    # 5. إحصائيات نهائية
+    print("5️⃣ الإحصائيات النهائية:")
     total_users = await db.users.count_documents({})
     total_admins = await db.users.count_documents({'role': 'admin'})
     total_supervisors = await db.users.count_documents({'role': 'supervisor'})
