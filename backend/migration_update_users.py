@@ -115,7 +115,7 @@ async def main():
             {'id': admin['id']},
             {
                 '$set': {
-                    'email': 'es012@hotmail.com',
+                    'email': 'almaghthawi.cdi@gmail.com',
                     'password_hash': hashed.decode('utf-8'),
                     'role': 'admin',
                     'mfa_enabled': True,
