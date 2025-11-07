@@ -20,7 +20,7 @@ const MFAVerification = ({ setUser }) => {
   const [otpCode, setOtpCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
-  const [timer, setTimer] = useState(900); // 15 minutes
+  const [timer, setTimer] = useState(1800); // 30 minutes
 
   const email = location.state?.email;
   const tempToken = location.state?.tempToken;
