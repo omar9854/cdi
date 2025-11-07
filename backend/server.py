@@ -1070,7 +1070,7 @@ async def reset_password_with_code(request: PasswordResetWithCode):
     new_password_hash = hash_password(request.new_password)
     await db.users.update_one(
         {"id": user['id']},
-        {"$set": {"password_hash": new_password_hash}}
+        {"$set": {"password": new_password_hash}}
     )
     
     # Mark token as used
