@@ -130,7 +130,7 @@ async def main():
                 }
             }
         )
-        print(f"   ✅ تم تحديث حساب Admin من {old_email} إلى es012@hotmail.com")
+        print(f"   ✅ تم تحديث حساب Admin من {old_email} إلى almaghthawi.cdi@gmail.com")
         print(f"   🔑 Password: {new_password}")
         
         # حذف جميع login attempts للأدمن
