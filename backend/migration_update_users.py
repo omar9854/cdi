@@ -144,9 +144,9 @@ async def main():
         
         admin_user = {
             'id': str(uuid.uuid4()),
-            'email': 'medidocai@gmail.com',
+            'email': 'ES012@HOTMAIL.COM',
             'password_hash': hashed.decode('utf-8'),
-            'full_name': 'مدير النظام',
+            'full_name': 'مدير النظام - System Administrator',
             'role': 'admin',
             'mfa_enabled': True,
             'is_active': True,
@@ -159,7 +159,7 @@ async def main():
         
         await db.users.insert_one(admin_user)
         print("   ✅ تم إنشاء حساب Admin جديد")
-        print(f"   📧 Email: medidocai@gmail.com")
+        print(f"   📧 Email: ES012@HOTMAIL.COM")
         print(f"   🔑 Password: {new_password}")
     
     print()
