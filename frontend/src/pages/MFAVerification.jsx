@@ -61,22 +61,15 @@ const MFAVerification = ({ setUser }) => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API}/security/mfa/verify-otp`, {
-        email,
-        otp_code: otpCode
-      });
+      // Complete login with step 2
+      const loginResponse = await axios.post(`${API}/auth/login-step2?email=${encodeURIComponent(email)}&otp_code=${otpCode}`);
 
-      if (response.status === 200) {
-        // OTP verified, complete login with step 2
-        const loginResponse = await axios.post(`${API}/auth/login-step2?email=${encodeURIComponent(email)}&otp_code=${otpCode}`);
+      localStorage.setItem('token', loginResponse.data.access_token);
+      localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
+      setUser(loginResponse.data.user);
 
-        localStorage.setItem('token', loginResponse.data.access_token);
-        localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
-        setUser(loginResponse.data.user);
-
-        toast.success(language === 'ar' ? 'تم التحقق بنجاح! مرحباً بك' : 'Verification successful! Welcome');
-        navigate('/dashboard');
-      }
+      toast.success(language === 'ar' ? 'تم التحقق بنجاح! مرحباً بك' : 'Verification successful! Welcome');
+      navigate('/dashboard');
     } catch (error) {
       console.error('Verification error:', error);
       toast.error(
