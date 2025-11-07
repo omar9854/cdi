@@ -3489,6 +3489,30 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_monitoring():
+    """Start monitoring tasks"""
+    import asyncio
+    
+    async def update_active_users():
+        while True:
+            try:
+                # Count active sessions (last 30 minutes)
+                cutoff = datetime.now(timezone.utc) - timedelta(minutes=30)
+                active_count = await db.user_sessions.count_documents({
+                    "last_activity": {"$gte": cutoff.isoformat()},
+                    "is_active": True
+                })
+                ACTIVE_USERS.set(active_count)
+            except Exception as e:
+                logging.error(f"Error updating active users metric: {e}")
+            
+            await asyncio.sleep(60)  # Update every minute
+    
+    # Start background task
+    asyncio.create_task(update_active_users())
+    logging.info("✅ Monitoring tasks started")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
