@@ -159,7 +159,7 @@ async def main():
         
         await db.users.insert_one(admin_user)
         print("   ✅ تم إنشاء حساب Admin جديد")
-        print(f"   📧 Email: es012@hotmail.com")
+        print(f"   📧 Email: almaghthawi.cdi@gmail.com")
         print(f"   🔑 Password: {new_password}")
     
     print()
