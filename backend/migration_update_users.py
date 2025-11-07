@@ -84,15 +84,25 @@ async def main():
     print(f"   📊 تم تحديث {updated_count} مستخدم")
     print()
     
-    # 2. التأكد من وجود حساب Admin وتحديث الإيميل
-    print("2️⃣ التحقق من حساب Admin...")
+    # 2. التأكد من وجود حساب Admin وتحديث الإيميل إلى medidocai@gmail.com
+    print("2️⃣ التحقق من حساب Admin وتحديث الإيميل...")
     
-    # البحث عن الأدمن بالإيميل القديم أو الجديد
-    admin = await db.users.find_one({'$or': [
-        {'email': 'admin@cdi-center.sa'},
-        {'email': 'medidocai@gmail.com'},
-        {'role': 'admin'}
-    ]})
+    # البحث عن جميع حسابات الأدمن
+    all_admins = await db.users.find({'role': 'admin'}).to_list(None)
+    
+    print(f"   📊 عدد حسابات الأدمن: {len(all_admins)}")
+    
+    # حذف الحسابات الزائدة (نبقي واحد فقط)
+    if len(all_admins) > 1:
+        print(f"   🗑️ حذف {len(all_admins) - 1} حسابات أدمن زائدة...")
+        keep_admin = all_admins[0]
+        for admin in all_admins[1:]:
+            await db.users.delete_one({'id': admin['id']})
+        admin = keep_admin
+    elif len(all_admins) == 1:
+        admin = all_admins[0]
+    else:
+        admin = None
     
     if admin:
         # تحديث كلمة مرور Admin
