@@ -47,6 +47,20 @@ const ChatEnhanced = ({ user, onLogout }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const fetchAnalysisAndNoteId = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/analysis/${analysisId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (response.data && response.data.note_id) {
+        setNoteId(response.data.note_id);
+      }
+    } catch (error) {
+      console.error('Error fetching analysis:', error);
+    }
+  };
+
   const fetchChatHistory = async () => {
     try {
       const token = localStorage.getItem('token');
