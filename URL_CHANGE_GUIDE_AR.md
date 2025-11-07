@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://medtechdoc-ai.preview.emergentagent.com
+https://medidoc-query.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://medtechdoc-ai.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://medtechdoc-ai.preview.emergentagent.com
+   https://medidoc-query.preview.emergentagent.com
    ```
 
 ---

@@ -16,7 +16,7 @@ async def send_password_change_email(email: str, name: str):
         smtp_user = 'medidocai@gmail.com'
         smtp_password = 'ntjtxivcqyzkeajq'
         email_from = 'medidocai@gmail.com'
-        reset_link = 'https://medtechdoc-ai.preview.emergentagent.com/forgot-password'
+        reset_link = 'https://medidoc-query.preview.emergentagent.com/forgot-password'
         
         message = MIMEMultipart("alternative")
         message["From"] = email_from

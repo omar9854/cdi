@@ -97,7 +97,7 @@ async def send_welcome_email(email: str, user_name: str, role: str = "user"):
                         
                         <!-- CTA Button -->
                         <div style="text-align: center; margin: 30px 0;">
-                            <a href="{os.environ.get('FRONTEND_URL', 'https://medtechdoc-ai.preview.emergentagent.com')}" 
+                            <a href="{os.environ.get('FRONTEND_URL', 'https://medidoc-query.preview.emergentagent.com')}" 
                                style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; 
                                       text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: bold;">
                                 🚀 ابدأ الآن
