@@ -3316,7 +3316,9 @@ async def get_question_categories(language: str = "ar", user: dict = Depends(get
         raise HTTPException(status_code=500, detail="Failed to get categories")
 
 @api_router.post("/chat/ask-question/{question_id}")
+@limiter.limit("20/minute")
 async def ask_predefined_question(
+    request: Request,
     question_id: str,
     analysis_id: str,
     language: str = "ar",
