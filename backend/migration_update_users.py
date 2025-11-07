@@ -202,7 +202,7 @@ async def main():
     print("=" * 60)
     print()
     print("📋 معلومات تسجيل الدخول:")
-    print("   Email: admin@cdi-center.sa")
+    print("   Email: medidocai@gmail.com")
     print("   Password: CDI@2024#Admin")
     print()
     
