@@ -1887,7 +1887,7 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         # Get chat history for context
         chat_history = []
         previous_messages = await db.chat_messages.find(
-            {"analysis_id": request.analysis_id}
+            {"analysis_id": chat_request.analysis_id}
         ).sort("created_at", 1).to_list(100)
         
         # Build chat history
