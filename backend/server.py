@@ -600,7 +600,9 @@ Please respond in the following JSON format:
   "diagnoses_to_document": [{{
     "diagnosis_ar": "التشخيص بالعربي",
     "diagnosis_en": "Diagnosis in English", 
-    "icd_code": "Code (for reference)"
+    "icd_code": "Code (for reference)",
+    "type": "principal" or "secondary",
+    "clinical_evidence": "Evidence from notes supporting this diagnosis"
   }}],
   "missing_documentation": [{{
     "item_ar": "التوثيق الناقص بالعربي",
@@ -608,13 +610,24 @@ Please respond in the following JSON format:
   }}],
   "gaps_ar": ["ثغرة 1", "ثغرة 2"],
   "gaps_en": ["Gap 1", "Gap 2"],
-  "queries_ar": ["بناءً على حكمك الطبي، الرجاء توثيق: [الجانب المطلوب]", "الرجاء توضيح: [التفصيل السريري المطلوب]"],
-  "queries_en": ["Based on your clinical judgment, please document: [aspect needed]", "Please clarify: [clinical detail needed]"],
+  "queries_ar": [
+    "استفسار يخص: [اسم التشخيص] ([كود ICD-10])\\n\\nبناءً على الملاحظات الطبية:\\n- [معطيات محددة من الملاحظات: الأعراض]\\n- [الأدوية المصروفة]\\n- [القياسات والفحوصات]\\n\\nبناءً على حكمك الطبي، الرجاء توثيق التشخيص [الرئيسي/الثانوي]."
+  ],
+  "queries_en": [
+    "Query regarding: [Diagnosis name] ([ICD-10 Code])\\n\\nBased on clinical documentation:\\n- [Specific findings from notes: symptoms]\\n- [Medications prescribed]\\n- [Measurements/tests]\\n\\nBased on your clinical judgment, please document the [principal/secondary] diagnosis."
+  ],
   "recommendations_ar": ["توصية 1 لتحسين التوثيق", "توصية 2"],
   "recommendations_en": ["Recommendation 1 for documentation improvement", "Recommendation 2"],
   "summary_ar": "ملخص شامل لمراجعة تحسين التوثيق السريري بالعربي",
   "summary_en": "Comprehensive CDI review summary in English"
-}}}}"""
+}}}}
+
+IMPORTANT: For queries, you MUST:
+1. Include the header with diagnosis name and ICD code for CDI staff reference
+2. Cite ACTUAL clinical findings from the provided notes (symptoms, medications, measurements)
+3. Never suggest diagnosis names in the query body itself
+4. Specify if it's principal or secondary diagnosis
+5. Each query should be detailed with real evidence from the notes"""
 
     try:
         # Use Google Gemini API with automatic key rotation
