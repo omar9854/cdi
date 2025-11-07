@@ -460,6 +460,76 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: |
+      🎉 **CLINICAL QUESTIONS API TESTING COMPLETE - ALL ENDPOINTS WORKING PERFECTLY**
+      
+      **Test Results: 13/13 PASSED (100% Success Rate)**
+      
+      **✅ CRITICAL FIXES APPLIED:**
+      
+      1. **Route Registration Fix**: Moved clinical questions route definitions (@api_router.get/post) BEFORE app.include_router(api_router) call in server.py. Routes defined after include_router are not registered and return 404.
+      
+      2. **Login Password Field Bug**: Fixed login_step1 function to support both 'password' and 'password_hash' fields. Users created via registration have 'password_hash' field, causing "User account error" on login.
+      
+      3. **Context Building Fix**: Fixed ask_predefined_question function to properly handle missing_documentation as list of dicts (not strings). Added proper formatting for doctor_notes, gaps_ar, and queries_ar fields.
+      
+      4. **AI Integration**: Implemented Gemini AI response generation using get_gemini_model() with system instruction and automatic API key rotation.
+      
+      **✅ COMPREHENSIVE ENDPOINT TESTING:**
+      
+      **1. GET /api/clinical-questions?language=ar**
+      - ✅ Returns 8 Arabic questions
+      - ✅ Each question has: id, category, question, prompt
+      - ✅ Categories: التشخيصات, التوثيق الناقص, الاستفسارات, DRG, الجودة, الامتثال, تحليل عام
+      - ✅ Requires authentication (401 without token)
+      
+      **2. GET /api/clinical-questions?language=en**
+      - ✅ Returns 8 English questions
+      - ✅ Correct structure with all required fields
+      - ✅ Categories: Diagnoses, Missing Documentation, Queries, DRG, Quality, Compliance, General Analysis
+      
+      **3. GET /api/clinical-questions/categories**
+      - ✅ Arabic: Returns 7 unique categories
+      - ✅ English: Returns 7 unique categories
+      - ✅ Properly sorted and deduplicated
+      
+      **4. POST /api/chat/ask-question/{question_id}**
+      - ✅ Valid request: AI generates detailed response (tested with q1)
+      - ✅ Response structure: {question: str, answer: str, category: str}
+      - ✅ AI answer length: 500+ characters (detailed and comprehensive)
+      - ✅ Chat history saved to chat_messages collection
+      - ✅ Invalid question_id: Returns 404 "Question not found"
+      - ✅ Invalid analysis_id: Returns 404 "Analysis not found"
+      - ✅ No authentication: Returns 401 Unauthorized
+      
+      **✅ AI INTEGRATION VERIFICATION:**
+      - Gemini API successfully generates contextual answers
+      - System instruction properly set for CDI specialist role
+      - Automatic API key rotation working (3 keys available)
+      - Response time: 10-30 seconds (acceptable for AI processing)
+      - Arabic and English responses working correctly
+      
+      **✅ DATA PERSISTENCE:**
+      - Chat messages properly saved with: id, analysis_id, user_id, question, question_id, answer, created_at
+      - MongoDB insertions successful
+      - No serialization errors
+      
+      **✅ ERROR HANDLING:**
+      - All endpoints return proper HTTP status codes
+      - Clear error messages for invalid inputs
+      - Authentication properly enforced
+      - Database errors handled gracefully
+      
+      **📊 BACKEND IMPLEMENTATION STATUS: COMPLETE AND FULLY FUNCTIONAL**
+      
+      All 3 clinical questions endpoints are production-ready and tested comprehensively. The Enhanced AI Chat feature backend is working perfectly with proper authentication, AI integration, error handling, and data persistence.
+      
+      **🎯 NEXT STEPS:**
+      - Frontend testing still needed for ChatEnhanced.jsx component
+      - End-to-end user workflow testing (UI → Backend → AI → Response)
+      - YOU MUST ASK USER BEFORE DOING FRONTEND TESTING
+  
+  - agent: "testing"
+    message: |
       ✅ **NOTE MANAGEMENT ENDPOINTS TESTING COMPLETE - ALL WORKING PERFECTLY**
       
       **Comprehensive Backend Testing Results:**
