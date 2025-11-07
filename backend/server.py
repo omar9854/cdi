@@ -873,7 +873,7 @@ async def login_step2(request: Request, credentials: OTPVerification):
             await log_audit(
                 db,
                 action="login_otp_failed",
-                user_email=email,
+                user_email=credentials.email,
                 status="failure",
                 details={"reason": "OTP expired"}
             )
