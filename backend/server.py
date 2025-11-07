@@ -695,7 +695,8 @@ async def register(user_data: UserRegister):
     }
 
 @api_router.post("/auth/login-step1")
-async def login_step1(credentials: UserLogin):
+@limiter.limit("5/minute")
+async def login_step1(request: Request, credentials: UserLogin):
     """Step 1: Verify credentials and send OTP"""
     try:
         # Import security utils
