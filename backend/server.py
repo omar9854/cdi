@@ -1836,7 +1836,7 @@ async def get_history(user: dict = Depends(get_current_user)):
 async def chat_with_ai(request: Request, chat_request: ChatRequest, user: dict = Depends(get_current_user)):
     # Get analysis
     analysis = await db.analyses.find_one(
-        {"id": request.analysis_id, "user_id": user['id']},
+        {"id": chat_request.analysis_id, "user_id": user['id']},
         {"_id": 0}
     )
     
