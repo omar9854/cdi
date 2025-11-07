@@ -2874,6 +2874,8 @@ def main():
             results = tester.run_supervisor_focused_test()
         elif sys.argv[1] == "--impersonation-test":
             results = tester.run_supervisor_impersonation_test()
+        elif sys.argv[1] == "--clinical-questions":
+            results = tester.run_clinical_questions_tests()
         else:
             results = tester.run_all_tests()
     else:
