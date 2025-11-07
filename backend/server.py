@@ -921,7 +921,9 @@ async def login_step1(request: Request, credentials: UserLogin):
                 "is_used": False,
                 "attempts": 0
             }
-            await db.otp_records.insert_one(otp_doc)
+            print(f"DEBUG: Saving OTP for {credentials.email}, code: {otp_code}, expires: {expires_at.isoformat()}")
+            result = await db.otp_records.insert_one(otp_doc)
+            print(f"DEBUG: OTP saved with ID: {result.inserted_id}")
             
             # Send OTP via email
             user_name = user.get('full_name', 'المستخدم')
