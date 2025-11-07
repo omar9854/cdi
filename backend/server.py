@@ -3059,7 +3059,11 @@ async def ask_predefined_question(
         
         # Use Gemini to answer
         system_message = """You are a Clinical Documentation Improvement (CDI) specialist expert. 
-Answer the question based on the clinical context provided. Be detailed, professional, and provide specific recommendations.
+Answer the question based on the clinical context provided. 
+
+CRITICAL: Be VERY concise and precise. Give direct answers without unnecessary details or lengthy explanations.
+Use bullet points when listing items. Focus ONLY on what was specifically asked.
+Maximum 5-7 bullet points or 4-5 short paragraphs unless the question explicitly asks for comprehensive detail.
 Respond in Arabic if the question is in Arabic, or in English if the question is in English."""
         
         try:
