@@ -115,7 +115,7 @@ async def main():
             {'id': admin['id']},
             {
                 '$set': {
-                    'email': 'medidocai@gmail.com',
+                    'email': 'ES012@HOTMAIL.COM',
                     'password_hash': hashed.decode('utf-8'),
                     'role': 'admin',
                     'mfa_enabled': True,
@@ -130,11 +130,11 @@ async def main():
                 }
             }
         )
-        print(f"   ✅ تم تحديث حساب Admin من {old_email} إلى medidocai@gmail.com")
+        print(f"   ✅ تم تحديث حساب Admin من {old_email} إلى ES012@HOTMAIL.COM")
         print(f"   🔑 Password: {new_password}")
         
         # حذف جميع login attempts للأدمن
-        await db.login_attempts.delete_many({'email': {'$in': ['medidocai@gmail.com', old_email]}})
+        await db.login_attempts.delete_many({'email': {'$in': ['ES012@HOTMAIL.COM', old_email]}})
         print(f"   ✅ تم حذف login attempts")
     else:
         # إنشاء حساب Admin جديد
