@@ -1774,6 +1774,22 @@ async def get_analyses(note_id: str, user: dict = Depends(get_current_user)):
     
     return analyses
 
+@api_router.get("/analysis/{analysis_id}", response_model=Analysis)
+async def get_analysis_by_id(analysis_id: str, user: dict = Depends(get_current_user)):
+    """Get specific analysis by analysis ID"""
+    analysis = await db.analyses.find_one(
+        {"id": analysis_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    
+    if isinstance(analysis['created_at'], str):
+        analysis['created_at'] = datetime.fromisoformat(analysis['created_at'])
+    
+    return analysis
+
 @api_router.get("/history", response_model=List[Dict])
 async def get_history(user: dict = Depends(get_current_user)):
     analyses = await db.analyses.find(
