@@ -617,6 +617,12 @@ Please respond in the following JSON format:
 async def root():
     return {"message": "مركز الترميز الطبي وتحسين التوثيق السريري", "status": "active"}
 
+@api_router.get("/metrics")
+async def metrics():
+    """Prometheus metrics endpoint"""
+    from fastapi.responses import Response
+    return Response(generate_latest(REGISTRY), media_type="text/plain")
+
 # Get specialties
 @api_router.get("/specialties")
 async def get_specialties():
