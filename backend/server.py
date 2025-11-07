@@ -6,9 +6,12 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, REGISTRY
+from prometheus_fastapi_instrumentator import Instrumentator
 import os
 import logging
 from pathlib import Path
+import time
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional, Dict
 import uuid
