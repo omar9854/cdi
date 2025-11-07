@@ -1910,7 +1910,7 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         for attempt in range(max_retries):
             try:
                 chat = model.start_chat(history=chat_history)
-                response = chat.send_message(request.message)
+                response = chat.send_message(chat_request.message)
                 response_text = response.text
                 break  # Success, exit retry loop
             except Exception as e:
