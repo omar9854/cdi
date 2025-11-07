@@ -453,7 +453,7 @@ frontend:
 frontend:
   - task: "ChatEnhanced - AI Chat with Fixed Questions and Open Chat"
     implemented: true
-    working: true
+    working: "NA"
     files:
       - "/app/frontend/src/pages/ChatEnhanced.jsx"
       - "/app/frontend/src/App.js"
@@ -467,6 +467,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "✅ CHATENHANCED BACK NAVIGATION FIX FULLY TESTED AND WORKING PERFECTLY! **USER REPORTED ISSUE RESOLVED**: 'When returning from AI chat to analysis page, notes disappear and errors appear' has been COMPLETELY FIXED. **COMPREHENSIVE END-TO-END TESTING COMPLETED**: ✅ Login successful (admin@cdi-center.sa), ✅ Analysis page loads correctly with notes visible (3 note sections found), ✅ Chat button 'الدردشة مع الذكاء الاصطناعي' working perfectly, ✅ ChatEnhanced page loads correctly (/chat/d22b5182-691c-4f91-b44f-bcad9e7ebe54), ✅ Questions sidebar appears with 8 question elements, ✅ **CRITICAL FIX VERIFIED**: Back button 'العودة للتحليل' navigates correctly, ✅ **CRITICAL SUCCESS**: Analysis page loads without errors after return, ✅ **CRITICAL SUCCESS**: Notes remain visible (not disappeared) - 3 note sections still present, ✅ No JavaScript errors found on page, ✅ Correct URL navigation: /analysis/ce336e62-8bb1-4df1-96cc-30feff5a7af0. **BACKEND FIX WORKING**: New GET /api/analysis/{analysis_id} endpoint correctly returns note_id field, allowing ChatEnhanced to navigate to correct analysis page using `/analysis/${noteId}` instead of incorrect UUID split. **FRONTEND INTEGRATION WORKING**: ChatEnhanced.jsx fetchAnalysisAndNoteId() function successfully retrieves note_id and uses it for proper back navigation. The user-reported issue has been completely resolved - notes no longer disappear and no errors appear when returning from chat to analysis page."
+      - working: "NA"
+        agent: "testing"
+        comment: "🔒 **CHAT HISTORY PERSISTENCE TEST BLOCKED BY MFA REQUIREMENT**: Attempted to test the specific user-reported issue 'When returning to chat after leaving, previous messages and responses disappear' but encountered MFA (Multi-Factor Authentication) requirement. **TESTING RESULTS**: ✅ Login form working correctly - successfully filled credentials (admin@cdi-center.sa / CDI@2024#Admin), ✅ Login step 1 successful - redirected to /mfa-verify page, ✅ Toast message confirmed: 'تم إرسال رمز التحقق إلى بريدك الإلكتروني' (OTP sent to email), ❌ **TESTING BLOCKED**: Cannot proceed without OTP code from email access. **TECHNICAL ANALYSIS**: The ChatEnhanced.jsx implementation shows proper fetchChatHistory() function that converts both predefined questions format {question, answer, category} and open chat format {role: 'user'/'assistant', message} to unified display format. The fix appears technically sound based on code review. **SYSTEM LIMITATION**: Testing agent cannot access email systems to retrieve OTP codes for MFA completion. **RECOMMENDATION**: Main agent should either: 1) Temporarily disable MFA for testing purposes, 2) Provide alternative test credentials without MFA, or 3) Test the chat history persistence functionality manually with proper MFA access."
 
 metadata:
   created_by: "main_agent"
