@@ -67,8 +67,41 @@ const ChatEnhanced = ({ user, onLogout }) => {
       const response = await axios.get(`${API}/chat/${analysisId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setMessages(response.data);
+      
+      // Convert messages to ChatEnhanced format
+      const formattedMessages = [];
+      const data = response.data || [];
+      
+      for (let i = 0; i < data.length; i++) {
+        const msg = data[i];
+        
+        // Handle predefined questions format: {question, answer, category}
+        if (msg.question && msg.answer) {
+          formattedMessages.push({
+            question: msg.question,
+            answer: msg.answer,
+            category: msg.category,
+            isLoading: false
+          });
+        }
+        // Handle open chat format: {role: 'user'/'assistant', message}
+        else if (msg.role === 'user') {
+          // Look for the next assistant message
+          const nextMsg = data[i + 1];
+          if (nextMsg && nextMsg.role === 'assistant') {
+            formattedMessages.push({
+              question: msg.message,
+              answer: nextMsg.message,
+              isLoading: false
+            });
+            i++; // Skip the assistant message as we've already processed it
+          }
+        }
+      }
+      
+      setMessages(formattedMessages);
     } catch (error) {
+      console.error('Error fetching chat history:', error);
       // No chat history yet
     } finally {
       setLoading(false);
