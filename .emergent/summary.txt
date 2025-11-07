@@ -1,133 +1,72 @@
 <analysis>
-The provided trajectory details an extensive development effort by an AI engineer on a CDI web application. Initially, the focus was on bug fixes and feature enhancements, including display issues on the Supervisor Dashboard and integrating new data analytics metrics like Numbers of Query. A significant portion of the work involved implementing and debugging a real-time chat widget.
+The AI engineer's work spanned multiple phases, primarily focusing on enhancing a CDI web application. Initial efforts addressed dashboard display bugs and new metric integration. A key architectural shift involved migrating the LLM provider from  to Google Gemini, necessitating backend refactoring for API key rotation.
 
-A major architectural pivot occurred when the LLM provider changed from  to Google Gemini Free API due to budget constraints. This required refactoring the backend () to use  and implementing a rotation mechanism for multiple Gemini API keys.
-
-Later, the engineer addressed several user requests: fixing a persistent chat notification issue, changing Patient Name to Patient ID for privacy, and implementing a privacy warning dialog in the New Note section. Concurrently, extensive work was done to implement robust security features, including MFA with Email OTP, strong password policies, and audit logging, across the backend and frontend. The user also requested re-analysis of notes after editing and pre-defined questions for the AI chat. The trajectory ends with the engineer beginning to implement a new  for fixed questions, after fixing several critical bugs related to user login, password reset, and the email service configuration.
+Subsequent work addressed critical user feedback: persistent chat notifications, changing Patient Name to Patient ID for privacy, and implementing a privacy warning in the  section. Extensive security features were integrated, including Email OTP MFA, strong password policies, and audit logging across both frontend and backend. The engineer also implemented note editing/deletion, re-analysis after edits, and began developing an enhanced chat interface for fixed, specialized AI questions, while simultaneously resolving crucial bugs related to login, password reset, and email service configuration. Towards the end, the focus shifted to deployment readiness, implementing automatic backups, comprehensive rate limiting, and refining AI queries for medical compliance. The trajectory concludes with the engineer actively debugging critical post-deployment issues, specifically a React runtime error in the login flow and an incorrect backend URL in the production environment.
 </analysis>
 
 <product_requirements>
-The application is an AI-powered Clinical Documentation Improvement (CDI) web app designed to analyze patient notes, identify gaps, determine ICD-10-CM diagnoses, and generate physician queries.
-
-**Implemented Features:**
-- Core AI analysis using Google Gemini LLM (previously Emergent Universal LLM Key).
-- User authentication, note saving, multi-language support (Arabic/English).
-- Interactive AI chat with multi-note input and specialty selection.
-- Admin system for user management, branding, history, and HTML presentation.
-- Password reset via email/WhatsApp, welcome emails, WhatsApp support.
-- Admin dashboard with user statistics, Excel export, supervisor assignment.
-- Supervisor dashboard for CDI data analysis, including PDX/ADX, DRG impact, specialist performance, and CDS status, with new metrics: Numbers of Query, Numbers of Review, Numbers of Response, and Total Queries per specialist.
-- Enhanced UI/UX for login/registration.
-- Internal messaging system between supervisors/employees with specific member selection, correct message ordering, and notification handling.
-- Supervisor impersonation and password reset for employees.
-- Privacy warning dialog before new note creation, using Patient ID instead of Patient Name.
-- Edit and delete functionality for saved notes in History and Dashboard.
-- Robust security enhancements: Email OTP MFA, strong password policies, and an Audit Logs framework.
-
-**Current Problem & Pending Features:**
-- Persistent chat notification badge even after opening chat (partially addressed).
-- Ability to edit saved notes and add multiple notes after editing (implemented but needs to re-trigger AI analysis).
-- Chat notifications not disappearing (partially addressed).
-- Password reset link not functioning correctly (fixed in backend, needs user verification).
-- Re-analysis of notes by AI after editing.
-- Enhancement of AI chat with fixed, specialized questions (e.g., Are diagnoses inferred?, Documented/inferred diagnoses with coding) and open chat capabilities.
-- DRG prediction before and after documentation.
+The AI-powered Clinical Documentation Improvement (CDI) web app analyzes patient notes, identifies gaps, determines ICD-10-CM diagnoses, and generates physician queries. Key features implemented include core AI analysis (Google Gemini), user authentication, multi-language support, interactive AI chat (multi-note, specialty selection), and an admin system for user/brand management. Password reset via email/WhatsApp, welcome emails, and supervisor features (impersonation, password reset for employees) are also present. Privacy enhancements include a dialog before note creation and using Patient ID. Note editing/deletion is available. Robust security features like Email OTP MFA, strong password policies, audit logging, and fine-grained rate limiting are in place. AI queries have been refined for medical compliance, providing detailed observations. The application also includes automatic database backup, and Prometheus monitoring integration.
 </product_requirements>
 
 <key_technical_concepts>
-- **FastAPI**: Python backend.
+- **FastAPI**: Python backend framework.
 - **React**: JavaScript frontend (with Shadcn UI).
 - **MongoDB**: NoSQL database.
 - **Google Gemini API**: LLM for analysis, with API Key Rotation.
-- **JWT/Bcrypt**: Authentication.
+- **JWT/Bcrypt**: Authentication and password hashing.
 - **Aiosmtplib**: Email sending.
 - **i18n**: Multi-language support.
 - **MFA (Email OTP)**: Multi-factor authentication.
 - **Audit Logging**: Security feature to track user actions.
-- **Supervisor**: Process control.
+- **SlowAPI/limits**: Rate Limiting for API endpoints.
+- **Prometheus**: Monitoring and metrics collection.
+- **Supervisor**: Process control for backend/frontend services.
 </key_technical_concepts>
 
 <code_architecture>
 
 -   **/app/backend/server.py**: Core FastAPI backend.
-    -   **Importance**: Centralizes business logic, API endpoints, database interactions, and AI calls.
-    -   **Changes**: Extensive modifications for LLM integration (Gemini), chat messaging, note analysis, new metrics, and, most recently, security features like MFA, password reset, and audit logging. Includes new endpoints for note editing/deletion () and re-analysis (). Fixed password hash comparison and  issues.
--   **/app/backend/security_models.py**: New file for Pydantic models related to security (e.g., , , ).
-    -   **Importance**: Defines data structures for secure operations.
--   **/app/backend/security_utils.py**: New file for helper functions for security (e.g., password hashing, JWT token generation, OTP generation/validation).
-    -   **Importance**: Encapsulates reusable security logic.
--   **/app/backend/security_routes.py**: New file to house security-related API endpoints (e.g., , , ).
-    -   **Importance**: Modularizes security features away from . Integrated into  via an APIRouter.
--   **/app/backend/send_password_change_emails.py**: New script for bulk email sending.
-    -   **Importance**: Facilitates sending password change prompts to all users.
--   **/app/backend/clinical_questions.py**: New file to store pre-defined clinical questions for AI chat.
-    -   **Importance**: Provides structured prompts for specialized AI interactions.
--   **/app/frontend/src/App.js**: Main React component for routing and global contexts.
-    -   **Importance**: Defines the application's navigation structure.
-    -   **Changes**: Integrated , , , , and replaced  with .
--   **/app/frontend/src/pages/SupervisorDashboard.jsx**: Dashboard for CDI data analysis.
-    -   **Importance**: Displays key CDI performance metrics.
-    -   **Changes**: Refined display of , , and added new metrics like , , , and .
--   **/app/frontend/src/pages/NewNote.jsx**: Page for creating new patient notes.
-    -   **Importance**: User interface for note input and AI analysis.
-    -   **Changes**: Implemented privacy warning dialog and updated Patient Name to Patient ID label.
--   **/app/frontend/src/pages/History.jsx**: Displays saved notes.
-    -   **Importance**: Allows users to view past notes.
-    -   **Changes**: Added Edit and Delete buttons for notes.
--   **/app/frontend/src/pages/Dashboard.jsx**: Main user dashboard.
-    -   **Importance**: Overview for users.
-    -   **Changes**: Added Edit and Delete buttons for notes.
--   **/app/frontend/src/pages/EditNote.jsx**: New page for editing existing notes.
-    -   **Importance**: Enables modification of previously saved notes.
-    -   **Changes**: Includes a Save and Re-analyze button.
+    -   **Importance**: Centralizes logic, API endpoints, database interactions.
+    -   **Changes**: Extensive modifications for LLM integration, chat messaging, note analysis, new metrics, MFA, password reset, audit logging. Added endpoints for note editing/deletion (), re-analysis (), clinical questions, and a new  endpoint. Implemented rate limiting with , Prometheus metrics, backup endpoint (), and significantly refined AI query generation logic.
+-   **/app/backend/security_models.py**: Defines Pydantic models for security (e.g., , ).
+-   **/app/backend/security_utils.py**: Helper functions for security (hashing, JWT, OTP).
+    -   **Changes**: Added  function.
+-   **/app/backend/security_routes.py**: Houses security-related API endpoints.
+-   **/app/backend/send_password_change_emails.py**: Script for bulk email sending.
+-   **/app/backend/clinical_questions.py**: Stores pre-defined clinical questions for AI chat.
+-   **/app/backend/migration_update_users.py**: New script for applying database migrations post-deployment (e.g., updating admin credentials, user roles).
+-   **/app/frontend/src/App.js**: Main React component for routing.
+    -   **Changes**: Integrated .
+-   **/app/frontend/src/pages/NewNote.jsx**: Page for creating notes.
+    -   **Changes**: Privacy warning dialog, Patient Name to Patient ID label.
+-   **/app/frontend/src/pages/History.jsx**, **/app/frontend/src/pages/Dashboard.jsx**: Displays saved notes.
+    -   **Changes**: Added Edit and Delete buttons.
+-   **/app/frontend/src/pages/EditNote.jsx**: New page for editing notes with Save and Re-analyze.
 -   **/app/frontend/src/pages/MFAVerification.jsx**: New page for MFA OTP verification.
-    -   **Importance**: Handles the second step of the login process when MFA is enabled.
-    -   **Changes**: Corrected API call logic to .
--   **/app/frontend/src/pages/SecurityDashboard.jsx**: New admin dashboard for security settings.
-    -   **Importance**: Provides an interface for managing security features (e.g., audit logs, MFA settings).
--   **/app/frontend/src/pages/Messages.jsx**: Page for internal messaging.
-    -   **Importance**: Central communication hub.
-    -   **Changes**: Fixed  error by correctly parsing API response and ensuring messages are an array.
--   **/app/frontend/src/components/ChatWidget.jsx**: Pop-up chat component.
-    -   **Importance**: Global real-time communication.
-    -   **Changes**: Addressed issues with notification badge display and message fetching.
--   **/app/frontend/src/components/Navbar.jsx**: Navigation bar.
-    -   **Importance**: Main navigation for the application.
-    -   **Changes**: Added a link to the  for admin users.
--   **/app/frontend/src/contexts/LanguageContext.jsx**: Manages multi-language strings.
-    -   **Importance**: Supports internationalization.
-    -   **Changes**: Updated translation keys from Patient Name to Patient ID.
--   **/app/frontend/src/pages/ChatEnhanced.jsx**: New improved chat page.
-    -   **Importance**: Will integrate static, specialized questions for AI interaction.
+    -   **Changes**: Corrected API call logic, currently being updated for robust error handling.
+-   **/app/frontend/src/pages/Login.jsx**: User login page.
+    -   **Changes**: Updated for MFA flow and integrated a new error handling utility.
+-   **/app/frontend/src/pages/ChatEnhanced.jsx**: New chat page for specialized questions and open chat.
+    -   **Changes**: Fixed  parsing, back navigation, and message rendering issues for persistent chat history.
+-   **/app/frontend/src/utils/errorHandler.js**: New utility for standardized error display in the frontend.
 -   **/app/backend/.env**: Backend environment variables.
-    -   **Importance**: Stores sensitive keys and configuration.
-    -   **Changes**: Added  (multiple keys) and  (changed from  to the actual preview URL). Updated  to an App Password.
--   **/app/SECURITY_DOCUMENTATION.md**: New markdown file.
-    -   **Importance**: Documents the implemented security features and configurations.
+    -   **Changes**: Added , , , and .
 </code_architecture>
 
 <pending_tasks>
-- Complete the integration of the DRG prediction system (before and after documentation).
-- Integrate the newly created  into the application's routing.
-- Implement the fixed questions feature within the AI chat, including code coding details.
-- Validate the working of MFA and password reset functionality end-to-end with the user, especially the fixed OTP and reset link.
+- Ensure correct production backend URL is used by the frontend after deployment.
+- Complete implementing robust error handling in .
+- Update admin user email to  (as requested by user).
+- Validate the working of MFA and password reset functionality end-to-end with the user in production.
 - Fully implement and display the audit logs in the .
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was engaged in significant security enhancements and addressing critical user-reported issues. The primary focus shifted to implementing a comprehensive security framework.
+Immediately before this summary request, the AI engineer was addressing critical post-deployment issues reported by the user. The primary focus was on resolving a site not working after deployment bug, where the page becomes empty after OTP verification. This was traced to the  in the frontend's  file still pointing to a preview URL instead of the actual production URL. The engineer has identified this as a critical issue and is awaiting the correct production URL from the user to update the  file and resolve it.
 
-**Key areas of recent work include:**
-1.  **Multi-Factor Authentication (MFA)**: Implementation of Email OTP for MFA, including creating new backend endpoints (, ) and integrating them into the login flow (, ). Frontend pages  and  were updated to handle the MFA flow. There were significant debugging efforts around OTP expiration and incorrect endpoint calls.
-2.  **Password Management**: Strong password policies were enforced during user registration. Extensive debugging was performed for the password reset functionality, particularly fixing the  in the email template and ensuring the password field was correctly updated in the database ().
-3.  **Audit Logs**: A framework for audit logging was initiated with backend models and utility functions, integrated into sensitive operations like login.
-4.  **Admin and User Management**: Logic for creating and updating admin users, including ensuring correct password hashing and the presence of necessary security fields in the database, was implemented. A script () was created to send password change emails to all users.
-5.  **Email Service**: The email sending functionality ( in ) was updated to use a user-provided Gmail App Password after multiple attempts with regular passwords failed.
-6.  **New Features**: Edit and Delete buttons were added to  and . A new  page was created, including a Save and Re-analyze button, and a new endpoint () was added to the backend. The  page for specialized questions was just created.
-
-The engineer had just finished fixing the password reset issue and the email sending problem, and was about to replace the old  with  to begin implementing fixed AI questions. Many security features are in place, but full end-to-end testing and the admin interface for audit logs are still in progress.
+Concurrently, another user-reported issue, Uncaught runtime errors: Objects are not valid as a React child, which occurs when displaying API errors, was being addressed. To fix this, the engineer created a new utility file, , to standardize error handling across the frontend. The  page was updated to utilize this new error handler. The engineer was in the process of extending this fix to  to ensure proper error display during the MFA flow. Additionally, the user explicitly requested to change the admin email to .
 </current_work>
 
 <optional_next_step>
-Integrate  into  and begin implementing the fixed, specialized questions for AI interaction, as requested by the user.
+I will continue implementing the error handling using the new  utility in .
 </optional_next_step>

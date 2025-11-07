@@ -494,7 +494,7 @@ agent_communication:
       **TESTING ATTEMPT RESULTS:**
       
       **✅ LOGIN PROCESS VERIFICATION:**
-      - Successfully navigated to login page (https://medidoc-ai-1.preview.emergentagent.com/login)
+      - Successfully navigated to login page (https://medtechdoc-ai.preview.emergentagent.com/login)
       - Login form elements detected correctly (1 email input, 1 password input, 1 submit button)
       - Credentials filled successfully (admin@cdi-center.sa / CDI@2024#Admin)
       - Login step 1 completed successfully

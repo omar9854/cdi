@@ -11,7 +11,7 @@ from datetime import datetime
 
 class CDIComprehensiveTest:
     def __init__(self):
-        self.base_url = "https://medidoc-ai-1.preview.emergentagent.com"
+        self.base_url = "https://medtechdoc-ai.preview.emergentagent.com"
         self.api_url = f"{self.base_url}/api"
         self.admin_credentials = {
             "email": "admin@cdi-center.sa",

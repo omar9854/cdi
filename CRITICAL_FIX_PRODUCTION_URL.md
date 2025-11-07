@@ -12,7 +12,7 @@
 
 ملف `/app/frontend/.env` مازال يحتوي على رابط Preview:
 ```
-REACT_APP_BACKEND_URL=https://medidoc-ai-1.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://medtechdoc-ai.preview.emergentagent.com
 ```
 
 هذا يعني:
