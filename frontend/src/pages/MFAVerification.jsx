@@ -64,7 +64,10 @@ const MFAVerification = ({ setUser }) => {
 
     try {
       // Complete login with step 2
-      const loginResponse = await axios.post(`${API}/auth/login-step2?email=${encodeURIComponent(email)}&otp_code=${otpCode}`);
+      const loginResponse = await axios.post(`${API}/auth/login-step2`, {
+        email: email,
+        otp_code: otpCode
+      });
 
       localStorage.setItem('token', loginResponse.data.access_token);
       localStorage.setItem('user', JSON.stringify(loginResponse.data.user));
