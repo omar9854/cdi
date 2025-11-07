@@ -1922,7 +1922,7 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         
         # Save assistant message
         assistant_msg = ChatMessage(
-            analysis_id=request.analysis_id,
+            analysis_id=chat_request.analysis_id,
             user_id=user['id'],
             role='assistant',
             message=response_text
