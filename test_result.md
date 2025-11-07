@@ -485,6 +485,64 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: |
+      🎉 **CHATENHANCED BACK NAVIGATION FIX - COMPREHENSIVE TESTING COMPLETE AND SUCCESSFUL**
+      
+      **USER REPORTED ISSUE RESOLVED**: "When returning from AI chat to analysis page, notes disappear and errors appear"
+      
+      **✅ COMPLETE END-TO-END TESTING RESULTS:**
+      
+      **1. Login & Authentication:**
+      - ✅ Successfully logged in with admin@cdi-center.sa credentials
+      - ✅ Dashboard access verified
+      - ✅ Navigation to analysis page working
+      
+      **2. Analysis Page Verification:**
+      - ✅ Analysis page loads correctly (/analysis/ce336e62-8bb1-4df1-96cc-30feff5a7af0)
+      - ✅ Notes are visible before going to chat (3 note sections found)
+      - ✅ Clinical notes display properly with Cardiology specialty
+      - ✅ Analysis results showing diagnoses, missing documentation, queries
+      
+      **3. Chat Navigation (CRITICAL TEST):**
+      - ✅ Chat button "الدردشة مع الذكاء الاصطناعي" found and clickable
+      - ✅ Redirects correctly to ChatEnhanced page (/chat/d22b5182-691c-4f91-b44f-bcad9e7ebe54)
+      - ✅ ChatEnhanced page loads completely
+      - ✅ Questions sidebar appears with 8 clinical questions
+      - ✅ UI elements render correctly (tabs, buttons, question categories)
+      
+      **4. Back Navigation Fix (CRITICAL VERIFICATION):**
+      - ✅ Back button "العودة للتحليل" found and clickable
+      - ✅ **CRITICAL SUCCESS**: Navigates back to correct analysis page
+      - ✅ **CRITICAL SUCCESS**: Final URL correct (/analysis/ce336e62-8bb1-4df1-96cc-30feff5a7af0)
+      - ✅ **CRITICAL SUCCESS**: Notes remain visible after return (3 note sections still present)
+      - ✅ **CRITICAL SUCCESS**: No errors appear on the page
+      - ✅ **CRITICAL SUCCESS**: No JavaScript console errors
+      
+      **✅ BACKEND FIX VERIFICATION:**
+      - New GET /api/analysis/{analysis_id} endpoint working correctly
+      - Returns single analysis object with note_id field
+      - ChatEnhanced.jsx fetchAnalysisAndNoteId() function retrieves note_id successfully
+      - Back navigation uses correct `/analysis/${noteId}` format instead of UUID split
+      
+      **✅ FRONTEND INTEGRATION VERIFICATION:**
+      - ChatEnhanced component properly integrated in App.js
+      - Route /chat/:analysisId configured correctly
+      - Back button navigation logic working as expected
+      - State management and URL handling working properly
+      
+      **📊 TEST RESULTS SUMMARY:**
+      - **Total Test Steps**: 10/10 PASSED
+      - **Critical Navigation Fix**: ✅ WORKING
+      - **User Issue Resolution**: ✅ COMPLETE
+      - **Notes Visibility**: ✅ PRESERVED
+      - **Error Prevention**: ✅ NO ERRORS
+      
+      **🎯 CONCLUSION:**
+      The ChatEnhanced back navigation fix has been thoroughly tested and is working perfectly. The user-reported issue where "notes disappear and errors appear when returning from AI chat to analysis page" has been completely resolved. The fix successfully addresses the root cause (incorrect UUID splitting) by implementing a proper backend endpoint and frontend integration.
+      
+      **STATUS: ✅ CHATENHANCED BACK NAVIGATION FIX COMPLETE AND VERIFIED**
+
+  - agent: "testing"
+    message: |
       🎉 **CLINICAL QUESTIONS API TESTING COMPLETE - ALL ENDPOINTS WORKING PERFECTLY**
       
       **Test Results: 13/13 PASSED (100% Success Rate)**
