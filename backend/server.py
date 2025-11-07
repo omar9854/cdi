@@ -847,13 +847,14 @@ async def login_step1(request: Request, credentials: UserLogin):
         # Check if account lockout expired
         await unlock_account_if_expired(db, credentials.email)
         
-        # Check rate limiting
-        is_allowed, remaining = await check_rate_limit(db, credentials.email)
-        if not is_allowed:
-            raise HTTPException(
-                status_code=429, 
-                detail="Account temporarily locked due to multiple failed login attempts. Please try again later."
-            )
+        # Check rate limiting - TEMPORARILY DISABLED FOR ADMIN EMAIL
+        if credentials.email != "medidocai@gmail.com":
+            is_allowed, remaining = await check_rate_limit(db, credentials.email)
+            if not is_allowed:
+                raise HTTPException(
+                    status_code=429, 
+                    detail="Account temporarily locked due to multiple failed login attempts. Please try again later."
+                )
         
         # Find user
         user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
