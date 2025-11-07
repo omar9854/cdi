@@ -26,10 +26,10 @@ class MedicalCodingAPITester:
         self.tests_passed = 0
         self.test_results = []
         
-        # Admin credentials from ADMIN_CREDENTIALS.txt
+        # Admin credentials (MFA disabled for testing)
         self.admin_credentials = {
-            "email": "admin@cdi-center.sa",
-            "password": "CDI@2024#Admin"
+            "email": "test_admin_backend@cdi-center.sa",
+            "password": "TestAdmin123!@#"
         }
         
         # Test user data (for clinical questions testing - MFA disabled)
