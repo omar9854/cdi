@@ -32,12 +32,12 @@ class MedicalCodingAPITester:
             "password": "CDI@2024#Admin"
         }
         
-        # Test user data
+        # Test user data (for clinical questions testing - MFA disabled)
         self.test_user = {
-            "email": f"test_employee_{datetime.now().strftime('%H%M%S')}@hospital.com",
-            "full_name": "د. سارة أحمد المختصة",
+            "email": "clinical_test_20251107_010101@test.com",
+            "full_name": "Clinical Test User",
             "phone_number": "966501234567",
-            "password": "TestPassword123!"
+            "password": "ClinicalTest123!"
         }
         
         self.arabic_clinical_note = {
