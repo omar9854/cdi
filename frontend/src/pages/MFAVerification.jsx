@@ -115,8 +115,8 @@ const MFAVerification = ({ setUser }) => {
           </CardTitle>
           <CardDescription className="text-base mt-2">
             {language === 'ar' 
-              ? `تم إرسال رمز التحقق إلى بريدك الإلكتروني: ${email}. الرمز صالح لمدة 15 دقيقة.`
-              : `Verification code sent to: ${email}. Valid for 15 minutes.`
+              ? `تم إرسال رمز التحقق إلى بريدك الإلكتروني: ${email}. الرمز صالح لمدة 30 دقيقة.`
+              : `Verification code sent to: ${email}. Valid for 30 minutes.`
             }
           </CardDescription>
         </CardHeader>
