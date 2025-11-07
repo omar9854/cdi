@@ -30,9 +30,11 @@ const ChatEnhanced = ({ user, onLogout }) => {
   const [questions, setQuestions] = useState([]);
   const [loadingQuestions, setLoadingQuestions] = useState(true);
   const [activeTab, setActiveTab] = useState('quick');
+  const [noteId, setNoteId] = useState(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
+    fetchAnalysisAndNoteId();
     fetchChatHistory();
     fetchQuestions();
   }, [analysisId]);
