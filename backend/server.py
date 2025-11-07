@@ -52,6 +52,25 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Prometheus Metrics
+instrumentor = Instrumentator(
+    should_group_status_codes=False,
+    should_ignore_untemplated=True,
+    should_respect_env_var=False,
+    should_instrument_requests_inprogress=True,
+    excluded_handlers=[".*admin.*", "/metrics"],
+    inprogress_name="cdi_requests_inprogress",
+    inprogress_labels=True,
+)
+
+# Custom Metrics
+ACTIVE_USERS = Gauge('cdi_active_users', 'Number of active users')
+AI_REQUESTS = Counter('cdi_ai_requests_total', 'Total AI requests', ['type'])
+AI_RESPONSE_TIME = Histogram('cdi_ai_response_time_seconds', 'AI response time', ['type'])
+DB_OPERATIONS = Counter('cdi_db_operations_total', 'Total database operations', ['operation', 'collection'])
+
+instrumentor.instrument(app).expose(app, endpoint="/metrics")
+
 # JWT Settings
 SECRET_KEY = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
 ALGORITHM = "HS256"
