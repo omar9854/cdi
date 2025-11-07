@@ -1732,6 +1732,9 @@ async def delete_note(note_id: str, user: dict = Depends(get_current_user)):
 @api_router.post("/analyze", response_model=Analysis)
 @limiter.limit("20/hour")
 async def analyze_note(request: Request, analyze_request: AnalyzeRequest, user: dict = Depends(get_current_user)):
+    # Track AI request
+    start_time = time.time()
+    
     note = await db.clinical_notes.find_one(
         {"id": analyze_request.note_id, "user_id": user['id']},
         {"_id": 0}
@@ -1740,8 +1743,15 @@ async def analyze_note(request: Request, analyze_request: AnalyzeRequest, user: 
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
     
+    # Track DB operation
+    DB_OPERATIONS.labels(operation='read', collection='clinical_notes').inc()
+    
     # Analyze with Gemini
     result = await analyze_with_gemini(note['title'], note['doctor_notes'])
+    
+    # Track AI metrics
+    AI_REQUESTS.labels(type='analyze').inc()
+    AI_RESPONSE_TIME.labels(type='analyze').observe(time.time() - start_time)
     
     # Create analysis record
     analysis = Analysis(
