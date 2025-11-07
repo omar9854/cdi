@@ -178,7 +178,7 @@ const MFAVerification = ({ setUser }) => {
               variant="outline"
               className="w-full"
               onClick={handleResend}
-              disabled={resending || timer > 840} // Allow resend after 1 minute
+              disabled={resending || timer > 1740} // Allow resend after 1 minute (1800 - 60)
             >
               {resending ? (
                 <>
