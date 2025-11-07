@@ -1132,3 +1132,120 @@ agent_communication:
       4. Test complete user flow: Analysis page → Chat → Back to Analysis
       
       **YOU MUST ASK USER BEFORE DOING FRONTEND TESTING**
+
+  - agent: "testing"
+    message: |
+      🚨 **CRITICAL PRODUCTION LOGIN ISSUE - ROOT CAUSE IDENTIFIED**
+      
+      **Test Results: INFRASTRUCTURE ISSUE (Not Backend Code)**
+      
+      ## 🎯 USER REPORTED ISSUE:
+      "User cannot login to production site (https://medidoc-ai.emergent.host) - returns 401/Invalid credentials"
+      "localhost:8001 works perfectly ✅"
+      
+      **Admin Credentials Tested:**
+      - Email: medidocai@gmail.com
+      - Password: CDI@2024#Admin
+      - MFA: Enabled
+      - Database: clinical_doc_center
+      
+      ## ✅ COMPREHENSIVE TESTING COMPLETED:
+      
+      **Phase 1: Database Verification (✅ PASSED)**
+      - ✅ Admin user exists in database with email: medidocai@gmail.com
+      - ✅ Password hash field present and correct
+      - ✅ MFA enabled: true
+      - ✅ Account not locked
+      - ✅ No blocking login attempts in login_attempts collection
+      - ✅ Password verification: bcrypt.checkpw() confirms password matches hash
+      
+      **Phase 2: API Health Check (✅ PASSED)**
+      - ✅ Production URL responds: https://medidoc-ai.emergent.host/api/
+      - ✅ Returns: {"message":"مركز الترميز الطبي وتحسين التوثيق السريري","status":"active"}
+      
+      **Phase 3: Login Flow Testing**
+      
+      **Localhost Testing (✅ PASSED):**
+      ```
+      curl POST http://localhost:8001/api/auth/login-step1
+      Response: {"requires_mfa":true,"message":"OTP sent to your email","email":"medidocai@gmail.com"}
+      Status: 200 OK ✅
+      ```
+      
+      **Backend Logs Confirm:**
+      ```
+      LOGIN DEBUG: Found user=True, Email=medidocai@gmail.com
+      LOGIN DEBUG: Verifying password using field: password_hash...
+      DEBUG: Saving OTP for medidocai@gmail.com, code: 491282
+      INFO: 127.0.0.1:52296 - "POST /api/auth/login-step1 HTTP/1.1" 200 OK
+      ```
+      
+      **Production URL Testing (❌ FAILED):**
+      ```
+      curl POST https://medidoc-ai.emergent.host/api/auth/login-step1
+      Response: {"detail":"Invalid email or password"}
+      Status: 401 Unauthorized ❌
+      ```
+      
+      **CRITICAL FINDING:**
+      - Production URL request does NOT appear in backend logs
+      - Localhost request appears immediately in logs
+      - This indicates production URL is routing to a DIFFERENT backend instance
+      
+      ## 🔍 ROOT CAUSE ANALYSIS:
+      
+      **The issue is NOT with the backend code or database:**
+      1. ✅ Backend code is correct (localhost works perfectly)
+      2. ✅ Database has correct admin credentials
+      3. ✅ Password verification works correctly
+      4. ✅ MFA flow works correctly
+      5. ✅ OTP generation and saving works correctly
+      
+      **The issue IS with infrastructure/deployment:**
+      1. ❌ Production URL (https://medidoc-ai.emergent.host) is routing to a STALE or DIFFERENT backend instance
+      2. ❌ Kubernetes ingress or load balancer is not routing to the current backend pod
+      3. ❌ There may be multiple backend deployments and production is hitting the wrong one
+      
+      ## 📊 EVIDENCE:
+      
+      **Backend Process:** Only ONE backend process running on port 8001
+      **Database:** Multiple databases exist (cdi_app, cdi_database, clinical_doc_center)
+      **Admin User:** Exists in both clinical_doc_center and cdi_database with correct password
+      
+      ## 🎯 RECOMMENDED ACTIONS FOR MAIN AGENT:
+      
+      **This is a KUBERNETES/INGRESS CONFIGURATION ISSUE, not a backend code issue.**
+      
+      **Immediate Actions Required:**
+      1. Check Kubernetes deployment status and verify which backend pods are running
+      2. Check if there's a stale deployment - production URL may be cached
+      3. Verify ingress routing to ensure https://medidoc-ai.emergent.host routes to correct backend
+      4. May need to restart Kubernetes pods or clear ingress cache
+      
+      ## 📝 TESTING SUMMARY:
+      
+      **Backend Code Status: ✅ FULLY WORKING**
+      - All login endpoints working correctly on localhost
+      - Database credentials correct
+      - Password verification working
+      - MFA flow working
+      - OTP generation and saving working
+      
+      **Production URL Status: ❌ INFRASTRUCTURE ISSUE**
+      - Production URL not routing to current backend
+      - Requires Kubernetes/infrastructure team intervention
+      - Backend code changes will NOT fix this issue
+      
+      ## 🚨 CRITICAL MESSAGE TO USER:
+      
+      **The login issue is NOT a backend code problem. It's an infrastructure/deployment issue.**
+      
+      Your backend code is working perfectly (verified on localhost). The production URL is routing to a different or stale backend instance. This requires infrastructure-level investigation:
+      
+      1. Check Kubernetes pod status
+      2. Verify ingress routing configuration
+      3. Check if there are multiple backend deployments
+      4. Restart backend pods if necessary
+      5. Clear any caching layers (CDN, load balancer, etc.)
+      
+      **The backend code does NOT need any changes. The issue is with how the production URL is being routed to the backend service.**
