@@ -988,11 +988,13 @@ async def login_step2(request: Request, credentials: OTPVerification):
         from security_utils import log_audit, record_login_attempt
         
         # Find OTP record
+        print(f"DEBUG: Looking for OTP - email={credentials.email}, code={credentials.otp_code}")
         otp_record = await db.otp_records.find_one({
             "email": credentials.email,
             "otp_code": credentials.otp_code,
             "is_used": False
         }, {"_id": 0})
+        print(f"DEBUG: OTP found={otp_record is not None}")
         
         if not otp_record:
             await log_audit(
