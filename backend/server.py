@@ -2972,6 +2972,13 @@ try:
 except Exception as e:
     print(f"⚠️ Warning: Could not load security routes: {str(e)}")
 
+# Import clinical questions
+try:
+    from clinical_questions import get_questions, get_question_by_id, get_categories
+    print("✅ Clinical questions loaded successfully")
+except Exception as e:
+    print(f"⚠️ Warning: Could not load clinical questions: {str(e)}")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
