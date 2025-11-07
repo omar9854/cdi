@@ -794,7 +794,7 @@ async def register(request: Request, user_data: UserRegister):
     
     # Send welcome email (async, non-blocking)
     try:
-        await send_welcome_email(user.email, user.full_name)
+        await send_welcome_email(user.email, user.full_name, role)
     except Exception as e:
         logging.error(f"Failed to send welcome email: {str(e)}")
     
