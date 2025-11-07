@@ -1,107 +1,133 @@
 <analysis>
-The trajectory details the AI engineer's work on a CDI web application, primarily focusing on bug fixes and feature enhancements following an initial build. The initial phase involved rectifying display issues on the Supervisor Dashboard, particularly concerning  and  indicators. Key decisions included filtering empty strings in Excel data processing in  (Chat Message 34) and refining frontend display logic in  to remove duplicate sections and correctly render metrics (Chat Message 45, 51, 53, 143).
+The provided trajectory details an extensive development effort by an AI engineer on a CDI web application. Initially, the focus was on bug fixes and feature enhancements, including display issues on the Supervisor Dashboard and integrating new data analytics metrics like Numbers of Query. A significant portion of the work involved implementing and debugging a real-time chat widget.
 
-Significant effort was directed at enhancing data analytics, adding Numbers of Query, Numbers of Review, and Numbers of Response to both summary cards and detailed hospital views (Chat Message 227-298). A real-time chat widget was implemented (, ), which then required extensive debugging to fix message sending, user name display, message order, and notification issues (Chat Message 362-437).
+A major architectural pivot occurred when the LLM provider changed from  to Google Gemini Free API due to budget constraints. This required refactoring the backend () to use  and implementing a rotation mechanism for multiple Gemini API keys.
 
-A major architectural shift occurred when addressing an LLM budget error, transitioning from  to Google Gemini Free API (Chat Message 444-452). This involved removing , adding  to , and refactoring  to use  with model name adjustments (Chat Message 459-500). To increase API limits, a rotation mechanism for three Gemini API keys was implemented (Chat Message 513-523).
-
-The final set of tasks, initiated just before this summary, involved fixing a persistent chat notification issue, changing Patient Name to Patient ID in the New Note section, and implementing a privacy warning dialog when creating new notes (Chat Message 565-596). The engineer was in the process of adding the warning dialog.
+Later, the engineer addressed several user requests: fixing a persistent chat notification issue, changing Patient Name to Patient ID for privacy, and implementing a privacy warning dialog in the New Note section. Concurrently, extensive work was done to implement robust security features, including MFA with Email OTP, strong password policies, and audit logging, across the backend and frontend. The user also requested re-analysis of notes after editing and pre-defined questions for the AI chat. The trajectory ends with the engineer beginning to implement a new  for fixed questions, after fixing several critical bugs related to user login, password reset, and the email service configuration.
 </analysis>
 
 <product_requirements>
-The application is an AI-powered Clinical Documentation Improvement (CDI) web app for analyzing patient notes, identifying gaps, determining ICD-10-CM diagnoses, and generating physician queries.
+The application is an AI-powered Clinical Documentation Improvement (CDI) web app designed to analyze patient notes, identify gaps, determine ICD-10-CM diagnoses, and generate physician queries.
 
-**Implemented Features (from previous trajectory analysis and current trajectory):**
-- Core AI analysis using Gemini LLM.
+**Implemented Features:**
+- Core AI analysis using Google Gemini LLM (previously Emergent Universal LLM Key).
 - User authentication, note saving, multi-language support (Arabic/English).
 - Interactive AI chat with multi-note input and specialty selection.
 - Admin system for user management, branding, history, and HTML presentation.
 - Password reset via email/WhatsApp, welcome emails, WhatsApp support.
-- Admin dashboard with user statistics, Excel export, and supervisor assignment.
-- Supervisor dashboard for CDI data analysis, including undocumented diagnoses (PDX/ADX), DRG impact, specialist performance, and CDS status.
-- Enhanced UI/UX for login/registration with digital health and KSA Vision 2030 aesthetics.
-- Internal messaging system between supervisors and employees, now improved for specific member selection, correct message ordering, and notification handling.
-- Supervisor impersonation to view employee accounts and password reset for employees.
-- New analysis indicators: Numbers of Query (column O), Numbers of Review (column N), and Numbers of Response (column P) in both summary cards and detailed hospital views.
-- Total Queries per specialist added to CDS Performance table.
+- Admin dashboard with user statistics, Excel export, supervisor assignment.
+- Supervisor dashboard for CDI data analysis, including PDX/ADX, DRG impact, specialist performance, and CDS status, with new metrics: Numbers of Query, Numbers of Review, Numbers of Response, and Total Queries per specialist.
+- Enhanced UI/UX for login/registration.
+- Internal messaging system between supervisors/employees with specific member selection, correct message ordering, and notification handling.
+- Supervisor impersonation and password reset for employees.
+- Privacy warning dialog before new note creation, using Patient ID instead of Patient Name.
+- Edit and delete functionality for saved notes in History and Dashboard.
+- Robust security enhancements: Email OTP MFA, strong password policies, and an Audit Logs framework.
 
-**Current Problem & Pending Features (as of the end of the trajectory):**
-- Chat notification badge remains stuck even after opening the chat.
-- Need edit functionality for notes after they have been saved, including adding multiple notes after an edit.
-- Change Patient Name field to Patient ID in the new note creation interface for privacy.
-- Display a privacy warning dialog before a new note can be created, requiring user acceptance.
+**Current Problem & Pending Features:**
+- Persistent chat notification badge even after opening chat (partially addressed).
+- Ability to edit saved notes and add multiple notes after editing (implemented but needs to re-trigger AI analysis).
+- Chat notifications not disappearing (partially addressed).
+- Password reset link not functioning correctly (fixed in backend, needs user verification).
+- Re-analysis of notes by AI after editing.
+- Enhancement of AI chat with fixed, specialized questions (e.g., Are diagnoses inferred?, Documented/inferred diagnoses with coding) and open chat capabilities.
+- DRG prediction before and after documentation.
 </product_requirements>
 
 <key_technical_concepts>
-- **FastAPI**: Python backend for API endpoints.
-- **React**: JavaScript frontend library (with Shadcn UI).
-- **MongoDB**: NoSQL database for data storage.
-- **Google Gemini API**: LLM for clinical note analysis, replacing Emergent LLM Key.
-- **API Key Rotation**: Custom backend logic for managing multiple Gemini API keys.
-- **JWT/Bcrypt**: Authentication and authorization.
-- **Aiosmtplib/Openpyxl/Pandas**: Email, Excel processing, data manipulation.
-- **i18n**: Multi-language support for internationalization.
-- **Recharts**: Data visualization library.
-- **Supervisor**: Process control for managing backend and frontend services.
+- **FastAPI**: Python backend.
+- **React**: JavaScript frontend (with Shadcn UI).
+- **MongoDB**: NoSQL database.
+- **Google Gemini API**: LLM for analysis, with API Key Rotation.
+- **JWT/Bcrypt**: Authentication.
+- **Aiosmtplib**: Email sending.
+- **i18n**: Multi-language support.
+- **MFA (Email OTP)**: Multi-factor authentication.
+- **Audit Logging**: Security feature to track user actions.
+- **Supervisor**: Process control.
 </key_technical_concepts>
 
 <code_architecture>
 
--   **/app/backend/server.py**: Core FastAPI backend handling API endpoints, database interactions, and AI calls.
-    -   **Importance**: Centralizes all business logic and data processing.
-    -   **Changes**:
-        -   Refactored  to explicitly differentiate , , and  and correctly filter empty strings for accurate Excel analysis (Chat Message 34, 177, 183).
-        -   Updated  and  calculations to accurately reflect user requirements (Chat Message 177, 183, 218).
-        -   Integrated new metrics: , ,  into overall and hospital-level analysis results (Chat Message 231, 235, 239, 243, 253, 284, 286, 288, 290, 292).
-        -   Modified  logic to correctly calculate  per specialist (Chat Message 339).
-        -   Extensive fixes for chat endpoints (, ) including  handling, message body parsing, and retrieving both sent and received messages (Chat Message 380, 382, 437, 424).
-        -   Transitioned from  to  for LLM calls, updating API key management to use  from  with rotation logic (Chat Message 469, 471, 473, 477, 517, 519, 521, 523).
-        -   Corrected Gemini model names to  for chat and analysis (Chat Message 488, 490, 498, 500).
-        -   Fixed a  for  by adjusting its definition scope (Chat Message 546).
--   **/app/frontend/src/App.js**: Main React component defining application routes and global contexts.
-    -   **Importance**: Orchestrates the main application structure.
-    -   **Changes**: Integrated  as a global pop-up chat accessible across all pages (Chat Message 309, 313).
--   **/app/frontend/src/pages/SupervisorDashboard.jsx**: Supervisor-specific dashboard displaying CDI data analysis.
-    -   **Importance**: Critical for supervisors to monitor CDI performance.
-    -   **Changes**:
-        -   Refined the display of  and  in summary cards and detailed hospital sections, removing  and duplicate PDX sections (Chat Message 45, 51, 53, 143).
-        -   Added display for , , and  in summary cards and per-hospital detailed views (Chat Message 263, 269, 275, 296, 298).
-        -   Added Total Queries column to the CDS Performance table (Chat Message 351, 355).
-        -   Adjusted  layout (Chat Message 166).
+-   **/app/backend/server.py**: Core FastAPI backend.
+    -   **Importance**: Centralizes business logic, API endpoints, database interactions, and AI calls.
+    -   **Changes**: Extensive modifications for LLM integration (Gemini), chat messaging, note analysis, new metrics, and, most recently, security features like MFA, password reset, and audit logging. Includes new endpoints for note editing/deletion () and re-analysis (). Fixed password hash comparison and  issues.
+-   **/app/backend/security_models.py**: New file for Pydantic models related to security (e.g., , , ).
+    -   **Importance**: Defines data structures for secure operations.
+-   **/app/backend/security_utils.py**: New file for helper functions for security (e.g., password hashing, JWT token generation, OTP generation/validation).
+    -   **Importance**: Encapsulates reusable security logic.
+-   **/app/backend/security_routes.py**: New file to house security-related API endpoints (e.g., , , ).
+    -   **Importance**: Modularizes security features away from . Integrated into  via an APIRouter.
+-   **/app/backend/send_password_change_emails.py**: New script for bulk email sending.
+    -   **Importance**: Facilitates sending password change prompts to all users.
+-   **/app/backend/clinical_questions.py**: New file to store pre-defined clinical questions for AI chat.
+    -   **Importance**: Provides structured prompts for specialized AI interactions.
+-   **/app/frontend/src/App.js**: Main React component for routing and global contexts.
+    -   **Importance**: Defines the application's navigation structure.
+    -   **Changes**: Integrated , , , , and replaced  with .
+-   **/app/frontend/src/pages/SupervisorDashboard.jsx**: Dashboard for CDI data analysis.
+    -   **Importance**: Displays key CDI performance metrics.
+    -   **Changes**: Refined display of , , and added new metrics like , , , and .
 -   **/app/frontend/src/pages/NewNote.jsx**: Page for creating new patient notes.
-    -   **Importance**: Core functionality for user input and AI analysis.
-    -   **Changes**: Started implementing a privacy warning dialog (Chat Message 594, 596) and updated field labels.
--   **/app/frontend/src/components/ChatWidget.jsx**: New component for the real-time chat functionality.
-    -   **Importance**: Provides internal communication capabilities.
-    -   **Changes**:
-        -   Initial creation and implementation of basic chat (Chat Message 305).
-        -   Enhanced with features to send messages to specific users, filter conversations, display user names correctly, reverse message order, and fix notification badge logic (Chat Message 326, 368, 372, 378, 393, 395, 397, 399, 401, 416, 420, 572).
--   **/app/frontend/src/contexts/LanguageContext.jsx**: Manages multi-language strings for the application.
-    -   **Importance**: Supports Arabic and English translations for UI elements.
-    -   **Changes**: Updated translation keys from Patient Name to Patient ID (Chat Message 588, 592).
--   **/app/backend/.env**: Environment variables for backend configuration.
-    -   **Importance**: Stores sensitive keys and configuration parameters.
-    -   **Changes**: Added  to store multiple Gemini API keys for rotation (Chat Message 459, 515).
+    -   **Importance**: User interface for note input and AI analysis.
+    -   **Changes**: Implemented privacy warning dialog and updated Patient Name to Patient ID label.
+-   **/app/frontend/src/pages/History.jsx**: Displays saved notes.
+    -   **Importance**: Allows users to view past notes.
+    -   **Changes**: Added Edit and Delete buttons for notes.
+-   **/app/frontend/src/pages/Dashboard.jsx**: Main user dashboard.
+    -   **Importance**: Overview for users.
+    -   **Changes**: Added Edit and Delete buttons for notes.
+-   **/app/frontend/src/pages/EditNote.jsx**: New page for editing existing notes.
+    -   **Importance**: Enables modification of previously saved notes.
+    -   **Changes**: Includes a Save and Re-analyze button.
+-   **/app/frontend/src/pages/MFAVerification.jsx**: New page for MFA OTP verification.
+    -   **Importance**: Handles the second step of the login process when MFA is enabled.
+    -   **Changes**: Corrected API call logic to .
+-   **/app/frontend/src/pages/SecurityDashboard.jsx**: New admin dashboard for security settings.
+    -   **Importance**: Provides an interface for managing security features (e.g., audit logs, MFA settings).
+-   **/app/frontend/src/pages/Messages.jsx**: Page for internal messaging.
+    -   **Importance**: Central communication hub.
+    -   **Changes**: Fixed  error by correctly parsing API response and ensuring messages are an array.
+-   **/app/frontend/src/components/ChatWidget.jsx**: Pop-up chat component.
+    -   **Importance**: Global real-time communication.
+    -   **Changes**: Addressed issues with notification badge display and message fetching.
+-   **/app/frontend/src/components/Navbar.jsx**: Navigation bar.
+    -   **Importance**: Main navigation for the application.
+    -   **Changes**: Added a link to the  for admin users.
+-   **/app/frontend/src/contexts/LanguageContext.jsx**: Manages multi-language strings.
+    -   **Importance**: Supports internationalization.
+    -   **Changes**: Updated translation keys from Patient Name to Patient ID.
+-   **/app/frontend/src/pages/ChatEnhanced.jsx**: New improved chat page.
+    -   **Importance**: Will integrate static, specialized questions for AI interaction.
+-   **/app/backend/.env**: Backend environment variables.
+    -   **Importance**: Stores sensitive keys and configuration.
+    -   **Changes**: Added  (multiple keys) and  (changed from  to the actual preview URL). Updated  to an App Password.
+-   **/app/SECURITY_DOCUMENTATION.md**: New markdown file.
+    -   **Importance**: Documents the implemented security features and configurations.
 </code_architecture>
 
 <pending_tasks>
-- Fix the chat notification badge which remains stuck even after the chat is opened.
-- Implement edit functionality for saved notes, allowing users to modify existing notes and add multiple new notes after an edit.
-- Change the display label Patient Name to Patient ID in the new note creation interface.
-- Add a privacy warning dialog that appears when a user attempts to create a new note, requiring acceptance before proceeding.
+- Complete the integration of the DRG prediction system (before and after documentation).
+- Integrate the newly created  into the application's routing.
+- Implement the fixed questions feature within the AI chat, including code coding details.
+- Validate the working of MFA and password reset functionality end-to-end with the user, especially the fixed OTP and reset link.
+- Fully implement and display the audit logs in the .
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was working on a set of user-reported issues related to the newly implemented chat feature and the note creation process. The user explicitly requested fixes for the persistent chat notification badge, the ability to edit saved notes and add more notes after editing, changing Patient Name to Patient ID for privacy, and adding a warning message before creating a new note.
+Immediately before this summary request, the AI engineer was engaged in significant security enhancements and addressing critical user-reported issues. The primary focus shifted to implementing a comprehensive security framework.
 
-The engineer initiated work on these tasks sequentially:
-1.  **Chat Notification Fix**: Started by reviewing  (Chat Message 570) and made an edit to address a potential dependency issue in  related to message fetching and marking as read (Chat Message 572).
-2.  **Change Patient Name to Patient ID**: Explored  and . The change involved updating translation keys in  for both Arabic and English to reflect Patient ID instead of Patient Name (Chat Message 588, 592).
-3.  **Add Privacy Warning Dialog**: Began implementation in . The engineer added a  state and started structuring a  component to display the warning message when Add New Note is clicked (Chat Message 594, 596).
+**Key areas of recent work include:**
+1.  **Multi-Factor Authentication (MFA)**: Implementation of Email OTP for MFA, including creating new backend endpoints (, ) and integrating them into the login flow (, ). Frontend pages  and  were updated to handle the MFA flow. There were significant debugging efforts around OTP expiration and incorrect endpoint calls.
+2.  **Password Management**: Strong password policies were enforced during user registration. Extensive debugging was performed for the password reset functionality, particularly fixing the  in the email template and ensuring the password field was correctly updated in the database ().
+3.  **Audit Logs**: A framework for audit logging was initiated with backend models and utility functions, integrated into sensitive operations like login.
+4.  **Admin and User Management**: Logic for creating and updating admin users, including ensuring correct password hashing and the presence of necessary security fields in the database, was implemented. A script () was created to send password change emails to all users.
+5.  **Email Service**: The email sending functionality ( in ) was updated to use a user-provided Gmail App Password after multiple attempts with regular passwords failed.
+6.  **New Features**: Edit and Delete buttons were added to  and . A new  page was created, including a Save and Re-analyze button, and a new endpoint () was added to the backend. The  page for specialized questions was just created.
 
-The last action performed was an edit to  (Chat Message 596) to integrate the warning dialog, indicating this task is partially complete and was the immediate focus before the summary request. The frontend  has been updated with new labels, and  has an attempted fix for notifications. The next step would be to complete the warning dialog and move to the note editing features.
+The engineer had just finished fixing the password reset issue and the email sending problem, and was about to replace the old  with  to begin implementing fixed AI questions. Many security features are in place, but full end-to-end testing and the admin interface for audit logs are still in progress.
 </current_work>
 
 <optional_next_step>
-Complete the implementation of the privacy warning dialog in  as per the user's explicit request.
+Integrate  into  and begin implementing the fixed, specialized questions for AI interaction, as requested by the user.
 </optional_next_step>
