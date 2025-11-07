@@ -19,6 +19,130 @@ def generate_otp(length: int = 6) -> str:
     return ''.join(random.choices(string.digits, k=length))
 
 # ========== Email Sending ==========
+
+async def send_welcome_email(email: str, user_name: str, role: str = "user"):
+    """Send welcome email to new users"""
+    try:
+        smtp_host = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
+        smtp_port = int(os.environ.get('SMTP_PORT', 587))
+        smtp_user = os.environ.get('SMTP_USER')
+        smtp_password = os.environ.get('SMTP_PASSWORD')
+        email_from = os.environ.get('EMAIL_FROM', smtp_user)
+        
+        # Determine role in Arabic
+        role_ar = {
+            'admin': 'مدير النظام',
+            'supervisor': 'مشرف',
+            'user': 'مستخدم'
+        }.get(role, 'مستخدم')
+        
+        # Create message
+        message = MIMEMultipart("alternative")
+        message["From"] = email_from
+        message["To"] = email
+        message["Subject"] = "مرحباً بك في مركز الترميز الطبي وتحسين التوثيق السريري"
+        
+        # Email body
+        html_content = f"""
+        <html dir="rtl">
+            <body style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+                    <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        
+                        <!-- Header -->
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h1 style="color: #2563eb; margin: 0;">🏥 مركز الترميز الطبي</h1>
+                            <p style="color: #64748b; margin-top: 5px;">نظام تحسين التوثيق السريري (CDI)</p>
+                        </div>
+                        
+                        <!-- Welcome Message -->
+                        <div style="margin-bottom: 30px;">
+                            <h2 style="color: #1e40af; margin-bottom: 15px;">مرحباً بك، {user_name}! 👋</h2>
+                            <p style="font-size: 16px; color: #333; line-height: 1.6;">
+                                يسعدنا انضمامك إلى نظام تحسين التوثيق السريري (CDI). تم إنشاء حسابك بنجاح كـ <strong>{role_ar}</strong>.
+                            </p>
+                        </div>
+                        
+                        <!-- Login Info -->
+                        <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                            <h3 style="color: #1e40af; margin-top: 0;">معلومات تسجيل الدخول:</h3>
+                            <p style="margin: 10px 0; color: #333;">
+                                <strong>البريد الإلكتروني:</strong> {email}<br>
+                                <strong>كلمة المرور:</strong> التي قمت بإنشائها عند التسجيل
+                            </p>
+                            <p style="margin: 10px 0; color: #ef4444; font-size: 14px;">
+                                ⚠️ يُرجى الاحتفاظ بكلمة المرور في مكان آمن
+                            </p>
+                        </div>
+                        
+                        <!-- Features -->
+                        <div style="margin-bottom: 30px;">
+                            <h3 style="color: #1e40af;">ماذا يمكنك أن تفعل الآن؟</h3>
+                            <ul style="color: #333; line-height: 2;">
+                                <li>✅ تحليل الملاحظات السريرية بالذكاء الاصطناعي</li>
+                                <li>✅ تحديد التشخيصات الموثقة والمستنتجة مع أكواد ICD-10-CM</li>
+                                <li>✅ توليد استفسارات طبية احترافية للأطباء</li>
+                                <li>✅ الدردشة التفاعلية مع الذكاء الاصطناعي</li>
+                                <li>✅ عرض وتصدير التحليلات (PDF/Excel)</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Security Note -->
+                        <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; border-right: 4px solid #f59e0b; margin-bottom: 30px;">
+                            <h4 style="color: #92400e; margin-top: 0;">🔒 ملاحظة أمنية هامة:</h4>
+                            <p style="color: #78350f; margin: 0; font-size: 14px;">
+                                النظام محمي بالمصادقة متعددة العوامل (MFA). عند تسجيل الدخول، سيتم إرسال رمز التحقق إلى بريدك الإلكتروني.
+                            </p>
+                        </div>
+                        
+                        <!-- CTA Button -->
+                        <div style="text-align: center; margin: 30px 0;">
+                            <a href="{os.environ.get('FRONTEND_URL', 'https://medidoc-ai-1.preview.emergentagent.com')}" 
+                               style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 30px; 
+                                      text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: bold;">
+                                🚀 ابدأ الآن
+                            </a>
+                        </div>
+                        
+                        <!-- Support -->
+                        <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 30px;">
+                            <h4 style="color: #1e40af; margin-top: 0;">هل تحتاج إلى مساعدة؟</h4>
+                            <p style="color: #666; font-size: 14px; margin: 0;">
+                                إذا كان لديك أي استفسار أو تحتاج إلى مساعدة، لا تتردد في التواصل معنا.
+                            </p>
+                        </div>
+                        
+                        <!-- Footer -->
+                        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                            <p style="color: #94a3b8; font-size: 12px; margin: 5px 0;">
+                                مركز الترميز الطبي وتحسين التوثيق السريري<br>
+                                نظام CDI المدعوم بالذكاء الاصطناعي
+                            </p>
+                            <p style="color: #cbd5e1; font-size: 11px; margin: 10px 0;">
+                                © 2024 جميع الحقوق محفوظة
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </body>
+        </html>
+        """
+        
+        part = MIMEText(html_content, "html")
+        message.attach(part)
+        
+        # Send email
+        async with aiosmtplib.SMTP(hostname=smtp_host, port=smtp_port) as smtp:
+            await smtp.starttls()
+            await smtp.login(smtp_user, smtp_password)
+            await smtp.send_message(message)
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error sending welcome email: {str(e)}")
+        return False
+
 async def send_otp_email(email: str, otp_code: str, user_name: str = "المستخدم"):
     """Send OTP code via email"""
     try:
