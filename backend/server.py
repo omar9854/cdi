@@ -1851,10 +1851,10 @@ async def chat_with_ai(request: Request, chat_request: ChatRequest, user: dict =
     
     # Save user message
     user_msg = ChatMessage(
-        analysis_id=request.analysis_id,
+        analysis_id=chat_request.analysis_id,
         user_id=user['id'],
         role='user',
-        message=request.message
+        message=chat_request.message
     )
     user_doc = user_msg.model_dump()
     user_doc['created_at'] = user_doc['created_at'].isoformat()
