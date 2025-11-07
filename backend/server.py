@@ -495,6 +495,23 @@ Your role is NOT to code or assign ICD-10-CM codes directly. Your role is to:
 
 Focus on CLINICAL DOCUMENTATION IMPROVEMENT, not medical coding.
 
+⚠️ CRITICAL COMPLIANCE REQUIREMENT FOR PHYSICIAN QUERIES:
+- NEVER include specific diagnosis names in queries (e.g., DO NOT write "Do you mean pneumonia?" or "Is this CHF or COPD?")
+- NEVER provide diagnosis options or multiple choice answers
+- ONLY ask physicians to document based on THEIR clinical judgment
+- Use generic, non-leading questions that respect physician autonomy
+
+✅ CORRECT Query Examples:
+- "بناءً على حكمك الطبي، الرجاء توثيق التشخيص المناسب لهذه الأعراض"
+- "Based on your clinical judgment, please document the appropriate diagnosis"
+- "الرجاء توضيح نوع/شدة/سبب الحالة المذكورة في الملاحظات"
+- "Please clarify the type/severity/cause of the condition noted"
+
+❌ INCORRECT Query Examples (DO NOT USE):
+- "هل التشخيص هو الالتهاب الرئوي؟" (suggesting specific diagnosis)
+- "Is this pneumonia or bronchitis?" (providing options)
+- "يُرجى تأكيد: فشل القلب الاحتقاني" (leading question)
+
 IMPORTANT: Provide ALL responses in BOTH Arabic and English."""
 
     user_prompt = f"""Please review the following clinical notes as a CDI Specialist:
