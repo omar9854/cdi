@@ -1911,6 +1911,131 @@ async def get_chat_history(analysis_id: str, user: dict = Depends(get_current_us
     
     return messages
 
+@api_router.post("/chat/{analysis_id}")
+async def chat_with_ai_by_path(analysis_id: str, question: dict, user: dict = Depends(get_current_user)):
+    """Alternative chat endpoint for ChatEnhanced.jsx - expects {question: str} in body"""
+    try:
+        # Get analysis
+        analysis = await db.analyses.find_one(
+            {"id": analysis_id, "user_id": user['id']},
+            {"_id": 0}
+        )
+        
+        if not analysis:
+            raise HTTPException(status_code=404, detail="Analysis not found")
+        
+        # Get note
+        note = await db.clinical_notes.find_one(
+            {"id": analysis['note_id']},
+            {"_id": 0}
+        )
+        
+        user_question = question.get('question', '')
+        if not user_question:
+            raise HTTPException(status_code=400, detail="Question is required")
+        
+        # Save user message
+        user_msg = ChatMessage(
+            analysis_id=analysis_id,
+            user_id=user['id'],
+            role='user',
+            message=user_question
+        )
+        user_doc = user_msg.model_dump()
+        user_doc['created_at'] = user_doc['created_at'].isoformat()
+        await db.chat_messages.insert_one(user_doc)
+        
+        # Build context
+        import json
+        
+        # Format doctor notes
+        doctor_notes_text = "\n\n".join([
+            f"**{dn.get('specialty', 'عام')}**:\n{dn.get('text', '')}"
+            for dn in note.get('doctor_notes', [])
+        ])
+        
+        context = f"""Clinical Note: {note['title']}
+
+Clinical Notes:
+{doctor_notes_text}
+
+Analysis Summary (Arabic): {analysis.get('summary_ar', '')}
+Analysis Summary (English): {analysis.get('summary_en', '')}
+
+Diagnoses to Document: {json.dumps(analysis.get('diagnoses_to_document', []), ensure_ascii=False)}
+Missing Documentation: {json.dumps(analysis.get('missing_documentation', []), ensure_ascii=False)}"""
+        
+        system_message = f"""You are a Clinical Documentation Improvement (CDI) specialist. You have reviewed a clinical case and now the user wants to discuss the analysis with you.
+
+Context:
+{context}
+
+Answer questions professionally, provide clarifications, and help improve the documentation. Respond in the same language as the user's question. 
+
+IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary details. Focus only on the specific question asked. Maximum 3-4 sentences unless more detail is specifically requested."""
+        
+        # Use analysis_id as session for continuity
+        try:
+            # Use Google Gemini API with automatic key rotation
+            model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+            
+            # Get chat history for context
+            chat_history = []
+            previous_messages = await db.chat_messages.find(
+                {"analysis_id": analysis_id}
+            ).sort("created_at", 1).to_list(100)
+            
+            # Build chat history
+            for msg in previous_messages:
+                if msg['role'] == 'user':
+                    chat_history.append({'role': 'user', 'parts': [msg['message']]})
+                else:
+                    chat_history.append({'role': 'model', 'parts': [msg['message']]})
+            
+            # Start chat with history and retry logic
+            max_retries = len(GEMINI_API_KEYS)
+            response_text = None
+            
+            for attempt in range(max_retries):
+                try:
+                    chat = model.start_chat(history=chat_history)
+                    response = chat.send_message(user_question)
+                    response_text = response.text
+                    break  # Success, exit retry loop
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        logger.warning(f"Chat retry {attempt + 1}/{max_retries} with different API key")
+                        model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+                    else:
+                        raise e
+            
+            # Save assistant message
+            assistant_msg = ChatMessage(
+                analysis_id=analysis_id,
+                user_id=user['id'],
+                role='assistant',
+                message=response_text
+            )
+            assistant_doc = assistant_msg.model_dump()
+            assistant_doc['created_at'] = assistant_doc['created_at'].isoformat()
+            await db.chat_messages.insert_one(assistant_doc)
+            
+            # Return format expected by ChatEnhanced.jsx
+            return {
+                "question": user_question,
+                "answer": response_text
+            }
+            
+        except Exception as e:
+            logging.error(f"Error in chat: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Error in chat: {str(e)}")
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error processing chat: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ========== Export Routes ==========
 @api_router.get("/export/pdf/{analysis_id}")
 async def export_pdf(analysis_id: str, user: dict = Depends(get_current_user)):
