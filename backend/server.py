@@ -1951,7 +1951,8 @@ async def get_chat_history(analysis_id: str, user: dict = Depends(get_current_us
     return messages
 
 @api_router.post("/chat/{analysis_id}")
-async def chat_with_ai_by_path(analysis_id: str, question: dict, user: dict = Depends(get_current_user)):
+@limiter.limit("30/minute")
+async def chat_with_ai_by_path(request: Request, analysis_id: str, question: dict, user: dict = Depends(get_current_user)):
     """Alternative chat endpoint for ChatEnhanced.jsx - expects {question: str} in body"""
     try:
         # Get analysis
