@@ -1691,7 +1691,8 @@ async def delete_note(note_id: str, user: dict = Depends(get_current_user)):
 
 # ========== Analysis Routes ==========
 @api_router.post("/analyze", response_model=Analysis)
-async def analyze_note(request: AnalyzeRequest, user: dict = Depends(get_current_user)):
+@limiter.limit("20/hour")
+async def analyze_note(request: Request, analyze_request: AnalyzeRequest, user: dict = Depends(get_current_user)):
     note = await db.clinical_notes.find_one(
         {"id": request.note_id, "user_id": user['id']},
         {"_id": 0}
