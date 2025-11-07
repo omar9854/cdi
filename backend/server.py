@@ -3663,8 +3663,11 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("startup")
 async def startup_monitoring():
-    """Start monitoring tasks"""
+    """Start monitoring tasks and ensure admin account"""
     import asyncio
+    
+    # CRITICAL: Ensure admin account exists with correct credentials
+    await ensure_admin_account()
     
     async def update_active_users():
         while True:
