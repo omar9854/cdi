@@ -109,21 +109,33 @@ async def main():
         new_password = "CDI@2024#Admin"
         hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
         
+        old_email = admin.get('email')
+        
         await db.users.update_one(
             {'id': admin['id']},
-            {'$set': {
-                'email': 'medidocai@gmail.com',
-                'password_hash': hashed.decode('utf-8'),
-                'role': 'admin',
-                'mfa_enabled': True,
-                'is_active': True,
-                'full_name': 'مدير النظام',
-                'password_changed_at': datetime.now(timezone.utc).isoformat()
-            }}
+            {
+                '$set': {
+                    'email': 'medidocai@gmail.com',
+                    'password_hash': hashed.decode('utf-8'),
+                    'role': 'admin',
+                    'mfa_enabled': True,
+                    'is_active': True,
+                    'full_name': 'مدير النظام - System Administrator',
+                    'password_changed_at': datetime.now(timezone.utc).isoformat(),
+                    'failed_login_attempts': 0,
+                    'account_locked_until': None
+                },
+                '$unset': {
+                    'password': ''  # حذف حقل password القديم إن وجد
+                }
+            }
         )
-        print("   ✅ تم تحديث حساب Admin")
-        print(f"   📧 Email: medidocai@gmail.com (تم التحديث)")
+        print(f"   ✅ تم تحديث حساب Admin من {old_email} إلى medidocai@gmail.com")
         print(f"   🔑 Password: {new_password}")
+        
+        # حذف جميع login attempts للأدمن
+        await db.login_attempts.delete_many({'email': {'$in': ['medidocai@gmail.com', old_email]}})
+        print(f"   ✅ تم حذف login attempts")
     else:
         # إنشاء حساب Admin جديد
         import uuid
