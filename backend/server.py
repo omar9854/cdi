@@ -543,12 +543,55 @@ IMPORTANT: Provide ALL responses in BOTH Arabic and English."""
 Perform a Clinical Documentation Improvement review and provide:
 
 1. **Diagnoses That Should Be Documented**: Based on the clinical findings in the notes, what diagnoses should be clearly documented? (with ICD-10-CM codes for reference only)
+   - For EACH diagnosis, specify if it's "principal" (التشخيص الرئيسي) or "secondary" (التشخيص الثانوي)
+   - Include the clinical evidence from the notes that supports this diagnosis
 
 2. **Missing Documentation**: What specific clinical information is missing or incomplete? (e.g., severity, acuity, specificity, causal relationships)
 
 3. **Documentation Gaps**: What gaps exist in the current documentation?
 
-4. **Physician Queries**: Generate queries to physicians to improve documentation. CRITICAL: DO NOT include specific diagnosis names or diagnosis options in queries. Use generic terms only. Format each query as: "Based on your clinical judgment, please document: [the specific aspect needed]" or "Please clarify: [the clinical detail needed]" or "Please specify the type/severity/cause of: [general clinical finding]"
+4. **Physician Queries**: Generate DETAILED queries with clinical context. For EACH query:
+   
+   **CRITICAL FORMAT FOR EACH QUERY:**
+   
+   A. **Header (For CDI staff):**
+   "استفسار يخص: [Diagnosis name in Arabic] ([ICD-10 Code])"
+   "Query regarding: [Diagnosis name in English] ([ICD-10 Code])"
+   
+   B. **Query Body (For Physician):**
+   - First, cite SPECIFIC clinical findings from the notes (symptoms, medications prescribed, lab results, vital signs)
+   - Then ask physician to document based on clinical judgment
+   - Specify if asking for principal diagnosis or secondary diagnosis
+   
+   **Example Format in Arabic:**
+   ```
+   استفسار يخص: ارتفاع ضغط الدم (I10)
+   
+   بناءً على الملاحظات الطبية:
+   - [ذكر الأعراض المحددة من الملاحظات]
+   - [ذكر الأدوية المصروفة من الملاحظات]
+   - [ذكر القياسات أو الفحوصات من الملاحظات]
+   
+   بناءً على حكمك الطبي، الرجاء توثيق التشخيص [الرئيسي/الثانوي - حسب النوع].
+   ```
+   
+   **Example Format in English:**
+   ```
+   Query regarding: Hypertension (I10)
+   
+   Based on clinical documentation:
+   - [Cite specific symptoms from notes]
+   - [Cite specific medications prescribed from notes]
+   - [Cite specific measurements/tests from notes]
+   
+   Based on your clinical judgment, please document the [principal/secondary - based on type] diagnosis.
+   ```
+   
+   **CRITICAL RULES:**
+   - NEVER suggest a specific diagnosis name in the query body
+   - ALWAYS include clinical evidence from the actual notes
+   - ALWAYS specify if it's principal or secondary diagnosis
+   - Use "التشخيص الرئيسي" for principal, omit "الرئيسي" for secondary
 
 5. **Recommendations**: Specific recommendations to improve the clinical documentation quality
 
