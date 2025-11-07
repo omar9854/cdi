@@ -1842,7 +1842,9 @@ Missing Documentation: {json.dumps(analysis.get('missing_documentation', []), en
 Context:
 {context}
 
-Answer questions professionally, provide clarifications, and help improve the documentation. Respond in the same language as the user's question. Be concise and direct."""
+Answer questions professionally, provide clarifications, and help improve the documentation. Respond in the same language as the user's question. 
+
+IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary details. Focus only on the specific question asked. Maximum 3-4 sentences unless more detail is specifically requested."""
     
     # Use analysis_id as session for continuity
     try:
