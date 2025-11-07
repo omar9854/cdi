@@ -144,7 +144,7 @@ async def main():
         
         admin_user = {
             'id': str(uuid.uuid4()),
-            'email': 'es012@hotmail.com',
+            'email': 'almaghthawi.cdi@gmail.com',
             'password_hash': hashed.decode('utf-8'),
             'full_name': 'مدير النظام - System Administrator',
             'role': 'admin',
