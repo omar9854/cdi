@@ -1706,7 +1706,7 @@ async def analyze_note(request: Request, analyze_request: AnalyzeRequest, user: 
     
     # Create analysis record
     analysis = Analysis(
-        note_id=request.note_id,
+        note_id=analyze_request.note_id,
         user_id=user['id'],
         diagnoses_to_document=[DiagnosisBilingual(**d) for d in result.get('diagnoses_to_document', [])],
         missing_documentation=result.get('missing_documentation', []),
