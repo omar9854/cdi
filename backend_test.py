@@ -2863,6 +2863,12 @@ class MedicalCodingAPITester:
                 self.test_get_analyses(note_id)
                 self.test_get_history()
                 
+                # Test new single analysis endpoint
+                print("\n🔍 Testing Single Analysis Endpoint (ChatEnhanced back navigation fix)...")
+                self.test_get_single_analysis(analysis_id)
+                self.test_get_single_analysis_invalid_id()
+                self.test_get_single_analysis_no_auth(analysis_id)
+                
                 # Export tests
                 print("\n📄 Testing Export Functions...")
                 self.test_export_pdf(analysis_id)
