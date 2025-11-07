@@ -585,7 +585,8 @@ async def get_specialties():
 
 # ========== Auth Routes ==========
 @api_router.post("/auth/register", response_model=Token)
-async def register(user_data: UserRegister):
+@limiter.limit("3/hour")
+async def register(request: Request, user_data: UserRegister):
     import re
     from security_utils import log_audit
     
