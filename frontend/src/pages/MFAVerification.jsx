@@ -92,7 +92,12 @@ const MFAVerification = ({ setUser }) => {
       setTimer(900); // Reset timer to 15 minutes
       setOtpCode('');
     } catch (error) {
-      toast.error(language === 'ar' ? 'فشل إرسال الرمز' : 'Failed to send code');
+      logError('Resend OTP', error);
+      const errorMessage = getErrorMessage(
+        error,
+        language === 'ar' ? 'فشل إرسال الرمز' : 'Failed to send code'
+      );
+      toast.error(errorMessage);
     } finally {
       setResending(false);
     }
