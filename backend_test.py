@@ -33,10 +33,12 @@ class MedicalCodingAPITester:
         }
         
         # Test user data (for clinical questions testing - MFA disabled)
+        import time
+        timestamp = str(int(time.time()))
         self.test_user = {
-            "email": "clinical_test_20251107_010101@test.com",
+            "email": f"clinical_test_{timestamp}@test.com",
             "full_name": "Clinical Test User",
-            "phone_number": "966501234567",
+            "phone_number": f"9665012{timestamp[-5:]}",
             "password": "ClinicalTest123!"
         }
         
