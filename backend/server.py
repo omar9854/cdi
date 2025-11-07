@@ -852,8 +852,8 @@ async def login_step2(request: Request, credentials: OTPVerification):
         
         # Find OTP record
         otp_record = await db.otp_records.find_one({
-            "email": email,
-            "otp_code": otp_code,
+            "email": credentials.email,
+            "otp_code": credentials.otp_code,
             "is_used": False
         }, {"_id": 0})
         
