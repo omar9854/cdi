@@ -918,7 +918,7 @@ async def login_step2(request: Request, credentials: OTPVerification):
             db,
             action="login_success",
             user_id=user['id'],
-            user_email=email,
+            user_email=credentials.email,
             status="success",
             details={"method": "mfa"}
         )
