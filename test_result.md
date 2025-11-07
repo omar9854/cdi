@@ -868,6 +868,62 @@ agent_communication:
 
   - agent: "main"
     message: |
+      ✅ **CRITICAL PRODUCTION ISSUES FIXED**
+      
+      **USER REPORTED ISSUES:**
+      1. "هل اصلحت مشكلة الدخول" - Login issue after OTP verification
+      2. "وغيرت ايميل الادمن" - Change admin email to medidocai@gmail.com
+      
+      **FIXES APPLIED:**
+      
+      **1. Production Backend URL Fix ✅**
+      - Problem: Frontend .env had preview URL instead of production URL
+      - Old URL: https://medtechdoc-ai.preview.emergentagent.com
+      - New URL: https://medidoc-ai.emergent.host
+      - File: /app/frontend/.env line 1
+      - Status: FIXED - Frontend now points to correct production backend
+      
+      **2. MFAVerification Error Handling Fix ✅**
+      - Problem: "Objects are not valid as a React child" runtime error
+      - Solution: Implemented errorHandler.js utility in MFAVerification.jsx
+      - Changes:
+        * Added import { getErrorMessage, logError } from '@/utils/errorHandler'
+        * Replaced error.response?.data?.detail with getErrorMessage() calls
+        * Applied to both verification and resend OTP functions
+      - File: /app/frontend/src/pages/MFAVerification.jsx
+      - Status: FIXED - Errors now display correctly as strings
+      
+      **3. Admin Email Update ✅**
+      - Old email: admin@cdi-center.sa
+      - New email: medidocai@gmail.com
+      - Password: CDI@2024#Admin (unchanged)
+      - Method: Updated migration_update_users.py script
+      - Script searches for admin by old/new email or role
+      - Updates email to medidocai@gmail.com automatically
+      - File: /app/backend/migration_update_users.py
+      - Status: FIXED - Admin email updated in database
+      
+      **MIGRATION SCRIPT RESULTS:**
+      - ✅ Admin email updated to medidocai@gmail.com
+      - ✅ Password reset to CDI@2024#Admin
+      - ✅ MFA enabled for admin
+      - ✅ Database indexes created
+      - ✅ Statistics: 1 admin user, 0 supervisors, 0 users
+      
+      **TESTING STATUS:**
+      - ✅ Frontend restarted successfully
+      - ✅ Login page loads correctly (screenshot confirmed)
+      - ✅ Backend URL updated in .env
+      - ✅ MFA error handling improved
+      - ⏳ End-to-end testing needed: Login → OTP → Dashboard flow
+      
+      **NEXT STEPS:**
+      - User should test login with new admin email: medidocai@gmail.com
+      - Verify OTP email reception and verification flow
+      - Confirm dashboard access after MFA completion
+      
+  - agent: "main"
+    message: |
       🚀 **ENHANCED AI CHAT WITH FIXED QUESTIONS - IMPLEMENTATION STATUS**
       
       User requested: "ابدا بالدردشة المحسنة" (Start with enhanced chat)
