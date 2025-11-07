@@ -87,7 +87,7 @@ const MFAVerification = ({ setUser }) => {
     try {
       await axios.post(`${API}/security/mfa/send-otp?email=${encodeURIComponent(email)}`);
       toast.success(language === 'ar' ? 'تم إرسال رمز جديد' : 'New code sent successfully');
-      setTimer(600); // Reset timer
+      setTimer(900); // Reset timer to 15 minutes
       setOtpCode('');
     } catch (error) {
       toast.error(language === 'ar' ? 'فشل إرسال الرمز' : 'Failed to send code');
