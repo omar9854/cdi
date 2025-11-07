@@ -2396,6 +2396,399 @@ class MedicalCodingAPITester:
         
         return self.generate_report()
 
+    # ========== CLINICAL QUESTIONS API TESTS ==========
+    
+    def test_get_clinical_questions_arabic(self):
+        """Test GET /api/clinical-questions with language=ar"""
+        if not self.token:
+            self.log_test("Get Clinical Questions (Arabic)", False, "No authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = requests.get(
+                f"{self.api_url}/clinical-questions?language=ar",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                questions = data.get('questions', [])
+                
+                # Verify structure
+                if not questions:
+                    success = False
+                    details = "No questions returned"
+                elif len(questions) != 8:
+                    success = False
+                    details = f"Expected 8 questions, got {len(questions)}"
+                else:
+                    # Verify each question has required fields
+                    required_fields = ['id', 'category', 'question', 'prompt']
+                    first_question = questions[0]
+                    missing_fields = [field for field in required_fields if field not in first_question]
+                    
+                    if missing_fields:
+                        success = False
+                        details = f"Missing required fields: {', '.join(missing_fields)}"
+                    else:
+                        # Verify Arabic content
+                        categories = [q['category'] for q in questions]
+                        expected_categories = ['التشخيصات', 'التوثيق الناقص', 'الاستفسارات', 'DRG', 'الجودة', 'الامتثال', 'تحليل عام']
+                        
+                        details = f"Retrieved {len(questions)} Arabic questions with categories: {', '.join(set(categories))}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Get Clinical Questions (Arabic)", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Get Clinical Questions (Arabic)", False, str(e))
+            return False
+    
+    def test_get_clinical_questions_english(self):
+        """Test GET /api/clinical-questions with language=en"""
+        if not self.token:
+            self.log_test("Get Clinical Questions (English)", False, "No authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = requests.get(
+                f"{self.api_url}/clinical-questions?language=en",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                questions = data.get('questions', [])
+                
+                # Verify structure
+                if not questions:
+                    success = False
+                    details = "No questions returned"
+                elif len(questions) != 8:
+                    success = False
+                    details = f"Expected 8 questions, got {len(questions)}"
+                else:
+                    # Verify each question has required fields
+                    required_fields = ['id', 'category', 'question', 'prompt']
+                    first_question = questions[0]
+                    missing_fields = [field for field in required_fields if field not in first_question]
+                    
+                    if missing_fields:
+                        success = False
+                        details = f"Missing required fields: {', '.join(missing_fields)}"
+                    else:
+                        # Verify English content
+                        categories = [q['category'] for q in questions]
+                        expected_categories = ['Diagnoses', 'Missing Documentation', 'Queries', 'DRG', 'Quality', 'Compliance', 'General Analysis']
+                        
+                        details = f"Retrieved {len(questions)} English questions with categories: {', '.join(set(categories))}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Get Clinical Questions (English)", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Get Clinical Questions (English)", False, str(e))
+            return False
+    
+    def test_get_clinical_questions_no_auth(self):
+        """Test GET /api/clinical-questions without authentication (should fail)"""
+        try:
+            response = requests.get(
+                f"{self.api_url}/clinical-questions?language=ar",
+                timeout=10
+            )
+            success = response.status_code == 401
+            if success:
+                details = "Correctly returned 401 for unauthenticated request"
+            else:
+                details = f"Expected 401, got {response.status_code}: {response.text}"
+            
+            self.log_test("Get Clinical Questions (No Auth)", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Get Clinical Questions (No Auth)", False, str(e))
+            return False
+    
+    def test_get_clinical_categories_arabic(self):
+        """Test GET /api/clinical-questions/categories with language=ar"""
+        if not self.token:
+            self.log_test("Get Clinical Categories (Arabic)", False, "No authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = requests.get(
+                f"{self.api_url}/clinical-questions/categories?language=ar",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                categories = data.get('categories', [])
+                
+                # Verify categories
+                expected_categories = ['DRG', 'الاستفسارات', 'الامتثال', 'التشخيصات', 'التوثيق الناقص', 'الجودة', 'تحليل عام']
+                
+                if not categories:
+                    success = False
+                    details = "No categories returned"
+                else:
+                    # Check if expected categories are present
+                    missing_categories = [cat for cat in expected_categories if cat not in categories]
+                    
+                    if missing_categories:
+                        details = f"Retrieved {len(categories)} categories, missing: {', '.join(missing_categories)}"
+                    else:
+                        details = f"Retrieved {len(categories)} Arabic categories: {', '.join(categories)}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Get Clinical Categories (Arabic)", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Get Clinical Categories (Arabic)", False, str(e))
+            return False
+    
+    def test_get_clinical_categories_english(self):
+        """Test GET /api/clinical-questions/categories with language=en"""
+        if not self.token:
+            self.log_test("Get Clinical Categories (English)", False, "No authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = requests.get(
+                f"{self.api_url}/clinical-questions/categories?language=en",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                categories = data.get('categories', [])
+                
+                # Verify categories
+                expected_categories = ['Compliance', 'DRG', 'Diagnoses', 'General Analysis', 'Missing Documentation', 'Queries', 'Quality']
+                
+                if not categories:
+                    success = False
+                    details = "No categories returned"
+                else:
+                    details = f"Retrieved {len(categories)} English categories: {', '.join(categories)}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Get Clinical Categories (English)", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Get Clinical Categories (English)", False, str(e))
+            return False
+    
+    def test_ask_predefined_question(self, analysis_id):
+        """Test POST /api/chat/ask-question/{question_id}"""
+        if not self.token or not analysis_id:
+            self.log_test("Ask Predefined Question", False, "No authentication token or analysis ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            question_id = "q1"  # Test with first question
+            
+            print(f"🔄 Asking predefined question (this may take 10-30 seconds for AI response)...")
+            response = requests.post(
+                f"{self.api_url}/chat/ask-question/{question_id}?analysis_id={analysis_id}&language=ar",
+                headers=headers,
+                timeout=60  # Longer timeout for AI processing
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                
+                # Verify response structure
+                required_fields = ['question', 'answer', 'category']
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if missing_fields:
+                    success = False
+                    details = f"Missing required fields: {', '.join(missing_fields)}"
+                else:
+                    question = data.get('question', '')
+                    answer = data.get('answer', '')
+                    category = data.get('category', '')
+                    answer_length = len(answer)
+                    
+                    # Verify answer is not empty
+                    if not answer or len(answer) < 50:
+                        success = False
+                        details = f"AI answer too short or empty: {answer_length} characters"
+                    else:
+                        details = f"AI answered question '{question[:50]}...' - Category: {category}, Answer length: {answer_length} characters"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Ask Predefined Question", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Ask Predefined Question", False, str(e))
+            return False
+    
+    def test_ask_question_invalid_question_id(self, analysis_id):
+        """Test POST /api/chat/ask-question/{question_id} with invalid question ID"""
+        if not self.token or not analysis_id:
+            self.log_test("Ask Question Invalid ID", False, "No authentication token or analysis ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            invalid_question_id = "invalid_q999"
+            
+            response = requests.post(
+                f"{self.api_url}/chat/ask-question/{invalid_question_id}?analysis_id={analysis_id}&language=ar",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 404
+            if success:
+                details = "Correctly returned 404 for invalid question ID"
+            else:
+                details = f"Expected 404, got {response.status_code}: {response.text}"
+            
+            self.log_test("Ask Question Invalid ID", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Ask Question Invalid ID", False, str(e))
+            return False
+    
+    def test_ask_question_invalid_analysis_id(self):
+        """Test POST /api/chat/ask-question/{question_id} with invalid analysis ID"""
+        if not self.token:
+            self.log_test("Ask Question Invalid Analysis", False, "No authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            question_id = "q1"
+            invalid_analysis_id = "invalid-analysis-id-12345"
+            
+            response = requests.post(
+                f"{self.api_url}/chat/ask-question/{question_id}?analysis_id={invalid_analysis_id}&language=ar",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 404
+            if success:
+                details = "Correctly returned 404 for invalid analysis ID"
+            else:
+                details = f"Expected 404, got {response.status_code}: {response.text}"
+            
+            self.log_test("Ask Question Invalid Analysis", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Ask Question Invalid Analysis", False, str(e))
+            return False
+    
+    def test_ask_question_no_auth(self):
+        """Test POST /api/chat/ask-question/{question_id} without authentication"""
+        try:
+            question_id = "q1"
+            fake_analysis_id = "fake-analysis-id"
+            
+            response = requests.post(
+                f"{self.api_url}/chat/ask-question/{question_id}?analysis_id={fake_analysis_id}&language=ar",
+                timeout=10
+            )
+            success = response.status_code == 401
+            if success:
+                details = "Correctly returned 401 for unauthenticated request"
+            else:
+                details = f"Expected 401, got {response.status_code}: {response.text}"
+            
+            self.log_test("Ask Question No Auth", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Ask Question No Auth", False, str(e))
+            return False
+    
+    def run_clinical_questions_tests(self):
+        """Run comprehensive clinical questions API tests"""
+        print("\n" + "=" * 80)
+        print("🧪 CLINICAL QUESTIONS API COMPREHENSIVE TESTING")
+        print("=" * 80)
+        print("Testing Enhanced AI Chat with Fixed Clinical Questions Feature")
+        print("=" * 80)
+        
+        # Basic connectivity
+        if not self.test_health_check():
+            print("❌ Health check failed - stopping tests")
+            return self.generate_report()
+        
+        # User Authentication
+        print("\n👤 Testing User Authentication...")
+        if not self.test_user_registration():
+            print("❌ User registration failed - stopping tests")
+            return self.generate_report()
+        
+        # Create a clinical note for testing
+        print("\n📝 Creating Clinical Note for Testing...")
+        note_success, note_id = self.test_create_clinical_note()
+        if not note_success or not note_id:
+            print("❌ Failed to create clinical note - stopping tests")
+            return self.generate_report()
+        
+        # Analyze the note to get analysis_id
+        print("\n🔬 Analyzing Clinical Note...")
+        analysis_success, analysis_id = self.test_analyze_note(note_id)
+        if not analysis_success or not analysis_id:
+            print("❌ Failed to analyze note - stopping tests")
+            return self.generate_report()
+        
+        print(f"\n✅ Setup complete - Note ID: {note_id}, Analysis ID: {analysis_id}")
+        
+        # Test 1: GET /api/clinical-questions with language=ar
+        print("\n📋 Test 1: GET /api/clinical-questions (Arabic)")
+        self.test_get_clinical_questions_arabic()
+        
+        # Test 2: GET /api/clinical-questions with language=en
+        print("\n📋 Test 2: GET /api/clinical-questions (English)")
+        self.test_get_clinical_questions_english()
+        
+        # Test 3: GET /api/clinical-questions without auth
+        print("\n🔒 Test 3: GET /api/clinical-questions (No Auth)")
+        self.test_get_clinical_questions_no_auth()
+        
+        # Test 4: GET /api/clinical-questions/categories (Arabic)
+        print("\n📂 Test 4: GET /api/clinical-questions/categories (Arabic)")
+        self.test_get_clinical_categories_arabic()
+        
+        # Test 5: GET /api/clinical-questions/categories (English)
+        print("\n📂 Test 5: GET /api/clinical-questions/categories (English)")
+        self.test_get_clinical_categories_english()
+        
+        # Test 6: POST /api/chat/ask-question/{question_id} with valid data
+        print("\n💬 Test 6: POST /api/chat/ask-question/{question_id} (Valid)")
+        self.test_ask_predefined_question(analysis_id)
+        
+        # Test 7: POST /api/chat/ask-question/{question_id} with invalid question ID
+        print("\n❌ Test 7: POST /api/chat/ask-question/{question_id} (Invalid Question ID)")
+        self.test_ask_question_invalid_question_id(analysis_id)
+        
+        # Test 8: POST /api/chat/ask-question/{question_id} with invalid analysis ID
+        print("\n❌ Test 8: POST /api/chat/ask-question/{question_id} (Invalid Analysis ID)")
+        self.test_ask_question_invalid_analysis_id()
+        
+        # Test 9: POST /api/chat/ask-question/{question_id} without auth
+        print("\n🔒 Test 9: POST /api/chat/ask-question/{question_id} (No Auth)")
+        self.test_ask_question_no_auth()
+        
+        return self.generate_report()
+
     def generate_report(self):
         """Generate test report"""
         print("\n" + "=" * 60)
