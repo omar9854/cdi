@@ -73,11 +73,12 @@ const MFAVerification = ({ setUser }) => {
       toast.success(language === 'ar' ? 'تم التحقق بنجاح! مرحباً بك' : 'Verification successful! Welcome');
       navigate('/dashboard');
     } catch (error) {
-      console.error('Verification error:', error);
-      toast.error(
-        error.response?.data?.detail || 
-        (language === 'ar' ? 'رمز التحقق غير صحيح أو منتهي الصلاحية' : 'Invalid or expired OTP code')
+      logError('MFA Verification', error);
+      const errorMessage = getErrorMessage(
+        error,
+        language === 'ar' ? 'رمز التحقق غير صحيح أو منتهي الصلاحية' : 'Invalid or expired OTP code'
       );
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
