@@ -479,7 +479,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Clinical Questions API - Predefined questions for AI chat"
     - "ChatEnhanced - AI Chat with Fixed Questions and Open Chat"
   stuck_tasks: []
   test_all: false
