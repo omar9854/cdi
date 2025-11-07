@@ -1987,10 +1987,16 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
             
             # Build chat history
             for msg in previous_messages:
-                if msg['role'] == 'user':
-                    chat_history.append({'role': 'user', 'parts': [msg['message']]})
-                else:
-                    chat_history.append({'role': 'model', 'parts': [msg['message']]})
+                # Handle both open chat messages (with 'role') and predefined questions (with 'question'/'answer')
+                if 'role' in msg:
+                    if msg['role'] == 'user':
+                        chat_history.append({'role': 'user', 'parts': [msg['message']]})
+                    else:
+                        chat_history.append({'role': 'model', 'parts': [msg['message']]})
+                elif 'question' in msg and 'answer' in msg:
+                    # Predefined question format
+                    chat_history.append({'role': 'user', 'parts': [msg['question']]})
+                    chat_history.append({'role': 'model', 'parts': [msg['answer']]})
             
             # Start chat with history and retry logic
             max_retries = len(GEMINI_API_KEYS)
