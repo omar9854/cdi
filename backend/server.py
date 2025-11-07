@@ -3019,18 +3019,37 @@ async def ask_predefined_question(
             raise HTTPException(status_code=404, detail="Note not found")
         
         # Build context for AI
+        # Format doctor notes
+        doctor_notes_text = "\n\n".join([
+            f"**{dn.get('specialty', 'عام')}**:\n{dn.get('text', '')}"
+            for dn in note.get('doctor_notes', [])
+        ])
+        
+        # Format missing documentation
+        missing_docs = analysis.get('missing_documentation', [])
+        if missing_docs and isinstance(missing_docs[0], dict):
+            missing_docs_text = ', '.join([d.get('item_ar', '') for d in missing_docs])
+        else:
+            missing_docs_text = ', '.join(missing_docs) if missing_docs else 'لا يوجد'
+        
         context = f"""
 التحليل السريري:
 العنوان: {note.get('title', 'N/A')}
 
 الملاحظات السريرية:
-{note.get('notes_text', 'N/A')}
+{doctor_notes_text}
 
 التشخيصات المحددة للتوثيق:
 {', '.join([d.get('diagnosis_ar', '') for d in analysis.get('diagnoses_to_document', [])])}
 
 التوثيق الناقص:
-{', '.join(analysis.get('missing_documentation', []))}
+{missing_docs_text}
+
+الثغرات في التوثيق:
+{', '.join(analysis.get('gaps_ar', []))}
+
+الاستفسارات للطبيب:
+{', '.join(analysis.get('queries_ar', []))}
 """
         
         # Ask AI with the question's prompt
