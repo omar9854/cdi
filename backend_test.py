@@ -322,6 +322,102 @@ class MedicalCodingAPITester:
             self.log_test("Get Analyses", False, str(e))
             return False
 
+    def test_get_single_analysis(self, analysis_id):
+        """Test GET /api/analysis/{analysis_id} - Get single analysis by ID"""
+        if not self.token or not analysis_id:
+            self.log_test("Get Single Analysis", False, "No authentication token or analysis ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = requests.get(
+                f"{self.api_url}/analysis/{analysis_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                # Verify it's a single object, not an array
+                if isinstance(data, list):
+                    success = False
+                    details = "ERROR: Expected single object, got array"
+                else:
+                    # Verify note_id field exists (critical for navigation)
+                    has_note_id = 'note_id' in data
+                    has_id = 'id' in data
+                    has_user_id = 'user_id' in data
+                    has_created_at = 'created_at' in data
+                    
+                    required_fields = ['id', 'note_id', 'user_id', 'created_at']
+                    missing_fields = [field for field in required_fields if field not in data]
+                    
+                    if missing_fields:
+                        success = False
+                        details = f"Missing required fields: {', '.join(missing_fields)}"
+                    else:
+                        details = f"Retrieved single analysis - ID: {data.get('id')}, note_id: {data.get('note_id')}, has all required fields"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Get Single Analysis", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Get Single Analysis", False, str(e))
+            return False
+
+    def test_get_single_analysis_invalid_id(self):
+        """Test GET /api/analysis/{analysis_id} with invalid ID - should return 404"""
+        if not self.token:
+            self.log_test("Get Single Analysis - Invalid ID", False, "No authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            invalid_id = "invalid-analysis-id-12345"
+            response = requests.get(
+                f"{self.api_url}/analysis/{invalid_id}",
+                headers=headers,
+                timeout=10
+            )
+            # Should return 404 for invalid ID
+            success = response.status_code == 404
+            if success:
+                details = "Correctly returned 404 for invalid analysis ID"
+            else:
+                details = f"Expected 404, got {response.status_code}"
+            
+            self.log_test("Get Single Analysis - Invalid ID", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Get Single Analysis - Invalid ID", False, str(e))
+            return False
+
+    def test_get_single_analysis_no_auth(self, analysis_id):
+        """Test GET /api/analysis/{analysis_id} without authentication - should return 401"""
+        if not analysis_id:
+            self.log_test("Get Single Analysis - No Auth", False, "No analysis ID")
+            return False
+        
+        try:
+            # No authorization header
+            response = requests.get(
+                f"{self.api_url}/analysis/{analysis_id}",
+                timeout=10
+            )
+            # Should return 401 for missing auth
+            success = response.status_code == 401
+            if success:
+                details = "Correctly returned 401 for missing authentication"
+            else:
+                details = f"Expected 401, got {response.status_code}"
+            
+            self.log_test("Get Single Analysis - No Auth", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Get Single Analysis - No Auth", False, str(e))
+            return False
+
     def test_get_history(self):
         """Test retrieving analysis history"""
         if not self.token:
