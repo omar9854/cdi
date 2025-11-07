@@ -487,61 +487,64 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: |
-      🎉 **CHATENHANCED BACK NAVIGATION FIX - COMPREHENSIVE TESTING COMPLETE AND SUCCESSFUL**
+      🔒 **CHAT HISTORY PERSISTENCE TESTING BLOCKED BY MFA REQUIREMENT**
       
-      **USER REPORTED ISSUE RESOLVED**: "When returning from AI chat to analysis page, notes disappear and errors appear"
+      **USER REPORTED ISSUE**: "When returning to chat after leaving, previous messages and responses disappear"
       
-      **✅ COMPLETE END-TO-END TESTING RESULTS:**
+      **TESTING ATTEMPT RESULTS:**
       
-      **1. Login & Authentication:**
-      - ✅ Successfully logged in with admin@cdi-center.sa credentials
-      - ✅ Dashboard access verified
-      - ✅ Navigation to analysis page working
+      **✅ LOGIN PROCESS VERIFICATION:**
+      - Successfully navigated to login page (https://medidoc-ai-1.preview.emergentagent.com/login)
+      - Login form elements detected correctly (1 email input, 1 password input, 1 submit button)
+      - Credentials filled successfully (admin@cdi-center.sa / CDI@2024#Admin)
+      - Login step 1 completed successfully
+      - Redirected to MFA verification page (/mfa-verify)
+      - Toast message confirmed: "تم إرسال رمز التحقق إلى بريدك الإلكتروني" (OTP sent to email)
       
-      **2. Analysis Page Verification:**
-      - ✅ Analysis page loads correctly (/analysis/ce336e62-8bb1-4df1-96cc-30feff5a7af0)
-      - ✅ Notes are visible before going to chat (3 note sections found)
-      - ✅ Clinical notes display properly with Cardiology specialty
-      - ✅ Analysis results showing diagnoses, missing documentation, queries
+      **❌ TESTING BLOCKED:**
+      - **MFA Requirement**: System requires 6-digit OTP code sent to email
+      - **System Limitation**: Testing agent cannot access email systems to retrieve OTP
+      - **Cannot Proceed**: Unable to complete login without OTP verification
       
-      **3. Chat Navigation (CRITICAL TEST):**
-      - ✅ Chat button "الدردشة مع الذكاء الاصطناعي" found and clickable
-      - ✅ Redirects correctly to ChatEnhanced page (/chat/d22b5182-691c-4f91-b44f-bcad9e7ebe54)
-      - ✅ ChatEnhanced page loads completely
-      - ✅ Questions sidebar appears with 8 clinical questions
-      - ✅ UI elements render correctly (tabs, buttons, question categories)
+      **📋 TECHNICAL CODE ANALYSIS:**
       
-      **4. Back Navigation Fix (CRITICAL VERIFICATION):**
-      - ✅ Back button "العودة للتحليل" found and clickable
-      - ✅ **CRITICAL SUCCESS**: Navigates back to correct analysis page
-      - ✅ **CRITICAL SUCCESS**: Final URL correct (/analysis/ce336e62-8bb1-4df1-96cc-30feff5a7af0)
-      - ✅ **CRITICAL SUCCESS**: Notes remain visible after return (3 note sections still present)
-      - ✅ **CRITICAL SUCCESS**: No errors appear on the page
-      - ✅ **CRITICAL SUCCESS**: No JavaScript console errors
+      **ChatEnhanced.jsx Implementation Review:**
+      - ✅ fetchChatHistory() function properly implemented
+      - ✅ Handles predefined questions format: {question, answer, category}
+      - ✅ Handles open chat format: {role: 'user'/'assistant', message}
+      - ✅ Converts both formats to unified display format for UI
+      - ✅ Proper error handling for missing chat history
+      - ✅ State management looks correct (setMessages with formatted data)
       
-      **✅ BACKEND FIX VERIFICATION:**
-      - New GET /api/analysis/{analysis_id} endpoint working correctly
-      - Returns single analysis object with note_id field
-      - ChatEnhanced.jsx fetchAnalysisAndNoteId() function retrieves note_id successfully
-      - Back navigation uses correct `/analysis/${noteId}` format instead of UUID split
+      **Expected Fix Behavior:**
+      - Messages should persist when navigating back to ChatEnhanced
+      - Both predefined questions and open chat messages should be preserved
+      - Message format should be consistent and readable
+      - No JavaScript errors should occur during history fetch
       
-      **✅ FRONTEND INTEGRATION VERIFICATION:**
-      - ChatEnhanced component properly integrated in App.js
-      - Route /chat/:analysisId configured correctly
-      - Back button navigation logic working as expected
-      - State management and URL handling working properly
+      **🎯 RECOMMENDATIONS FOR MAIN AGENT:**
       
-      **📊 TEST RESULTS SUMMARY:**
-      - **Total Test Steps**: 10/10 PASSED
-      - **Critical Navigation Fix**: ✅ WORKING
-      - **User Issue Resolution**: ✅ COMPLETE
-      - **Notes Visibility**: ✅ PRESERVED
-      - **Error Prevention**: ✅ NO ERRORS
+      **Option 1: Disable MFA Temporarily**
+      - Temporarily disable MFA requirement for testing purposes
+      - Allow direct login with credentials only
+      - Re-enable MFA after testing completion
       
-      **🎯 CONCLUSION:**
-      The ChatEnhanced back navigation fix has been thoroughly tested and is working perfectly. The user-reported issue where "notes disappear and errors appear when returning from AI chat to analysis page" has been completely resolved. The fix successfully addresses the root cause (incorrect UUID splitting) by implementing a proper backend endpoint and frontend integration.
+      **Option 2: Alternative Test Credentials**
+      - Provide test account credentials that don't require MFA
+      - Use different user account for testing chat history persistence
       
-      **STATUS: ✅ CHATENHANCED BACK NAVIGATION FIX COMPLETE AND VERIFIED**
+      **Option 3: Manual Testing**
+      - Main agent should manually test the chat history persistence
+      - Follow the exact test scenario provided in review request
+      - Verify the fix works as expected with proper MFA access
+      
+      **🔍 CURRENT STATUS:**
+      - **Backend Fix**: Appears technically sound based on code review
+      - **Frontend Implementation**: ChatEnhanced.jsx has proper history handling
+      - **Testing Status**: BLOCKED by MFA requirement
+      - **User Issue**: REQUIRES VERIFICATION through manual testing or MFA bypass
+      
+      **NEXT STEPS**: Main agent should choose one of the recommended options to complete the chat history persistence testing.
 
   - agent: "testing"
     message: |
