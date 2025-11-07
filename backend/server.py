@@ -3056,7 +3056,17 @@ async def ask_predefined_question(
         full_prompt = f"{context}\n\n{question['prompt']}"
         
         # Use Gemini to answer
-        result = await ask_gemini_chat(full_prompt)
+        system_message = """You are a Clinical Documentation Improvement (CDI) specialist expert. 
+Answer the question based on the clinical context provided. Be detailed, professional, and provide specific recommendations.
+Respond in Arabic if the question is in Arabic, or in English if the question is in English."""
+        
+        try:
+            model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+            response = model.generate_content(full_prompt)
+            result = response.text
+        except Exception as e:
+            logger.error(f"Error generating AI response: {str(e)}")
+            raise HTTPException(status_code=500, detail="Failed to generate AI response")
         
         # Save to chat history
         chat_message = {
