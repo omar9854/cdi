@@ -43,6 +43,69 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Auto-fix admin account on startup
+async def ensure_admin_account():
+    """Automatically ensure admin account exists with correct credentials on startup"""
+    try:
+        # Check for admin account
+        admin = await db.users.find_one({'role': 'admin'})
+        
+        admin_email = "es012@hotmail.com"
+        admin_password = "CDI@2024#Admin"
+        
+        if not admin:
+            # Create admin if doesn't exist
+            print("⚠️  No admin account found - creating one...")
+            hashed = bcrypt.hashpw(admin_password.encode('utf-8'), bcrypt.gensalt())
+            
+            admin_user = {
+                'id': str(uuid.uuid4()),
+                'email': admin_email,
+                'password_hash': hashed.decode('utf-8'),
+                'full_name': 'مدير النظام - System Administrator',
+                'phone_number': '+966500000000',
+                'role': 'admin',
+                'mfa_enabled': True,
+                'is_active': True,
+                'created_at': datetime.now(timezone.utc).isoformat(),
+                'password_changed_at': datetime.now(timezone.utc).isoformat(),
+                'last_login': None,
+                'failed_login_attempts': 0,
+                'account_locked_until': None
+            }
+            
+            await db.users.insert_one(admin_user)
+            print(f"✅ Admin account created: {admin_email}")
+        
+        elif admin.get('email') != admin_email:
+            # Update admin email if different
+            print(f"⚠️  Admin email is {admin.get('email')}, updating to {admin_email}...")
+            hashed = bcrypt.hashpw(admin_password.encode('utf-8'), bcrypt.gensalt())
+            
+            await db.users.update_one(
+                {'id': admin['id']},
+                {
+                    '$set': {
+                        'email': admin_email,
+                        'password_hash': hashed.decode('utf-8'),
+                        'mfa_enabled': True,
+                        'is_active': True,
+                        'password_changed_at': datetime.now(timezone.utc).isoformat(),
+                        'failed_login_attempts': 0,
+                        'account_locked_until': None
+                    },
+                    '$unset': {'password': ''}
+                }
+            )
+            print(f"✅ Admin account updated: {admin_email}")
+        
+        # Clean up old data
+        await db.otp_records.delete_many({'created_at': {'$lt': (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()}})
+        await db.login_attempts.delete_many({'timestamp': {'$lt': (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()}})
+        
+    except Exception as e:
+        print(f"❌ Error ensuring admin account: {e}")
+
 # Create the main app
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
