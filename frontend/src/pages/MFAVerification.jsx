@@ -31,8 +31,8 @@ const MFAVerification = ({ setUser }) => {
       return;
     }
 
-    // Countdown timer (15 minutes = 900 seconds)
-    setTimer(900);
+    // Countdown timer (30 minutes = 1800 seconds)
+    setTimer(1800);
     const interval = setInterval(() => {
       setTimer((prev) => {
         if (prev <= 1) {
