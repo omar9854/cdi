@@ -755,8 +755,7 @@ async def login_step1(credentials: UserLogin):
             raise HTTPException(status_code=403, detail="Account is locked. Please contact support.")
         
         # Check if MFA is enabled (default: true for security)
-        # TEMPORARY: Disable MFA for testing purposes
-        mfa_enabled = False  # user.get('mfa_enabled', True)
+        mfa_enabled = user.get('mfa_enabled', True)
         
         if mfa_enabled:
             # Generate and send OTP
