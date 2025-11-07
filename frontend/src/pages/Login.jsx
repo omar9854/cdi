@@ -51,8 +51,7 @@ const Login = ({ setUser }) => {
         navigate('/dashboard');
       }
     } catch (error) {
-      // Handle errors
-      const backendMessage = error.response?.data?.detail;
+      // Handle errors safely
       let errorMessage;
       
       if (error.response?.status === 429) {
@@ -68,7 +67,9 @@ const Login = ({ setUser }) => {
           ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' 
           : 'Invalid email or password';
       } else {
-        errorMessage = backendMessage || (language === 'ar' ? 'حدث خطأ في تسجيل الدخول' : 'Login error');
+        // Use error handler to safely extract message
+        const defaultMsg = language === 'ar' ? 'حدث خطأ في تسجيل الدخول' : 'Login error';
+        errorMessage = getErrorMessage(error, defaultMsg);
       }
       
       toast.error(errorMessage, {
