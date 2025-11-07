@@ -2263,6 +2263,389 @@ class MedicalCodingAPITester:
             self.log_test("Upload CDI Data", False, error_msg)
             return False
 
+
+    # ========== ENHANCED AI CHAT TESTS (FIX 1 & FIX 2) ==========
+    
+    def test_predefined_question_concise_answer(self, analysis_id, language="ar"):
+        """Test POST /api/chat/ask-question/{question_id} with concise answer verification"""
+        if not self.token or not analysis_id:
+            self.log_test("Predefined Question Concise Answer", False, "No authentication token or analysis ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            question_id = "q1"  # First predefined question
+            
+            print(f"\n🔄 Testing predefined question {question_id} (this may take 10-30 seconds)...")
+            response = requests.post(
+                f"{self.api_url}/chat/ask-question/{question_id}",
+                params={"analysis_id": analysis_id, "language": language},
+                headers=headers,
+                timeout=60
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                question = data.get('question', '')
+                answer = data.get('answer', '')
+                category = data.get('category', '')
+                
+                # Verify response structure
+                has_question = bool(question)
+                has_answer = bool(answer)
+                has_category = bool(category)
+                
+                # Check answer conciseness (should not be excessively long)
+                answer_length = len(answer)
+                # Count bullet points or paragraphs
+                bullet_count = answer.count('•') + answer.count('-') + answer.count('*')
+                paragraph_count = answer.count('\n\n') + 1
+                
+                # Verify conciseness: answer should be focused and not too verbose
+                is_concise = answer_length < 2000  # Reasonable limit for concise answer
+                
+                details = f"Question: '{question[:50]}...', Answer length: {answer_length} chars, Bullets/items: {bullet_count}, Paragraphs: {paragraph_count}, Concise: {is_concise}, Category: {category}"
+                
+                if not is_concise:
+                    details += f" ⚠️ WARNING: Answer may be too long ({answer_length} chars)"
+                
+                success = has_question and has_answer and has_category
+                
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Predefined Question Concise Answer", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Predefined Question Concise Answer", False, str(e))
+            return False
+    
+    def test_open_chat_endpoint(self, analysis_id):
+        """Test POST /api/chat/{analysis_id} with {question: str} format"""
+        if not self.token or not analysis_id:
+            self.log_test("Open Chat Endpoint", False, "No authentication token or analysis ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            question_data = {
+                "question": "ما هي التشخيصات الرئيسية؟"
+            }
+            
+            print(f"\n🔄 Testing open chat endpoint (this may take 10-30 seconds)...")
+            response = requests.post(
+                f"{self.api_url}/chat/{analysis_id}",
+                json=question_data,
+                headers=headers,
+                timeout=60
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                question = data.get('question', '')
+                answer = data.get('answer', '')
+                
+                # Verify response format matches ChatEnhanced.jsx expectations
+                has_question = bool(question)
+                has_answer = bool(answer)
+                correct_format = 'question' in data and 'answer' in data
+                
+                # Check answer conciseness (should be 3-4 sentences max for open chat)
+                answer_length = len(answer)
+                sentence_count = answer.count('.') + answer.count('؟') + answer.count('!')
+                
+                # Verify conciseness for open chat
+                is_concise = answer_length < 1000  # Open chat should be even more concise
+                
+                details = f"Question: '{question}', Answer length: {answer_length} chars, Sentences: ~{sentence_count}, Concise: {is_concise}, Format correct: {correct_format}"
+                
+                if not is_concise:
+                    details += f" ⚠️ WARNING: Answer may be too long for open chat ({answer_length} chars, should be ~3-4 sentences)"
+                
+                success = has_question and has_answer and correct_format
+                
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Open Chat Endpoint", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Open Chat Endpoint", False, str(e))
+            return False
+    
+    def test_open_chat_english_question(self, analysis_id):
+        """Test POST /api/chat/{analysis_id} with English question"""
+        if not self.token or not analysis_id:
+            self.log_test("Open Chat English Question", False, "No authentication token or analysis ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            question_data = {
+                "question": "What are the main diagnoses?"
+            }
+            
+            print(f"\n🔄 Testing open chat with English question (this may take 10-30 seconds)...")
+            response = requests.post(
+                f"{self.api_url}/chat/{analysis_id}",
+                json=question_data,
+                headers=headers,
+                timeout=60
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                answer = data.get('answer', '')
+                answer_length = len(answer)
+                
+                # Verify answer is in English (basic check)
+                has_english = any(char.isascii() and char.isalpha() for char in answer)
+                
+                details = f"English question answered, Answer length: {answer_length} chars, Contains English: {has_english}"
+                success = has_english and answer_length > 0
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Open Chat English Question", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Open Chat English Question", False, str(e))
+            return False
+    
+    def test_chat_history_verification(self, analysis_id):
+        """Test GET /api/chat/{analysis_id} - verify messages are saved"""
+        if not self.token or not analysis_id:
+            self.log_test("Chat History Verification", False, "No authentication token or analysis ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            response = requests.get(
+                f"{self.api_url}/chat/{analysis_id}",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                messages = response.json()
+                message_count = len(messages)
+                
+                # Verify messages have correct structure
+                if messages:
+                    first_msg = messages[0]
+                    has_required_fields = all(field in first_msg for field in ['id', 'analysis_id', 'user_id', 'created_at'])
+                    
+                    # Check for both predefined and open chat messages
+                    has_question_field = any('question' in msg for msg in messages)
+                    has_role_field = any('role' in msg for msg in messages)
+                    
+                    details = f"Retrieved {message_count} messages, Has required fields: {has_required_fields}, Has question field: {has_question_field}, Has role field: {has_role_field}"
+                    success = has_required_fields and message_count > 0
+                else:
+                    details = "No messages found in chat history"
+                    success = False
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Chat History Verification", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Chat History Verification", False, str(e))
+            return False
+    
+    def test_chat_invalid_analysis_id(self):
+        """Test POST /api/chat/{analysis_id} with invalid analysis_id (should return 404)"""
+        if not self.token:
+            self.log_test("Chat Invalid Analysis ID", False, "No authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            invalid_analysis_id = "invalid-analysis-id-12345"
+            question_data = {
+                "question": "Test question"
+            }
+            
+            response = requests.post(
+                f"{self.api_url}/chat/{invalid_analysis_id}",
+                json=question_data,
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 404
+            if success:
+                details = "Correctly returned 404 for invalid analysis_id"
+            else:
+                details = f"Expected 404, got {response.status_code}: {response.text}"
+            
+            self.log_test("Chat Invalid Analysis ID", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Chat Invalid Analysis ID", False, str(e))
+            return False
+    
+    def test_chat_without_auth(self, analysis_id):
+        """Test POST /api/chat/{analysis_id} without authentication (should return 401)"""
+        if not analysis_id:
+            self.log_test("Chat Without Auth", False, "No analysis ID")
+            return False
+        
+        try:
+            question_data = {
+                "question": "Test question"
+            }
+            
+            response = requests.post(
+                f"{self.api_url}/chat/{analysis_id}",
+                json=question_data,
+                timeout=10
+            )
+            success = response.status_code == 401
+            if success:
+                details = "Correctly returned 401 for missing authentication"
+            else:
+                details = f"Expected 401, got {response.status_code}: {response.text}"
+            
+            self.log_test("Chat Without Auth", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Chat Without Auth", False, str(e))
+            return False
+    
+    def test_chat_empty_question(self, analysis_id):
+        """Test POST /api/chat/{analysis_id} with empty question (should return 400)"""
+        if not self.token or not analysis_id:
+            self.log_test("Chat Empty Question", False, "No authentication token or analysis ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            question_data = {
+                "question": ""
+            }
+            
+            response = requests.post(
+                f"{self.api_url}/chat/{analysis_id}",
+                json=question_data,
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 400
+            if success:
+                details = "Correctly returned 400 for empty question"
+            else:
+                details = f"Expected 400, got {response.status_code}: {response.text}"
+            
+            self.log_test("Chat Empty Question", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Chat Empty Question", False, str(e))
+            return False
+    
+    def test_predefined_question_invalid_id(self, analysis_id):
+        """Test POST /api/chat/ask-question/{question_id} with invalid question_id (should return 404)"""
+        if not self.token or not analysis_id:
+            self.log_test("Predefined Question Invalid ID", False, "No authentication token or analysis ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.token}"}
+            invalid_question_id = "invalid_q999"
+            
+            response = requests.post(
+                f"{self.api_url}/chat/ask-question/{invalid_question_id}",
+                params={"analysis_id": analysis_id, "language": "ar"},
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 404
+            if success:
+                details = "Correctly returned 404 for invalid question_id"
+            else:
+                details = f"Expected 404, got {response.status_code}: {response.text}"
+            
+            self.log_test("Predefined Question Invalid ID", success, details)
+            return success
+        except Exception as e:
+            self.log_test("Predefined Question Invalid ID", False, str(e))
+            return False
+    
+    def run_enhanced_chat_tests(self):
+        """Run comprehensive tests for Enhanced AI Chat with FIX 1 and FIX 2"""
+        print("\n" + "=" * 80)
+        print("🎯 ENHANCED AI CHAT TESTING - FIX 1 & FIX 2")
+        print("=" * 80)
+        print("Testing:")
+        print("  FIX 1: Concise Answers (5-7 bullets for predefined, 3-4 sentences for open)")
+        print("  FIX 2: Open Chat Endpoint POST /api/chat/{analysis_id} with {question: str}")
+        print("=" * 80)
+        
+        # Step 1: Login as existing user or create new one
+        print("\n👤 Step 1: User Authentication...")
+        if not self.token:
+            if not self.test_user_login():
+                if not self.test_user_registration():
+                    print("❌ Failed to authenticate user - stopping Enhanced Chat tests")
+                    return False
+                if not self.test_user_login():
+                    print("❌ Failed to login after registration - stopping Enhanced Chat tests")
+                    return False
+        
+        # Step 2: Create a clinical note
+        print("\n📝 Step 2: Creating Clinical Note...")
+        note_success, note_id = self.test_create_clinical_note()
+        if not note_success or not note_id:
+            print("❌ Failed to create clinical note - stopping Enhanced Chat tests")
+            return False
+        
+        # Step 3: Analyze the note to get analysis_id
+        print("\n🔬 Step 3: Analyzing Clinical Note...")
+        analysis_success, analysis_id = self.test_analyze_note(note_id)
+        if not analysis_success or not analysis_id:
+            print("❌ Failed to analyze note - stopping Enhanced Chat tests")
+            return False
+        
+        print(f"\n✅ Setup complete - Analysis ID: {analysis_id}")
+        
+        # Step 4: Test Predefined Question with Concise Answer (FIX 1)
+        print("\n" + "=" * 80)
+        print("📋 TEST 1: Predefined Question with Concise Answer (FIX 1)")
+        print("=" * 80)
+        self.test_predefined_question_concise_answer(analysis_id, language="ar")
+        
+        # Step 5: Test Open Chat Endpoint (FIX 2)
+        print("\n" + "=" * 80)
+        print("💬 TEST 2: Open Chat Endpoint with Correct Format (FIX 2)")
+        print("=" * 80)
+        self.test_open_chat_endpoint(analysis_id)
+        
+        # Step 6: Test Open Chat with English Question
+        print("\n" + "=" * 80)
+        print("🌐 TEST 3: Open Chat with English Question")
+        print("=" * 80)
+        self.test_open_chat_english_question(analysis_id)
+        
+        # Step 7: Verify Chat History
+        print("\n" + "=" * 80)
+        print("📜 TEST 4: Chat History Verification")
+        print("=" * 80)
+        self.test_chat_history_verification(analysis_id)
+        
+        # Step 8: Error Handling Tests
+        print("\n" + "=" * 80)
+        print("⚠️ TEST 5: Error Handling")
+        print("=" * 80)
+        self.test_chat_invalid_analysis_id()
+        self.test_chat_without_auth(analysis_id)
+        self.test_chat_empty_question(analysis_id)
+        self.test_predefined_question_invalid_id(analysis_id)
+        
+        print("\n" + "=" * 80)
+        print("✅ ENHANCED AI CHAT TESTING COMPLETE")
+        print("=" * 80)
+        
+        return True
+
     def run_all_tests(self):
         """Run all API tests including Admin and Supervisor functionality"""
         print("🚀 Starting CDI Medical Application API Tests")
