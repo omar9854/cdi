@@ -272,7 +272,7 @@ const EditNote = ({ user, onLogout }) => {
                 <Button
                   type="submit"
                   className="flex-1 medical-blue text-white py-6 text-lg font-semibold"
-                  disabled={saving}
+                  disabled={saving || analyzing}
                   data-testid="save-note-button"
                 >
                   {saving ? (
@@ -284,6 +284,25 @@ const EditNote = ({ user, onLogout }) => {
                     <>
                       {language === 'ar' ? <Save className="ml-2" /> : <Save className="mr-2" />}
                       {language === 'ar' ? 'حفظ التعديلات' : 'Save Changes'}
+                    </>
+                  )}
+                </Button>
+                
+                <Button
+                  type="button"
+                  onClick={handleSaveAndAnalyze}
+                  className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-6 text-lg font-semibold"
+                  disabled={saving || analyzing}
+                  data-testid="save-and-analyze-button"
+                >
+                  {analyzing ? (
+                    <>
+                      <Loader2 className={`animate-spin ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                      {language === 'ar' ? 'جاري إعادة التحليل...' : 'Reanalyzing...'}
+                    </>
+                  ) : (
+                    <>
+                      {language === 'ar' ? '💡 حفظ وإعادة التحليل' : '💡 Save & Reanalyze'}
                     </>
                   )}
                 </Button>
