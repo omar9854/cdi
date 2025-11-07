@@ -509,7 +509,7 @@ Perform a Clinical Documentation Improvement review and provide:
 
 3. **Documentation Gaps**: What gaps exist in the current documentation?
 
-4. **Physician Queries**: What specific questions should be asked to the physicians to improve documentation?
+4. **Physician Queries**: Generate queries to physicians to improve documentation. CRITICAL: DO NOT include specific diagnosis names or diagnosis options in queries. Use generic terms only. Format each query as: "Based on your clinical judgment, please document: [the specific aspect needed]" or "Please clarify: [the clinical detail needed]" or "Please specify the type/severity/cause of: [general clinical finding]"
 
 5. **Recommendations**: Specific recommendations to improve the clinical documentation quality
 
