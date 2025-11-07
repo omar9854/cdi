@@ -2960,6 +2960,107 @@ async def impersonate_user(
         }
     }
 
+# ========== Clinical Questions Routes ==========
+# Import clinical questions
+try:
+    from clinical_questions import get_questions, get_question_by_id, get_categories
+    print("✅ Clinical questions loaded successfully")
+except Exception as e:
+    print(f"⚠️ Warning: Could not load clinical questions: {str(e)}")
+
+@api_router.get("/clinical-questions")
+async def get_clinical_questions(language: str = "ar", user: dict = Depends(get_current_user)):
+    """Get all predefined clinical questions"""
+    try:
+        questions = get_questions(language)
+        return {"questions": questions}
+    except Exception as e:
+        print(f"Error getting questions: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get questions")
+
+@api_router.get("/clinical-questions/categories")
+async def get_question_categories(language: str = "ar", user: dict = Depends(get_current_user)):
+    """Get question categories"""
+    try:
+        categories = get_categories(language)
+        return {"categories": categories}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to get categories")
+
+@api_router.post("/chat/ask-question/{question_id}")
+async def ask_predefined_question(
+    question_id: str,
+    analysis_id: str,
+    language: str = "ar",
+    user: dict = Depends(get_current_user)
+):
+    """Ask a predefined clinical question about an analysis"""
+    try:
+        # Get the question
+        question = get_question_by_id(question_id, language)
+        if not question:
+            raise HTTPException(status_code=404, detail="Question not found")
+        
+        # Get the analysis
+        analysis = await db.analyses.find_one(
+            {"id": analysis_id, "user_id": user['id']},
+            {"_id": 0}
+        )
+        if not analysis:
+            raise HTTPException(status_code=404, detail="Analysis not found")
+        
+        # Get the note
+        note = await db.clinical_notes.find_one(
+            {"id": analysis['note_id'], "user_id": user['id']},
+            {"_id": 0}
+        )
+        if not note:
+            raise HTTPException(status_code=404, detail="Note not found")
+        
+        # Build context for AI
+        context = f"""
+التحليل السريري:
+العنوان: {note.get('title', 'N/A')}
+
+الملاحظات السريرية:
+{note.get('notes_text', 'N/A')}
+
+التشخيصات المحددة للتوثيق:
+{', '.join([d.get('diagnosis_ar', '') for d in analysis.get('diagnoses_to_document', [])])}
+
+التوثيق الناقص:
+{', '.join(analysis.get('missing_documentation', []))}
+"""
+        
+        # Ask AI with the question's prompt
+        full_prompt = f"{context}\n\n{question['prompt']}"
+        
+        # Use Gemini to answer
+        result = await ask_gemini_chat(full_prompt)
+        
+        # Save to chat history
+        chat_message = {
+            "id": str(uuid.uuid4()),
+            "analysis_id": analysis_id,
+            "user_id": user['id'],
+            "question": question['question'],
+            "question_id": question_id,
+            "answer": result,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.chat_messages.insert_one(chat_message)
+        
+        return {
+            "question": question['question'],
+            "answer": result,
+            "category": question['category']
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error asking question: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to process question")
 
 # ========== Include Routers ==========
 app.include_router(api_router)
