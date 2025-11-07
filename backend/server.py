@@ -179,6 +179,10 @@ class Token(BaseModel):
     token_type: str
     user: Dict
 
+class OTPVerification(BaseModel):
+    email: EmailStr
+    otp_code: str
+
 class DoctorNote(BaseModel):
     text: str
     specialty: Optional[str] = None
