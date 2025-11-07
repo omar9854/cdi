@@ -759,7 +759,7 @@ async def login_step1(credentials: UserLogin):
         if mfa_enabled:
             # Generate and send OTP
             otp_code = generate_otp()
-            expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+            expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
             
             # Save OTP to database
             otp_doc = {
