@@ -24,6 +24,7 @@ const EditNote = ({ user, onLogout }) => {
   const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
 
   useEffect(() => {
     fetchSpecialties();
