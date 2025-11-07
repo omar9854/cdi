@@ -235,7 +235,7 @@ async def main():
     print("=" * 60)
     print()
     print("📋 معلومات تسجيل الدخول:")
-    print("   Email: medidocai@gmail.com")
+    print("   Email: ES012@HOTMAIL.COM")
     print("   Password: CDI@2024#Admin")
     print()
     
