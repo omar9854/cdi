@@ -83,7 +83,7 @@ const EditNote = ({ user, onLogout }) => {
     setDoctorNotes(newNotes);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, reanalyze = false) => {
     e.preventDefault();
     
     // Validate
@@ -98,11 +98,17 @@ const EditNote = ({ user, onLogout }) => {
       return;
     }
     
-    setSaving(true);
+    if (reanalyze) {
+      setAnalyzing(true);
+    } else {
+      setSaving(true);
+    }
 
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.put(
+      
+      // Update note
+      await axios.put(
         `${API}/notes/${noteId}`,
         {
           title,
@@ -111,14 +117,33 @@ const EditNote = ({ user, onLogout }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      toast.success(language === 'ar' ? 'تم تحديث الملاحظة بنجاح' : 'Note updated successfully');
+      if (reanalyze) {
+        // Reanalyze note
+        toast.info(language === 'ar' ? 'جاري إعادة التحليل...' : 'Reanalyzing...');
+        
+        const analyzeResponse = await axios.post(
+          `${API}/analysis/reanalyze/${noteId}`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        
+        toast.success(language === 'ar' ? 'تم تحديث الملاحظة وإعادة التحليل بنجاح' : 'Note updated and reanalyzed successfully');
+      } else {
+        toast.success(language === 'ar' ? 'تم تحديث الملاحظة بنجاح' : 'Note updated successfully');
+      }
+      
       navigate(`/analysis/${noteId}`);
     } catch (error) {
       console.error('Error updating note:', error);
       toast.error(language === 'ar' ? 'فشل تحديث الملاحظة' : 'Failed to update note');
     } finally {
       setSaving(false);
+      setAnalyzing(false);
     }
+  };
+  
+  const handleSaveAndAnalyze = (e) => {
+    handleSubmit(e, true);
   };
 
   if (loading) {
