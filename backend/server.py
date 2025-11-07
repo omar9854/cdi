@@ -728,15 +728,16 @@ async def login_step1(credentials: UserLogin):
         
         print(f"LOGIN DEBUG: User fields: {list(user.keys())}")
         
-        # Check if password field exists
-        if 'password' not in user:
+        # Check if password field exists (support both 'password' and 'password_hash')
+        password_field = 'password' if 'password' in user else 'password_hash'
+        if password_field not in user:
             print("LOGIN DEBUG: Password field missing!")
             raise HTTPException(status_code=500, detail="User account error - please contact support")
         
-        print(f"LOGIN DEBUG: Verifying password...")
+        print(f"LOGIN DEBUG: Verifying password using field: {password_field}...")
         
         # Check if password is correct
-        if not verify_password(credentials.password, user['password']):
+        if not verify_password(credentials.password, user[password_field]):
             print("LOGIN DEBUG: Password verification failed")
             # Record failed attempt
             await record_login_attempt(db, credentials.email, False)
