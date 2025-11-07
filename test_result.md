@@ -407,6 +407,39 @@ frontend:
         agent: "main"
         comment: "Added /supervisor route in App.js accessible to both supervisors and admins. Added Supervisor navigation link in Navbar for users with supervisor or admin role."
 
+  - task: "Clinical Questions API - Predefined questions for AI chat"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/backend/server.py"
+      - "/app/backend/clinical_questions.py"
+    endpoints:
+      - "GET /api/clinical-questions" (language param)
+      - "GET /api/clinical-questions/categories" (language param)
+      - "POST /api/chat/ask-question/{question_id}" (analysis_id, language params)
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Backend endpoints already implemented. GET /api/clinical-questions returns predefined clinical questions in Arabic/English from clinical_questions.py. 8 specialized questions covering: Diagnoses, Missing Documentation, Queries, DRG, Quality, Compliance, General Analysis. POST /api/chat/ask-question/{question_id} accepts predefined question, retrieves analysis context, uses Gemini to generate detailed answer based on question's prompt template, saves to chat history. Needs comprehensive testing."
+
+frontend:
+  - task: "ChatEnhanced - AI Chat with Fixed Questions and Open Chat"
+    implemented: true
+    working: "NA"
+    files:
+      - "/app/frontend/src/pages/ChatEnhanced.jsx"
+      - "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "ChatEnhanced.jsx already created with: Quick Questions sidebar (loads from /api/clinical-questions), categorized questions with color coding and icons, click to ask predefined questions, Open Chat tab for custom questions, message history display with AI responses, smooth UI with loading states. Already integrated in App.js at line 15 (import Chat from '@/pages/ChatEnhanced'). Route already configured at line 73. Ready for end-to-end testing with real user workflow."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
@@ -415,7 +448,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Supervisor Dashboard - CDI Analysis Tool"
+    - "Clinical Questions API - Predefined questions for AI chat"
+    - "ChatEnhanced - AI Chat with Fixed Questions and Open Chat"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
