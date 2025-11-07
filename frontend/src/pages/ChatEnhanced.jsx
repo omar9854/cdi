@@ -226,7 +226,7 @@ const ChatEnhanced = ({ user, onLogout }) => {
         <div className="mb-6">
           <Button 
             variant="ghost" 
-            onClick={() => navigate(`/analysis/${analysisId.split('-')[0]}`)} 
+            onClick={() => navigate(noteId ? `/analysis/${noteId}` : '/dashboard')} 
             className="mb-4"
           >
             {language === 'ar' ? <ArrowRight className="ml-2" /> : <ArrowRight className="mr-2" />}
