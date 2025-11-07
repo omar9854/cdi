@@ -134,7 +134,7 @@ async def main():
         print(f"   🔑 Password: {new_password}")
         
         # حذف جميع login attempts للأدمن
-        await db.login_attempts.delete_many({'email': {'$in': ['ES012@HOTMAIL.COM', old_email]}})
+        await db.login_attempts.delete_many({'email': {'$in': ['es012@hotmail.com', old_email]}})
         print(f"   ✅ تم حذف login attempts")
     else:
         # إنشاء حساب Admin جديد
