@@ -12,7 +12,7 @@ import NewNote from '@/pages/NewNote';
 import EditNote from '@/pages/EditNote';
 import Analysis from '@/pages/Analysis';
 import History from '@/pages/History';
-import Chat from '@/pages/Chat';
+import Chat from '@/pages/ChatEnhanced';
 import AdminDashboard from '@/pages/AdminDashboard';
 import SupervisorDashboard from '@/pages/SupervisorDashboard';
 import Messages from '@/pages/Messages';
