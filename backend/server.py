@@ -891,7 +891,7 @@ async def login_step2(request: Request, credentials: OTPVerification):
             raise HTTPException(status_code=404, detail="User not found")
         
         # Record successful login
-        await record_login_attempt(db, email, True)
+        await record_login_attempt(db, credentials.email, True)
         
         # Create session
         token = create_access_token({
