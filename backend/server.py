@@ -2131,6 +2131,144 @@ async def download_security_documentation():
         media_type="text/markdown"
     )
 
+@api_router.post("/admin/backup/create")
+async def create_backup(backup_key: str = Header(None, alias="X-Backup-Key")):
+    """
+    Create database backup (for cron jobs)
+    Requires X-Backup-Key header for security
+    """
+    import subprocess
+    import json
+    
+    # Verify backup key
+    BACKUP_KEY = os.environ.get('BACKUP_KEY', 'change-this-backup-key-in-production')
+    if backup_key != BACKUP_KEY:
+        raise HTTPException(status_code=403, detail="Invalid backup key")
+    
+    try:
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        backup_dir = "/app/backups"
+        os.makedirs(backup_dir, exist_ok=True)
+        
+        backup_file = f"{backup_dir}/backup_{timestamp}.json"
+        
+        # Export all collections
+        collections_to_backup = [
+            "users",
+            "clinical_notes", 
+            "analyses",
+            "chat_messages",
+            "audit_logs",
+            "login_attempts",
+            "otp_records",
+            "user_sessions",
+            "password_history",
+            "messages"
+        ]
+        
+        backup_data = {}
+        for collection_name in collections_to_backup:
+            collection = db[collection_name]
+            documents = await collection.find({}, {"_id": 0}).to_list(None)
+            
+            # Convert datetime objects to ISO strings
+            for doc in documents:
+                for key, value in doc.items():
+                    if isinstance(value, datetime):
+                        doc[key] = value.isoformat()
+            
+            backup_data[collection_name] = documents
+        
+        # Save to file
+        with open(backup_file, 'w', encoding='utf-8') as f:
+            json.dump(backup_data, f, ensure_ascii=False, indent=2)
+        
+        # Get file size
+        file_size = os.path.getsize(backup_file)
+        
+        # Log backup creation
+        await db.audit_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": "system",
+            "email": "system",
+            "action": "backup_created",
+            "resource_type": "system",
+            "resource_id": backup_file,
+            "ip_address": "cron-job",
+            "user_agent": "automated-backup",
+            "status": "success",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "details": {
+                "collections_backed_up": len(collections_to_backup),
+                "total_documents": sum(len(docs) for docs in backup_data.values()),
+                "file_size_mb": round(file_size / (1024 * 1024), 2)
+            }
+        })
+        
+        return {
+            "success": True,
+            "backup_file": backup_file,
+            "timestamp": timestamp,
+            "collections": len(collections_to_backup),
+            "total_documents": sum(len(docs) for docs in backup_data.values()),
+            "file_size_mb": round(file_size / (1024 * 1024), 2)
+        }
+        
+    except Exception as e:
+        logging.error(f"Backup creation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Backup failed: {str(e)}")
+
+@api_router.get("/admin/backup/list")
+async def list_backups(user: dict = Depends(get_current_user)):
+    """List all available backups (Admin only)"""
+    if user.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        backup_dir = "/app/backups"
+        if not os.path.exists(backup_dir):
+            return {"backups": []}
+        
+        backups = []
+        for filename in sorted(os.listdir(backup_dir), reverse=True):
+            if filename.startswith("backup_") and filename.endswith(".json"):
+                filepath = os.path.join(backup_dir, filename)
+                file_size = os.path.getsize(filepath)
+                file_time = os.path.getmtime(filepath)
+                
+                backups.append({
+                    "filename": filename,
+                    "size_mb": round(file_size / (1024 * 1024), 2),
+                    "created_at": datetime.fromtimestamp(file_time).isoformat(),
+                    "download_url": f"/api/admin/backup/download/{filename}"
+                })
+        
+        return {"backups": backups}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/admin/backup/download/{filename}")
+async def download_backup(filename: str, user: dict = Depends(get_current_user)):
+    """Download specific backup file (Admin only)"""
+    if user.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Security: only allow backup files
+    if not filename.startswith("backup_") or not filename.endswith(".json"):
+        raise HTTPException(status_code=400, detail="Invalid backup filename")
+    
+    filepath = f"/app/backups/{filename}"
+    
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="Backup file not found")
+    
+    return FileResponse(
+        path=filepath,
+        filename=filename,
+        media_type="application/json"
+    )
+
 @api_router.get("/export/excel/{analysis_id}")
 async def export_excel(analysis_id: str, user: dict = Depends(get_current_user)):
     analysis = await db.analyses.find_one(
