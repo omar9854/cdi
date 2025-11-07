@@ -409,7 +409,7 @@ frontend:
 
   - task: "Clinical Questions API - Predefined questions for AI chat"
     implemented: true
-    working: "NA"
+    working: true
     files:
       - "/app/backend/server.py"
       - "/app/backend/clinical_questions.py"
@@ -419,11 +419,14 @@ frontend:
       - "POST /api/chat/ask-question/{question_id}" (analysis_id, language params)
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Backend endpoints already implemented. GET /api/clinical-questions returns predefined clinical questions in Arabic/English from clinical_questions.py. 8 specialized questions covering: Diagnoses, Missing Documentation, Queries, DRG, Quality, Compliance, General Analysis. POST /api/chat/ask-question/{question_id} accepts predefined question, retrieves analysis context, uses Gemini to generate detailed answer based on question's prompt template, saves to chat history. Needs comprehensive testing."
+      - working: true
+        agent: "testing"
+        comment: "✅ ALL CLINICAL QUESTIONS API ENDPOINTS WORKING PERFECTLY (13/13 tests passed, 100% success rate). CRITICAL FIX APPLIED: Moved clinical questions route definitions before app.include_router() to ensure proper registration. Fixed login password field bug (password vs password_hash). Fixed context building for AI questions (missing_documentation dict handling). COMPREHENSIVE TESTING RESULTS: ✅ GET /api/clinical-questions?language=ar - Returns 8 Arabic questions with correct structure (id, category, question, prompt). ✅ GET /api/clinical-questions?language=en - Returns 8 English questions with correct structure. ✅ GET /api/clinical-questions (No Auth) - Correctly returns 401 Unauthorized. ✅ GET /api/clinical-questions/categories?language=ar - Returns 7 Arabic categories (DRG, الاستفسارات, الامتثال, التشخيصات, التوثيق الناقص, الجودة, تحليل عام). ✅ GET /api/clinical-questions/categories?language=en - Returns 7 English categories. ✅ POST /api/chat/ask-question/q1 with valid analysis_id - AI successfully generates detailed response using Gemini, saves to chat_messages collection, returns proper structure (question, answer, category). ✅ POST /api/chat/ask-question with invalid question_id - Correctly returns 404. ✅ POST /api/chat/ask-question with invalid analysis_id - Correctly returns 404. ✅ POST /api/chat/ask-question (No Auth) - Correctly returns 401. All endpoints return proper status codes, error messages, and response structures. AI integration with Gemini working correctly with automatic API key rotation. Chat history properly saved to database."
 
 frontend:
   - task: "ChatEnhanced - AI Chat with Fixed Questions and Open Chat"
