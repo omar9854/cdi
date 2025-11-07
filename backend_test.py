@@ -2729,14 +2729,11 @@ class MedicalCodingAPITester:
             print("❌ Health check failed - stopping tests")
             return self.generate_report()
         
-        # Admin Authentication (use admin to create notes and test)
-        print("\n👑 Testing Admin Authentication...")
-        if not self.test_admin_login():
-            print("❌ Admin login failed - stopping tests")
+        # User Authentication (use test user with MFA disabled)
+        print("\n👤 Testing User Authentication...")
+        if not self.test_user_login():
+            print("❌ User login failed - stopping tests")
             return self.generate_report()
-        
-        # Use admin token for testing
-        self.token = self.admin_token
         
         # Create a clinical note for testing
         print("\n📝 Creating Clinical Note for Testing...")
