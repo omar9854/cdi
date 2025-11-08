@@ -500,7 +500,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "ChatEnhanced - AI Chat with Fixed Questions and Open Chat"
+    - "Gemini API Keys System - 5-Key Rotation for Enhanced Capacity"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
