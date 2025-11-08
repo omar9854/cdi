@@ -14,7 +14,7 @@ import pandas as pd
 from openpyxl import Workbook
 
 class MedicalCodingAPITester:
-    def __init__(self, base_url="https://medidoc-query.preview.emergentagent.com"):
+    def __init__(self, base_url="https://medidoc-ai.emergent.host"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.token = None
