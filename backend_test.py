@@ -2905,6 +2905,8 @@ class MedicalCodingAPITester:
         
         # Step 2: Create a medical note for analysis
         print("\n2️⃣ Creating medical note for AI analysis...")
+        # Use admin token for note creation
+        self.token = self.admin_token
         note_success, note_id = self.test_create_clinical_note()
         
         if not note_success or not note_id:
