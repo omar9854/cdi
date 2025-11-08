@@ -2757,6 +2757,34 @@ class MedicalCodingAPITester:
 
     # ========== GEMINI API KEYS TESTING ==========
     
+    def test_admin_login_direct(self):
+        """Test direct admin login (try both old and new endpoints)"""
+        # First try the old login endpoint
+        try:
+            response = requests.post(
+                f"{self.api_url}/auth/login",
+                json=self.admin_credentials,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                self.admin_token = data.get('access_token')
+                self.admin_data = data.get('user')
+                details = f"Direct login successful: {self.admin_data.get('email')}, Role: {self.admin_data.get('role')}"
+                self.log_test("Admin Direct Login", True, details, data)
+                return True, data
+            elif response.status_code == 202:
+                # MFA required, try step1 endpoint
+                return self.test_mfa_login_step1()
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+                self.log_test("Admin Direct Login", False, details)
+                return False, None
+        except Exception as e:
+            self.log_test("Admin Direct Login", False, str(e))
+            return False, None
+
     def test_mfa_login_step1(self):
         """Test MFA login step 1 with admin credentials"""
         try:
