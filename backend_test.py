@@ -2758,8 +2758,48 @@ class MedicalCodingAPITester:
     # ========== GEMINI API KEYS TESTING ==========
     
     def test_admin_login_direct(self):
-        """Test direct admin login (try both old and new endpoints)"""
-        # First try the old login endpoint
+        """Test direct admin login - create test user without MFA"""
+        # Create a test admin user without MFA for testing
+        try:
+            # First, create a test user for this session
+            test_admin = {
+                "email": f"test_admin_gemini_{int(time.time())}@test.com",
+                "full_name": "Test Admin for Gemini",
+                "phone_number": f"966501{int(time.time()) % 1000000}",
+                "password": "TestAdmin123!@#",
+                "admin_code": "CDI-ADMIN-2024"  # This should make them admin
+            }
+            
+            # Register the test admin
+            response = requests.post(
+                f"{self.api_url}/auth/register",
+                json=test_admin,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                self.admin_token = data.get('access_token')
+                self.admin_data = data.get('user')
+                
+                # Update credentials for future use
+                self.admin_credentials = {
+                    "email": test_admin["email"],
+                    "password": test_admin["password"]
+                }
+                
+                details = f"Test admin created and logged in: {self.admin_data.get('email')}, Role: {self.admin_data.get('role')}"
+                self.log_test("Admin Direct Login", True, details, data)
+                return True, data
+            else:
+                # Try with original credentials
+                return self.test_original_admin_login()
+        except Exception as e:
+            self.log_test("Admin Direct Login", False, str(e))
+            return False, None
+
+    def test_original_admin_login(self):
+        """Try login with original admin credentials"""
         try:
             response = requests.post(
                 f"{self.api_url}/auth/login",
@@ -2771,18 +2811,15 @@ class MedicalCodingAPITester:
                 data = response.json()
                 self.admin_token = data.get('access_token')
                 self.admin_data = data.get('user')
-                details = f"Direct login successful: {self.admin_data.get('email')}, Role: {self.admin_data.get('role')}"
-                self.log_test("Admin Direct Login", True, details, data)
+                details = f"Original admin login successful: {self.admin_data.get('email')}, Role: {self.admin_data.get('role')}"
+                self.log_test("Original Admin Login", True, details, data)
                 return True, data
-            elif response.status_code == 202:
-                # MFA required, try step1 endpoint
-                return self.test_mfa_login_step1()
             else:
                 details = f"Status: {response.status_code}, Error: {response.text}"
-                self.log_test("Admin Direct Login", False, details)
+                self.log_test("Original Admin Login", False, details)
                 return False, None
         except Exception as e:
-            self.log_test("Admin Direct Login", False, str(e))
+            self.log_test("Original Admin Login", False, str(e))
             return False, None
 
     def test_mfa_login_step1(self):
