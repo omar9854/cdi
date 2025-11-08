@@ -3643,4 +3643,11 @@ def main():
     return 0 if results["failed_tests"] == 0 else 1
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # Check if we should run Gemini API test specifically
+    if len(sys.argv) > 1 and sys.argv[1] == "--gemini-test":
+        print("🔑 Running focused Gemini API Keys test...")
+        tester = MedicalCodingAPITester()
+        results = tester.run_gemini_api_test()
+        sys.exit(0 if results["failed_tests"] == 0 else 1)
+    else:
+        sys.exit(main())
