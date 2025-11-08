@@ -2848,9 +2848,9 @@ class MedicalCodingAPITester:
         print("📊 Expected quota: 7,500 requests/day (1,500 per key × 5 keys)")
         print("=" * 60)
         
-        # Step 1: Login with MFA
-        print("\n1️⃣ Testing MFA Login...")
-        login_success, login_data = self.test_mfa_login_step1()
+        # Step 1: Login with admin credentials
+        print("\n1️⃣ Testing Admin Login...")
+        login_success, login_data = self.test_admin_login_direct()
         
         if not login_success:
             self.log_test("Gemini API Keys System", False, "Failed at MFA login step 1")
