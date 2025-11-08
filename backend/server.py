@@ -128,7 +128,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 GEMINI_API_KEYS = [
     os.environ.get('GEMINI_API_KEY_1'),
     os.environ.get('GEMINI_API_KEY_2'),
-    os.environ.get('GEMINI_API_KEY_3')
+    os.environ.get('GEMINI_API_KEY_3'),
+    os.environ.get('GEMINI_API_KEY_4'),
+    os.environ.get('GEMINI_API_KEY_5')
 ]
 # Filter out None values
 GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
