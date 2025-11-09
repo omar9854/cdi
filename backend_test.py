@@ -3082,6 +3082,333 @@ class MedicalCodingAPITester:
         
         return self.generate_report()
 
+    def test_whatsapp_endpoints_removed(self):
+        """Test that WhatsApp endpoints return 404 (removed)"""
+        print("\n🚫 Testing WhatsApp Endpoints Removal")
+        print("=" * 50)
+        
+        # Test GET /api/support/whatsapp - should return 404
+        try:
+            response = requests.get(f"{self.api_url}/support/whatsapp", timeout=10)
+            success = response.status_code == 404
+            details = f"GET /api/support/whatsapp returned {response.status_code} (expected 404)"
+            self.log_test("WhatsApp Support Endpoint Removed", success, details)
+        except Exception as e:
+            self.log_test("WhatsApp Support Endpoint Removed", False, str(e))
+        
+        # Test POST /api/auth/reset-password-with-code - should return 404
+        try:
+            test_data = {
+                "email": "test@example.com",
+                "code": "123456",
+                "new_password": "NewPassword123!"
+            }
+            response = requests.post(
+                f"{self.api_url}/auth/reset-password-with-code",
+                json=test_data,
+                timeout=10
+            )
+            success = response.status_code == 404
+            details = f"POST /api/auth/reset-password-with-code returned {response.status_code} (expected 404)"
+            self.log_test("WhatsApp Password Reset Endpoint Removed", success, details)
+        except Exception as e:
+            self.log_test("WhatsApp Password Reset Endpoint Removed", False, str(e))
+
+    def test_password_reset_email_only(self):
+        """Test that password reset only sends email (no WhatsApp codes)"""
+        print("\n📧 Testing Password Reset Email-Only")
+        print("=" * 50)
+        
+        try:
+            # Use admin email for testing
+            test_data = {"email": "medidocai@gmail.com"}
+            response = requests.post(
+                f"{self.api_url}/auth/forgot-password",
+                json=test_data,
+                timeout=10
+            )
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                
+                # Check for expected email messages
+                has_arabic_message = "message" in data and "بريدك الإلكتروني" in data["message"]
+                has_english_message = "message_en" in data and "email" in data["message_en"].lower()
+                
+                # Check that WhatsApp fields are NOT present
+                no_reset_code = "reset_code" not in data
+                no_phone_digits = "phone_last_digits" not in data
+                no_has_phone = "has_phone" not in data or data.get("has_phone") == False
+                
+                whatsapp_removed = no_reset_code and no_phone_digits and no_has_phone
+                
+                if has_arabic_message and has_english_message and whatsapp_removed:
+                    details = "Password reset returns email-only messages, no WhatsApp fields"
+                    success = True
+                else:
+                    missing = []
+                    if not has_arabic_message: missing.append("Arabic email message")
+                    if not has_english_message: missing.append("English email message")
+                    if not whatsapp_removed: missing.append("WhatsApp fields still present")
+                    details = f"Issues: {', '.join(missing)}"
+                    success = False
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Password Reset Email Only", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Password Reset Email Only", False, str(e))
+            return False
+
+    def test_register_no_whatsapp_link(self):
+        """Test that register endpoint does not return whatsapp_welcome_link"""
+        print("\n📝 Testing Register Without WhatsApp Link")
+        print("=" * 50)
+        
+        try:
+            # Create a test user for registration
+            import time
+            timestamp = str(int(time.time()))
+            test_user = {
+                "email": f"whatsapp_test_{timestamp}@test.com",
+                "full_name": "WhatsApp Test User",
+                "phone_number": f"9665012{timestamp[-5:]}",
+                "password": "WhatsAppTest123!"
+            }
+            
+            response = requests.post(
+                f"{self.api_url}/auth/register",
+                json=test_user,
+                timeout=10
+            )
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                
+                # Check expected fields are present
+                has_access_token = "access_token" in data
+                has_token_type = "token_type" in data
+                has_user = "user" in data
+                
+                # Check WhatsApp link is NOT present
+                no_whatsapp_link = "whatsapp_welcome_link" not in data
+                
+                if has_access_token and has_token_type and has_user and no_whatsapp_link:
+                    details = "Registration successful, no whatsapp_welcome_link field"
+                    success = True
+                else:
+                    issues = []
+                    if not has_access_token: issues.append("missing access_token")
+                    if not has_token_type: issues.append("missing token_type")
+                    if not has_user: issues.append("missing user")
+                    if not no_whatsapp_link: issues.append("whatsapp_welcome_link still present")
+                    details = f"Issues: {', '.join(issues)}"
+                    success = False
+                
+                # Clean up - delete test user
+                if "user" in data and "id" in data["user"]:
+                    test_user_id = data["user"]["id"]
+                    if self.admin_token:
+                        try:
+                            headers = {"Authorization": f"Bearer {self.admin_token}"}
+                            requests.delete(
+                                f"{self.api_url}/admin/users/{test_user_id}",
+                                headers=headers,
+                                timeout=10
+                            )
+                        except:
+                            pass  # Cleanup failure is not critical
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Register No WhatsApp Link", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Register No WhatsApp Link", False, str(e))
+            return False
+
+    def test_security_dashboard_audit_logs(self):
+        """Test Security Dashboard audit logs with IP addresses"""
+        print("\n🛡️ Testing Security Dashboard Audit Logs")
+        print("=" * 50)
+        
+        if not self.admin_token:
+            self.log_test("Security Audit Logs", False, "No admin authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(
+                f"{self.api_url}/security/audit-logs",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                logs = data.get('logs', []) if isinstance(data, dict) else data
+                
+                if logs and len(logs) > 0:
+                    # Check first log entry for required fields
+                    first_log = logs[0]
+                    required_fields = ['user_email', 'action', 'status', 'timestamp', 'ip_address', 'user_agent']
+                    missing_fields = [field for field in required_fields if field not in first_log]
+                    
+                    if not missing_fields:
+                        ip_address = first_log.get('ip_address', '')
+                        has_valid_ip = ip_address and ip_address != 'unknown'
+                        details = f"Retrieved {len(logs)} audit logs, all required fields present, IP: {ip_address}"
+                        success = has_valid_ip
+                        if not has_valid_ip:
+                            details += " (WARNING: IP address is missing or 'unknown')"
+                    else:
+                        details = f"Missing required fields: {', '.join(missing_fields)}"
+                        success = False
+                else:
+                    details = "No audit logs found"
+                    success = True  # Empty logs is acceptable
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Security Audit Logs", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Security Audit Logs", False, str(e))
+            return False
+
+    def test_security_dashboard_stats(self):
+        """Test Security Dashboard statistics"""
+        print("\n📊 Testing Security Dashboard Stats")
+        print("=" * 50)
+        
+        if not self.admin_token:
+            self.log_test("Security Dashboard Stats", False, "No admin authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(
+                f"{self.api_url}/security/dashboard/stats",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                # Check for expected statistics fields
+                expected_fields = ['total_users', 'active_sessions', 'failed_logins_today', 'audit_logs_count']
+                present_fields = [field for field in expected_fields if field in data]
+                details = f"Security stats retrieved, fields present: {', '.join(present_fields)}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Security Dashboard Stats", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Security Dashboard Stats", False, str(e))
+            return False
+
+    def test_security_recent_activities(self):
+        """Test Security Dashboard recent activities with IP addresses"""
+        print("\n🕒 Testing Security Recent Activities")
+        print("=" * 50)
+        
+        if not self.admin_token:
+            self.log_test("Security Recent Activities", False, "No admin authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(
+                f"{self.api_url}/security/dashboard/recent-activities",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            
+            if success:
+                data = response.json()
+                activities = data.get('activities', []) if isinstance(data, dict) else data
+                
+                if activities and len(activities) > 0:
+                    # Check first activity for IP address
+                    first_activity = activities[0]
+                    has_ip = 'ip_address' in first_activity
+                    ip_value = first_activity.get('ip_address', '')
+                    details = f"Retrieved {len(activities)} recent activities, IP addresses included: {has_ip}"
+                    if has_ip:
+                        details += f", Sample IP: {ip_value}"
+                    success = has_ip
+                else:
+                    details = "No recent activities found"
+                    success = True  # Empty activities is acceptable
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Security Recent Activities", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Security Recent Activities", False, str(e))
+            return False
+
+    def run_whatsapp_removal_and_security_tests(self):
+        """Run WhatsApp removal verification and Security Dashboard tests"""
+        print("🚀 Starting WhatsApp Removal Verification & Security Dashboard Testing...")
+        print("=" * 80)
+        
+        # Admin login first (required for security dashboard tests)
+        admin_credentials = {
+            "email": "medidocai@gmail.com",
+            "password": "CDI@2024#Admin"
+        }
+        
+        try:
+            response = requests.post(
+                f"{self.api_url}/auth/login-step1",
+                json=admin_credentials,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('requires_mfa'):
+                    print("⚠️  MFA required for admin login - some tests may be limited")
+                    self.log_test("Admin Login", False, "MFA required - cannot complete automated login")
+                else:
+                    self.admin_token = data.get('access_token')
+                    self.admin_data = data.get('user')
+                    self.log_test("Admin Login", True, f"Admin login successful: {admin_credentials['email']}")
+            else:
+                self.log_test("Admin Login", False, f"Login failed: {response.text}")
+        except Exception as e:
+            self.log_test("Admin Login", False, str(e))
+        
+        # WhatsApp Removal Tests
+        print("\n" + "="*60)
+        print("🚫 WHATSAPP INTEGRATION REMOVAL VERIFICATION")
+        print("="*60)
+        
+        self.test_whatsapp_endpoints_removed()
+        self.test_password_reset_email_only()
+        self.test_register_no_whatsapp_link()
+        
+        # Security Dashboard Tests
+        print("\n" + "="*60)
+        print("🛡️ SECURITY DASHBOARD AUDIT LOGS VERIFICATION")
+        print("="*60)
+        
+        self.test_security_dashboard_audit_logs()
+        self.test_security_dashboard_stats()
+        self.test_security_recent_activities()
+        
+        # Print final summary
+        self.print_summary()
+
     def run_all_tests(self):
         """Run all API tests including Admin and Supervisor functionality"""
         print("🚀 Starting CDI Medical Application API Tests")
