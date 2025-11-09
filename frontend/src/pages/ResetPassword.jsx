@@ -78,19 +78,12 @@ const ResetPassword = () => {
             </CardHeader>
             <CardContent>
               <div className="text-center space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="code">
-                    {language === 'ar' ? 'كود الاستعادة' : 'Reset Code'}
-                  </Label>
-                  <Input
-                    id="code"
-                    type="text"
-                    placeholder="123456"
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                    required
-                  />
-                </div>
+                <Button
+                  onClick={() => navigate('/forgot-password')}
+                  className="w-full medical-blue text-white py-6 text-lg font-semibold"
+                >
+                  {language === 'ar' ? 'طلب رابط جديد' : 'Request New Link'}
+                </Button>
                 <div className="space-y-2">
                   <Label htmlFor="password">{t('newPassword')}</Label>
                   <div className="relative">
