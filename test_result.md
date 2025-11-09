@@ -540,7 +540,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Gemini API Keys System - 5-Key Rotation for Enhanced Capacity"
+    - "Complete WhatsApp Integration Removal"
+    - "Security Dashboard - Audit Logs with IP Addresses"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
