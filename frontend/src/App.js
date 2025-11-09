@@ -18,7 +18,6 @@ import SupervisorDashboard from '@/pages/SupervisorDashboard';
 import Messages from '@/pages/Messages';
 import MFAVerification from '@/pages/MFAVerification';
 import SecurityDashboard from '@/pages/SecurityDashboard';
-import WhatsAppSupport from '@/components/WhatsAppSupport';
 import ChatWidget from '@/components/ChatWidget';
 
 function AppContent() {
