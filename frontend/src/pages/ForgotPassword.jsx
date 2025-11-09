@@ -21,9 +21,6 @@ const ForgotPassword = () => {
   const [resetCode, setResetCode] = useState('');
   const [phoneDigits, setPhoneDigits] = useState('');
 
-  const [resetCode, setResetCode] = useState('');
-  const [phoneDigits, setPhoneDigits] = useState('');
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
