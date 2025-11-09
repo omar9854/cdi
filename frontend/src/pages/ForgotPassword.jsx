@@ -88,38 +88,13 @@ const ForgotPassword = () => {
             ) : (
               <div className="text-center space-y-6">
                 <div className="text-green-600 text-lg font-semibold">
-                  ✓ {language === 'ar' ? 'تم إرسال كود الاستعادة' : 'Reset Code Sent'}
+                  ✓ {language === 'ar' ? 'تم إرسال رابط إعادة التعيين' : 'Reset Link Sent'}
                 </div>
-                
-                {resetCode && (
-                  <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 space-y-3">
-                    <p className="text-sm text-gray-700">
-                      {language === 'ar' 
-                        ? `تم إرسال الكود إلى واتساب (***${phoneDigits}) وبريدك الإلكتروني`
-                        : `Code sent to WhatsApp (***${phoneDigits}) and your email`
-                      }
-                    </p>
-                    <div className="bg-white rounded-lg p-4 shadow-sm">
-                      <p className="text-xs text-gray-500 mb-2">
-                        {language === 'ar' ? 'كود الاستعادة:' : 'Reset Code:'}
-                      </p>
-                      <div className="text-3xl font-bold text-blue-600 tracking-wider" style={{letterSpacing: '0.5em'}}>
-                        {resetCode}
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      {language === 'ar' 
-                        ? 'استخدم هذا الكود في صفحة إعادة تعيين كلمة المرور'
-                        : 'Use this code on the password reset page'
-                      }
-                    </p>
-                  </div>
-                )}
                 
                 <p className="text-gray-600 text-sm">
                   {language === 'ar' 
-                    ? 'تحقق من واتساب وبريدك الإلكتروني واتبع التعليمات لإعادة تعيين كلمة المرور'
-                    : 'Check your WhatsApp and email and follow the instructions to reset your password'
+                    ? 'تحقق من بريدك الإلكتروني واتبع التعليمات لإعادة تعيين كلمة المرور'
+                    : 'Check your email and follow the instructions to reset your password'
                   }
                 </p>
                 
