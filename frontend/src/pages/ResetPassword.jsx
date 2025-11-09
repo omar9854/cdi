@@ -43,20 +43,11 @@ const ResetPassword = () => {
     setLoading(true);
 
     try {
-      if (token) {
-        // Reset with token from email
-        await axios.post(`${API}/auth/reset-password`, {
-          token,
-          new_password: formData.password
-        });
-      } else {
-        // Reset with code from WhatsApp
-        await axios.post(`${API}/auth/reset-password-with-code`, {
-          email: formData.email,
-          code: formData.code,
-          new_password: formData.password
-        });
-      }
+      // Reset with token from email only
+      await axios.post(`${API}/auth/reset-password`, {
+        token,
+        new_password: formData.password
+      });
       
       toast.success(language === 'ar' ? 'تم إعادة تعيين كلمة المرور بنجاح!' : 'Password reset successfully!');
       setTimeout(() => navigate('/login'), 2000);
@@ -68,7 +59,7 @@ const ResetPassword = () => {
   };
 
   if (!token) {
-    // Show form for code-based reset (from WhatsApp)
+    // Redirect to forgot password if no token
     return (
       <div className="min-h-screen flex flex-col">
         <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4">
@@ -80,24 +71,13 @@ const ResetPassword = () => {
               <CardTitle className="text-3xl font-bold text-gray-800">{t('resetPasswordTitle')}</CardTitle>
               <CardDescription className="text-lg">
                 {language === 'ar' 
-                  ? 'أدخل الكود المرسل على واتساب' 
-                  : 'Enter the code sent via WhatsApp'
+                  ? 'رابط إعادة التعيين غير صالح. يرجى طلب رابط جديد.'
+                  : 'Invalid reset link. Please request a new one.'
                 }
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">{t('email')}</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="example@hospital.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                  />
-                </div>
+              <div className="text-center space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="code">
                     {language === 'ar' ? 'كود الاستعادة' : 'Reset Code'}
