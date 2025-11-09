@@ -1214,6 +1214,76 @@ agent_communication:
       
       **YOU MUST ASK USER BEFORE DOING FRONTEND TESTING**
   
+  - agent: "main"
+    message: |
+      🗑️ **COMPLETE WHATSAPP REMOVAL IMPLEMENTATION**
+      
+      **USER REQUEST**: "الغى نظام الواتس اب من الموقع واحذف اي سي يرتبط بالواتس اب"
+      (Cancel WhatsApp system from site and delete any code related to WhatsApp)
+      
+      ## ✅ COMPLETED REMOVALS:
+      
+      **Backend Changes (server.py):**
+      1. ✅ Removed WhatsApp welcome link generation from /api/auth/register endpoint
+         - Removed lines 850-863: WhatsApp message and link creation
+         - Response now returns only token and user data
+      
+      2. ✅ Removed WhatsApp code from /api/auth/forgot-password endpoint
+         - Removed lines 1192-1236: All WhatsApp sending logic
+         - Now sends password reset link via EMAIL ONLY
+         - Removed reset_code generation and display
+         - Updated response message to email-only
+      
+      3. ✅ Deleted /api/auth/reset-password-with-code endpoint (lines 1211-1247)
+         - This endpoint was for WhatsApp code-based reset
+         - Now only /api/auth/reset-password exists (token-based, email)
+      
+      4. ✅ Deleted /api/support/whatsapp endpoint (lines 1249-1256)
+         - Removed GET endpoint that returned WhatsApp support number
+      
+      **Environment Variables (.env):**
+      5. ✅ Removed SUPPORT_WHATSAPP="966502468148" from backend/.env
+      
+      **Frontend Changes:**
+      6. ✅ Deleted /app/frontend/src/components/WhatsAppSupport.jsx component
+      7. ✅ Removed WhatsAppSupport import from App.js
+      8. ✅ Removed <WhatsAppSupport /> usage from App.js
+      
+      **Documentation:**
+      9. ✅ Deleted /app/WHATSAPP_INTEGRATION_GUIDE.md
+      10. ✅ Deleted /app/WHATSAPP_WELCOME_MESSAGE.md
+      
+      **Email Script Update:**
+      11. ✅ Updated send_password_change_emails.py
+          - Changed reset_link from preview URL to production URL
+          - Old: https://diagnote-ai.preview.emergentagent.com/forgot-password
+          - New: https://medidoc-ai.emergent.host/forgot-password
+      
+      ## 🔒 PASSWORD RESET NOW EMAIL-ONLY:
+      
+      **New Flow:**
+      1. User requests password reset via /api/auth/forgot-password
+      2. System generates unique token (UUID)
+      3. Email sent with reset link: https://medidoc-ai.emergent.host/reset-password?token={token}
+      4. User clicks link and enters new password
+      5. Password updated via /api/auth/reset-password with token
+      
+      **No more WhatsApp codes or phone numbers involved**
+      
+      ## 📊 VERIFICATION NEEDED:
+      
+      **Backend Testing:**
+      - Test /api/auth/register - verify no WhatsApp link in response
+      - Test /api/auth/forgot-password - verify email-only sending
+      - Verify /api/support/whatsapp returns 404
+      - Verify /api/auth/reset-password-with-code returns 404
+      
+      **Frontend Testing:**
+      - Verify no WhatsApp button/widget appears
+      - Test forgot password flow end-to-end with email
+      
+      **Status:** ✅ Backend restarted successfully, no errors in logs
+  
   - agent: "testing"
     message: |
       ✅ **SINGLE ANALYSIS ENDPOINT TESTING COMPLETE - CHATENHANCED BACK NAVIGATION FIX VERIFIED**
