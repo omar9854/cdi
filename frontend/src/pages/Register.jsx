@@ -32,26 +32,14 @@ const Register = ({ setUser }) => {
 
     try {
       const response = await axios.post(`${API}/auth/register`, formData);
-      const { access_token, user, whatsapp_welcome_link } = response.data;
+      const { access_token, user } = response.data;
       
       localStorage.setItem('token', access_token);
       localStorage.setItem('user', JSON.stringify(user));
       setUser(user);
       
       toast.success(t('registerSuccess'));
-      
-      // فتح واتساب مع رسالة الترحيب - استخدام location بدلاً من window.open
-      if (whatsapp_welcome_link) {
-        // حفظ الرابط وفتحه مباشرة
-        window.location.href = whatsapp_welcome_link;
-        
-        // الانتظار قليلاً ثم التوجيه للداشبورد
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 3000);
-      } else {
-        navigate('/dashboard');
-      }
+      navigate('/dashboard');
     } catch (error) {
       toast.error(error.response?.data?.detail || t('error'));
       setLoading(false);
