@@ -53,7 +53,6 @@ function AppContent() {
     <div className="App">
       <Toaster position="top-center" richColors closeButton />
       <BrowserRouter>
-        <WhatsAppSupport />
         {user && <ChatWidget user={user} />}
         <Routes>
           <Route path="/login" element={!user ? <Login setUser={setUser} /> : <Navigate to="/dashboard" />} />
