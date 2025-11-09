@@ -84,43 +84,9 @@ const ResetPassword = () => {
                 >
                   {language === 'ar' ? 'طلب رابط جديد' : 'Request New Link'}
                 </Button>
-                <div className="space-y-2">
-                  <Label htmlFor="password">{t('newPassword')}</Label>
-                  <div className="relative">
-                    <Lock className={`absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-3 h-5 w-5 text-gray-400`} />
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className={language === 'ar' ? 'pr-10' : 'pl-10'}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
-                  <div className="relative">
-                    <Lock className={`absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-3 h-5 w-5 text-gray-400`} />
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="••••••••"
-                      value={formData.confirmPassword}
-                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                      className={language === 'ar' ? 'pr-10' : 'pl-10'}
-                      required
-                    />
-                  </div>
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full medical-blue text-white py-6 text-lg font-semibold"
-                  disabled={loading}
-                >
-                  {loading ? t('loading') : t('resetPassword')}
-                </Button>
+                <Link to="/login" className="block text-blue-600 font-semibold hover:underline">
+                  {t('backToLogin')}
+                </Link>
               </form>
               <div className="mt-6 text-center">
                 <Link to="/login" className="text-blue-600 font-semibold hover:underline">
