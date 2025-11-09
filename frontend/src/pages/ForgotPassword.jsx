@@ -28,20 +28,12 @@ const ForgotPassword = () => {
     try {
       const response = await axios.post(`${API}/auth/forgot-password`, { email });
       
-      if (response.data.has_phone && response.data.reset_code) {
-        // عرض الكود للمستخدم
-        setResetCode(response.data.reset_code);
-        setPhoneDigits(response.data.phone_last_digits);
-        setSent(true);
-        toast.success(
-          language === 'ar' 
-            ? 'تم إرسال كود الاستعادة إلى واتساب والبريد الإلكتروني' 
-            : 'Reset code sent to WhatsApp and email'
-        );
-      } else {
-        setSent(true);
-        toast.success(t('resetLinkSent'));
-      }
+      setSent(true);
+      toast.success(
+        language === 'ar' 
+          ? 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني'
+          : 'Password reset link sent to your email'
+      );
     } catch (error) {
       toast.error(error.response?.data?.detail || t('error'));
     } finally {
