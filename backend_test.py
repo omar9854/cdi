@@ -3121,7 +3121,7 @@ class MedicalCodingAPITester:
         
         try:
             # Use admin email for testing
-            test_data = {"email": "medidocai@gmail.com"}
+            test_data = {"email": "almaghthawi.cdi@gmail.com"}
             response = requests.post(
                 f"{self.api_url}/auth/forgot-password",
                 json=test_data,
