@@ -4028,10 +4028,12 @@ def main():
             results = tester.run_supervisor_impersonation_test()
         elif sys.argv[1] == "--clinical-questions":
             results = tester.run_clinical_questions_tests()
+        elif sys.argv[1] == "--whatsapp-security":
+            results = tester.run_whatsapp_removal_and_security_tests()
         else:
             results = tester.run_all_tests()
     else:
-        results = tester.run_all_tests()
+        results = tester.run_whatsapp_removal_and_security_tests()  # Default to WhatsApp/Security tests
     
     # Return appropriate exit code
     return 0 if results["failed_tests"] == 0 else 1
