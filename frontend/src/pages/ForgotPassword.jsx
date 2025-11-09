@@ -95,16 +95,49 @@ const ForgotPassword = () => {
                 </Button>
               </form>
             ) : (
-              <div className="text-center space-y-4">
-                <div className="text-green-600 text-lg">
-                  ✓ {t('resetLinkSent')}
+              <div className="text-center space-y-6">
+                <div className="text-green-600 text-lg font-semibold">
+                  ✓ {language === 'ar' ? 'تم إرسال كود الاستعادة' : 'Reset Code Sent'}
                 </div>
-                <p className="text-gray-600">
+                
+                {resetCode && (
+                  <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 space-y-3">
+                    <p className="text-sm text-gray-700">
+                      {language === 'ar' 
+                        ? `تم إرسال الكود إلى واتساب (***${phoneDigits}) وبريدك الإلكتروني`
+                        : `Code sent to WhatsApp (***${phoneDigits}) and your email`
+                      }
+                    </p>
+                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                      <p className="text-xs text-gray-500 mb-2">
+                        {language === 'ar' ? 'كود الاستعادة:' : 'Reset Code:'}
+                      </p>
+                      <div className="text-3xl font-bold text-blue-600 tracking-wider" style={{letterSpacing: '0.5em'}}>
+                        {resetCode}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {language === 'ar' 
+                        ? 'استخدم هذا الكود في صفحة إعادة تعيين كلمة المرور'
+                        : 'Use this code on the password reset page'
+                      }
+                    </p>
+                  </div>
+                )}
+                
+                <p className="text-gray-600 text-sm">
                   {language === 'ar' 
-                    ? 'يرجى التحقق من بريدك الإلكتروني واتباع التعليمات لإعادة تعيين كلمة المرور'
-                    : 'Please check your email and follow the instructions to reset your password'
+                    ? 'تحقق من واتساب وبريدك الإلكتروني واتبع التعليمات لإعادة تعيين كلمة المرور'
+                    : 'Check your WhatsApp and email and follow the instructions to reset your password'
                   }
                 </p>
+                
+                <Button
+                  onClick={() => window.location.href = '/reset-password'}
+                  className="w-full medical-blue"
+                >
+                  {language === 'ar' ? 'أدخل الكود الآن' : 'Enter Code Now'}
+                </Button>
               </div>
             )}
             <div className="mt-6 text-center">
