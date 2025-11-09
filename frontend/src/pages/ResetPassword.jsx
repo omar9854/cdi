@@ -87,12 +87,7 @@ const ResetPassword = () => {
                 <Link to="/login" className="block text-blue-600 font-semibold hover:underline">
                   {t('backToLogin')}
                 </Link>
-              </form>
-              <div className="mt-6 text-center">
-                <Link to="/login" className="text-blue-600 font-semibold hover:underline">
-                  {t('backToLogin')}
-                </Link>
-              </div>
+ 
             </CardContent>
           </Card>
         </div>
