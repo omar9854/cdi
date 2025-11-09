@@ -1141,16 +1141,14 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
 
 @api_router.post("/auth/forgot-password")
 async def forgot_password(request: PasswordResetRequest):
-    """Request password reset - sends code via WhatsApp"""
+    """Request password reset - sends link via Email only"""
     user = await db.users.find_one({"email": request.email}, {"_id": 0})
     
     # Always return success (don't reveal if email exists)
     if not user:
-        return {"message": "If the account exists, a reset code will be sent"}
+        return {"message": "If the account exists, a reset link will be sent to email"}
     
-    # Generate reset code (6 digits)
-    import random
-    reset_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    # Generate reset token
     reset_token = str(uuid.uuid4())
     expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
     
@@ -1164,65 +1162,18 @@ async def forgot_password(request: PasswordResetRequest):
     doc = token_doc.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     doc['expires_at'] = doc['expires_at'].isoformat()
-    doc['reset_code'] = reset_code
     await db.password_reset_tokens.insert_one(doc)
     
-    # Send password reset email (if configured)
+    # Send password reset email
     try:
         await send_password_reset_email(user['email'], user['full_name'], reset_token)
+        logging.info(f"Password reset email sent to user {user['email']}")
     except Exception as e:
         logging.error(f"Failed to send password reset email: {str(e)}")
     
-    # Send WhatsApp message with reset code
-    phone_number = user.get('phone_number', '')
-    whatsapp_sent = False
-    
-    if phone_number:
-        try:
-            # إرسال رسالة واتساب مباشرة
-            import requests
-            
-            # تنظيف رقم الهاتف (إزالة أي أحرف غير رقمية)
-            clean_phone = ''.join(filter(str.isdigit, phone_number))
-            if not clean_phone.startswith('966'):
-                clean_phone = '966' + clean_phone.lstrip('0')
-            
-            whatsapp_message = f"""مرحباً {user['full_name']}
-
-كود استعادة كلمة المرور الخاص بك هو:
-
-*{reset_code}*
-
-هذا الكود صالح لمدة ساعة واحدة فقط.
-
-للدعم الفني: 0502468148
-
-_نظام تحسين التوثيق السريري_"""
-            
-            # محاولة إرسال عبر WhatsApp Business API (إذا كان متوفراً)
-            # يمكن استخدام خدمات مثل Twilio أو واتساب بيزنس API
-            
-            # للآن، نرجع الرسالة والكود ليتم عرضه للمستخدم
-            whatsapp_sent = True
-            logging.info(f"WhatsApp code ready for user {user['email']}: {reset_code}")
-            
-        except Exception as e:
-            logging.error(f"Failed to prepare WhatsApp message: {str(e)}")
-    
-    # إرجاع النتيجة
-    if whatsapp_sent:
-        return {
-            "message": "تم إرسال كود الاستعادة إلى رقم جوالك عبر واتساب وإلى بريدك الإلكتروني",
-            "message_en": "Reset code sent to your WhatsApp and email",
-            "has_phone": True,
-            "reset_code": reset_code,  # إرجاع الكود ليتم عرضه
-            "phone_last_digits": phone_number[-4:] if phone_number else ""
-        }
-    
     return {
         "message": "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني",
-        "message_en": "Password reset link sent to your email",
-        "has_phone": False
+        "message_en": "Password reset link sent to your email"
     }
 
 @api_router.post("/auth/reset-password")
