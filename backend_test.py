@@ -3407,7 +3407,7 @@ class MedicalCodingAPITester:
         self.test_security_recent_activities()
         
         # Print final summary
-        self.print_summary()
+        return self.generate_report()
 
     def run_all_tests(self):
         """Run all API tests including Admin and Supervisor functionality"""
