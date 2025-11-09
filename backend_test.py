@@ -3363,7 +3363,7 @@ class MedicalCodingAPITester:
         
         # Admin login first (required for security dashboard tests)
         admin_credentials = {
-            "email": "medidocai@gmail.com",
+            "email": "almaghthawi.cdi@gmail.com",
             "password": "CDI@2024#Admin"
         }
         
