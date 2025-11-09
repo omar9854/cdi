@@ -515,7 +515,7 @@ agent_communication:
       **TESTING ATTEMPT RESULTS:**
       
       **✅ LOGIN PROCESS VERIFICATION:**
-      - Successfully navigated to login page (https://medidoc-query.preview.emergentagent.com/login)
+      - Successfully navigated to login page (https://diagnote-ai.preview.emergentagent.com/login)
       - Login form elements detected correctly (1 email input, 1 password input, 1 submit button)
       - Credentials filled successfully (admin@cdi-center.sa / CDI@2024#Admin)
       - Login step 1 completed successfully
@@ -982,7 +982,7 @@ agent_communication:
       
       **1. Production Backend URL Fix ✅**
       - Problem: Frontend .env had preview URL instead of production URL
-      - Old URL: https://medidoc-query.preview.emergentagent.com
+      - Old URL: https://diagnote-ai.preview.emergentagent.com
       - New URL: https://medidoc-ai.emergent.host
       - File: /app/frontend/.env line 1
       - Status: FIXED - Frontend now points to correct production backend

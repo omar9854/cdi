@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://medidoc-query.preview.emergentagent.com
+https://diagnote-ai.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://medidoc-query.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://medidoc-query.preview.emergentagent.com
+   https://diagnote-ai.preview.emergentagent.com
    ```
 
 ---
