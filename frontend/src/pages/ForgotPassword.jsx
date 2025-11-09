@@ -19,6 +19,9 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
+  const [resetCode, setResetCode] = useState('');
+  const [phoneDigits, setPhoneDigits] = useState('');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -26,15 +29,16 @@ const ForgotPassword = () => {
     try {
       const response = await axios.post(`${API}/auth/forgot-password`, { email });
       
-      if (response.data.whatsapp_link) {
-        // فتح واتساب مع الكود مباشرة
-        toast.success(language === 'ar' ? 'جاري فتح واتساب مع الكود...' : 'Opening WhatsApp with code...');
-        
-        setTimeout(() => {
-          window.location.href = response.data.whatsapp_link;
-        }, 1000);
-        
+      if (response.data.has_phone && response.data.reset_code) {
+        // عرض الكود للمستخدم
+        setResetCode(response.data.reset_code);
+        setPhoneDigits(response.data.phone_last_digits);
         setSent(true);
+        toast.success(
+          language === 'ar' 
+            ? 'تم إرسال كود الاستعادة إلى واتساب والبريد الإلكتروني' 
+            : 'Reset code sent to WhatsApp and email'
+        );
       } else {
         setSent(true);
         toast.success(t('resetLinkSent'));
