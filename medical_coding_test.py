@@ -80,9 +80,9 @@ class MedicalCodingTester:
         
         # Test coding department registration - auditor
         auditor_user = {
-            "email": f"auditor_test_{datetime.now().strftime('%H%M%S')}@test.com",
+            "email": f"auditor_test_{timestamp}@test.com",
             "full_name": "Auditor Test User",
-            "phone_number": "966501234569",
+            "phone_number": f"96650125{timestamp[-4:]}",
             "password": "AuditorTestUser123!",
             "department": "coding",
             "coding_role": "auditor"
