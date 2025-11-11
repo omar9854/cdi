@@ -1411,24 +1411,29 @@ async def update_user_department(
     department: str,
     coding_role: Optional[str] = None,
     daily_case_target: Optional[int] = None,
+    role: Optional[str] = None,
     admin: dict = Depends(require_admin)
 ):
-    """Update user's department and coding role"""
+    """Update user's department, role, and coding role"""
     # Validate department
     if department not in ['cdi', 'coding']:
         raise HTTPException(status_code=400, detail="Invalid department. Must be 'cdi' or 'coding'")
     
     # Validate coding_role if department is coding
     if department == 'coding':
-        if coding_role not in ['coder', 'auditor', None]:
-            raise HTTPException(status_code=400, detail="Invalid coding_role. Must be 'coder', 'auditor', or null")
+        if coding_role not in ['coder', 'auditor', 'supervisor', None]:
+            raise HTTPException(status_code=400, detail="Invalid coding_role")
+        
+        # If supervisor for coding, set role to supervisor
+        if coding_role == 'supervisor':
+            role = 'supervisor'
     else:
         # If CDI, clear coding role
         coding_role = None
         daily_case_target = None
     
     # Set default daily target for coders
-    if coding_role == 'coder' and daily_case_target is None:
+    if coding_role == 'coder' and (daily_case_target is None or daily_case_target == 0):
         daily_case_target = 10
     
     # Update user
@@ -1437,8 +1442,13 @@ async def update_user_department(
         'coding_role': coding_role
     }
     
-    if daily_case_target is not None:
+    if role:
+        update_data['role'] = role
+    
+    if daily_case_target is not None and daily_case_target > 0:
         update_data['daily_case_target'] = daily_case_target
+    elif coding_role != 'coder':
+        update_data['daily_case_target'] = None
     
     result = await db.users.update_one(
         {"id": user_id},
