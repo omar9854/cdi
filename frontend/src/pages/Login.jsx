@@ -48,7 +48,22 @@ const Login = ({ setUser }) => {
         setUser(user);
         
         toast.success(t('loginSuccess'));
-        navigate('/dashboard');
+        
+        // Route based on department and role
+        if (user.department === 'coding') {
+          if (user.coding_role === 'coder') {
+            navigate('/coder');
+          } else if (user.coding_role === 'auditor') {
+            navigate('/auditor');
+          } else if (user.role === 'supervisor' || user.role === 'admin') {
+            navigate('/coding-supervisor');
+          } else {
+            navigate('/dashboard');
+          }
+        } else {
+          // CDI department users go to dashboard
+          navigate('/dashboard');
+        }
       }
     } catch (error) {
       // Handle errors safely
