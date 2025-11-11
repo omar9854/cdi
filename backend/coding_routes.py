@@ -71,6 +71,8 @@ async def create_hospital(hospital: HospitalCreate):
     doc['created_at'] = doc['created_at'].isoformat()
     
     await db.hospitals.insert_one(doc)
+    # Remove _id field for response
+    doc.pop('_id', None)
     return {"message": "Hospital created successfully", "hospital": doc}
 
 @router.put("/hospitals/{hospital_id}")
