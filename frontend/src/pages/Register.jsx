@@ -126,6 +126,76 @@ const Register = ({ setUser }) => {
               </div>
             </div>
             
+            {/* Department Selection */}
+            <div className="space-y-2">
+              <Label>{language === 'ar' ? 'القسم' : 'Department'}</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, department: 'cdi', coding_role: null })}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    formData.department === 'cdi'
+                      ? 'border-blue-600 bg-blue-50 text-blue-700'
+                      : 'border-gray-200 hover:border-blue-300'
+                  }`}
+                >
+                  <div className="font-semibold">
+                    {language === 'ar' ? 'تحسين التوثيق السريري' : 'CDI'}
+                  </div>
+                  <div className="text-xs opacity-75 mt-1">
+                    {language === 'ar' ? 'Clinical Documentation' : 'CDI Specialist'}
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, department: 'coding', coding_role: 'coder' })}
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    formData.department === 'coding'
+                      ? 'border-green-600 bg-green-50 text-green-700'
+                      : 'border-gray-200 hover:border-green-300'
+                  }`}
+                >
+                  <div className="font-semibold">
+                    {language === 'ar' ? 'الترميز الطبي' : 'Medical Coding'}
+                  </div>
+                  <div className="text-xs opacity-75 mt-1">
+                    {language === 'ar' ? 'ICD-10-AM Coding' : 'Medical Coder'}
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Coding Role Selection (if coding department) */}
+            {formData.department === 'coding' && (
+              <div className="space-y-2 fade-in">
+                <Label>{language === 'ar' ? 'الدور الوظيفي' : 'Role'}</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, coding_role: 'coder' })}
+                    className={`p-2 rounded-lg border-2 transition-all ${
+                      formData.coding_role === 'coder'
+                        ? 'border-green-600 bg-green-50 text-green-700'
+                        : 'border-gray-200 hover:border-green-300'
+                    }`}
+                  >
+                    {language === 'ar' ? 'مرمز طبي' : 'Medical Coder'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, coding_role: 'auditor' })}
+                    className={`p-2 rounded-lg border-2 transition-all ${
+                      formData.coding_role === 'auditor'
+                        ? 'border-purple-600 bg-purple-50 text-purple-700'
+                        : 'border-gray-200 hover:border-purple-300'
+                    }`}
+                  >
+                    {language === 'ar' ? 'مدقق' : 'Auditor'}
+                  </button>
+                </div>
+              </div>
+            )}
+            
             {/* Admin Code Toggle */}
             <div className="text-center">
               <button
