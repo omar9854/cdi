@@ -68,9 +68,9 @@ class MedicalCodingTester:
         
         # Test coding department registration - coder
         coder_user = {
-            "email": f"coder_test_{datetime.now().strftime('%H%M%S')}@test.com",
+            "email": f"coder_test_{timestamp}@test.com",
             "full_name": "Coder Test User",
-            "phone_number": "966501234568",
+            "phone_number": f"96650124{timestamp[-4:]}",
             "password": "CoderTestUser123!",
             "department": "coding",
             "coding_role": "coder"
