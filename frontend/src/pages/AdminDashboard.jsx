@@ -379,6 +379,21 @@ const AdminDashboard = ({ user, onLogout }) => {
                       <TableCell className="text-center text-sm">{userStat.email}</TableCell>
                       <TableCell className="text-center text-sm">{userStat.phone_number || '-'}</TableCell>
                       <TableCell className="text-center">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          userStat.department === 'coding' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {userStat.department === 'coding' ? 
+                            (language === 'ar' ? 'ترميز طبي' : 'Medical Coding') : 
+                            (language === 'ar' ? 'تحسين توثيق' : 'CDI')}
+                        </span>
+                        {userStat.coding_role && (
+                          <div className="text-xs text-gray-600 mt-1">
+                            {userStat.coding_role === 'coder' ? (language === 'ar' ? 'مرمز' : 'Coder') :
+                             userStat.coding_role === 'auditor' ? (language === 'ar' ? 'مدقق' : 'Auditor') : ''}
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
                         {userStat.role === 'supervisor' ? (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                             {language === 'ar' ? 'مشرف' : 'Supervisor'}
