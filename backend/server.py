@@ -898,6 +898,7 @@ async def register(request: Request, user_data: UserRegister):
 @limiter.limit("50/minute")  # Increased for testing
 async def login_step1(request: Request, credentials: UserLogin):
     """Step 1: Verify credentials and send OTP"""
+    print(f"🔑 LOGIN REQUEST: {credentials.email}")
     try:
         # Import security utils
         from security_utils import (
