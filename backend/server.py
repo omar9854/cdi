@@ -1033,7 +1033,9 @@ async def login_step1(request: Request, credentials: UserLogin):
                     "email": user['email'], 
                     "full_name": user['full_name'],
                     "phone_number": user.get('phone_number', ''),
-                    "role": user.get('role', 'user')
+                    "role": user.get('role', 'user'),
+                    "department": user.get('department', 'cdi'),
+                    "coding_role": user.get('coding_role')
                 }
             }
     except HTTPException:
