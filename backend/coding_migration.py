@@ -360,11 +360,11 @@ async def main():
     print(f"   - DRG Prices: {await db.drg_prices.count_documents({})}")
     print(f"   - Medical Cases: {await db.medical_cases.count_documents({})}")
     
-    print("\n🔑 Test Credentials (MFA Enabled):")
+    print("\n🔑 Test Credentials (MFA Disabled for Testing):")
     print("   Coding Supervisor: supervisor@hospital.sa / Super123!")
     print("   Medical Coder: coder@hospital.sa / Coder123!")
     print("   Medical Auditor: auditor@hospital.sa / Auditor123!")
-    print("\n⚠️  First login requires MFA setup with Google Authenticator")
+    print("\n✅ Direct login without MFA for easy testing")
     print("=" * 60)
     
     client.close()
