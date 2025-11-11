@@ -233,6 +233,9 @@ class User(BaseModel):
     phone_number: str  # رقم الجوال
     password_hash: str
     role: str = "user"  # "admin", "supervisor", or "user"
+    department: str = "cdi"  # "cdi" or "coding"
+    coding_role: Optional[str] = None  # For coding department: "coder", "auditor", or None
+    daily_case_target: Optional[int] = 10  # Daily target for coders
     supervisor_id: Optional[str] = None  # ID of supervisor (if user is assigned to one)
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -242,6 +245,8 @@ class UserRegister(BaseModel):
     full_name: str
     phone_number: str  # رقم الجوال مطلوب
     password: str
+    department: str = "cdi"  # Department selection: "cdi" or "coding"
+    coding_role: Optional[str] = None  # If coding department: "coder" or "auditor"
     admin_code: Optional[str] = None  # كود سري للأدمن
 
 class UserLogin(BaseModel):
