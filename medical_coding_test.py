@@ -59,7 +59,7 @@ class MedicalCodingTester:
             "email": f"cdi_test_{datetime.now().strftime('%H%M%S')}@test.com",
             "full_name": "CDI Test User",
             "phone_number": "966501234567",
-            "password": "CDITest123!",
+            "password": "CDITestUser123!",
             "department": "cdi"
         }
         
