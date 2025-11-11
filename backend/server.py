@@ -71,6 +71,9 @@ async def ensure_admin_account():
             'full_name': 'مدير النظام - System Administrator',
             'phone_number': '+966500000000',
             'role': 'admin',
+            'department': 'cdi',  # Admin manages both departments
+            'coding_role': None,
+            'daily_case_target': None,
             'mfa_enabled': True,
             'is_active': True,
             'created_at': datetime.now(timezone.utc).isoformat(),
