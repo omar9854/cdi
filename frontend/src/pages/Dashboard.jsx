@@ -22,9 +22,26 @@ const Dashboard = ({ user, onLogout }) => {
   const [noteToDelete, setNoteToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Auto-redirect based on department and role
   useEffect(() => {
-    fetchNotes();
-  }, []);
+    if (user?.department === 'coding') {
+      // Redirect coding users to their specific pages
+      if (user.coding_role === 'coder') {
+        navigate('/coder');
+      } else if (user.coding_role === 'auditor') {
+        navigate('/auditor');
+      } else if (user.role === 'supervisor' || user.role === 'admin') {
+        navigate('/coding-supervisor');
+      }
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    // Only fetch notes if user is CDI department
+    if (user?.department === 'cdi') {
+      fetchNotes();
+    }
+  }, [user]);
 
   const fetchNotes = async () => {
     try {
