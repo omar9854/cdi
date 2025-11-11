@@ -27,6 +27,12 @@ const AdminDashboard = ({ user, onLogout }) => {
   const [editFormData, setEditFormData] = useState({});
   const [changePasswordUser, setChangePasswordUser] = useState(null);
   const [newPassword, setNewPassword] = useState('');
+  const [editDepartmentUser, setEditDepartmentUser] = useState(null);
+  const [departmentForm, setDepartmentForm] = useState({
+    department: 'cdi',
+    coding_role: null,
+    daily_case_target: 10
+  });
 
   useEffect(() => {
     if (user.role !== 'admin') {
