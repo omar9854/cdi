@@ -247,6 +247,210 @@ async def upload_drg_prices(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=f"Error processing file: {str(e)}")
 
 # ========== Medical Cases Management (Supervisor) ==========
+@router.post("/cases/manual")
+async def create_case_manual(
+    case_number: str,
+    hospital_id: str,
+    admission_days: int,
+    assigned_coder_id: str,
+    user_id: str,
+    patient_id: str = None,
+    chief_complaint: str = "إدخال يدوي",
+    clinical_summary: str = "في انتظار الترميز"
+):
+    """Create single case manually and assign to specific coder"""
+    import uuid
+    from datetime import datetime, timezone, timedelta
+    
+    # Generate patient ID if not provided
+    if not patient_id:
+        patient_id = 'PT-' + str(uuid.uuid4())[:8].upper()
+    
+    # Calculate dates
+    today = datetime.now(timezone.utc).date()
+    admission_date = (today - timedelta(days=admission_days)).isoformat()
+    discharge_date = today.isoformat()
+    
+    # Verify coder exists
+    coder = await db.users.find_one(
+        {"id": assigned_coder_id, "department": "coding", "coding_role": "coder"},
+        {"_id": 0}
+    )
+    if not coder:
+        raise HTTPException(status_code=404, detail="Coder not found")
+    
+    # Verify hospital exists
+    hospital = await db.hospitals.find_one({"id": hospital_id}, {"_id": 0})
+    if not hospital:
+        raise HTTPException(status_code=404, detail="Hospital not found")
+    
+    # Check if case number already exists
+    existing = await db.medical_cases.find_one({"case_number": case_number}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Case number already exists")
+    
+    # Create case
+    case_doc = {
+        'id': str(uuid.uuid4()),
+        'case_number': case_number,
+        'patient_id': patient_id,
+        'hospital_id': hospital_id,
+        'admission_date': admission_date,
+        'discharge_date': discharge_date,
+        'age': 0,  # Will be updated later
+        'gender': 'غير محدد',
+        'chief_complaint': chief_complaint,
+        'clinical_summary': clinical_summary,
+        'procedures': [],
+        'assigned_to': assigned_coder_id,
+        'assigned_at': datetime.now(timezone.utc).isoformat(),
+        'status': 'pending',
+        'created_at': datetime.now(timezone.utc).isoformat(),
+        'created_by': user_id
+    }
+    
+    await db.medical_cases.insert_one(case_doc)
+    
+    return {
+        "message": f"Case {case_number} created and assigned to {coder['full_name']}",
+        "case_id": case_doc['id'],
+        "assigned_to": coder['full_name']
+    }
+
+@router.post("/cases/upload-excel")
+async def upload_cases_excel(file: UploadFile = File(...), user_id: str = None):
+    """Upload cases from Excel and distribute dynamically based on coder targets
+    
+    Expected columns: case_number, hospital_code, admission_days, patient_id (optional)
+    """
+    try:
+        contents = await file.read()
+        df = pd.read_excel(io.BytesIO(contents))
+        
+        required_cols = ['case_number', 'hospital_code', 'admission_days']
+        if not all(col in df.columns for col in required_cols):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Excel must contain columns: {', '.join(required_cols)}"
+            )
+        
+        # Get active coders with their daily targets
+        coders = await db.users.find(
+            {"department": "coding", "coding_role": "coder", "is_active": True},
+            {"_id": 0}
+        ).to_list(100)
+        
+        if not coders:
+            raise HTTPException(status_code=400, detail="No active coders available")
+        
+        # Get today's assigned cases per coder
+        today = datetime.now(timezone.utc).date()
+        today_start = datetime.combine(today, datetime.min.time()).isoformat()
+        
+        coder_workload = {}
+        for coder in coders:
+            assigned_today = await db.medical_cases.count_documents({
+                "assigned_to": coder['id'],
+                "assigned_at": {"$gte": today_start}
+            })
+            daily_target = coder.get('daily_case_target', 10)
+            remaining = max(0, daily_target - assigned_today)
+            coder_workload[coder['id']] = {
+                'coder': coder,
+                'assigned_today': assigned_today,
+                'daily_target': daily_target,
+                'remaining': remaining
+            }
+        
+        # Sort coders by remaining capacity (highest first)
+        sorted_coders = sorted(coder_workload.items(), key=lambda x: x[1]['remaining'], reverse=True)
+        
+        cases_created = 0
+        cases_skipped = 0
+        distribution_log = []
+        current_coder_index = 0
+        
+        for _, row in df.iterrows():
+            case_number = str(row['case_number'])
+            hospital_code = str(row['hospital_code'])
+            admission_days = int(row['admission_days'])
+            patient_id = str(row.get('patient_id', 'PT-' + str(uuid.uuid4())[:8].upper()))
+            
+            # Check if case exists
+            existing = await db.medical_cases.find_one({"case_number": case_number}, {"_id": 0})
+            if existing:
+                cases_skipped += 1
+                continue
+            
+            # Find hospital
+            hospital = await db.hospitals.find_one({"code": hospital_code}, {"_id": 0})
+            if not hospital:
+                cases_skipped += 1
+                continue
+            
+            # Assign to coder with capacity
+            coder_assigned = False
+            attempts = 0
+            while not coder_assigned and attempts < len(sorted_coders):
+                coder_id, workload = sorted_coders[current_coder_index]
+                if workload['remaining'] > 0:
+                    # Assign to this coder
+                    admission_date = (datetime.now(timezone.utc).date() - timedelta(days=admission_days)).isoformat()
+                    discharge_date = datetime.now(timezone.utc).date().isoformat()
+                    
+                    case_doc = {
+                        'id': str(uuid.uuid4()),
+                        'case_number': case_number,
+                        'patient_id': patient_id,
+                        'hospital_id': hospital['id'],
+                        'admission_date': admission_date,
+                        'discharge_date': discharge_date,
+                        'age': 0,
+                        'gender': 'غير محدد',
+                        'chief_complaint': 'رفع Excel',
+                        'clinical_summary': 'في انتظار الترميز',
+                        'procedures': [],
+                        'assigned_to': coder_id,
+                        'assigned_at': datetime.now(timezone.utc).isoformat(),
+                        'status': 'pending',
+                        'created_at': datetime.now(timezone.utc).isoformat(),
+                        'created_by': user_id or 'system'
+                    }
+                    
+                    await db.medical_cases.insert_one(case_doc)
+                    
+                    # Update workload
+                    workload['remaining'] -= 1
+                    workload['assigned_today'] += 1
+                    
+                    distribution_log.append({
+                        'case': case_number,
+                        'coder': workload['coder']['full_name'],
+                        'hospital': hospital['name']
+                    })
+                    
+                    cases_created += 1
+                    coder_assigned = True
+                
+                # Move to next coder (round-robin among those with capacity)
+                current_coder_index = (current_coder_index + 1) % len(sorted_coders)
+                attempts += 1
+            
+            if not coder_assigned:
+                cases_skipped += 1
+        
+        return {
+            "message": f"Successfully uploaded {cases_created} cases",
+            "total_rows": len(df),
+            "cases_created": cases_created,
+            "cases_skipped": cases_skipped,
+            "distribution": distribution_log[:10]  # Show first 10
+        }
+        
+    except Exception as e:
+        logging.error(f"Error uploading cases: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Error processing file: {str(e)}")
+
 @router.post("/cases")
 async def create_medical_case(case: MedicalCaseCreate, user_id: str):
     """Create new medical case for coding"""
