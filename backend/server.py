@@ -1141,9 +1141,9 @@ async def login_step2(request: Request, credentials: OTPVerification):
 
 # Keep old endpoint for backward compatibility (deprecated)
 @api_router.post("/auth/login", response_model=Token)
-async def login(credentials: UserLogin):
+async def login(request: Request, credentials: UserLogin):
     """Legacy login endpoint - redirects to new MFA flow"""
-    result = await login_step1(credentials)
+    result = await login_step1(request, credentials)
     if result.get('requires_mfa'):
         raise HTTPException(
             status_code=202,
