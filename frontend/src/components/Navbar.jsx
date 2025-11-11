@@ -133,6 +133,35 @@ const Navbar = ({ user, onLogout }) => {
                   {language === 'ar' ? 'البريد' : 'Messages'}
                 </Button>
               )}
+
+              {/* Coding Department Links */}
+              {user.department === 'coding' && (user.role === 'supervisor' || user.role === 'admin') && (
+                <Button
+                  variant={isActive('/coding-supervisor') ? 'secondary' : 'ghost'}
+                  onClick={() => navigate('/coding-supervisor')}
+                  className={isActive('/coding-supervisor') ? '' : 'text-white hover:bg-white/10'}
+                >
+                  {language === 'ar' ? 'الترميز الطبي' : 'Medical Coding'}
+                </Button>
+              )}
+              {user.department === 'coding' && user.coding_role === 'coder' && (
+                <Button
+                  variant={isActive('/coder') ? 'secondary' : 'ghost'}
+                  onClick={() => navigate('/coder')}
+                  className={isActive('/coder') ? '' : 'text-white hover:bg-white/10'}
+                >
+                  {language === 'ar' ? 'منصة المرمز' : 'Coder Workspace'}
+                </Button>
+              )}
+              {user.department === 'coding' && user.coding_role === 'auditor' && (
+                <Button
+                  variant={isActive('/auditor') ? 'secondary' : 'ghost'}
+                  onClick={() => navigate('/auditor')}
+                  className={isActive('/auditor') ? '' : 'text-white hover:bg-white/10'}
+                >
+                  {language === 'ar' ? 'منصة المدقق' : 'Auditor Workspace'}
+                </Button>
+              )}
             </div>
           </div>
 
