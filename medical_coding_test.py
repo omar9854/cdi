@@ -55,10 +55,11 @@ class MedicalCodingTester:
         print("-" * 50)
         
         # Test CDI department registration (default)
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
         cdi_user = {
-            "email": f"cdi_test_{datetime.now().strftime('%H%M%S')}@test.com",
+            "email": f"cdi_test_{timestamp}@test.com",
             "full_name": "CDI Test User",
-            "phone_number": "966501234567",
+            "phone_number": f"96650123{timestamp[-4:]}",
             "password": "CDITestUser123!",
             "department": "cdi"
         }
