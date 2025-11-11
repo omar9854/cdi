@@ -414,6 +414,22 @@ const AdminDashboard = ({ user, onLogout }) => {
                           <Button
                             size="sm"
                             variant="outline"
+                            onClick={() => {
+                              setEditDepartmentUser(userStat);
+                              setDepartmentForm({
+                                department: userStat.department || 'cdi',
+                                coding_role: userStat.coding_role || null,
+                                daily_case_target: userStat.daily_case_target || 10
+                              });
+                            }}
+                            title={language === 'ar' ? 'تعديل القسم' : 'Edit Department'}
+                            className="bg-green-50"
+                          >
+                            <ShieldCheck className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => handleEditUser(userStat)}
                             title={language === 'ar' ? 'تعديل' : 'Edit'}
                           >
