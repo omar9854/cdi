@@ -888,7 +888,9 @@ async def register(request: Request, user_data: UserRegister):
             "email": user.email, 
             "full_name": user.full_name,
             "phone_number": user.phone_number,
-            "role": user.role
+            "role": user.role,
+            "department": user.department,
+            "coding_role": user.coding_role
         }
     }
 
