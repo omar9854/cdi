@@ -909,9 +909,10 @@ async def login_step1(request: Request, credentials: UserLogin):
         # Check if account lockout expired
         await unlock_account_if_expired(db, credentials.email)
         
-        # Check rate limiting - TEMPORARILY DISABLED FOR TEST ACCOUNTS
-        test_accounts = ["medidocai@gmail.com", "supervisor@hospital.sa", "coder@hospital.sa", "auditor@hospital.sa"]
+        # Skip rate limiting for test accounts
+        test_accounts = ["medidocai@gmail.com", "almaghthawi.cdi@gmail.com", "supervisor@hospital.sa", "coder@hospital.sa", "auditor@hospital.sa"]
         if credentials.email not in test_accounts:
+            # Check rate limiting
             is_allowed, remaining = await check_rate_limit(db, credentials.email)
             if not is_allowed:
                 raise HTTPException(
