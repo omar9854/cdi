@@ -854,3 +854,68 @@ async def update_daily_target(user_id: str, daily_target: int):
     
     return {"message": "Daily target updated successfully"}
 
+# ========== AI-Powered Coding Assistant ==========
+@router.post("/ai/analyze-case")
+async def ai_analyze_case(case_id: str):
+    """Use AI to analyze case and suggest ICD codes"""
+    try:
+        from coding_ai_helper import analyze_case_for_coding
+        
+        # Get case details
+        case = await db.medical_cases.find_one({"id": case_id}, {"_id": 0})
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        
+        # Get available ICD codes
+        icd_codes = await db.icd_codes.find({}, {"_id": 0}).to_list(100)
+        
+        # Analyze with AI
+        result = await analyze_case_for_coding(
+            clinical_summary=case.get('clinical_summary', ''),
+            chief_complaint=case.get('chief_complaint', ''),
+            procedures=case.get('procedures', []),
+            icd_codes=icd_codes
+        )
+        
+        return result
+        
+    except Exception as e:
+        logging.error(f"AI analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"AI analysis failed: {str(e)}")
+
+@router.post("/ai/search-icd")
+async def ai_search_icd(query: str):
+    """Smart ICD code search with AI"""
+    try:
+        from coding_ai_helper import search_icd_smart
+        
+        # Get all ICD codes
+        icd_codes = await db.icd_codes.find({}, {"_id": 0}).to_list(500)
+        
+        # Smart search
+        results = await search_icd_smart(query, icd_codes)
+        
+        return {"codes": results, "count": len(results)}
+        
+    except Exception as e:
+        logging.error(f"Smart search error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/ai/calculate-drg")
+async def ai_calculate_drg(principal_code: str, secondary_codes: List[str] = []):
+    """Calculate DRG and estimated value"""
+    try:
+        from coding_ai_helper import calculate_drg_value
+        
+        # Get DRG prices
+        drg_prices = await db.drg_prices.find({}, {"_id": 0}).to_list(100)
+        
+        # Calculate
+        result = await calculate_drg_value(principal_code, secondary_codes, drg_prices)
+        
+        return result
+        
+    except Exception as e:
+        logging.error(f"DRG calculation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
