@@ -821,12 +821,28 @@ async def register(request: Request, user_data: UserRegister):
     # Set password expiration (90 days from now)
     password_expires_at = datetime.now(timezone.utc) + timedelta(days=90)
     
+    # Validate department and coding_role
+    department = user_data.department if user_data.department in ['cdi', 'coding'] else 'cdi'
+    coding_role = None
+    daily_case_target = None
+    
+    if department == 'coding':
+        if user_data.coding_role not in ['coder', 'auditor']:
+            raise HTTPException(status_code=400, detail="Invalid coding role. Must be 'coder' or 'auditor'")
+        coding_role = user_data.coding_role
+        
+        if coding_role == 'coder':
+            daily_case_target = 10  # Default target for new coders
+    
     user = User(
         email=user_data.email,
         full_name=user_data.full_name,
         phone_number=user_data.phone_number,
         password_hash=hash_password(user_data.password),
-        role=role
+        role=role,
+        department=department,
+        coding_role=coding_role,
+        daily_case_target=daily_case_target
     )
     
     doc = user.model_dump()
