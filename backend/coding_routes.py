@@ -101,6 +101,19 @@ async def delete_hospital(hospital_id: str):
     
     return {"message": "Hospital deactivated successfully"}
 
+@router.post("/hospitals/{hospital_id}/activate")
+async def activate_hospital(hospital_id: str):
+    """Reactivate a deactivated hospital"""
+    result = await db.hospitals.update_one(
+        {"id": hospital_id},
+        {"$set": {"is_active": True}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Hospital not found")
+    
+    return {"message": "Hospital activated successfully"}
+
 # ========== ICD-10-AM Code Management ==========
 @router.get("/icd-codes")
 async def get_icd_codes(search: Optional[str] = None, limit: int = 50):
