@@ -70,7 +70,7 @@ class MedicalCodingTester:
             "email": f"coder_test_{datetime.now().strftime('%H%M%S')}@test.com",
             "full_name": "Coder Test User",
             "phone_number": "966501234568",
-            "password": "CoderTest123!",
+            "password": "CoderTestUser123!",
             "department": "coding",
             "coding_role": "coder"
         }
