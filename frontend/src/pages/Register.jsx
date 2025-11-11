@@ -21,6 +21,8 @@ const Register = ({ setUser }) => {
     full_name: '', 
     phone_number: '',
     password: '',
+    department: 'cdi',
+    coding_role: null,
     admin_code: '' 
   });
   const [loading, setLoading] = useState(false);
