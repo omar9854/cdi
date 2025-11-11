@@ -366,6 +366,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                     <TableHead className="text-center">{language === 'ar' ? 'الاسم' : 'Name'}</TableHead>
                     <TableHead className="text-center">{language === 'ar' ? 'البريد' : 'Email'}</TableHead>
                     <TableHead className="text-center">{language === 'ar' ? 'الجوال' : 'Phone'}</TableHead>
+                    <TableHead className="text-center">{language === 'ar' ? 'القسم' : 'Department'}</TableHead>
                     <TableHead className="text-center">{language === 'ar' ? 'الدور' : 'Role'}</TableHead>
                     <TableHead className="text-center">{language === 'ar' ? 'النشاط اليوم' : 'Today'}</TableHead>
                     <TableHead className="text-center">{language === 'ar' ? 'الإجراءات' : 'Actions'}</TableHead>
