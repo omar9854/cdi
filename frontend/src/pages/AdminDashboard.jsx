@@ -71,6 +71,25 @@ const AdminDashboard = ({ user, onLogout }) => {
     }
   };
 
+  const handleUpdateDepartment = async () => {
+    if (!editDepartmentUser) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `${API}/admin/users/${editDepartmentUser.id}/department?department=${departmentForm.department}&coding_role=${departmentForm.coding_role || ''}&daily_case_target=${departmentForm.daily_case_target || ''}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` }}
+      );
+      
+      toast.success(language === 'ar' ? 'تم تحديث القسم بنجاح' : 'Department updated successfully');
+      setEditDepartmentUser(null);
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to update');
+    }
+  };
+
   const handleExportExcel = async () => {
     setExporting(true);
     try {
