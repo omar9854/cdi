@@ -19,7 +19,7 @@ import Messages from '@/pages/Messages';
 import MFAVerification from '@/pages/MFAVerification';
 import SecurityDashboard from '@/pages/SecurityDashboard';
 import CodingSupervisor from '@/pages/CodingSupervisorPro';
-import CoderWorkspace from '@/pages/CoderWorkspace';
+import CoderWorkspace from '@/pages/CoderWorkspacePro';
 import AuditorWorkspace from '@/pages/AuditorWorkspace';
 import ChatWidget from '@/components/ChatWidget';
 
