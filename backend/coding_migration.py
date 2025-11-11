@@ -77,7 +77,7 @@ async def main():
             'department': 'coding',
             'coding_role': 'coder',
             'daily_case_target': 15,
-            'mfa_enabled': True,
+            'mfa_enabled': False,
             'is_active': True,
             'created_at': datetime.now(timezone.utc).isoformat(),
             'password_last_changed': datetime.now(timezone.utc).isoformat(),
