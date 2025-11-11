@@ -3575,6 +3575,15 @@ try:
 except Exception as e:
     print(f"⚠️ Warning: Could not load security routes: {str(e)}")
 
+# Import and include coding router
+try:
+    # Set database for coding routes
+    coding_routes.set_db(db)
+    app.include_router(coding_routes.router, prefix="/api")
+    print("✅ Medical coding routes loaded successfully")
+except Exception as e:
+    print(f"⚠️ Warning: Could not load coding routes: {str(e)}")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
