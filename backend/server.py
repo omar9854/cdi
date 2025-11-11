@@ -1396,7 +1396,7 @@ async def get_users_filtered(
 @api_router.get("/admin/users")
 async def get_all_users(admin: dict = Depends(require_admin)):
     users = await db.users.find(
-        {}, {"_id": 0, "password_hash": 0}
+        {}, {"_id": 0, "password_hash": 0, "password": 0}
     ).sort("created_at", -1).to_list(1000)
     
     for user in users:
@@ -1404,6 +1404,51 @@ async def get_all_users(admin: dict = Depends(require_admin)):
             user['created_at'] = datetime.fromisoformat(user['created_at'])
     
     return users
+
+@api_router.put("/admin/users/{user_id}/department")
+async def update_user_department(
+    user_id: str,
+    department: str,
+    coding_role: Optional[str] = None,
+    daily_case_target: Optional[int] = None,
+    admin: dict = Depends(require_admin)
+):
+    """Update user's department and coding role"""
+    # Validate department
+    if department not in ['cdi', 'coding']:
+        raise HTTPException(status_code=400, detail="Invalid department. Must be 'cdi' or 'coding'")
+    
+    # Validate coding_role if department is coding
+    if department == 'coding':
+        if coding_role not in ['coder', 'auditor', None]:
+            raise HTTPException(status_code=400, detail="Invalid coding_role. Must be 'coder', 'auditor', or null")
+    else:
+        # If CDI, clear coding role
+        coding_role = None
+        daily_case_target = None
+    
+    # Set default daily target for coders
+    if coding_role == 'coder' and daily_case_target is None:
+        daily_case_target = 10
+    
+    # Update user
+    update_data = {
+        'department': department,
+        'coding_role': coding_role
+    }
+    
+    if daily_case_target is not None:
+        update_data['daily_case_target'] = daily_case_target
+    
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "User department updated successfully", "update": update_data}
 
 @api_router.put("/admin/users/{user_id}/toggle-active")
 async def toggle_user_active(user_id: str, admin: dict = Depends(require_admin)):
