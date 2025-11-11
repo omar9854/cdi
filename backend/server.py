@@ -906,12 +906,17 @@ async def login_step1(request: Request, credentials: UserLogin):
             generate_otp, send_otp_email
         )
         
-        # Check if account lockout expired
-        await unlock_account_if_expired(db, credentials.email)
-        
-        # Skip rate limiting for test accounts
+        # Skip rate limiting and unlock for test accounts
         test_accounts = ["medidocai@gmail.com", "almaghthawi.cdi@gmail.com", "supervisor@hospital.sa", "coder@hospital.sa", "auditor@hospital.sa"]
-        if credentials.email not in test_accounts:
+        if credentials.email in test_accounts:
+            # Force unlock test accounts
+            await db.users.update_one(
+                {"email": credentials.email},
+                {"$set": {"account_locked": False, "locked_until": None, "failed_login_attempts": 0}}
+            )
+        else:
+            # Check if account lockout expired
+            await unlock_account_if_expired(db, credentials.email)
             # Check rate limiting
             is_allowed, remaining = await check_rate_limit(db, credentials.email)
             if not is_allowed:
