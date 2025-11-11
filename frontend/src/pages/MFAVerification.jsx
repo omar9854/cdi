@@ -74,7 +74,22 @@ const MFAVerification = ({ setUser }) => {
       setUser(loginResponse.data.user);
 
       toast.success(language === 'ar' ? 'تم التحقق بنجاح! مرحباً بك' : 'Verification successful! Welcome');
-      navigate('/dashboard');
+      
+      // Route based on department and role
+      const user = loginResponse.data.user;
+      if (user.department === 'coding') {
+        if (user.coding_role === 'coder') {
+          navigate('/coder');
+        } else if (user.coding_role === 'auditor') {
+          navigate('/auditor');
+        } else if (user.role === 'supervisor' || user.role === 'admin') {
+          navigate('/coding-supervisor');
+        } else {
+          navigate('/dashboard');
+        }
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error) {
       logError('MFA Verification', error);
       const errorMessage = getErrorMessage(
