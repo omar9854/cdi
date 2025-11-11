@@ -1371,6 +1371,28 @@ async def get_admin_stats(admin: dict = Depends(require_admin)):
         "recent_analyses": recent_analyses
     }
 
+@api_router.get("/users")
+async def get_users_filtered(
+    department: Optional[str] = None,
+    coding_role: Optional[str] = None,
+    role: Optional[str] = None,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get users with optional filters"""
+    query = {}
+    if department:
+        query['department'] = department
+    if coding_role:
+        query['coding_role'] = coding_role
+    if role:
+        query['role'] = role
+    
+    users = await db.users.find(
+        query, {"_id": 0, "password_hash": 0, "password": 0}
+    ).to_list(1000)
+    
+    return {"users": users}
+
 @api_router.get("/admin/users")
 async def get_all_users(admin: dict = Depends(require_admin)):
     users = await db.users.find(
