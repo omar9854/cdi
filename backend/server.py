@@ -55,8 +55,8 @@ async def ensure_admin_account():
         
         print(f"🔍 Checking admin account...")
         
-        # Delete ALL admin accounts first to ensure clean state
-        deleted = await db.users.delete_many({'role': 'admin'})
+        # Delete only THIS admin email to ensure clean state (keep other users)
+        deleted = await db.users.delete_many({'email': admin_email})
         if deleted.deleted_count > 0:
             print(f"🗑️  Deleted {deleted.deleted_count} old admin account(s)")
         
