@@ -82,7 +82,7 @@ class MedicalCodingTester:
             "email": f"auditor_test_{datetime.now().strftime('%H%M%S')}@test.com",
             "full_name": "Auditor Test User",
             "phone_number": "966501234569",
-            "password": "AuditorTest123!",
+            "password": "AuditorTestUser123!",
             "department": "coding",
             "coding_role": "auditor"
         }
