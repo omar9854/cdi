@@ -26,10 +26,10 @@ class MedicalCodingAPITester:
         self.tests_passed = 0
         self.test_results = []
         
-        # Admin credentials for Gemini API testing
+        # Admin credentials for Gemini API testing (test admin without MFA)
         self.admin_credentials = {
-            "email": "almaghthawi.cdi@gmail.com",
-            "password": "CDI@2024#Admin"
+            "email": "test.admin@cdi.com",
+            "password": "TestAdmin123!"
         }
         
         # Test user data (for clinical questions testing - MFA disabled)
