@@ -2319,8 +2319,8 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
     try:
         # Validate AI provider
         ai_provider = chat_request.ai_provider or 'gemini'
-        if ai_provider not in ['gemini', 'azure', 'grok']:
-            raise HTTPException(status_code=400, detail="Invalid AI provider")
+        if ai_provider not in ['gemini', 'azure', 'deepseek']:
+            raise HTTPException(status_code=400, detail="مزود غير صحيح. يجب أن يكون: gemini, azure, أو deepseek. Invalid AI provider. Must be: gemini, azure, or deepseek")
         
         # Get chat history for context
         previous_messages = await db.chat_messages.find(
