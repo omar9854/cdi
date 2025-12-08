@@ -2130,8 +2130,8 @@ async def analyze_note(request: Request, analyze_request: AnalyzeRequest, user: 
     
     # Validate AI provider
     ai_provider = analyze_request.ai_provider or 'gemini'
-    if ai_provider not in ['gemini', 'azure', 'grok']:
-        raise HTTPException(status_code=400, detail="Invalid AI provider. Must be: gemini, azure, or grok")
+    if ai_provider not in ['gemini', 'azure', 'deepseek']:
+        raise HTTPException(status_code=400, detail="مزود غير صحيح. يجب أن يكون: gemini, azure, أو deepseek. Invalid AI provider. Must be: gemini, azure, or deepseek")
     
     # Analyze with selected AI provider
     result = await analyze_with_ai(note['title'], note['doctor_notes'], provider=ai_provider)
