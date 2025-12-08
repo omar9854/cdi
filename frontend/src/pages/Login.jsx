@@ -50,19 +50,25 @@ const Login = ({ setUser }) => {
         toast.success(t('loginSuccess'));
         
         // Route based on department and role
-        if (user.department === 'coding') {
-          if (user.coding_role === 'coder') {
+        if (user.role === 'admin') {
+          navigate('/admin');
+        } else if (user.department === 'coding') {
+          if (user.coding_role === 'supervisor') {
+            navigate('/coding-supervisor');
+          } else if (user.coding_role === 'coder') {
             navigate('/coder');
           } else if (user.coding_role === 'auditor') {
             navigate('/auditor');
-          } else if (user.role === 'supervisor' || user.role === 'admin') {
-            navigate('/coding-supervisor');
           } else {
             navigate('/dashboard');
           }
         } else {
-          // CDI department users go to dashboard
-          navigate('/dashboard');
+          // CDI department users go to dashboard  
+          if (user.role === 'supervisor') {
+            navigate('/supervisor');
+          } else {
+            navigate('/dashboard');
+          }
         }
       }
     } catch (error) {
