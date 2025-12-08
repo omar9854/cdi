@@ -784,7 +784,7 @@ CRITICAL REQUIREMENTS:
         # Select AI provider
         if provider == 'gemini':
             # Use Google Gemini API with automatic key rotation
-            model = get_gemini_model('gemini-1.5-flash')
+            model = get_gemini_model('gemini-2.5-flash')
             
             # Combine system message and user prompt
             full_prompt = f"{system_message}\n\n{user_prompt}"
