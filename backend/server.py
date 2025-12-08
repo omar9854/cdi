@@ -3929,7 +3929,7 @@ Respond in Arabic if the question is in Arabic, or in English if the question is
 
 # ========== AI Settings Routes ==========
 class AIKeysUpdate(BaseModel):
-    provider: str  # gemini, azure, grok
+    provider: str  # gemini, azure, deepseek
     api_keys: List[str]
 
 @api_router.get("/admin/ai-settings")
