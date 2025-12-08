@@ -6,7 +6,7 @@
 
 1. **اذهب إلى صفحة التسجيل:**
    ```
-   https://diagnote-ai.preview.emergentagent.com/register
+   https://medical-coder.preview.emergentagent.com/register
    ```
 
 2. **املأ البيانات:**
@@ -66,7 +66,7 @@
 
 1. **انسخ الرابط:**
    ```
-   https://diagnote-ai.preview.emergentagent.com
+   https://medical-coder.preview.emergentagent.com
    ```
 
 2. **أرسله للفريق الطبي عبر:**

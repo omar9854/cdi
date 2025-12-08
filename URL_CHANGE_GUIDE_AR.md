@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://diagnote-ai.preview.emergentagent.com
+https://medical-coder.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://diagnote-ai.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://diagnote-ai.preview.emergentagent.com
+   https://medical-coder.preview.emergentagent.com
    ```
 
 ---
