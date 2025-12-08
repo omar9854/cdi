@@ -180,15 +180,39 @@ const Analysis = ({ user, onLogout }) => {
           </CardContent>
         </Card>
 
-        {/* Analyze Button */}
+        {/* Analyze Button with AI Provider Selection */}
         {!analysis && (
           <Card className="medical-card mb-6 fade-in">
             <CardContent className="text-center py-8">
               <Sparkles className="w-16 h-16 text-blue-600 mx-auto mb-4" />
               <h3 className="text-2xl font-semibold text-gray-800 mb-2">{t('readyToAnalyze')}</h3>
               <p className="text-gray-600 mb-6">{t('aiAnalysisDescription')}</p>
+              
+              {aiProviders.length > 1 && !analyzing && (
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 mb-2">
+                    {language === 'ar' ? 'اختر مزود الذكاء الاصطناعي:' : 'Choose AI Provider:'}
+                  </p>
+                  <div className="flex justify-center gap-3 flex-wrap">
+                    {aiProviders.map((provider) => (
+                      <button
+                        key={provider.id}
+                        onClick={() => setSelectedProvider(provider.id)}
+                        className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                          selectedProvider === provider.id
+                            ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold'
+                            : 'border-gray-200 hover:border-blue-300'
+                        }`}
+                      >
+                        {language === 'ar' ? provider.name_ar : provider.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <Button
-                onClick={handleAnalyze}
+                onClick={() => handleAnalyze()}
                 disabled={analyzing}
                 className="medical-blue text-lg py-6 px-8"
                 data-testid="analyze-button"
