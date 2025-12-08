@@ -151,7 +151,7 @@ if not GEMINI_API_KEYS:
 print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation (Total capacity: {len(GEMINI_API_KEYS) * 1500} requests/day)")
 
 # Helper function to get a random API key for load balancing
-def get_gemini_model(model_name='gemini-flash-latest', system_instruction=None):
+def get_gemini_model(model_name='gemini-2.5-flash', system_instruction=None):
     """Get a Gemini model with a random API key for load balancing"""
     api_key = random.choice(GEMINI_API_KEYS)
     genai.configure(api_key=api_key)
