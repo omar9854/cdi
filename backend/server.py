@@ -128,7 +128,9 @@ DB_OPERATIONS = Counter('cdi_db_operations_total', 'Total database operations', 
 instrumentor.instrument(app).expose(app, endpoint="/metrics")
 
 # JWT Settings
-SECRET_KEY = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
+SECRET_KEY = os.environ.get('JWT_SECRET')
+if not SECRET_KEY:
+    raise ValueError("JWT_SECRET environment variable is required for production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
