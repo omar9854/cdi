@@ -780,29 +780,103 @@ CRITICAL REQUIREMENTS:
 - ALL ICD-10-CM codes MUST be complete and accurate"""
 
     try:
-        # Use Google Gemini API with automatic key rotation
-        model = get_gemini_model('gemini-flash-latest')
+        # Select AI provider
+        if provider == 'gemini':
+            # Use Google Gemini API with automatic key rotation
+            model = get_gemini_model('gemini-1.5-flash')
+            
+            # Combine system message and user prompt
+            full_prompt = f"{system_message}\n\n{user_prompt}"
+            
+            # Generate response with retry logic
+            max_retries = len(GEMINI_API_KEYS)
+            last_error = None
+            
+            for attempt in range(max_retries):
+                try:
+                    response = model.generate_content(full_prompt)
+                    response_text = response.text.strip()
+                    break  # Success, exit retry loop
+                except Exception as e:
+                    last_error = e
+                    if attempt < max_retries - 1:
+                        # Try with a different key
+                        logger.warning(f"Retry {attempt + 1}/{max_retries} with different API key")
+                        model = get_gemini_model('gemini-1.5-flash')
+                    else:
+                        raise e
         
-        # Combine system message and user prompt
-        full_prompt = f"{system_message}\n\n{user_prompt}"
-        
-        # Generate response with retry logic
-        max_retries = len(GEMINI_API_KEYS)
-        last_error = None
-        
-        for attempt in range(max_retries):
-            try:
-                response = model.generate_content(full_prompt)
-                response_text = response.text.strip()
-                break  # Success, exit retry loop
-            except Exception as e:
-                last_error = e
-                if attempt < max_retries - 1:
-                    # Try with a different key
-                    logger.warning(f"Retry {attempt + 1}/{max_retries} with different API key")
-                    model = get_gemini_model('gemini-flash-latest')
+        elif provider == 'azure':
+            # Use Microsoft Azure OpenAI
+            from openai import AzureOpenAI
+            
+            azure_key = os.environ.get('AZURE_OPENAI_KEY')
+            if not azure_key:
+                # Check database
+                azure_settings = await db.ai_settings.find_one({"provider": "azure"})
+                if azure_settings and azure_settings.get('api_keys'):
+                    azure_key = random.choice(azure_settings['api_keys'])
                 else:
-                    raise e
+                    raise HTTPException(status_code=400, detail="Azure OpenAI key not configured")
+            
+            endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT', 'https://your-resource.openai.azure.com/')
+            deployment = os.environ.get('AZURE_OPENAI_DEPLOYMENT', 'gpt-4')
+            api_version = os.environ.get('AZURE_OPENAI_API_VERSION', '2024-02-15-preview')
+            
+            client = AzureOpenAI(
+                api_key=azure_key,
+                api_version=api_version,
+                azure_endpoint=endpoint
+            )
+            
+            messages = [
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_prompt}
+            ]
+            
+            response = client.chat.completions.create(
+                model=deployment,
+                messages=messages,
+                temperature=0.7,
+                max_tokens=4000
+            )
+            
+            response_text = response.choices[0].message.content.strip()
+        
+        elif provider == 'grok':
+            # Use Grok (X.AI)
+            from openai import OpenAI
+            
+            grok_key = os.environ.get('GROK_API_KEY')
+            if not grok_key:
+                # Check database
+                grok_settings = await db.ai_settings.find_one({"provider": "grok"})
+                if grok_settings and grok_settings.get('api_keys'):
+                    grok_key = random.choice(grok_settings['api_keys'])
+                else:
+                    raise HTTPException(status_code=400, detail="Grok API key not configured")
+            
+            client = OpenAI(
+                api_key=grok_key,
+                base_url="https://api.x.ai/v1"
+            )
+            
+            messages = [
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_prompt}
+            ]
+            
+            response = client.chat.completions.create(
+                model="grok-beta",
+                messages=messages,
+                temperature=0.7,
+                max_tokens=4000
+            )
+            
+            response_text = response.choices[0].message.content.strip()
+        
+        else:
+            raise HTTPException(status_code=400, detail=f"Unsupported AI provider: {provider}")
         
         # Parse JSON response
         import json
