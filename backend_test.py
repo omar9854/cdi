@@ -3411,6 +3411,303 @@ class MedicalCodingAPITester:
         # Print final summary
         return self.generate_report()
 
+    # ========== AI PROVIDER SYSTEM TESTS ==========
+    
+    def test_ai_providers_endpoint(self):
+        """Test GET /api/ai-providers - should return list of available providers"""
+        if not self.admin_token:
+            self.log_test("AI Providers Endpoint", False, "No admin authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(
+                f"{self.api_url}/ai-providers",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                providers = data.get('providers', [])
+                
+                # Verify response structure
+                if not isinstance(providers, list):
+                    success = False
+                    details = "Expected 'providers' to be a list"
+                else:
+                    # Check if Gemini provider exists (should be available from env)
+                    gemini_found = False
+                    for provider in providers:
+                        if provider.get('id') == 'gemini':
+                            gemini_found = True
+                            required_fields = ['id', 'name', 'name_ar', 'available']
+                            missing_fields = [field for field in required_fields if field not in provider]
+                            if missing_fields:
+                                success = False
+                                details = f"Gemini provider missing fields: {', '.join(missing_fields)}"
+                                break
+                    
+                    if success:
+                        if gemini_found:
+                            details = f"Retrieved {len(providers)} providers, Gemini available: {gemini_found}"
+                        else:
+                            success = False
+                            details = f"Gemini provider not found in {len(providers)} providers"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("AI Providers Endpoint", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("AI Providers Endpoint", False, str(e))
+            return False
+
+    def test_analyze_with_ai_provider(self, note_id):
+        """Test POST /api/analyze with ai_provider parameter"""
+        if not self.admin_token or not note_id:
+            self.log_test("Analyze with AI Provider", False, "No admin token or note ID")
+            return False, None
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            analyze_data = {
+                "note_id": note_id,
+                "ai_provider": "gemini"
+            }
+            
+            print("🔄 Starting AI analysis with Gemini provider (this may take 10-30 seconds)...")
+            response = requests.post(
+                f"{self.api_url}/analyze",
+                json=analyze_data,
+                headers=headers,
+                timeout=60  # Longer timeout for AI processing
+            )
+            success = response.status_code == 200
+            analysis_id = None
+            if success:
+                data = response.json()
+                analysis_id = data.get('id')
+                
+                # Verify expected response structure for AI provider system
+                required_fields = [
+                    'diagnoses_to_document', 'missing_documentation', 
+                    'gaps_ar', 'gaps_en', 'queries_ar', 'queries_en',
+                    'recommendations_ar', 'recommendations_en', 
+                    'summary_ar', 'summary_en'
+                ]
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if missing_fields:
+                    success = False
+                    details = f"Missing required fields: {', '.join(missing_fields)}"
+                else:
+                    # Check diagnoses structure
+                    diagnoses = data.get('diagnoses_to_document', [])
+                    diagnoses_count = len(diagnoses)
+                    
+                    # Verify diagnoses have type field (principal/secondary/derived)
+                    diagnoses_with_type = 0
+                    for diag in diagnoses:
+                        if 'type' in diag:
+                            diagnoses_with_type += 1
+                    
+                    gaps_ar_count = len(data.get('gaps_ar', []))
+                    gaps_en_count = len(data.get('gaps_en', []))
+                    queries_ar_count = len(data.get('queries_ar', []))
+                    queries_en_count = len(data.get('queries_en', []))
+                    
+                    details = f"Analysis completed with Gemini - Diagnoses: {diagnoses_count} (with type: {diagnoses_with_type}), Gaps AR: {gaps_ar_count}, Gaps EN: {gaps_en_count}, Queries AR: {queries_ar_count}, Queries EN: {queries_en_count}"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Analyze with AI Provider", success, details, response.json() if success else None)
+            return success, analysis_id
+        except Exception as e:
+            self.log_test("Analyze with AI Provider", False, str(e))
+            return False, None
+
+    def test_chat_with_ai_provider(self, analysis_id):
+        """Test POST /api/chat/{analysis_id} with ai_provider"""
+        if not self.admin_token or not analysis_id:
+            self.log_test("Chat with AI Provider", False, "No admin token or analysis ID")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            chat_data = {
+                "question": "ما هي التشخيصات الرئيسية التي يجب توثيقها؟"
+            }
+            
+            print("🔄 Testing AI chat with Gemini provider...")
+            response = requests.post(
+                f"{self.api_url}/chat/{analysis_id}",
+                json=chat_data,
+                headers=headers,
+                timeout=60  # Longer timeout for AI processing
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                
+                # Verify response structure
+                required_fields = ['question', 'answer']
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if missing_fields:
+                    success = False
+                    details = f"Missing required fields: {', '.join(missing_fields)}"
+                else:
+                    question = data.get('question', '')
+                    answer = data.get('answer', '')
+                    answer_length = len(answer)
+                    details = f"Chat response received - Question: '{question[:50]}...', Answer length: {answer_length} chars"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Chat with AI Provider", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Chat with AI Provider", False, str(e))
+            return False
+
+    def test_admin_ai_settings_get(self):
+        """Test GET /api/admin/ai-settings - should return providers config"""
+        if not self.admin_token:
+            self.log_test("Admin AI Settings GET", False, "No admin authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.get(
+                f"{self.api_url}/admin/ai-settings",
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                
+                # Verify expected providers
+                expected_providers = ['gemini', 'azure', 'grok']
+                missing_providers = [p for p in expected_providers if p not in data]
+                
+                if missing_providers:
+                    success = False
+                    details = f"Missing providers: {', '.join(missing_providers)}"
+                else:
+                    # Check Gemini configuration
+                    gemini_config = data.get('gemini', {})
+                    gemini_keys_count = gemini_config.get('keys_count', 0)
+                    gemini_name = gemini_config.get('name', '')
+                    gemini_name_ar = gemini_config.get('name_ar', '')
+                    
+                    details = f"AI settings retrieved - Gemini: {gemini_keys_count} keys, Name: '{gemini_name}', Name AR: '{gemini_name_ar}'"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Admin AI Settings GET", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Admin AI Settings GET", False, str(e))
+            return False
+
+    def test_admin_ai_settings_put(self):
+        """Test PUT /api/admin/ai-settings - update provider config"""
+        if not self.admin_token:
+            self.log_test("Admin AI Settings PUT", False, "No admin authentication token")
+            return False
+        
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            update_data = {
+                "provider": "gemini",
+                "api_keys": ["test_key_1", "test_key_2"]
+            }
+            
+            response = requests.put(
+                f"{self.api_url}/admin/ai-settings",
+                json=update_data,
+                headers=headers,
+                timeout=10
+            )
+            success = response.status_code == 200
+            if success:
+                data = response.json()
+                
+                # Verify response structure
+                required_fields = ['message', 'provider', 'keys_count']
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if missing_fields:
+                    success = False
+                    details = f"Missing required fields: {', '.join(missing_fields)}"
+                else:
+                    provider = data.get('provider')
+                    keys_count = data.get('keys_count')
+                    message = data.get('message', '')
+                    
+                    if provider != 'gemini' or keys_count != 2:
+                        success = False
+                        details = f"Expected provider='gemini' and keys_count=2, got provider='{provider}' and keys_count={keys_count}"
+                    else:
+                        details = f"AI settings updated - Provider: {provider}, Keys count: {keys_count}, Message: '{message}'"
+            else:
+                details = f"Status: {response.status_code}, Error: {response.text}"
+            
+            self.log_test("Admin AI Settings PUT", success, details, response.json() if success else None)
+            return success
+        except Exception as e:
+            self.log_test("Admin AI Settings PUT", False, str(e))
+            return False
+
+    def test_ai_provider_system_comprehensive(self):
+        """Comprehensive test of the AI Provider System"""
+        print("\n🤖 COMPREHENSIVE AI PROVIDER SYSTEM TEST")
+        print("=" * 70)
+        print("Testing AI Providers, Analysis, Chat, and Admin Settings endpoints")
+        print("=" * 70)
+        
+        # Step 1: Test AI Providers endpoint
+        providers_success = self.test_ai_providers_endpoint()
+        
+        # Step 2: Test Admin AI Settings endpoints
+        ai_settings_get_success = self.test_admin_ai_settings_get()
+        ai_settings_put_success = self.test_admin_ai_settings_put()
+        
+        # Step 3: Create a clinical note for testing
+        print("\n📝 Creating clinical note for AI testing...")
+        note_created, note_id = self.test_create_clinical_note()
+        
+        if not note_created or not note_id:
+            self.log_test("AI Provider System - Note Creation", False, "Failed to create test note")
+            return False
+        
+        # Step 4: Test AI analysis with provider
+        analysis_success, analysis_id = self.test_analyze_with_ai_provider(note_id)
+        
+        # Step 5: Test AI chat with provider
+        chat_success = False
+        if analysis_success and analysis_id:
+            chat_success = self.test_chat_with_ai_provider(analysis_id)
+        
+        # Summary
+        print(f"\n📊 AI PROVIDER SYSTEM TEST SUMMARY:")
+        print(f"   AI Providers Endpoint: {'✅ SUCCESS' if providers_success else '❌ FAILED'}")
+        print(f"   Admin AI Settings GET: {'✅ SUCCESS' if ai_settings_get_success else '❌ FAILED'}")
+        print(f"   Admin AI Settings PUT: {'✅ SUCCESS' if ai_settings_put_success else '❌ FAILED'}")
+        print(f"   AI Analysis with Provider: {'✅ SUCCESS' if analysis_success else '❌ FAILED'}")
+        print(f"   AI Chat with Provider: {'✅ SUCCESS' if chat_success else '❌ FAILED'}")
+        
+        overall_success = all([
+            providers_success, ai_settings_get_success, ai_settings_put_success,
+            analysis_success, chat_success
+        ])
+        
+        self.log_test("AI Provider System - Overall", overall_success, 
+                     "All AI provider tests passed" if overall_success else "Some AI provider tests failed")
+        
+        return overall_success
     def run_all_tests(self):
         """Run all API tests including Admin and Supervisor functionality"""
         print("🚀 Starting CDI Medical Application API Tests")
