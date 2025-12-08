@@ -546,7 +546,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Medical Coding System - Dual Department Implementation"
+    - "AI Provider System Testing"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
