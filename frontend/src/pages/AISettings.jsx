@@ -102,7 +102,7 @@ export default function AISettings({ user, onLogout }) {
     const getProviderIcon = () => {
       if (providerId === 'gemini') return '🤖';
       if (providerId === 'azure') return '☁️';
-      if (providerId === 'grok') return '🚀';
+      if (providerId === 'deepseek') return '🧠';
       return '🔑';
     };
 
