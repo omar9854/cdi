@@ -1423,10 +1423,14 @@ async def update_user_department(
     if department not in ['cdi', 'coding']:
         raise HTTPException(status_code=400, detail="Invalid department. Must be 'cdi' or 'coding'")
     
+    # Convert empty string to None
+    if coding_role == '':
+        coding_role = None
+    
     # Validate coding_role if department is coding
     if department == 'coding':
         if coding_role not in ['coder', 'auditor', 'supervisor', None]:
-            raise HTTPException(status_code=400, detail="Invalid coding_role")
+            raise HTTPException(status_code=400, detail="Invalid coding_role. Must be 'coder', 'auditor', or 'supervisor'")
         
         # If supervisor for coding, set role to supervisor
         if coding_role == 'supervisor':
