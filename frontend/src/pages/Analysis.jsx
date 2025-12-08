@@ -78,17 +78,32 @@ const Analysis = ({ user, onLogout }) => {
     }
   };
 
-  const handleAnalyze = async () => {
+  const handleAnalyze = async (providerId = null) => {
+    const provider = providerId || selectedProvider;
+    
     setAnalyzing(true);
+    setShowProviderDialog(false);
+    
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
         `${API}/analyze`,
-        { note_id: noteId },
+        { 
+          note_id: noteId,
+          ai_provider: provider
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setAnalysis(response.data);
-      toast.success(t('analysisComplete'));
+      
+      // Save preferred provider
+      localStorage.setItem('preferred_ai_provider', provider);
+      
+      toast.success(
+        language === 'ar' ? 
+        `تم التحليل بنجاح باستخدام ${aiProviders.find(p => p.id === provider)?.name_ar || provider}` :
+        `Analysis completed using ${aiProviders.find(p => p.id === provider)?.name || provider}`
+      );
     } catch (error) {
       toast.error(error.response?.data?.detail || t('error'));
     } finally {
