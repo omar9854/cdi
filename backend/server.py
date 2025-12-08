@@ -834,7 +834,8 @@ CRITICAL REQUIREMENTS:
                         else:
                             raise e
         
-        elif provider == 'azure':
+        # Process if response_text is still None (fallback triggered or direct provider selection)
+        if provider == 'azure' and response_text is None:
             # Use Microsoft Azure OpenAI
             from openai import AzureOpenAI
             
