@@ -18,7 +18,7 @@ export default function AISettings({ user, onLogout }) {
   const [providers, setProviders] = useState({
     gemini: { name: 'Google Gemini', name_ar: 'جوجل جيميناي', keys_count: 0, api_keys: [] },
     azure: { name: 'Microsoft Azure', name_ar: 'مايكروسوفت أزور', keys_count: 0, api_keys: [] },
-    grok: { name: 'Grok (X.AI)', name_ar: 'جروك', keys_count: 0, api_keys: [] }
+    deepseek: { name: 'DeepSeek', name_ar: 'ديب سيك', keys_count: 0, api_keys: [] }
   });
   
   const [editingProvider, setEditingProvider] = useState(null);
