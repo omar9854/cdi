@@ -19,6 +19,9 @@ const Analysis = ({ user, onLogout }) => {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
+  const [aiProviders, setAiProviders] = useState([]);
+  const [selectedProvider, setSelectedProvider] = useState('gemini');
+  const [showProviderDialog, setShowProviderDialog] = useState(false);
 
   useEffect(() => {
     fetchNote();
