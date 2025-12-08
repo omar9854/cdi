@@ -23,10 +23,9 @@ const Dashboard = ({ user, onLogout }) => {
   const [deleting, setDeleting] = useState(false);
 
   // Auto-redirect based on department and role
+  // Admin can stay on dashboard - they have access to admin panel via navbar
   useEffect(() => {
-    if (user?.role === 'admin') {
-      navigate('/admin');
-    } else if (user?.department === 'coding') {
+    if (user?.department === 'coding') {
       // Redirect coding users to their specific pages
       if (user.coding_role === 'supervisor') {
         navigate('/coding-supervisor');
@@ -35,7 +34,8 @@ const Dashboard = ({ user, onLogout }) => {
       } else if (user.coding_role === 'auditor') {
         navigate('/auditor');
       }
-    } else if (user?.role === 'supervisor') {
+    } else if (user?.role === 'supervisor' && user?.role !== 'admin') {
+      // Only redirect non-admin supervisors
       navigate('/supervisor');
     }
   }, [user, navigate]);
