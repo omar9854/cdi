@@ -135,14 +135,20 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 # Emergent LLM Key
-# Load Gemini API Keys (multiple for rotation)
+# Load Gemini API Keys (multiple for rotation - up to 12 keys)
 GEMINI_API_KEYS = [
     os.environ.get('GEMINI_API_KEY_1'),
     os.environ.get('GEMINI_API_KEY_2'),
     os.environ.get('GEMINI_API_KEY_3'),
     os.environ.get('GEMINI_API_KEY_4'),
     os.environ.get('GEMINI_API_KEY_5'),
-    os.environ.get('GEMINI_API_KEY_6')
+    os.environ.get('GEMINI_API_KEY_6'),
+    os.environ.get('GEMINI_API_KEY_7'),
+    os.environ.get('GEMINI_API_KEY_8'),
+    os.environ.get('GEMINI_API_KEY_9'),
+    os.environ.get('GEMINI_API_KEY_10'),
+    os.environ.get('GEMINI_API_KEY_11'),
+    os.environ.get('GEMINI_API_KEY_12')
 ]
 # Filter out None values
 GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
@@ -150,8 +156,12 @@ GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
 if not GEMINI_API_KEYS:
     raise ValueError("No Gemini API keys found in environment variables")
 
+# Calculate capacity (Free tier: 20 requests/day/key)
+capacity_per_key = 20  # Free tier limit
+total_capacity = len(GEMINI_API_KEYS) * capacity_per_key
+
 # Log will be done after logger is initialized
-print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation (Total capacity: {len(GEMINI_API_KEYS) * 1500} requests/day)")
+print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation (Total capacity: {total_capacity} requests/day, Free tier: 20/key/day)")
 
 # Helper function to get a random API key for load balancing
 def get_gemini_model(model_name='gemini-2.5-flash', system_instruction=None):
