@@ -2275,7 +2275,7 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         
         if ai_provider == 'gemini':
             # Use Google Gemini API with automatic key rotation
-            model = get_gemini_model('gemini-1.5-flash', system_instruction=system_message)
+            model = get_gemini_model('gemini-2.5-flash', system_instruction=system_message)
             
             # Build chat history for Gemini
             chat_history = []
