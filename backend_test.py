@@ -170,24 +170,46 @@ class MedicalCodingAPITester:
             return False
 
     def test_admin_login(self):
-        """Test admin login"""
+        """Test admin login with MFA handling"""
         try:
+            # First try step 1 login
             response = requests.post(
-                f"{self.api_url}/auth/login",
+                f"{self.api_url}/auth/login-step1",
                 json=self.admin_credentials,
                 timeout=10
             )
-            success = response.status_code == 200
-            if success:
-                data = response.json()
-                self.admin_token = data.get('access_token')
-                self.admin_data = data.get('user')
-                details = f"Admin login successful for: {data.get('user', {}).get('email')}, Role: {data.get('user', {}).get('role')}"
-            else:
-                details = f"Status: {response.status_code}, Error: {response.text}"
             
-            self.log_test("Admin Login", success, details, response.json() if success else None)
-            return success
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('requires_mfa'):
+                    # MFA required - we can't complete automated login
+                    self.log_test("Admin Login", False, "MFA required - cannot complete automated login")
+                    return False
+                else:
+                    # Direct login without MFA
+                    self.admin_token = data.get('access_token')
+                    self.admin_data = data.get('user')
+                    details = f"Admin login successful for: {data.get('user', {}).get('email')}, Role: {data.get('user', {}).get('role')}"
+                    self.log_test("Admin Login", True, details, data)
+                    return True
+            else:
+                # Try legacy login endpoint
+                response = requests.post(
+                    f"{self.api_url}/auth/login",
+                    json=self.admin_credentials,
+                    timeout=10
+                )
+                success = response.status_code == 200
+                if success:
+                    data = response.json()
+                    self.admin_token = data.get('access_token')
+                    self.admin_data = data.get('user')
+                    details = f"Admin login successful for: {data.get('user', {}).get('email')}, Role: {data.get('user', {}).get('role')}"
+                else:
+                    details = f"Status: {response.status_code}, Error: {response.text}"
+                
+                self.log_test("Admin Login", success, details, response.json() if success else None)
+                return success
         except Exception as e:
             self.log_test("Admin Login", False, str(e))
             return False
