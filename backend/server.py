@@ -3951,9 +3951,9 @@ async def get_ai_settings(admin: dict = Depends(require_admin)):
             'keys_count': 0,
             'api_keys': []
         },
-        'grok': {
-            'name': 'Grok (X.AI)',
-            'name_ar': 'جروك',
+        'deepseek': {
+            'name': 'DeepSeek',
+            'name_ar': 'ديب سيك',
             'keys_count': 0,
             'api_keys': []
         }
