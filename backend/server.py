@@ -2301,7 +2301,7 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
                 except Exception as e:
                     if attempt < max_retries - 1:
                         logger.warning(f"Chat retry {attempt + 1}/{max_retries} with different API key")
-                        model = get_gemini_model('gemini-1.5-flash', system_instruction=system_message)
+                        model = get_gemini_model('gemini-2.5-flash', system_instruction=system_message)
                     else:
                         raise e
         
