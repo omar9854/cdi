@@ -26,7 +26,29 @@ const Analysis = ({ user, onLogout }) => {
   useEffect(() => {
     fetchNote();
     fetchAnalysis();
+    fetchAIProviders();
   }, [noteId]);
+  
+  const fetchAIProviders = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/ai-providers`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAiProviders(response.data.providers || []);
+      // Set default provider if available
+      if (response.data.providers && response.data.providers.length > 0) {
+        const savedProvider = localStorage.getItem('preferred_ai_provider');
+        if (savedProvider && response.data.providers.some(p => p.id === savedProvider)) {
+          setSelectedProvider(savedProvider);
+        } else {
+          setSelectedProvider(response.data.providers[0].id);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch AI providers:', error);
+    }
+  };
 
   const fetchNote = async () => {
     try {
