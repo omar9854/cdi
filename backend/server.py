@@ -848,49 +848,63 @@ CRITICAL REQUIREMENTS:
         
         # Select AI provider
         if provider == 'gemini':
-            # Use Google Gemini API with automatic key rotation
-            model = get_gemini_model('gemini-2.5-flash')
-            
+            # Use Google Gemini API with intelligent key rotation
             # Combine system message and user prompt
             full_prompt = f"{system_message}\n\n{user_prompt}"
             
-            # Generate response with retry logic
+            # Try all available keys with intelligent rotation
             max_retries = len(GEMINI_API_KEYS)
             last_error = None
             
             for attempt in range(max_retries):
                 try:
+                    # Get model with next key in rotation
+                    model = get_gemini_model('gemini-2.5-flash')
                     response = model.generate_content(full_prompt)
                     response_text = response.text.strip()
+                    logger.info(f"✅ Gemini analysis successful on attempt {attempt + 1}")
                     break  # Success, exit retry loop
+                    
                 except Exception as e:
                     last_error = e
                     error_msg = str(e)
                     
                     # Check if quota exceeded (429 error)
                     if "429" in error_msg or "quota" in error_msg.lower() or "RESOURCE_EXHAUSTED" in error_msg:
-                        logger.warning(f"⚠️ Gemini quota exceeded. Error: {error_msg[:200]}")
+                        logger.warning(f"⚠️ Gemini key exhausted (attempt {attempt + 1}/{max_retries})")
                         
-                        # Try fallback to Azure if available
-                        azure_key = os.environ.get('AZURE_OPENAI_KEY')
-                        if azure_key:
-                            logger.info("🔄 Auto-switching to Azure due to Gemini quota limit")
-                            provider = 'azure'  # Switch provider
-                            response_text = None  # Reset for Azure processing
-                            break  # Exit retry loop to use Azure
+                        # Continue trying other keys
+                        if attempt < max_retries - 1:
+                            logger.info(f"🔄 Trying next Gemini key ({attempt + 2}/{max_retries})...")
+                            continue
                         else:
-                            if attempt < max_retries - 1:
-                                logger.warning(f"Retry {attempt + 1}/{max_retries} with different API key")
-                                model = get_gemini_model('gemini-2.5-flash')
+                            # All Gemini keys exhausted, try fallback
+                            logger.error("❌ All Gemini keys exhausted")
+                            
+                            # Try fallback to DeepSeek or Azure
+                            deepseek_key = os.environ.get('DEEPSEEK_API_KEY')
+                            azure_key = os.environ.get('AZURE_OPENAI_KEY')
+                            
+                            if deepseek_key:
+                                logger.info("🔄 Auto-switching to DeepSeek due to Gemini quota limit")
+                                provider = 'deepseek'
+                                response_text = None
+                                break
+                            elif azure_key:
+                                logger.info("🔄 Auto-switching to Azure due to Gemini quota limit")
+                                provider = 'azure'
+                                response_text = None
+                                break
                             else:
                                 raise HTTPException(
-                                    status_code=429, 
-                                    detail="جميع مفاتيح Gemini وصلت للحد اليومي. الرجاء استخدام مزود آخر أو الانتظار حتى الغد. All Gemini keys reached daily quota. Please use another provider or wait until tomorrow."
+                                    status_code=429,
+                                    detail=f"جميع مفاتيح Gemini ({len(GEMINI_API_KEYS)}) وصلت للحد اليومي. الرجاء استخدام DeepSeek أو Azure. All {len(GEMINI_API_KEYS)} Gemini keys reached daily quota. Please use DeepSeek or Azure."
                                 )
                     else:
+                        # Other errors - try next key
                         if attempt < max_retries - 1:
-                            logger.warning(f"Retry {attempt + 1}/{max_retries} with different API key")
-                            model = get_gemini_model('gemini-2.5-flash')
+                            logger.warning(f"⚠️ Error with key, trying next: {error_msg[:100]}")
+                            continue
                         else:
                             raise e
         
