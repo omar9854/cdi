@@ -329,6 +329,7 @@ class Analysis(BaseModel):
 
 class AnalyzeRequest(BaseModel):
     note_id: str
+    ai_provider: Optional[str] = 'gemini'  # gemini, azure, grok
 
 class ChatMessage(BaseModel):
     model_config = ConfigDict(extra="ignore")
