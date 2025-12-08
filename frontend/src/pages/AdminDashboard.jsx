@@ -631,7 +631,20 @@ const AdminDashboard = ({ user, onLogout }) => {
                       <label className="text-sm font-semibold">
                         {language === 'ar' ? 'الدور الوظيفي' : 'Role'}
                       </label>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-3 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setDepartmentForm({...departmentForm, coding_role: 'supervisor', daily_case_target: null})}
+                          className={`p-3 rounded-lg border-2 transition-all ${
+                            departmentForm.coding_role === 'supervisor'
+                              ? 'border-blue-600 bg-blue-50 text-blue-700'
+                              : 'border-gray-200 hover:border-blue-300'
+                          }`}
+                        >
+                          <div className="font-semibold text-sm">
+                            {language === 'ar' ? 'مشرف' : 'Supervisor'}
+                          </div>
+                        </button>
                         <button
                           type="button"
                           onClick={() => setDepartmentForm({...departmentForm, coding_role: 'coder'})}
@@ -647,7 +660,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                         </button>
                         <button
                           type="button"
-                          onClick={() => setDepartmentForm({...departmentForm, coding_role: 'auditor'})}
+                          onClick={() => setDepartmentForm({...departmentForm, coding_role: 'auditor', daily_case_target: null})}
                           className={`p-3 rounded-lg border-2 transition-all ${
                             departmentForm.coding_role === 'auditor'
                               ? 'border-purple-600 bg-purple-50 text-purple-700'
