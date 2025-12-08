@@ -163,11 +163,61 @@ total_capacity = len(GEMINI_API_KEYS) * capacity_per_key
 # Log will be done after logger is initialized
 print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation (Total capacity: {total_capacity} requests/day, Free tier: 20/key/day)")
 
-# Helper function to get a random API key for load balancing
+# Advanced key rotation system with usage tracking
+class GeminiKeyManager:
+    """Manages Gemini API keys with intelligent rotation"""
+    
+    def __init__(self, keys):
+        self.keys = keys
+        self.current_index = 0
+        self.usage_count = {i: 0 for i in range(len(keys))}
+        self.failed_keys = set()  # Track keys that hit quota
+        
+    def get_next_key(self):
+        """Get next key using round-robin with skip for failed keys"""
+        attempts = 0
+        while attempts < len(self.keys):
+            key_index = self.current_index
+            self.current_index = (self.current_index + 1) % len(self.keys)
+            
+            # Skip if key is marked as failed
+            if key_index not in self.failed_keys:
+                self.usage_count[key_index] += 1
+                return self.keys[key_index], key_index
+            
+            attempts += 1
+        
+        # If all keys failed, reset and try again
+        logger.warning("⚠️ All Gemini keys exhausted, resetting failed keys tracker")
+        self.failed_keys.clear()
+        key_index = self.current_index
+        self.current_index = (self.current_index + 1) % len(self.keys)
+        self.usage_count[key_index] += 1
+        return self.keys[key_index], key_index
+    
+    def mark_key_failed(self, key_index):
+        """Mark a key as failed (quota exceeded)"""
+        self.failed_keys.add(key_index)
+        logger.warning(f"⚠️ Gemini key #{key_index + 1} marked as exhausted")
+    
+    def get_usage_stats(self):
+        """Get usage statistics"""
+        return {
+            "total_keys": len(self.keys),
+            "active_keys": len(self.keys) - len(self.failed_keys),
+            "failed_keys": len(self.failed_keys),
+            "usage_per_key": self.usage_count
+        }
+
+# Initialize key manager
+gemini_key_manager = GeminiKeyManager(GEMINI_API_KEYS)
+
 def get_gemini_model(model_name='gemini-2.5-flash', system_instruction=None):
-    """Get a Gemini model with a random API key for load balancing"""
-    api_key = random.choice(GEMINI_API_KEYS)
+    """Get Gemini model with intelligent key rotation"""
+    api_key, key_index = gemini_key_manager.get_next_key()
     genai.configure(api_key=api_key)
+    
+    logger.info(f"🔑 Using Gemini key #{key_index + 1}/{len(GEMINI_API_KEYS)}")
     
     if system_instruction:
         return genai.GenerativeModel(model_name, system_instruction=system_instruction)
