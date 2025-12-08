@@ -803,12 +803,33 @@ CRITICAL REQUIREMENTS:
                     break  # Success, exit retry loop
                 except Exception as e:
                     last_error = e
-                    if attempt < max_retries - 1:
-                        # Try with a different key
-                        logger.warning(f"Retry {attempt + 1}/{max_retries} with different API key")
-                        model = get_gemini_model('gemini-2.5-flash')
+                    error_msg = str(e)
+                    
+                    # Check if quota exceeded (429 error)
+                    if "429" in error_msg or "quota" in error_msg.lower() or "RESOURCE_EXHAUSTED" in error_msg:
+                        logger.warning(f"⚠️ Gemini quota exceeded. Error: {error_msg[:200]}")
+                        
+                        # Try fallback to Azure if available
+                        azure_key = os.environ.get('AZURE_OPENAI_KEY')
+                        if azure_key:
+                            logger.info("🔄 Auto-switching to Azure due to Gemini quota limit")
+                            provider = 'azure'  # Switch provider
+                            break  # Exit retry loop to use Azure
+                        else:
+                            if attempt < max_retries - 1:
+                                logger.warning(f"Retry {attempt + 1}/{max_retries} with different API key")
+                                model = get_gemini_model('gemini-2.5-flash')
+                            else:
+                                raise HTTPException(
+                                    status_code=429, 
+                                    detail="جميع مفاتيح Gemini وصلت للحد اليومي. الرجاء استخدام مزود آخر أو الانتظار حتى الغد. All Gemini keys reached daily quota. Please use another provider or wait until tomorrow."
+                                )
                     else:
-                        raise e
+                        if attempt < max_retries - 1:
+                            logger.warning(f"Retry {attempt + 1}/{max_retries} with different API key")
+                            model = get_gemini_model('gemini-2.5-flash')
+                        else:
+                            raise e
         
         elif provider == 'azure':
             # Use Microsoft Azure OpenAI
