@@ -872,22 +872,24 @@ CRITICAL REQUIREMENTS:
             
             response_text = response.choices[0].message.content.strip()
         
-        elif provider == 'grok':
-            # Use Grok (X.AI)
+        elif provider == 'deepseek' and response_text is None:
+            # Use DeepSeek
             from openai import OpenAI
             
-            grok_key = os.environ.get('GROK_API_KEY')
-            if not grok_key:
+            # Get DeepSeek API key
+            deepseek_key = os.environ.get('DEEPSEEK_API_KEY')
+            if not deepseek_key:
                 # Check database
-                grok_settings = await db.ai_settings.find_one({"provider": "grok"})
-                if grok_settings and grok_settings.get('api_keys'):
-                    grok_key = random.choice(grok_settings['api_keys'])
+                deepseek_settings = await db.ai_settings.find_one({"provider": "deepseek"})
+                if deepseek_settings and deepseek_settings.get('api_keys'):
+                    deepseek_key = random.choice(deepseek_settings['api_keys'])
                 else:
-                    raise HTTPException(status_code=400, detail="Grok API key not configured")
+                    raise HTTPException(status_code=400, detail="مفتاح DeepSeek غير مُعدّ. DeepSeek API key not configured")
             
+            # DeepSeek uses OpenAI-compatible API
             client = OpenAI(
-                api_key=grok_key,
-                base_url="https://api.x.ai/v1"
+                api_key=deepseek_key,
+                base_url="https://api.deepseek.com"
             )
             
             messages = [
@@ -896,7 +898,7 @@ CRITICAL REQUIREMENTS:
             ]
             
             response = client.chat.completions.create(
-                model="grok-beta",
+                model="deepseek-chat",
                 messages=messages,
                 temperature=0.7,
                 max_tokens=4000
@@ -904,8 +906,8 @@ CRITICAL REQUIREMENTS:
             
             response_text = response.choices[0].message.content.strip()
         
-        else:
-            raise HTTPException(status_code=400, detail=f"Unsupported AI provider: {provider}")
+        elif response_text is None:
+            raise HTTPException(status_code=400, detail=f"مزود غير مدعوم أو فشل في المعالجة: {provider}. Unsupported AI provider or processing failed: {provider}")
         
         # Parse JSON response
         import json
