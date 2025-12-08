@@ -138,7 +138,9 @@ GEMINI_API_KEYS = [
     os.environ.get('GEMINI_API_KEY_2'),
     os.environ.get('GEMINI_API_KEY_3'),
     os.environ.get('GEMINI_API_KEY_4'),
-    os.environ.get('GEMINI_API_KEY_5')
+    os.environ.get('GEMINI_API_KEY_5'),
+    os.environ.get('GEMINI_API_KEY_6'),
+    os.environ.get('GEMINI_API_KEY_7')
 ]
 # Filter out None values
 GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
@@ -147,7 +149,7 @@ if not GEMINI_API_KEYS:
     raise ValueError("No Gemini API keys found in environment variables")
 
 # Log will be done after logger is initialized
-print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation")
+print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation (Total capacity: {len(GEMINI_API_KEYS) * 1500} requests/day)")
 
 # Helper function to get a random API key for load balancing
 def get_gemini_model(model_name='gemini-flash-latest', system_instruction=None):
