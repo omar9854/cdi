@@ -343,6 +343,7 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     analysis_id: str
     message: str
+    ai_provider: Optional[str] = 'gemini'  # gemini, azure, grok
 
 class PasswordResetRequest(BaseModel):
     email: EmailStr
