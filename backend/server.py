@@ -4057,20 +4057,20 @@ async def get_available_providers(user: dict = Depends(get_current_user)):
             "available": True
         })
     
-    # Check Grok
-    grok_settings = await db.ai_settings.find_one({"provider": "grok"})
-    if grok_settings and grok_settings.get('api_keys'):
+    # Check DeepSeek
+    deepseek_settings = await db.ai_settings.find_one({"provider": "deepseek"})
+    if deepseek_settings and deepseek_settings.get('api_keys'):
         providers.append({
-            "id": "grok",
-            "name": "Grok (X.AI)",
-            "name_ar": "جروك",
+            "id": "deepseek",
+            "name": "DeepSeek",
+            "name_ar": "ديب سيك",
             "available": True
         })
-    elif os.environ.get('GROK_API_KEY'):
+    elif os.environ.get('DEEPSEEK_API_KEY'):
         providers.append({
-            "id": "grok",
-            "name": "Grok (X.AI)",
-            "name_ar": "جروك",
+            "id": "deepseek",
+            "name": "DeepSeek",
+            "name_ar": "ديب سيك",
             "available": True
         })
     
