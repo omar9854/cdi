@@ -56,7 +56,7 @@ class AIProviderManager:
             {"$set": {
                 "provider": provider,
                 "api_keys": api_keys,
-                "updated_at": genai.datetime.now().isoformat()
+                "updated_at": datetime.now(timezone.utc).isoformat()
             }},
             upsert=True
         )
