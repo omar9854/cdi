@@ -139,8 +139,7 @@ GEMINI_API_KEYS = [
     os.environ.get('GEMINI_API_KEY_3'),
     os.environ.get('GEMINI_API_KEY_4'),
     os.environ.get('GEMINI_API_KEY_5'),
-    os.environ.get('GEMINI_API_KEY_6'),
-    os.environ.get('GEMINI_API_KEY_7')
+    os.environ.get('GEMINI_API_KEY_6')
 ]
 # Filter out None values
 GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
