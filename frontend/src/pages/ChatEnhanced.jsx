@@ -444,6 +444,33 @@ const ChatEnhanced = ({ user, onLogout }) => {
                 )}
               </CardContent>
 
+              {/* AI Provider Selection */}
+              {aiProviders.length > 1 && (
+                <div className="border-t px-4 py-2 bg-gray-50">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs text-gray-600">
+                      {language === 'ar' ? 'مزود الذكاء الاصطناعي:' : 'AI Provider:'}
+                    </span>
+                    {aiProviders.map((provider) => (
+                      <button
+                        key={provider.id}
+                        onClick={() => {
+                          setSelectedProvider(provider.id);
+                          localStorage.setItem('preferred_ai_provider', provider.id);
+                        }}
+                        className={`text-xs px-2 py-1 rounded border transition-all ${
+                          selectedProvider === provider.id
+                            ? 'border-purple-600 bg-purple-50 text-purple-700 font-semibold'
+                            : 'border-gray-200 hover:border-purple-300'
+                        }`}
+                      >
+                        {language === 'ar' ? provider.name_ar : provider.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               {/* Input Area */}
               <div className="border-t p-4">
                 <form onSubmit={handleSendMessage} className="flex gap-2">
