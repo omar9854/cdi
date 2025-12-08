@@ -221,7 +221,7 @@ export default function AISettings({ user, onLogout }) {
         <div className="grid grid-cols-1 gap-6">
           {renderProviderCard('gemini')}
           {renderProviderCard('azure')}
-          {renderProviderCard('grok')}
+          {renderProviderCard('deepseek')}
         </div>
 
         <Card className="mt-6 bg-blue-50 border-blue-200">
