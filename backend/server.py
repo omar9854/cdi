@@ -803,7 +803,7 @@ CRITICAL REQUIREMENTS:
                     if attempt < max_retries - 1:
                         # Try with a different key
                         logger.warning(f"Retry {attempt + 1}/{max_retries} with different API key")
-                        model = get_gemini_model('gemini-1.5-flash')
+                        model = get_gemini_model('gemini-2.5-flash')
                     else:
                         raise e
         
