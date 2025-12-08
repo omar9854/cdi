@@ -784,6 +784,8 @@ CRITICAL REQUIREMENTS:
 - ALL ICD-10-CM codes MUST be complete and accurate"""
 
     try:
+        response_text = None  # Initialize to avoid UnboundLocalError
+        
         # Select AI provider
         if provider == 'gemini':
             # Use Google Gemini API with automatic key rotation
@@ -814,6 +816,7 @@ CRITICAL REQUIREMENTS:
                         if azure_key:
                             logger.info("🔄 Auto-switching to Azure due to Gemini quota limit")
                             provider = 'azure'  # Switch provider
+                            response_text = None  # Reset for Azure processing
                             break  # Exit retry loop to use Azure
                         else:
                             if attempt < max_retries - 1:
