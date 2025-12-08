@@ -2386,21 +2386,21 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
                     azure_endpoint=endpoint
                 )
                 model_name = deployment
-            else:  # grok
-                api_key = os.environ.get('GROK_API_KEY')
+            else:  # deepseek
+                api_key = os.environ.get('DEEPSEEK_API_KEY')
                 if not api_key:
-                    grok_settings = await db.ai_settings.find_one({"provider": "grok"})
-                    if grok_settings and grok_settings.get('api_keys'):
-                        api_key = random.choice(grok_settings['api_keys'])
+                    deepseek_settings = await db.ai_settings.find_one({"provider": "deepseek"})
+                    if deepseek_settings and deepseek_settings.get('api_keys'):
+                        api_key = random.choice(deepseek_settings['api_keys'])
                 
                 if not api_key:
-                    raise HTTPException(status_code=400, detail="Grok API key not configured")
+                    raise HTTPException(status_code=400, detail="مفتاح DeepSeek غير مُعدّ. DeepSeek API key not configured")
                 
                 client = OpenAI(
                     api_key=api_key,
-                    base_url="https://api.x.ai/v1"
+                    base_url="https://api.deepseek.com"
                 )
-                model_name = "grok-beta"
+                model_name = "deepseek-chat"
             
             # Build messages with history
             messages = [{"role": "system", "content": system_message}]
