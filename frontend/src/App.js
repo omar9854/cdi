@@ -66,7 +66,7 @@ function AppContent() {
           <Route path="/admin" element={user && user.role === 'admin' ? <AdminDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
           <Route path="/supervisor" element={user && (user.role === 'supervisor' || user.role === 'admin') ? <SupervisorDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
           <Route path="/security" element={user && user.role === 'admin' ? <SecurityDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
-          <Route path="/coding-supervisor" element={user && user.department === 'coding' && (user.role === 'supervisor' || user.role === 'admin') ? <CodingSupervisor user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
+          <Route path="/coding-supervisor" element={user && user.department === 'coding' && (user.coding_role === 'supervisor' || user.role === 'admin') ? <CodingSupervisor user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
           <Route path="/coder" element={user && user.department === 'coding' && user.coding_role === 'coder' ? <CoderWorkspace user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
           <Route path="/auditor" element={user && user.department === 'coding' && user.coding_role === 'auditor' ? <AuditorWorkspace user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
           <Route path="/mfa-verify" element={!user ? <MFAVerification setUser={setUser} /> : <Navigate to="/dashboard" />} />
