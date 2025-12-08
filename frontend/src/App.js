@@ -18,6 +18,7 @@ import SupervisorDashboard from '@/pages/SupervisorDashboard';
 import Messages from '@/pages/Messages';
 import MFAVerification from '@/pages/MFAVerification';
 import SecurityDashboard from '@/pages/SecurityDashboard';
+import AISettings from '@/pages/AISettings';
 import CodingSupervisor from '@/pages/CodingSupervisorPro';
 import CoderWorkspace from '@/pages/CoderWorkspacePro';
 import AuditorWorkspace from '@/pages/AuditorWorkspace';
