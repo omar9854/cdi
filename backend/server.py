@@ -1063,7 +1063,7 @@ async def login_step1(request: Request, credentials: UserLogin):
         raise HTTPException(status_code=500, detail="Login failed")
 
 @api_router.post("/auth/login-step2", response_model=Token)
-@limiter.limit("10/minute")
+# @limiter.limit("10/minute")  # Temporarily disabled
 async def login_step2(request: Request, credentials: OTPVerification):
     """Step 2: Verify OTP and complete login"""
     try:
