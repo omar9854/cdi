@@ -3983,8 +3983,8 @@ async def get_ai_settings(admin: dict = Depends(require_admin)):
 @api_router.put("/admin/ai-settings")
 async def update_ai_settings(keys_update: AIKeysUpdate, admin: dict = Depends(require_admin)):
     """Update API keys for a specific AI provider"""
-    if keys_update.provider not in ['gemini', 'azure', 'grok']:
-        raise HTTPException(status_code=400, detail="Invalid provider")
+    if keys_update.provider not in ['gemini', 'azure', 'deepseek']:
+        raise HTTPException(status_code=400, detail="Invalid provider. Must be: gemini, azure, or deepseek")
     
     # Validate that keys are provided
     if not keys_update.api_keys or len(keys_update.api_keys) == 0:
