@@ -4314,6 +4314,27 @@ class MedicalCodingAPITester:
         self.test_exit_impersonation_functionality()
         
         return self.generate_report()
+    def run_ai_provider_test(self):
+        """Run focused test for AI Provider System"""
+        print("🚀 Starting AI Provider System Test")
+        print(f"🔗 Testing API: {self.api_url}")
+        print("=" * 80)
+        
+        # Basic connectivity
+        if not self.test_health_check():
+            print("❌ Health check failed - stopping tests")
+            return self.generate_report()
+        
+        # Admin Authentication (required for AI provider endpoints)
+        print("\n👑 Testing Admin Authentication...")
+        if not self.test_admin_login():
+            print("❌ Admin login failed - stopping tests")
+            return self.generate_report()
+        
+        # Run the comprehensive AI provider test
+        self.test_ai_provider_system_comprehensive()
+        
+        return self.generate_report()
 
 def main():
     """Main test execution"""
