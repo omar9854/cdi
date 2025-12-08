@@ -2262,44 +2262,110 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
     
     # Use analysis_id as session for continuity
     try:
-        # Use Google Gemini API with automatic key rotation
-        model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+        # Validate AI provider
+        ai_provider = chat_request.ai_provider or 'gemini'
+        if ai_provider not in ['gemini', 'azure', 'grok']:
+            raise HTTPException(status_code=400, detail="Invalid AI provider")
         
         # Get chat history for context
-        chat_history = []
         previous_messages = await db.chat_messages.find(
             {"analysis_id": chat_request.analysis_id}
         ).sort("created_at", 1).to_list(100)
         
-        # Build chat history
-        for msg in previous_messages:
-            # Handle both open chat messages (with 'role') and predefined questions (with 'question'/'answer')
-            if 'role' in msg:
-                if msg['role'] == 'user':
-                    chat_history.append({'role': 'user', 'parts': [msg['message']]})
-                else:
-                    chat_history.append({'role': 'model', 'parts': [msg['message']]})
-            elif 'question' in msg and 'answer' in msg:
-                # Predefined question format
-                chat_history.append({'role': 'user', 'parts': [msg['question']]})
-                chat_history.append({'role': 'model', 'parts': [msg['answer']]})
-        
-        # Start chat with history and retry logic
-        max_retries = len(GEMINI_API_KEYS)
         response_text = None
         
-        for attempt in range(max_retries):
-            try:
-                chat = model.start_chat(history=chat_history)
-                response = chat.send_message(chat_request.message)
-                response_text = response.text
-                break  # Success, exit retry loop
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    logger.warning(f"Chat retry {attempt + 1}/{max_retries} with different API key")
-                    model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
-                else:
-                    raise e
+        if ai_provider == 'gemini':
+            # Use Google Gemini API with automatic key rotation
+            model = get_gemini_model('gemini-1.5-flash', system_instruction=system_message)
+            
+            # Build chat history for Gemini
+            chat_history = []
+            for msg in previous_messages:
+                if 'role' in msg:
+                    if msg['role'] == 'user':
+                        chat_history.append({'role': 'user', 'parts': [msg['message']]})
+                    else:
+                        chat_history.append({'role': 'model', 'parts': [msg['message']]})
+                elif 'question' in msg and 'answer' in msg:
+                    chat_history.append({'role': 'user', 'parts': [msg['question']]})
+                    chat_history.append({'role': 'model', 'parts': [msg['answer']]})
+            
+            # Start chat with history and retry logic
+            max_retries = len(GEMINI_API_KEYS)
+            
+            for attempt in range(max_retries):
+                try:
+                    chat = model.start_chat(history=chat_history)
+                    response = chat.send_message(chat_request.message)
+                    response_text = response.text
+                    break
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        logger.warning(f"Chat retry {attempt + 1}/{max_retries} with different API key")
+                        model = get_gemini_model('gemini-1.5-flash', system_instruction=system_message)
+                    else:
+                        raise e
+        
+        elif ai_provider in ['azure', 'grok']:
+            # Use OpenAI-compatible API for Azure and Grok
+            from openai import OpenAI, AzureOpenAI
+            
+            # Get API key
+            if ai_provider == 'azure':
+                api_key = os.environ.get('AZURE_OPENAI_KEY')
+                if not api_key:
+                    azure_settings = await db.ai_settings.find_one({"provider": "azure"})
+                    if azure_settings and azure_settings.get('api_keys'):
+                        api_key = random.choice(azure_settings['api_keys'])
+                
+                if not api_key:
+                    raise HTTPException(status_code=400, detail="Azure OpenAI key not configured")
+                
+                endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT')
+                deployment = os.environ.get('AZURE_OPENAI_DEPLOYMENT', 'gpt-4')
+                api_version = os.environ.get('AZURE_OPENAI_API_VERSION', '2024-02-15-preview')
+                
+                client = AzureOpenAI(
+                    api_key=api_key,
+                    api_version=api_version,
+                    azure_endpoint=endpoint
+                )
+                model_name = deployment
+            else:  # grok
+                api_key = os.environ.get('GROK_API_KEY')
+                if not api_key:
+                    grok_settings = await db.ai_settings.find_one({"provider": "grok"})
+                    if grok_settings and grok_settings.get('api_keys'):
+                        api_key = random.choice(grok_settings['api_keys'])
+                
+                if not api_key:
+                    raise HTTPException(status_code=400, detail="Grok API key not configured")
+                
+                client = OpenAI(
+                    api_key=api_key,
+                    base_url="https://api.x.ai/v1"
+                )
+                model_name = "grok-beta"
+            
+            # Build messages with history
+            messages = [{"role": "system", "content": system_message}]
+            for msg in previous_messages:
+                if 'role' in msg:
+                    messages.append({"role": msg['role'], "content": msg['message']})
+                elif 'question' in msg and 'answer' in msg:
+                    messages.append({"role": "user", "content": msg['question']})
+                    messages.append({"role": "assistant", "content": msg['answer']})
+            
+            messages.append({"role": "user", "content": chat_request.message})
+            
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+                temperature=0.7,
+                max_tokens=2000
+            )
+            
+            response_text = response.choices[0].message.content
         
         # Save assistant message
         assistant_msg = ChatMessage(
