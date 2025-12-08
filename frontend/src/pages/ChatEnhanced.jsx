@@ -31,6 +31,8 @@ const ChatEnhanced = ({ user, onLogout }) => {
   const [loadingQuestions, setLoadingQuestions] = useState(true);
   const [activeTab, setActiveTab] = useState('quick');
   const [noteId, setNoteId] = useState(null);
+  const [aiProviders, setAiProviders] = useState([]);
+  const [selectedProvider, setSelectedProvider] = useState('gemini');
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
