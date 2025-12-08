@@ -2072,8 +2072,13 @@ async def analyze_note(request: Request, analyze_request: AnalyzeRequest, user: 
     # Track DB operation
     DB_OPERATIONS.labels(operation='read', collection='clinical_notes').inc()
     
-    # Analyze with Gemini
-    result = await analyze_with_gemini(note['title'], note['doctor_notes'])
+    # Validate AI provider
+    ai_provider = analyze_request.ai_provider or 'gemini'
+    if ai_provider not in ['gemini', 'azure', 'grok']:
+        raise HTTPException(status_code=400, detail="Invalid AI provider. Must be: gemini, azure, or grok")
+    
+    # Analyze with selected AI provider
+    result = await analyze_with_ai(note['title'], note['doctor_notes'], provider=ai_provider)
     
     # Track AI metrics
     AI_REQUESTS.labels(type='analyze').inc()
