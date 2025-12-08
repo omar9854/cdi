@@ -6,9 +6,8 @@ import os
 import random
 import logging
 from typing import Optional, Dict, List
+from datetime import datetime, timezone
 import google.generativeai as genai
-from openai import AzureOpenAI
-import anthropic
 
 logger = logging.getLogger(__name__)
 
