@@ -50,8 +50,9 @@ db = client[os.environ['DB_NAME']]
 async def ensure_admin_account():
     """Automatically ensure admin account exists with correct credentials on startup"""
     try:
-        admin_email = "almaghthawi.cdi@gmail.com"
-        admin_password = "CDI@2024#Admin"
+        # Get admin credentials from environment variables
+        admin_email = os.environ.get('ADMIN_EMAIL', 'admin@system.com')
+        admin_password = os.environ.get('ADMIN_PASSWORD', 'ChangeMe@123456')
         
         print(f"🔍 Checking admin account...")
         
