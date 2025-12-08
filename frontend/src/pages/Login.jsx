@@ -50,9 +50,8 @@ const Login = ({ setUser }) => {
         toast.success(t('loginSuccess'));
         
         // Route based on department and role
-        if (user.role === 'admin') {
-          navigate('/admin');
-        } else if (user.department === 'coding') {
+        // Admin goes to dashboard by default (can access admin panel from navbar)
+        if (user.department === 'coding') {
           if (user.coding_role === 'supervisor') {
             navigate('/coding-supervisor');
           } else if (user.coding_role === 'coder') {
