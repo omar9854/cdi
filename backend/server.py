@@ -728,39 +728,56 @@ Perform a Clinical Documentation Improvement review and provide:
 
 5. **Recommendations**: Specific recommendations to improve the clinical documentation quality
 
-Please respond in the following JSON format:
+Provide response in this EXACT JSON format:
 {{{{
-  "diagnoses_to_document": [{{
-    "diagnosis_ar": "التشخيص بالعربي",
-    "diagnosis_en": "Diagnosis in English", 
-    "icd_code": "Code (for reference)",
-    "type": "principal" or "secondary",
-    "clinical_evidence": "Evidence from notes supporting this diagnosis"
-  }}],
-  "missing_documentation": [{{
-    "item_ar": "التوثيق الناقص بالعربي",
-    "item_en": "Missing item in English"
-  }}],
-  "gaps_ar": ["ثغرة 1", "ثغرة 2"],
-  "gaps_en": ["Gap 1", "Gap 2"],
+  "diagnoses_to_document": [
+    {{
+      "diagnosis_ar": "التشخيص بالعربي الكامل مع التفاصيل",
+      "diagnosis_en": "Complete diagnosis in English with details",
+      "icd_code": "Full ICD-10-CM code",
+      "type": "principal" or "secondary" or "derived",
+      "severity": "Severity/Stage/Type if applicable",
+      "clinical_evidence": "Specific clinical findings from notes supporting this diagnosis"
+    }}
+  ],
+  "missing_documentation": [
+    {{
+      "item_ar": "التوثيق الناقص - كن محدداً",
+      "item_en": "Missing documentation - be specific",
+      "impact": "Impact on coding/reimbursement/quality"
+    }}
+  ],
+  "gaps_ar": [
+    "فجوة توثيقية محددة 1 - اشرح بالتفصيل",
+    "ثغرة في التوثيق 2 - مع أمثلة من الملاحظات"
+  ],
+  "gaps_en": [
+    "Specific documentation gap 1 - explain in detail",
+    "Documentation deficiency 2 - with examples from notes"
+  ],
   "queries_ar": [
-    "استفسار يخص: [اسم التشخيص] ([كود ICD-10])\\n\\nبناءً على الملاحظات الطبية:\\n- [معطيات محددة من الملاحظات: الأعراض]\\n- [الأدوية المصروفة]\\n- [القياسات والفحوصات]\\n\\nبناءً على حكمك الطبي، الرجاء توثيق التشخيص [الرئيسي/الثانوي]."
+    "استفسار يخص: [التشخيص الكامل] ([ICD-10])\\n\\nبناءً على الملاحظات الطبية:\\n- [معطى سريري محدد 1]\\n- [معطى سريري محدد 2]\\n- [معطى سريري محدد 3]\\n\\nبناءً على حكمك الطبي، الرجاء توثيق:\\n- التشخيص [الرئيسي/الثانوي]\\n- شدة الحالة\\n- المرحلة/النوع إن أمكن"
   ],
   "queries_en": [
-    "Query regarding: [Diagnosis name] ([ICD-10 Code])\\n\\nBased on clinical documentation:\\n- [Specific findings from notes: symptoms]\\n- [Medications prescribed]\\n- [Measurements/tests]\\n\\nBased on your clinical judgment, please document the [principal/secondary] diagnosis."
+    "Query regarding: [Full diagnosis] ([ICD-10])\\n\\nBased on clinical documentation:\\n- [Specific clinical finding 1]\\n- [Specific clinical finding 2]\\n- [Specific clinical finding 3]\\n\\nBased on your clinical judgment, please document:\\n- [Principal/Secondary] diagnosis\\n- Severity\\n- Stage/Type if applicable"
   ],
-  "recommendations_ar": ["توصية 1 لتحسين التوثيق", "توصية 2"],
-  "recommendations_en": ["Recommendation 1 for documentation improvement", "Recommendation 2"],
-  "summary_ar": "ملخص شامل لمراجعة تحسين التوثيق السريري بالعربي",
-  "summary_en": "Comprehensive CDI review summary in English"
+  "recommendations_ar": [
+    "توصية محددة 1 مع خطوات عملية",
+    "توصية 2 لتحسين جودة التوثيق"
+  ],
+  "recommendations_en": [
+    "Specific recommendation 1 with actionable steps",
+    "Recommendation 2 for documentation quality improvement"
+  ],
+  "summary_ar": "ملخص شامل ومفصل يغطي جميع النقاط الحرجة في التوثيق",
+  "summary_en": "Comprehensive detailed summary covering all critical documentation points"
 }}}}
 
-IMPORTANT: For queries, you MUST:
-1. Include the header with diagnosis name and ICD code for CDI staff reference
-2. Cite ACTUAL clinical findings from the provided notes (symptoms, medications, measurements)
-3. Never suggest diagnosis names in the query body itself
-4. Specify if it's principal or secondary diagnosis
-5. Each query should be detailed with real evidence from the notes"""
+CRITICAL REQUIREMENTS:
+- Identify ALL diagnoses (principal, secondary, AND derived/implied)
+- Each query MUST cite 3+ specific clinical findings
+- Gaps MUST be detailed with examples
+- ALL ICD-10-CM codes MUST be complete and accurate"""
 
     try:
         # Use Google Gemini API with automatic key rotation
