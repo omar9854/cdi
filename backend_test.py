@@ -4350,10 +4350,12 @@ def main():
             results = tester.run_clinical_questions_tests()
         elif sys.argv[1] == "--whatsapp-security":
             results = tester.run_whatsapp_removal_and_security_tests()
+        elif sys.argv[1] == "--ai-providers":
+            results = tester.run_ai_provider_test()
         else:
             results = tester.run_all_tests()
     else:
-        results = tester.run_whatsapp_removal_and_security_tests()  # Default to WhatsApp/Security tests
+        results = tester.run_ai_provider_test()  # Default to AI Provider tests
     
     # Return appropriate exit code
     return 0 if results["failed_tests"] == 0 else 1
