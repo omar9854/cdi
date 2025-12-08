@@ -100,6 +100,15 @@ const Navbar = ({ user, onLogout }) => {
                     {language === 'ar' ? <Shield className="ml-2 w-4 h-4" /> : <Shield className="mr-2 w-4 h-4" />}
                     {language === 'ar' ? 'الأمان' : 'Security'}
                   </Button>
+                  <Button
+                    variant={isActive('/ai-settings') ? 'secondary' : 'ghost'}
+                    onClick={() => navigate('/ai-settings')}
+                    className={isActive('/ai-settings') ? '' : 'text-white hover:bg-white/10'}
+                    data-testid="nav-ai-settings"
+                  >
+                    {language === 'ar' ? <Brain className="ml-2 w-4 h-4" /> : <Brain className="mr-2 w-4 h-4" />}
+                    {language === 'ar' ? 'الذكاء الاصطناعي' : 'AI Settings'}
+                  </Button>
                 </>
               )}
               {(user.role === 'supervisor' || user.role === 'admin') && (
