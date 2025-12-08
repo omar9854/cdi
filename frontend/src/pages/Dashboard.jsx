@@ -24,15 +24,19 @@ const Dashboard = ({ user, onLogout }) => {
 
   // Auto-redirect based on department and role
   useEffect(() => {
-    if (user?.department === 'coding') {
+    if (user?.role === 'admin') {
+      navigate('/admin');
+    } else if (user?.department === 'coding') {
       // Redirect coding users to their specific pages
-      if (user.coding_role === 'coder') {
+      if (user.coding_role === 'supervisor') {
+        navigate('/coding-supervisor');
+      } else if (user.coding_role === 'coder') {
         navigate('/coder');
       } else if (user.coding_role === 'auditor') {
         navigate('/auditor');
-      } else if (user.role === 'supervisor' || user.role === 'admin') {
-        navigate('/coding-supervisor');
       }
+    } else if (user?.role === 'supervisor') {
+      navigate('/supervisor');
     }
   }, [user, navigate]);
 
