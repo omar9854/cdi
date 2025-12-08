@@ -3697,9 +3697,13 @@ class MedicalCodingAPITester:
         ai_settings_get_success = self.test_admin_ai_settings_get()
         ai_settings_put_success = self.test_admin_ai_settings_put()
         
-        # Step 3: Create a clinical note for testing
+        # Step 3: Create a clinical note for testing (use admin token)
         print("\n📝 Creating clinical note for AI testing...")
+        # Temporarily set user token to admin token for note creation
+        original_token = self.token
+        self.token = self.admin_token
         note_created, note_id = self.test_create_clinical_note()
+        self.token = original_token
         
         if not note_created or not note_id:
             self.log_test("AI Provider System - Note Creation", False, "Failed to create test note")
