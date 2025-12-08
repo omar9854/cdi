@@ -561,8 +561,8 @@ async def send_password_reset_email(user_email: str, user_name: str, reset_token
     
     await send_email(user_email, subject, body_html)
 
-async def analyze_with_gemini(notes_text: str, doctor_notes: List[Dict]) -> Dict:
-    """Analyze clinical notes using Gemini AI - CDI Focus"""
+async def analyze_with_ai(notes_text: str, doctor_notes: List[Dict], provider: str = 'gemini') -> Dict:
+    """Analyze clinical notes using specified AI provider - Enhanced CDI Focus"""
     
     # Format doctor notes with specialties
     formatted_notes = "\n\n".join([
