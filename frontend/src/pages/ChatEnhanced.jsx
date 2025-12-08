@@ -39,7 +39,26 @@ const ChatEnhanced = ({ user, onLogout }) => {
     fetchAnalysisAndNoteId();
     fetchChatHistory();
     fetchQuestions();
+    fetchAIProviders();
   }, [analysisId]);
+  
+  const fetchAIProviders = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/ai-providers`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAiProviders(response.data.providers || []);
+      const savedProvider = localStorage.getItem('preferred_ai_provider');
+      if (savedProvider && response.data.providers.some(p => p.id === savedProvider)) {
+        setSelectedProvider(savedProvider);
+      } else if (response.data.providers.length > 0) {
+        setSelectedProvider(response.data.providers[0].id);
+      }
+    } catch (error) {
+      console.error('Failed to fetch AI providers:', error);
+    }
+  };
 
   useEffect(() => {
     scrollToBottom();
