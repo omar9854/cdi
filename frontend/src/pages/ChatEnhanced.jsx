@@ -202,9 +202,15 @@ const ChatEnhanced = ({ user, onLogout }) => {
 
       const response = await axios.post(
         `${API}/chat/${analysisId}`,
-        { question: userMessage },
+        { 
+          question: userMessage,
+          ai_provider: selectedProvider
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
+      // Save preferred provider
+      localStorage.setItem('preferred_ai_provider', selectedProvider);
 
       // Update with AI response
       setMessages(prev => prev.map((msg, idx) => 
