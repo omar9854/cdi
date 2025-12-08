@@ -2361,7 +2361,7 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
                     else:
                         raise e
         
-        elif ai_provider in ['azure', 'grok']:
+        elif ai_provider in ['azure', 'deepseek']:
             # Use OpenAI-compatible API for Azure and Grok
             from openai import OpenAI, AzureOpenAI
             
