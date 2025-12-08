@@ -100,10 +100,12 @@ async def ensure_admin_account():
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
-# Rate Limiting
-limiter = Limiter(key_func=get_remote_address)
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# Rate Limiting - TEMPORARILY DISABLED TO FIX LOGIN ISSUE
+# The slowapi rate limiter was causing persistent login failures due to in-memory state
+# TODO: Implement rate limiting with Redis or database-backed storage
+# limiter = Limiter(key_func=get_remote_address)
+# app.state.limiter = limiter
+# app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Prometheus Metrics
 instrumentor = Instrumentator(
