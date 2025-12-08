@@ -1401,57 +1401,83 @@ async def require_admin(user: dict = Depends(get_current_user)):
 
 @api_router.get("/admin/users-statistics")
 async def get_users_statistics(admin: dict = Depends(require_admin)):
-    """Get detailed statistics for all users"""
+    """Get detailed statistics for all users - Optimized with aggregation"""
     from datetime import datetime, timezone, timedelta
     
-    # Get all users except admins
-    users = await db.users.find(
-        {"role": {"$ne": "admin"}},
-        {"_id": 0, "password_hash": 0}
-    ).to_list(1000)
-    
     today = datetime.now(timezone.utc).date()
-    yesterday = today - timedelta(days=1)
+    today_start = datetime.combine(today, datetime.min.time()).isoformat()
+    today_end = datetime.combine(today + timedelta(days=1), datetime.min.time()).isoformat()
+    
+    # Optimized aggregation pipeline - single query instead of N+1
+    pipeline = [
+        {"$match": {"role": {"$ne": "admin"}}},
+        {
+            "$lookup": {
+                "from": "clinical_notes",
+                "localField": "id",
+                "foreignField": "user_id",
+                "as": "notes"
+            }
+        },
+        {
+            "$lookup": {
+                "from": "analyses",
+                "localField": "id",
+                "foreignField": "user_id",
+                "as": "analyses"
+            }
+        },
+        {
+            "$addFields": {
+                "total_notes": {"$size": "$notes"},
+                "total_analyses": {"$size": "$analyses"},
+                "today_notes": {
+                    "$size": {
+                        "$filter": {
+                            "input": "$notes",
+                            "cond": {
+                                "$and": [
+                                    {"$gte": ["$$this.created_at", today_start]},
+                                    {"$lt": ["$$this.created_at", today_end]}
+                                ]
+                            }
+                        }
+                    }
+                },
+                "today_analyses": {
+                    "$size": {
+                        "$filter": {
+                            "input": "$analyses",
+                            "cond": {
+                                "$and": [
+                                    {"$gte": ["$$this.created_at", today_start]},
+                                    {"$lt": ["$$this.created_at", today_end]}
+                                ]
+                            }
+                        }
+                    }
+                },
+                "last_note_date": {"$max": "$notes.created_at"}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "password_hash": 0,
+                "notes": 0,
+                "analyses": 0
+            }
+        }
+    ]
+    
+    users = await db.users.aggregate(pipeline).to_list(1000)
     
     user_stats = []
     for user in users:
-        user_id = user['id']
-        
-        # Count total notes
-        total_notes = await db.clinical_notes.count_documents({"user_id": user_id})
-        
-        # Count total analyses
-        total_analyses = await db.analyses.count_documents({"user_id": user_id})
-        
-        # Count today's notes
-        today_notes = await db.clinical_notes.count_documents({
-            "user_id": user_id,
-            "created_at": {
-                "$gte": datetime.combine(today, datetime.min.time()).isoformat(),
-                "$lt": datetime.combine(today + timedelta(days=1), datetime.min.time()).isoformat()
-            }
-        })
-        
-        # Count today's analyses
-        today_analyses = await db.analyses.count_documents({
-            "user_id": user_id,
-            "created_at": {
-                "$gte": datetime.combine(today, datetime.min.time()).isoformat(),
-                "$lt": datetime.combine(today + timedelta(days=1), datetime.min.time()).isoformat()
-            }
-        })
-        
-        # Get last activity
-        last_note = await db.clinical_notes.find_one(
-            {"user_id": user_id},
-            {"_id": 0, "created_at": 1},
-            sort=[("created_at", -1)]
-        )
-        
-        last_activity = last_note['created_at'] if last_note else user.get('created_at')
+        last_activity = user.get('last_note_date') or user.get('created_at')
         
         user_stats.append({
-            "user_id": user_id,
+            "user_id": user['id'],
             "full_name": user['full_name'],
             "email": user['email'],
             "phone_number": user.get('phone_number', ''),
@@ -1459,11 +1485,11 @@ async def get_users_statistics(admin: dict = Depends(require_admin)):
             "is_active": user.get('is_active', True),
             "registration_date": user.get('created_at'),
             "last_activity": last_activity,
-            "total_notes": total_notes,
-            "total_analyses": total_analyses,
-            "today_notes": today_notes,
-            "today_analyses": today_analyses,
-            "is_active_today": today_notes > 0 or today_analyses > 0
+            "total_notes": user.get('total_notes', 0),
+            "total_analyses": user.get('total_analyses', 0),
+            "today_notes": user.get('today_notes', 0),
+            "today_analyses": user.get('today_analyses', 0),
+            "is_active_today": (user.get('today_notes', 0) + user.get('today_analyses', 0)) > 0
         })
     
     # Sort by today's activity (most active first)
