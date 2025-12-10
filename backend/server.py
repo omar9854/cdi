@@ -965,18 +965,41 @@ CRITICAL REQUIREMENTS:
         elif response_text is None:
             raise HTTPException(status_code=400, detail=f"مزود غير مدعوم أو فشل في المعالجة: {provider}. Unsupported AI provider or processing failed: {provider}")
         
-        # Parse JSON response
+        # Enhanced JSON parsing with better error handling
         import json
-        if "```json" in response_text:
-            response_text = response_text.split("```json")[1].split("```")[0].strip()
-        elif "```" in response_text:
-            response_text = response_text.split("```")[1].split("```")[0].strip()
+        import re
         
-        result = json.loads(response_text)
-        return result
+        try:
+            # Remove markdown code blocks if present
+            if "```json" in response_text:
+                response_text = response_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in response_text:
+                response_text = response_text.split("```")[1].split("```")[0].strip()
+            
+            # Remove any BOM or invisible characters
+            response_text = response_text.strip().lstrip('\ufeff').lstrip('\u200b')
+            
+            # Try to find JSON object in the response
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if json_match:
+                response_text = json_match.group(0)
+            
+            # Parse JSON
+            result = json.loads(response_text)
+            return result
+            
+        except json.JSONDecodeError as je:
+            logger.error(f"JSON parsing error: {str(je)}")
+            logger.error(f"Response text (first 500 chars): {response_text[:500]}")
+            raise HTTPException(
+                status_code=500, 
+                detail=f"فشل في تحليل استجابة AI. Failed to parse AI response: {str(je)}"
+            )
         
+    except HTTPException:
+        raise
     except Exception as e:
-        logging.error(f"Error analyzing with Gemini: {str(e)}")
+        logging.error(f"Error analyzing with AI: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error in analysis: {str(e)}")
 
 # Health check route
