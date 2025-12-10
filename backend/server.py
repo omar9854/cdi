@@ -844,51 +844,69 @@ CRITICAL REQUIREMENTS:
 - ALL ICD-10-CM codes MUST be complete and accurate"""
 
     try:
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
-        from dotenv import load_dotenv
-        load_dotenv()
-        
         response_text = None  # Initialize to avoid UnboundLocalError
         
         # Select AI provider
         if provider == 'gemini':
-            # Use Emergent LLM Key with emergentintegrations
-            emergent_key = os.environ.get('EMERGENT_LLM_KEY')
-            if not emergent_key:
-                raise HTTPException(status_code=400, detail="Emergent LLM Key not configured")
+            # Use Google Gemini API with intelligent key rotation
+            # Combine system message and user prompt
+            full_prompt = f"{system_message}\n\n{user_prompt}"
             
-            try:
-                # Initialize LlmChat with Gemini
-                chat = LlmChat(
-                    api_key=emergent_key,
-                    session_id=f"analysis_{notes_text[:20]}",
-                    system_message=system_message
-                ).with_model("gemini", "gemini-2.5-flash")
-                
-                # Send message
-                user_message = UserMessage(text=user_prompt)
-                response_text = await chat.send_message(user_message)
-                logger.info("✅ Gemini analysis successful with Emergent LLM Key")
-                
-            except Exception as e:
-                logger.error(f"❌ Gemini error: {str(e)}")
-                # Try fallback to DeepSeek or Azure
-                deepseek_key = os.environ.get('DEEPSEEK_API_KEY')
-                azure_key = os.environ.get('AZURE_OPENAI_KEY')
-                
-                if deepseek_key:
-                    logger.info("🔄 Auto-switching to DeepSeek due to Gemini error")
-                    provider = 'deepseek'
-                    response_text = None
-                elif azure_key:
-                    logger.info("🔄 Auto-switching to Azure due to Gemini error")
-                    provider = 'azure'
-                    response_text = None
-                else:
-                    raise HTTPException(
-                        status_code=500,
-                        detail=f"Gemini failed: {str(e)}"
-                    )
+            # Try all available keys with intelligent rotation
+            max_retries = len(GEMINI_API_KEYS)
+            last_error = None
+            
+            for attempt in range(max_retries):
+                try:
+                    # Get model with next key in rotation
+                    model = get_gemini_model('gemini-2.5-flash')
+                    response = model.generate_content(full_prompt)
+                    response_text = response.text.strip()
+                    logger.info(f"✅ Gemini analysis successful on attempt {attempt + 1}")
+                    break  # Success, exit retry loop
+                    
+                except Exception as e:
+                    last_error = e
+                    error_msg = str(e)
+                    
+                    # Check if quota exceeded (429 error)
+                    if "429" in error_msg or "quota" in error_msg.lower() or "RESOURCE_EXHAUSTED" in error_msg:
+                        logger.warning(f"⚠️ Gemini key exhausted (attempt {attempt + 1}/{max_retries})")
+                        
+                        # Continue trying other keys
+                        if attempt < max_retries - 1:
+                            logger.info(f"🔄 Trying next Gemini key ({attempt + 2}/{max_retries})...")
+                            continue
+                        else:
+                            # All Gemini keys exhausted, try fallback
+                            logger.error("❌ All Gemini keys exhausted")
+                            
+                            # Try fallback to DeepSeek or Azure
+                            deepseek_key = os.environ.get('DEEPSEEK_API_KEY')
+                            azure_key = os.environ.get('AZURE_OPENAI_KEY')
+                            
+                            if deepseek_key:
+                                logger.info("🔄 Auto-switching to DeepSeek due to Gemini quota limit")
+                                provider = 'deepseek'
+                                response_text = None
+                                break
+                            elif azure_key:
+                                logger.info("🔄 Auto-switching to Azure due to Gemini quota limit")
+                                provider = 'azure'
+                                response_text = None
+                                break
+                            else:
+                                raise HTTPException(
+                                    status_code=429,
+                                    detail=f"جميع مفاتيح Gemini ({len(GEMINI_API_KEYS)}) وصلت للحد اليومي. الرجاء استخدام DeepSeek أو Azure. All {len(GEMINI_API_KEYS)} Gemini keys reached daily quota. Please use DeepSeek or Azure."
+                                )
+                    else:
+                        # Other errors - try next key
+                        if attempt < max_retries - 1:
+                            logger.warning(f"⚠️ Error with key, trying next: {error_msg[:100]}")
+                            continue
+                        else:
+                            raise e
         
         # Process if response_text is still None (fallback triggered or direct provider selection)
         if provider == 'azure' and response_text is None:
