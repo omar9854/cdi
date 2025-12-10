@@ -432,7 +432,7 @@ Omar Almaghthawi
 Omar Almaghthawi
 
 **رابط التطبيق:**
-https://medical-coder.preview.emergentagent.com
+https://medcode-dashboard.preview.emergentagent.com
 
 **حساب الأدمن:**
 📧 admin@cdi-center.sa

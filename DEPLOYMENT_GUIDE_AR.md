@@ -3,7 +3,7 @@
 ## 📋 معلومات التطبيق
 
 **اسم التطبيق:** مركز تحسين التوثيق السريري (CDI Center)
-**URL الحالي:** https://medical-coder.preview.emergentagent.com
+**URL الحالي:** https://medcode-dashboard.preview.emergentagent.com
 
 ---
 
@@ -35,7 +35,7 @@
 
 ### الطريقة الحالية (Preview):
 ```
-https://medical-coder.preview.emergentagent.com
+https://medcode-dashboard.preview.emergentagent.com
 ```
 
 **ملاحظة:** هذا الرابط مؤقت للتطوير والاختبار

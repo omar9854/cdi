@@ -1,59 +1,156 @@
-<analysis>
-The AI engineer's trajectory involved a sequence of distinct tasks, starting with the fulfillment of a comprehensive documentation request. This included generating technical, security, intellectual property, and code inventory documents in Markdown, converting them to PDF, and then attempting to archive them (which faced initial timeout issues). The user subsequently struggled to access files, prompting the AI to provide alternative delivery methods like displaying content as text in the chat. The focus then shifted to generating tailored presentations for various stakeholders (CEO, IT, Health Information Manager, Cybersecurity), including user-specific details and screenshots. A critical compliance check against Saudi and US cybersecurity standards (HIPAA) was performed, resulting in a detailed report. Next, the AI successfully expanded the application's Google Gemini API key pool from 3 to 5, ensuring robust LLM capacity. The final set of issues involved a critical bug in the password reset functionality, where a preview URL was used, and an explicit user request to remove all WhatsApp integration. The AI addressed the URL issue, but the WhatsApp removal was ongoing at the point of this summary, with the primary component and its import in  having been removed.
-</analysis>
+<analysis>**original_problem_statement:**
+The user's initial goal was a major platform overhaul, including removing WhatsApp, splitting the app into CDI and Medical Coding departments, and implementing specific roles and features for the new Medical Coding module. A critical login bug blocked all progress.
 
-<product_requirements>
-The AI-powered Clinical Documentation Improvement (CDI) web application analyzes patient notes, identifies gaps, determines ICD-10-CM diagnoses, and generates physician queries. It features robust AI analysis (Google Gemini), secure user authentication with Email OTP MFA, and multi-language support. Users can create, edit, and delete notes, with privacy enhancements like patient ID usage. The application includes an admin system for user management and supervisor features. Core security aspects, such as strong password policies, audit logging, and rate limiting, are in place. Recent development efforts concentrated on stabilizing the login flow, ensuring reliable MFA, and persistent admin account configuration across environments, culminating in the provision of comprehensive documentation for technical, security, and intellectual property review.
-</product_requirements>
+During this session, the user's requirements evolved significantly to include:
+1.  **Multi-AI Provider Integration:** A system for the Admin to manage API keys for different AI providers.
+2.  **User-Selectable AI:** Allow end-users to choose which AI model (Gemini, Microsoft Azure, or DeepSeek) to use for analysis and chat.
+3.  **API Key Expansion:** Add a large number of new API keys for Gemini and a new set of keys for DeepSeek (replacing a previous request for Grok).
+4.  **Bug Fixes:** Resolve the critical login failure, fix numerous bugs in the Admin Dashboard, correct role-based navigation, and address a blank-page frontend error.
+5.  **Deployment Readiness:** Harden the application by removing hardcoded secrets, fixing performance issues (N+1 queries), and ensuring it passes all health checks for deployment.
 
-<key_technical_concepts>
--   **FastAPI**: Python backend framework.
--   **React**: JavaScript frontend (with Shadcn UI).
--   **MongoDB**: NoSQL database.
--   **Google Gemini API**: LLM for analysis, with API Key Rotation.
--   **JWT/Bcrypt**: Authentication and password hashing.
--   **Email OTP**: Multi-factor authentication.
--   **Pydantic**: Data validation for API models.
--   **Supervisor**: Process control for services.
--   ****: Frontend utility for error display.
-</key_technical_concepts>
+**User's preferred language**: Arabic ()
 
-<code_architecture>
+**what currently exists?**
+The application is a full-stack medical documentation platform with two departments: CDI and Medical Coding.
+- **Backend:** The critical login failure has been resolved by removing the  rate limiter. All hardcoded credentials (, , ) have been moved to environment variables. An N+1 query issue in the user list has been fixed with an aggregation pipeline. The backend now features a sophisticated, multi-provider AI system managed by . It supports round-robin key rotation for 12 Gemini keys, with an automatic fallback to the next key on quota errors, and a final fallback to Azure. It also supports DeepSeek.
+- **Frontend:** The UI for role-based redirection is fixed. An admin page () exists to manage AI provider keys. The analysis and chat pages (, ) have been updated to allow users to select their preferred AI provider.
+- **Overall Health:** The backend is stable and deployment-ready. However, the frontend is currently **broken** due to a React DOM error, preventing it from rendering correctly for the user.
+
+**Last working item**:
+- Last item agent was working: Debugging a frontend runtime error:  This error started appearing after the last set of backend and frontend changes to improve AI key rotation and provider management. The agent had just started to investigate the cause.
+- Status: IN PROGRESS
+- Agent Testing Done: N
+- Which testing method agent to use? manual testing by screenshot tool
+- User Testing Done: N
+
+**All Pending/In progress Issue list**:
+- Issue 1: Critical Frontend React Error (P0)
+- Issue 2: Verify IP Address in Audit Logs (P1)
+- Issue 3: Full End-to-End Password Reset Test (P1)
+
+Issues Detail:
+- Issue 1: 
+  - Description: The frontend throws a  error, causing the UI to fail to render or behave unpredictably. This is a critical blocker for any user interaction. It's likely a React-specific issue related to DOM manipulation during component re-renders.
+  - Attempted fixes: None. The agent was just beginning to investigate when the session ended.
+  - Next debug checklist:
+    1.  **Review Recently Modified Components:** Scrutinize  and , as they were heavily modified. Pay close attention to conditional rendering logic.
+    2.  **Check  Props:** Ensure all lists rendered with  have unique and stable  props. Using an array index as a key is a common cause of this error if the list can be reordered or items are removed.
+    3.  **Analyze State Updates:** Look for asynchronous state updates that might cause a component to unmount before a DOM operation (like an animation or another state update) completes.
+    4.  **Isolate the Cause:** Temporarily comment out new UI elements (like the AI provider selection dialogs/dropdowns) to see if the error disappears, which would pinpoint the problematic component.
+  - Why fix this issue and what will be achieved with the fix? This is a **critical blocker**. Fixing it will restore frontend functionality and make the application usable again.
+  - Status:  IN PROGRESS
+  - Is recurring issue? N
+  - Should Test frontend/backend/both after fix? frontend
+  - Blocked on other issue: No, this issue blocks all other frontend work.
+
+- Issue 2:
+  - Description: Verify that the IP address for user actions is being correctly recorded in the  collection and displayed on the  page. This was part of the original request but has not been verified.
+  - Status: NOT STARTED
+  - Blocked on other issue: Issue 1: Critical Frontend React Error
+
+- Issue 3:
+  - Description: The password reset flow was previously bugged. While fixes were applied, a full end-to-end test from email request to successful login with the new password has not been performed.
+  - Status: NOT STARTED
+  - Blocked on other issue: Issue 1: Critical Frontend React Error
+
+**In progress Task List**:
+There are no in-progress tasks other than debugging the critical frontend error listed above.
+
+**Upcoming and Future Tasks**
+- **Upcoming Tasks:**
+    - (P2) **Full Frontend Implementation for Medical Coding Roles:** The existing pages (, , ) are still basic placeholders. They need to be fully implemented with all the UI and business logic for their respective features.
+- **Future Tasks:**
+    - (P3) **Final WhatsApp Removal Sweep:** Perform a final  across the entire project to find and remove any last remnants of whatsapp or twilio from comments, configs, or documentation.
+
+**Completed work in this session**
+- **Critical Bug Fixes:**
+  - Resolved the application-breaking login failure by removing the  rate-limiter.
+  - Fixed a blank page frontend error by correcting the environment variable usage from Vite's () to Create React App's ().
+  - Fixed a bug where Admins were incorrectly redirected to the  page on login instead of the main dashboard.
+- **AI Provider Integration:**
+  - Replaced Grok integration with DeepSeek as requested by the user.
+  - Implemented a complete, multi-provider AI system supporting Gemini, Azure, and DeepSeek.
+  - Created an admin page () to manage AI provider keys, which are stored in the database.
+  - Updated analysis and chat pages to allow users to select their preferred AI provider.
+- **API Key Management:**
+  - Added a total of 12 Gemini keys and 5 DeepSeek keys to the  file.
+  - Implemented an advanced, thread-safe, round-robin key rotation system for Gemini keys () to handle quota limits gracefully.
+  - Implemented an automatic fallback mechanism: if all Gemini keys fail due to quota, the system will automatically try Azure.
+- **Deployment Hardening:**
+  - Removed hardcoded Admin credentials and JWT secret from  and moved them to environment variables.
+  - Removed  from  to allow for proper deployment configuration.
+  - Optimized a user list endpoint by fixing an N+1 query problem using a MongoDB aggregation pipeline.
+  - Successfully passed all  health checks.
+
+**Earlier issues found/mentioned but not fixed**
+All known issues have been addressed or are captured in the pending list above.
+
+**Known issue recurrence from previous fork**
+- The critical login failure was a recurring issue that is now fully resolved by removing the root cause ( middleware).
+
+**Code Architecture**
 
 
--   **/app/backend/server.py**: Core FastAPI backend. Handles API endpoints, authentication, MFA, and database interactions.
-    -   **Changes**: Updated OTP expiration, implemented  for admin provisioning. Modified for Gemini API key loading/rotation, logic for WhatsApp-based password reset (later reverted), and then email-based password reset URL fix.
--   **/app/backend/migration_update_users.py**: Script for database migrations.
-    -   **Changes**: Modified repeatedly for admin email updates and password hashing.
--   **/app/frontend/.env**: Frontend environment variables.
-    -   **Changes**:  updated to . Later,  was changed from a preview link to the correct URL  to fix password reset links.  and  were added.
--   **/app/frontend/src/pages/MFAVerification.jsx**: Frontend page for OTP verification.
-    -   **Changes**: Integrated  for error display and fixed OTP data submission.
--   **/app/frontend/src/pages/Login.jsx**: Frontend login page.
-    -   **Changes**: Integrated  for robust error handling.
--   **/app/frontend/src/pages/ForgotPassword.jsx**: Frontend page for initiating password reset.
-    -   **Changes**: Modified to display a password reset code (later removed during WhatsApp removal).
--   **/app/frontend/src/utils/errorHandler.js**: New utility for standardized error display.
-    -   **Changes**: Created to provide a consistent way to display API errors.
--   **/app/update_admin_email.sh**: Bash script for .
--   **/app/frontend/src/App.js**: Main frontend component.
-    -   **Changes**: Removed import and usage of  component.
--   **/app/frontend/src/components/WhatsAppSupport.jsx**: WhatsApp support component.
-    -   **Changes**: Deleted from the codebase.
--   **New Documentation Files**: Numerous  files (and their PDF versions) were created for comprehensive project documentation, patent applications, copyright registration, stakeholder presentations, and compliance reports (e.g., , , , , , , , , , , , , , , , , , , , ).
-</code_architecture>
+**Key Technical Concepts**
+- Backend: FastAPI, MongoDB (motor), Pydantic
+- Frontend: React, Shadcn/UI, Tailwind CSS
+- AI Integration: Multi-provider system (Google Gemini, Azure OpenAI, DeepSeek) with dynamic selection.
+- Key Management: Thread-safe, round-robin key rotation with automatic fallback.
 
-<pending_tasks>
--   User needs to perform a  operation from their Emergent platform to ensure production reflects the latest code.
--   Validate MFA and password reset functionality end-to-end in the *production* environment with the latest fixes.
--   Fully implement and display audit logs in the .
--   Complete the removal of all remaining WhatsApp-related code and configurations from the application.
-</pending_tasks>
+**key DB schema**
+- **users**: 
+- **ai_settings**:  (New collection)
+- **hospitals**: 
+- **medical_cases**: 
+- **audit_logs**: 
 
-<current_work>
-Immediately before this summary request, the AI engineer was engaged in removing all WhatsApp integration from the application, as explicitly requested by the user. The process involved identifying and deleting the primary frontend component  (Chat Message 180). Following this, the engineer successfully removed the corresponding import statement and JSX usage of  from the main  file (Chat Message 188). The previous step had been an attempt to remove this import, which initially failed due to a  error in the replacement tool but was subsequently corrected and executed successfully. This task is currently ongoing, as the user requested to الغى نظام الواتس اب من الموقع واحذف اي سي يرتبط بالواتس اب (Cancel the WhatsApp system from the site and delete anything related to WhatsApp), implying a comprehensive removal beyond just the component and its immediate import.
-</current_work>
+**changes in tech stack**
+- DeepSeek API has been added.
 
-<optional_next_step>
-Continue searching for and removing any remaining WhatsApp-related code, environment variables, or configurations from both the frontend and backend.
-</optional_next_step>
+**All files of reference**
+- **Created:**
+  - : Core logic for managing multiple AI providers and key rotation.
+  - : UI for Admins to manage AI keys.
+  - : Documentation for the user on upgrading from free-tier AI keys.
+- **Updated:**
+  - : Major changes to integrate the AI provider manager, fix bugs, remove hardcoded secrets, and optimize queries.
+  - : Heavily updated with all secrets and numerous API keys for Gemini and DeepSeek.
+  - , : Added UI for AI provider selection.
+  - , , : Fixed admin redirection logic.
+  - : Removed  entries.
+
+**Critical Info for New Agent**
+- **Focus on the Frontend Bug First:** The top priority is fixing the  error. Do not attempt any other tasks until the frontend is rendering correctly. Follow the debug checklist provided in the Issues Detail section. The error is almost certainly in the React code, not the backend.
+- **AI System is Complex:** The AI integration is no longer a simple API call. It involves a manager class (), a database collection (), and sophisticated key rotation logic in  and . Understand this flow before making changes.
+- **Backend is Healthy:** The backend has been hardened and passed deployment health checks. Avoid making unnecessary changes to the backend while debugging the frontend issue unless a clear link is found.
+
+**documents created in this job**
+- /app/AI_KEYS_UPGRADE_GUIDE.md
+
+**Last 10 User Messages and any pending user messages**
+1.  **User:** Reports a  error and asks to replace Grok with DeepSeek, providing 5 keys. (COMPLETED)
+2.  **User:** Asks to add 6 more Gemini keys to the existing ones for better performance and smoother rotation. (COMPLETED)
+3.  **Agent:** Confirms addition of 12 total Gemini keys and implementation of an advanced round-robin rotation system. (COMPLETED)
+4.  **User:** Reports a new frontend error:  (IN PROGRESS)
+
+**Project Health Check:**
+- **Broken**: The frontend is non-functional due to a critical React runtime error.
+- **Mocked**: None.
+
+**3rd Party Integrations**
+- **Google Gemini API**: Integrated with 12 keys using a round-robin rotation system.
+- **Microsoft Azure OpenAI**: Integrated as a fallback option.
+- **DeepSeek API**: Integrated with 5 keys as a selectable option.
+
+**Testing status**
+- Testing agent used after significant changes: YES, the backend and DeepSeek integration passed all tests.
+- Troubleshoot agent used after agent stuck in loop: NO
+- Test files created: None.
+- Known regressions: The entire frontend is currently non-functional due to the  error.
+
+**Credentials to test flow:**
+Admin credentials are now sourced from environment variables, but for testing, you can use the demo account created by the previous agent:
+- **Email:** 
+- **Password:** 
+- **MFA:** Disabled
+**Note:** Login will likely fail or the page won't render correctly until the critical frontend bug is fixed.</analysis>

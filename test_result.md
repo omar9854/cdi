@@ -583,7 +583,7 @@ agent_communication:
       **TESTING ATTEMPT RESULTS:**
       
       **✅ LOGIN PROCESS VERIFICATION:**
-      - Successfully navigated to login page (https://medical-coder.preview.emergentagent.com/login)
+      - Successfully navigated to login page (https://medcode-dashboard.preview.emergentagent.com/login)
       - Login form elements detected correctly (1 email input, 1 password input, 1 submit button)
       - Credentials filled successfully (admin@cdi-center.sa / CDI@2024#Admin)
       - Login step 1 completed successfully
@@ -1413,7 +1413,7 @@ agent_communication:
       
       **1. Production Backend URL Fix ✅**
       - Problem: Frontend .env had preview URL instead of production URL
-      - Old URL: https://medical-coder.preview.emergentagent.com
+      - Old URL: https://medcode-dashboard.preview.emergentagent.com
       - New URL: https://medidoc-ai.emergent.host
       - File: /app/frontend/.env line 1
       - Status: FIXED - Frontend now points to correct production backend
@@ -1646,7 +1646,7 @@ agent_communication:
       **Email Script Update:**
       11. ✅ Updated send_password_change_emails.py
           - Changed reset_link from preview URL to production URL
-          - Old: https://medical-coder.preview.emergentagent.com/forgot-password
+          - Old: https://medcode-dashboard.preview.emergentagent.com/forgot-password
           - New: https://medidoc-ai.emergent.host/forgot-password
       
       ## 🔒 PASSWORD RESET NOW EMAIL-ONLY:
