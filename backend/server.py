@@ -3554,6 +3554,39 @@ async def generate_excel_report(
             ws_hospitals.cell(row=row_idx, column=6).value = hospital.get('adx_added', 0)
             ws_hospitals.cell(row=row_idx, column=7).value = hospital.get('drg_impact_rate', 0)
         
+        # Financial Impact by Hospital Sheet
+        ws_financial = wb.create_sheet(title="الأثر المالي التفصيلي")
+        financial_headers = ['المستشفى', 'تغييرات DRG', 'الأثر المالي الشهري (ريال)', 'التوقعات السنوية (ريال)']
+        for col_idx, header in enumerate(financial_headers, 1):
+            cell = ws_financial.cell(row=1, column=col_idx)
+            cell.value = header
+            cell.fill = PatternFill(start_color="2ECC71", end_color="2ECC71", fill_type="solid")
+            cell.font = Font(color="FFFFFF", bold=True)
+        
+        total_financial_impact = 0
+        for row_idx, hospital in enumerate(hospitals, 2):
+            hosp_drg_changes = hospital.get('drg_changes', 0)
+            hosp_impact = calculate_financial_impact(hosp_drg_changes)
+            
+            ws_financial.cell(row=row_idx, column=1).value = hospital.get('hospital_name', '')
+            ws_financial.cell(row=row_idx, column=2).value = hosp_drg_changes
+            ws_financial.cell(row=row_idx, column=3).value = hosp_impact['monthly_impact_sar']
+            ws_financial.cell(row=row_idx, column=3).number_format = '#,##0.00'
+            ws_financial.cell(row=row_idx, column=4).value = hosp_impact['annual_projection_sar']
+            ws_financial.cell(row=row_idx, column=4).number_format = '#,##0.00'
+            total_financial_impact += hosp_impact['monthly_impact_sar']
+        
+        # Add total row
+        total_row = len(hospitals) + 2
+        ws_financial.cell(row=total_row, column=1).value = "الإجمالي"
+        ws_financial.cell(row=total_row, column=1).font = Font(bold=True)
+        ws_financial.cell(row=total_row, column=3).value = total_financial_impact
+        ws_financial.cell(row=total_row, column=3).font = Font(bold=True, color="2ECC71")
+        ws_financial.cell(row=total_row, column=3).number_format = '#,##0.00'
+        ws_financial.cell(row=total_row, column=4).value = total_financial_impact * 12
+        ws_financial.cell(row=total_row, column=4).font = Font(bold=True, color="2ECC71")
+        ws_financial.cell(row=total_row, column=4).number_format = '#,##0.00'
+        
         # Top PDX Diagnoses Sheet
         if analysis_data.get('top_diagnoses', {}).get('pdx_after_cdi'):
             ws_pdx = wb.create_sheet(title="Top PDX Diagnoses")
