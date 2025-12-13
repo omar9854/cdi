@@ -3416,6 +3416,35 @@ async def upload_cdi_data(
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"خطأ في معالجة الملف: {str(e)}")
 
+
+
+def calculate_financial_impact(drg_changes: int, avg_case_value_sar: float = 25000.0) -> dict:
+    """
+    Calculate financial impact of DRG changes in Saudi Riyals
+    
+    Args:
+        drg_changes: Number of DRG changes/upgrades
+        avg_case_value_sar: Average additional reimbursement per DRG upgrade (default: 25,000 SAR)
+    
+    Returns:
+        dict with financial metrics
+    """
+    total_impact_sar = drg_changes * avg_case_value_sar
+    monthly_impact = total_impact_sar
+    annual_projection = monthly_impact * 12
+    
+    return {
+        "drg_changes": drg_changes,
+        "avg_case_value_sar": avg_case_value_sar,
+        "total_impact_sar": round(total_impact_sar, 2),
+        "monthly_impact_sar": round(monthly_impact, 2),
+        "annual_projection_sar": round(annual_projection, 2),
+        "total_impact_formatted": f"{total_impact_sar:,.2f} ريال",
+        "monthly_impact_formatted": f"{monthly_impact:,.2f} ريال",
+        "annual_projection_formatted": f"{annual_projection:,.2f} ريال"
+    }
+
+
 @api_router.post("/supervisor/generate-excel-report")
 async def generate_excel_report(
     analysis_data: dict,
