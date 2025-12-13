@@ -899,7 +899,7 @@ CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLE
         
         response_text = None
         
-        if provider == 'phi3':
+        if provider == 'azure':
             # Use Microsoft Phi-3-Mini via Ollama (Local/Offline ONLY)
             logger.info("🔄 Using Phi-3-Mini (local offline model)...")
             
