@@ -899,42 +899,67 @@ CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLE
         
         response_text = None
         
-        if provider == 'gemini':
-            # Use Gemini via Emergent LLM Key (Fast, Reliable, Local Credits)
-            logger.info("🔄 Using Gemini (Emergent LLM Key)...")
+        if provider == 'phi3':
+            # Use Microsoft Phi-3-Mini via Ollama (Local/Offline)
+            logger.info("🔄 Using Phi-3-Mini (local)...")
             
             try:
-                from emergentintegrations.llm.chat import LlmChat, UserMessage
-                from dotenv import load_dotenv
-                load_dotenv()
+                import requests
                 
-                emergent_key = os.environ.get('EMERGENT_LLM_KEY')
-                if not emergent_key:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Emergent LLM Key not configured. المفتاح غير مُعدّ."
-                    )
+                ollama_url = "http://localhost:11434/api/generate"
+                payload = {
+                    "model": "phi3:mini",
+                    "prompt": f"{system_message}\n\n{user_prompt}",
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.7,
+                        "num_predict": 4000,
+                        "num_ctx": 8192
+                    }
+                }
                 
-                # Initialize chat
-                chat = LlmChat(
-                    api_key=emergent_key,
-                    session_id=f"analysis_{notes_text[:20]}",
-                    system_message=system_message
-                ).with_model("gemini", "gemini-2.5-flash")
+                logger.info("📤 Sending to Phi-3 (30-90 sec for long notes)...")
+                response = requests.post(ollama_url, json=payload, timeout=300)
+                response.raise_for_status()
                 
-                # Send message
-                logger.info("📤 Sending request to Gemini...")
-                user_message = UserMessage(text=user_prompt)
-                response_text = await chat.send_message(user_message)
+                response_text = response.json().get('response', '').strip()
+                logger.info("✅ Phi-3 analysis successful")
                 
-                logger.info("✅ Gemini analysis successful (via Emergent Key)")
+            except requests.exceptions.ConnectionError:
+                raise HTTPException(status_code=503, detail="خدمة Phi-3 غير متاحة. Phi-3 service unavailable.")
+            except Exception as e:
+                logger.error(f"❌ Phi-3 error: {str(e)}")
+                raise HTTPException(status_code=500, detail=f"فشل Phi-3: {str(e)}")
+        
+        elif provider == 'gemini':
+            # Use Google Gemini with API keys (12 keys with rotation)
+            logger.info("🔄 Using Gemini with API keys...")
+            
+            try:
+                model = get_gemini_model('gemini-2.0-flash-exp')
+                full_prompt = f"{system_message}\n\n{user_prompt}"
                 
+                max_retries = len(GEMINI_API_KEYS)
+                for attempt in range(max_retries):
+                    try:
+                        response = model.generate_content(full_prompt)
+                        response_text = response.text.strip()
+                        logger.info(f"✅ Gemini successful (attempt {attempt+1})")
+                        break
+                    except Exception as e:
+                        if "429" in str(e) or "quota" in str(e).lower():
+                            if attempt < max_retries - 1:
+                                logger.warning(f"Key exhausted, trying next ({attempt+2}/{max_retries})")
+                                model = get_gemini_model('gemini-2.0-flash-exp')
+                                continue
+                            else:
+                                raise HTTPException(status_code=429, detail="جميع مفاتيح Gemini نفد رصيدها. All Gemini keys exhausted.")
+                        else:
+                            raise e
+                            
             except Exception as e:
                 logger.error(f"❌ Gemini error: {str(e)}")
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"فشل التحليل: {str(e)}. Analysis failed: {str(e)}"
-                )
+                raise HTTPException(status_code=500, detail=f"فشل Gemini: {str(e)}")
         
         else:
             # Only Phi-3 is supported - no external API keys
