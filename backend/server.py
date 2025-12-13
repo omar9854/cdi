@@ -326,7 +326,7 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     analysis_id: str
     message: str
-    ai_provider: Optional[str] = 'phi3'  # phi3 (default), deepseek
+    ai_provider: Optional[str] = 'azure'  # azure (default)
 
 class PasswordResetRequest(BaseModel):
     email: EmailStr
