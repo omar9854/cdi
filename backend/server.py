@@ -1029,23 +1029,35 @@ async def get_specialties():
 # Get available AI providers
 @api_router.get("/ai-providers")
 async def get_ai_providers():
-    """Get list of available AI providers - Gemini with Emergent LLM Key"""
+    """Get list of available AI providers - Phi-3 (local) & Gemini"""
     providers = [
         {
+            "id": "phi3",
+            "name": "Phi-3 Mini (Local)",
+            "name_ar": "فاي-3 ميني (محلي)",
+            "description": "Microsoft Phi-3 - Local, Free, Offline",
+            "description_ar": "مايكروسوفت فاي-3 - محلي، مجاني، بدون إنترنت",
+            "status": "active",
+            "is_local": True,
+            "is_free": True,
+            "note": "Free, may take 30-90 seconds",
+            "note_ar": "مجاني، قد يستغرق 30-90 ثانية"
+        },
+        {
             "id": "gemini",
-            "name": "Google Gemini 2.5 Flash",
-            "name_ar": "جوجل جيميناي 2.5 فلاش",
-            "description": "Google Gemini - Fast, Accurate, Powered by Emergent",
-            "description_ar": "جوجل جيميناي - سريع، دقيق، مدعوم من Emergent",
+            "name": "Google Gemini 2.0",
+            "name_ar": "جوجل جيميناي 2.0",
+            "description": "Google Gemini - Fast, High Accuracy",
+            "description_ar": "جوجل جيميناي - سريع، دقة عالية",
             "status": "active",
             "is_local": False,
-            "is_free": False,
-            "note": "Uses your Emergent credits. Fast (5-10 seconds)",
-            "note_ar": "يستخدم رصيد Emergent الخاص بك. سريع (5-10 ثواني)"
+            "is_free": True,
+            "note": "Fast (5-10 seconds), uses API keys",
+            "note_ar": "سريع (5-10 ثواني)، يستخدم مفاتيح API"
         }
     ]
     
-    return {"providers": providers, "default": "gemini"}
+    return {"providers": providers, "default": "phi3"}
 
 
 # ========== Auth Routes ==========
