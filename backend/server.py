@@ -2340,8 +2340,8 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
     
     # Use analysis_id as session for continuity
     try:
-        # Get AI provider from request (default: azure)
-        ai_provider = getattr(chat_request, 'ai_provider', 'azure') or 'azure'
+        # Get AI provider from request (default: gemini)
+        ai_provider = getattr(chat_request, 'ai_provider', 'gemini') or 'gemini'
         
         # Get chat history for context
         previous_messages = await db.chat_messages.find(
