@@ -899,51 +899,41 @@ CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLE
         
         response_text = None
         
-        if provider == 'azure':
-            # Use Microsoft Azure OpenAI
-            logger.info("🔄 Using Microsoft Azure OpenAI...")
+        if provider == 'gemini':
+            # Use Gemini via Emergent LLM Key (Fast, Reliable, Local Credits)
+            logger.info("🔄 Using Gemini (Emergent LLM Key)...")
             
             try:
-                from openai import AzureOpenAI
+                from emergentintegrations.llm.chat import LlmChat, UserMessage
+                from dotenv import load_dotenv
+                load_dotenv()
                 
-                azure_key = os.environ.get('AZURE_OPENAI_KEY')
-                endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT')
-                deployment = os.environ.get('AZURE_OPENAI_DEPLOYMENT', 'gpt-4o-mini')
-                api_version = os.environ.get('AZURE_OPENAI_API_VERSION', '2024-02-15-preview')
-                
-                if not azure_key or not endpoint:
+                emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+                if not emergent_key:
                     raise HTTPException(
-                        status_code=400, 
-                        detail="Azure OpenAI not configured. مفاتيح Azure غير مضبوطة."
+                        status_code=400,
+                        detail="Emergent LLM Key not configured. المفتاح غير مُعدّ."
                     )
                 
-                client = AzureOpenAI(
-                    api_key=azure_key,
-                    api_version=api_version,
-                    azure_endpoint=endpoint
-                )
+                # Initialize chat
+                chat = LlmChat(
+                    api_key=emergent_key,
+                    session_id=f"analysis_{notes_text[:20]}",
+                    system_message=system_message
+                ).with_model("gemini", "gemini-2.5-flash")
                 
-                messages = [
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": user_prompt}
-                ]
+                # Send message
+                logger.info("📤 Sending request to Gemini...")
+                user_message = UserMessage(text=user_prompt)
+                response_text = await chat.send_message(user_message)
                 
-                logger.info(f"📤 Sending request to Azure ({deployment})...")
-                response = client.chat.completions.create(
-                    model=deployment,
-                    messages=messages,
-                    temperature=0.7,
-                    max_tokens=4000
-                )
-                
-                response_text = response.choices[0].message.content.strip()
-                logger.info("✅ Azure OpenAI analysis successful")
+                logger.info("✅ Gemini analysis successful (via Emergent Key)")
                 
             except Exception as e:
-                logger.error(f"❌ Azure error: {str(e)}")
+                logger.error(f"❌ Gemini error: {str(e)}")
                 raise HTTPException(
-                    status_code=500, 
-                    detail=f"فشل التحليل مع Azure: {str(e)}. Azure analysis failed: {str(e)}"
+                    status_code=500,
+                    detail=f"فشل التحليل: {str(e)}. Analysis failed: {str(e)}"
                 )
         
         else:
