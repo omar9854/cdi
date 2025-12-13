@@ -747,6 +747,255 @@ IMPORTANT: For queries, you MUST:
         logging.error(f"Error analyzing with Gemini: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error in analysis: {str(e)}")
 
+
+async def analyze_with_ai(notes_text: str, doctor_notes: List[Dict], provider: str = 'phi3') -> Dict:
+    """
+    Analyze clinical notes using specified AI provider (Phi-3 or DeepSeek)
+    Default: Phi-3 (local, offline, free)
+    """
+    
+    # Format doctor notes with specialties
+    formatted_notes = "\n\n".join([
+        f"**{note['specialty']}**:\n{note['text']}"
+        for note in doctor_notes
+    ])
+    
+    # Enhanced system message for better accuracy with long notes and ICD codes
+    system_message = """You are an Expert Clinical Documentation Improvement (CDI) Specialist with deep medical knowledge.
+
+🎯 YOUR MISSION:
+Conduct comprehensive CDI analysis to identify ALL documentation opportunities for quality improvement and proper reimbursement.
+
+📋 CRITICAL ANALYSIS REQUIREMENTS FOR LONG CLINICAL NOTES:
+
+1. **READ ENTIRE NOTE CAREFULLY** - Don't miss details in long documentation
+2. **IDENTIFY ALL DIAGNOSES** (Principal, Secondary, AND Derived/Implied)
+   - Categorize each as Principal (الرئيسي) or Secondary (الثانوي)
+   - Include COMPLETE and ACCURATE ICD-10-CM codes (verify specificity)
+   - Document clinical evidence supporting each diagnosis
+   - Note severity, stage, type, laterality when applicable
+
+3. **DERIVED/IMPLIED DIAGNOSES** (التشخيصات المشتقة):
+   - Conditions IMPLIED by clinical data but not explicitly documented
+   - Lab results showing anemia, medications for diabetes, symptoms suggesting infection
+   - These require physician clarification via queries
+
+4. **MISSING DOCUMENTATION** (التوثيق الناقص):
+   - Severity indicators (mild, moderate, severe, acute, chronic)
+   - Laterality (right, left, bilateral)
+   - Stages of disease
+   - Causal relationships (due to, secondary to)
+   - Complications and manifestations
+   - Type/subtype specifications
+
+5. **DOCUMENTATION GAPS** (الفجوات والثغرات):
+   - Clinical indicators present without corresponding diagnosis
+   - Treatments/medications without documented indication
+   - Abnormal results without interpretation
+   - Historical conditions mentioned but not current status
+
+⚠️ PHYSICIAN QUERIES - CRITICAL COMPLIANCE FORMAT:
+
+**MANDATORY 2-PART STRUCTURE:**
+
+**PART 1 - HEADER (CDI Staff Reference Only):**
+Format: "استفسار يخص: [Diagnosis + Specification] ([ICD-10 Code])"
+
+**PART 2 - QUERY BODY (Sent to Physician):**
+MUST INCLUDE:
+✓ SPECIFIC clinical findings (symptoms, vitals, lab values, medications)
+✓ Request for documentation based on "clinical judgment" only
+✓ Specification of what to document
+
+MUST NOT INCLUDE:
+✗ Any mention of the diagnosis name
+✗ Leading questions suggesting a diagnosis
+
+✅ CORRECT Query Example (Arabic):
+```
+استفسار يخص: الفشل الكلوي الحاد (N17.9)
+
+بناءً على الملاحظات الطبية:
+- الكرياتينين: 3.8 mg/dL (كان 1.2 قبل أسبوع)
+- معدل الترشيح الكبيبي: 25 mL/min
+- قلة البول: 400 مل خلال 24 ساعة
+
+بناءً على حكمك الطبي، الرجاء توثيق التشخيص الرئيسي وشدة الحالة.
+```
+
+🔍 ICD-10-CM CODE ACCURACY:
+- Use COMPLETE codes with all required digits
+- Include 7th character extensions when required
+- Specify laterality (right/left) when applicable
+- Use combination codes when appropriate
+- Verify code validity and specificity
+
+CRITICAL: ALL responses MUST be in BOTH Arabic AND English."""
+
+    user_prompt = f"""Please review the following clinical notes as a CDI Specialist.
+    
+IMPORTANT: This may be a LONG clinical note. Read it COMPLETELY and CAREFULLY.
+
+{formatted_notes}
+
+Perform a Clinical Documentation Improvement review and provide:
+
+1. **Diagnoses That Should Be Documented**: Based on ALL clinical findings
+   - Specify if "principal" (التشخيص الرئيسي) or "secondary" (التشخيص الثانوي)
+   - Include ACCURATE and COMPLETE ICD-10-CM codes
+   - Provide clinical evidence from notes
+
+2. **Missing Documentation**: What specific information is missing?
+
+3. **Documentation Gaps**: What gaps exist?
+
+4. **Physician Queries**: Generate DETAILED queries with clinical context
+   - Use the 2-part structure (Header + Body)
+   - Cite specific findings from the notes
+   - Request appropriate documentation level
+
+5. **Recommendations**: Specific recommendations to improve documentation
+
+Provide response in this EXACT JSON format:
+{{{{
+  "diagnoses_to_document": [
+    {{
+      "diagnosis_ar": "التشخيص بالعربي الكامل مع التفاصيل",
+      "diagnosis_en": "Complete diagnosis in English with details",
+      "icd_code": "Full ICD-10-CM code with all digits",
+      "type": "principal" or "secondary" or "derived",
+      "severity": "Severity/Stage/Type if applicable",
+      "clinical_evidence": "Specific clinical findings from notes supporting this diagnosis"
+    }}
+  ],
+  "missing_documentation": [
+    {{
+      "item_ar": "التوثيق الناقص - كن محدداً",
+      "item_en": "Missing documentation - be specific",
+      "impact": "Impact on coding/reimbursement/quality"
+    }}
+  ],
+  "gaps_ar": ["فجوة توثيقية محددة 1", "ثغرة في التوثيق 2"],
+  "gaps_en": ["Specific documentation gap 1", "Documentation deficiency 2"],
+  "queries_ar": [
+    "استفسار يخص: [التشخيص الكامل] ([ICD-10])\\n\\nبناءً على الملاحظات الطبية:\\n- [معطى سريري محدد 1]\\n- [معطى سريري محدد 2]\\n- [معطى سريري محدد 3]\\n\\nبناءً على حكمك الطبي، الرجاء توثيق التشخيص [الرئيسي/الثانوي] وشدة الحالة."
+  ],
+  "queries_en": [
+    "Query regarding: [Full diagnosis] ([ICD-10])\\n\\nBased on clinical documentation:\\n- [Specific clinical finding 1]\\n- [Specific clinical finding 2]\\n- [Specific clinical finding 3]\\n\\nBased on your clinical judgment, please document the [principal/secondary] diagnosis and severity."
+  ],
+  "recommendations_ar": ["توصية محددة 1 مع خطوات عملية", "توصية 2"],
+  "recommendations_en": ["Specific recommendation 1 with actionable steps", "Recommendation 2"],
+  "summary_ar": "ملخص شامل ومفصل يغطي جميع النقاط الحرجة",
+  "summary_en": "Comprehensive detailed summary covering all critical points"
+}}}}
+
+CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLETE and ACCURATE ICD-10-CM codes."""
+
+    try:
+        import requests
+        import json
+        
+        response_text = None
+        
+        if provider == 'phi3':
+            # Use Microsoft Phi-3-Mini via Ollama (Local/Offline)
+            logger.info("🔄 Using Phi-3-Mini (local offline model)...")
+            
+            try:
+                ollama_url = "http://localhost:11434/api/generate"
+                
+                payload = {
+                    "model": "phi3:mini",
+                    "prompt": f"{system_message}\n\n{user_prompt}",
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.7,
+                        "num_predict": 4000,
+                        "num_ctx": 8192  # Support long contexts
+                    }
+                }
+                
+                response = requests.post(ollama_url, json=payload, timeout=180)
+                response.raise_for_status()
+                
+                response_text = response.json().get('response', '').strip()
+                logger.info("✅ Phi-3-Mini analysis successful (local offline model)")
+                
+            except requests.exceptions.ConnectionError:
+                logger.error("❌ Phi-3 not available, falling back to DeepSeek")
+                provider = 'deepseek'  # Fallback
+                response_text = None
+            except Exception as e:
+                logger.error(f"❌ Phi-3 error: {str(e)}")
+                raise HTTPException(status_code=500, detail=f"Phi-3 failed: {str(e)}")
+        
+        if provider == 'deepseek' and response_text is None:
+            # Use DeepSeek
+            logger.info("🔄 Using DeepSeek (cloud)...")
+            from openai import OpenAI
+            
+            deepseek_key = os.environ.get('DEEPSEEK_API_KEY')
+            if not deepseek_key:
+                raise HTTPException(status_code=400, detail="مفتاح DeepSeek غير مُعدّ. DeepSeek API key not configured")
+            
+            client = OpenAI(
+                api_key=deepseek_key,
+                base_url="https://api.deepseek.com"
+            )
+            
+            messages = [
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_prompt}
+            ]
+            
+            response = client.chat.completions.create(
+                model="deepseek-chat",
+                messages=messages,
+                temperature=0.7,
+                max_tokens=4000
+            )
+            
+            response_text = response.choices[0].message.content.strip()
+            logger.info("✅ DeepSeek analysis successful")
+        
+        # Enhanced JSON parsing with better error handling
+        import re
+        
+        try:
+            # Remove markdown code blocks if present
+            if "```json" in response_text:
+                response_text = response_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in response_text:
+                response_text = response_text.split("```")[1].split("```")[0].strip()
+            
+            # Remove any BOM or invisible characters
+            response_text = response_text.strip().lstrip('\ufeff').lstrip('\u200b')
+            
+            # Try to find JSON object in the response
+            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+            if json_match:
+                response_text = json_match.group(0)
+            
+            # Parse JSON
+            result = json.loads(response_text)
+            logger.info(f"✅ JSON parsing successful, found {len(result.get('diagnoses_to_document', []))} diagnoses")
+            return result
+            
+        except json.JSONDecodeError as je:
+            logger.error(f"JSON parsing error: {str(je)}")
+            logger.error(f"Response text (first 500 chars): {response_text[:500]}")
+            raise HTTPException(
+                status_code=500, 
+                detail=f"فشل في تحليل استجابة AI. Failed to parse AI response: {str(je)}"
+            )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error analyzing with AI: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error in analysis: {str(e)}")
+
+
 # Health check route
 @api_router.get("/")
 async def root():
