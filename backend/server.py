@@ -900,47 +900,50 @@ CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLE
         response_text = None
         
         if provider == 'azure':
-            # Use Microsoft Phi-3-Mini via Ollama (Local/Offline ONLY)
-            logger.info("🔄 Using Phi-3-Mini (local offline model)...")
+            # Use Microsoft Azure OpenAI
+            logger.info("🔄 Using Microsoft Azure OpenAI...")
             
             try:
-                ollama_url = "http://localhost:11434/api/generate"
+                from openai import AzureOpenAI
                 
-                payload = {
-                    "model": "phi3:mini",
-                    "prompt": f"{system_message}\n\n{user_prompt}",
-                    "stream": False,
-                    "options": {
-                        "temperature": 0.7,
-                        "num_predict": 4000,
-                        "num_ctx": 8192  # Support long contexts
-                    }
-                }
+                azure_key = os.environ.get('AZURE_OPENAI_KEY')
+                endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT')
+                deployment = os.environ.get('AZURE_OPENAI_DEPLOYMENT', 'gpt-4o-mini')
+                api_version = os.environ.get('AZURE_OPENAI_API_VERSION', '2024-02-15-preview')
                 
-                logger.info("📤 Sending request to Phi-3 (may take 30-90 seconds for long notes)...")
-                response = requests.post(ollama_url, json=payload, timeout=300)  # Increased to 5 minutes
-                response.raise_for_status()
+                if not azure_key or not endpoint:
+                    raise HTTPException(
+                        status_code=400, 
+                        detail="Azure OpenAI not configured. مفاتيح Azure غير مضبوطة."
+                    )
                 
-                response_text = response.json().get('response', '').strip()
-                logger.info("✅ Phi-3-Mini analysis successful (local offline model)")
-                
-            except requests.exceptions.Timeout:
-                logger.error("❌ Phi-3 timeout - request took too long")
-                raise HTTPException(
-                    status_code=504, 
-                    detail="تجاوز وقت التحليل. الرجاء المحاولة مرة أخرى أو استخدام ملاحظات أقصر. Analysis timeout. Please try again or use shorter notes."
+                client = AzureOpenAI(
+                    api_key=azure_key,
+                    api_version=api_version,
+                    azure_endpoint=endpoint
                 )
-            except requests.exceptions.ConnectionError:
-                logger.error("❌ Phi-3 (Ollama) not running")
-                raise HTTPException(
-                    status_code=503,
-                    detail="خدمة التحليل المحلي غير متاحة. الرجاء الاتصال بالدعم الفني. Local analysis service unavailable. Please contact support."
+                
+                messages = [
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": user_prompt}
+                ]
+                
+                logger.info(f"📤 Sending request to Azure ({deployment})...")
+                response = client.chat.completions.create(
+                    model=deployment,
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=4000
                 )
+                
+                response_text = response.choices[0].message.content.strip()
+                logger.info("✅ Azure OpenAI analysis successful")
+                
             except Exception as e:
-                logger.error(f"❌ Phi-3 error: {str(e)}")
+                logger.error(f"❌ Azure error: {str(e)}")
                 raise HTTPException(
                     status_code=500, 
-                    detail=f"فشل التحليل المحلي: {str(e)}. Local analysis failed: {str(e)}"
+                    detail=f"فشل التحليل مع Azure: {str(e)}. Azure analysis failed: {str(e)}"
                 )
         
         else:
