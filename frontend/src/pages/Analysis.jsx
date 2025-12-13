@@ -20,7 +20,7 @@ const Analysis = ({ user, onLogout }) => {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [aiProviders, setAiProviders] = useState([]);
-  const [selectedProvider, setSelectedProvider] = useState('gemini');
+  const [selectedProvider, setSelectedProvider] = useState('phi3');  // Changed default to phi3
   const [showProviderDialog, setShowProviderDialog] = useState(false);
 
   useEffect(() => {
