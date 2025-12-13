@@ -3652,6 +3652,113 @@ async def generate_excel_report(
         logger.error(f"Error generating Excel report: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error generating report: {str(e)}")
 
+
+@api_router.get("/supervisor/dashboard-stats")
+async def get_dashboard_statistics(supervisor: dict = Depends(require_supervisor)):
+    """
+    Get visual dashboard statistics with KPIs and charts data
+    Returns comprehensive monthly statistics for visual dashboard
+    """
+    try:
+        # Get the latest uploaded analysis data from session/database
+        # For now, we'll return structure - implement actual data fetching later
+        
+        # Mock data structure for dashboard
+        current_month = datetime.now().strftime("%B %Y")
+        
+        dashboard_data = {
+            "period": current_month,
+            "kpis": {
+                "total_cases": 0,
+                "drg_changes": 0,
+                "drg_impact_rate": 0.0,
+                "financial_impact_sar": 0.0,
+                "annual_projection_sar": 0.0,
+                "pdx_changes": 0,
+                "adx_added": 0,
+                "queries_generated": 0
+            },
+            "charts": {
+                "drg_trend": {
+                    "labels": [],
+                    "values": []
+                },
+                "hospital_comparison": {
+                    "hospitals": [],
+                    "drg_changes": [],
+                    "financial_impact": []
+                },
+                "specialty_distribution": {
+                    "specialties": [],
+                    "cases": []
+                },
+                "cds_performance": {
+                    "specialists": [],
+                    "drg_impact": [],
+                    "success_rate": []
+                }
+            },
+            "top_performers": [],
+            "improvement_areas": []
+        }
+        
+        return dashboard_data
+    
+    except Exception as e:
+        logger.error(f"Error fetching dashboard stats: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/supervisor/export-dashboard-image")
+async def export_dashboard_image(
+    chart_data: dict,
+    supervisor: dict = Depends(require_supervisor)
+):
+    """
+    Export dashboard charts as images (PNG)
+    Receives chart configuration and returns image
+    """
+    try:
+        import matplotlib
+        matplotlib.use('Agg')
+        import matplotlib.pyplot as plt
+        from io import BytesIO
+        
+        chart_type = chart_data.get('type', 'bar')
+        title = chart_data.get('title', 'Chart')
+        labels = chart_data.get('labels', [])
+        values = chart_data.get('values', [])
+        
+        fig, ax = plt.subplots(figsize=(12, 6))
+        
+        if chart_type == 'bar':
+            ax.bar(labels, values, color='#3B82F6')
+        elif chart_type == 'line':
+            ax.plot(labels, values, marker='o', color='#10B981', linewidth=2)
+        elif chart_type == 'pie':
+            ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=90)
+            ax.axis('equal')
+        
+        ax.set_title(title, fontsize=16, fontweight='bold')
+        ax.grid(True, alpha=0.3)
+        
+        # Save to buffer
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png', dpi=300, bbox_inches='tight')
+        buffer.seek(0)
+        plt.close()
+        
+        return StreamingResponse(
+            buffer,
+            media_type="image/png",
+            headers={"Content-Disposition": f"attachment; filename={title.replace(' ', '_')}.png"}
+        )
+    
+    except Exception as e:
+        logger.error(f"Error exporting chart image: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 def generate_recommendations(analysis_data):
     """Generate smart recommendations based on analysis data"""
     recommendations = []
