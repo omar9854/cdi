@@ -943,34 +943,12 @@ CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLE
                     detail=f"فشل التحليل المحلي: {str(e)}. Local analysis failed: {str(e)}"
                 )
         
-        elif provider == 'deepseek' and response_text is None:
-            # Use DeepSeek
-            logger.info("🔄 Using DeepSeek (cloud)...")
-            from openai import OpenAI
-            
-            deepseek_key = os.environ.get('DEEPSEEK_API_KEY')
-            if not deepseek_key:
-                raise HTTPException(status_code=400, detail="مفتاح DeepSeek غير مُعدّ. DeepSeek API key not configured")
-            
-            client = OpenAI(
-                api_key=deepseek_key,
-                base_url="https://api.deepseek.com"
+        else:
+            # Only Phi-3 is supported - no external API keys
+            raise HTTPException(
+                status_code=400,
+                detail="فقط Phi-3 المحلي متاح. Only local Phi-3 analysis is available."
             )
-            
-            messages = [
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": user_prompt}
-            ]
-            
-            response = client.chat.completions.create(
-                model="deepseek-chat",
-                messages=messages,
-                temperature=0.7,
-                max_tokens=4000
-            )
-            
-            response_text = response.choices[0].message.content.strip()
-            logger.info("✅ DeepSeek analysis successful")
         
         # Check if we have a response
         if not response_text:
