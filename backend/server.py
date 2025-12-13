@@ -2282,8 +2282,8 @@ async def get_history(user: dict = Depends(get_current_user)):
 
 # ========== Chat Routes ==========
 @api_router.post("/chat")
-@limiter.limit("30/minute")
-async def chat_with_ai(request: Request, chat_request: ChatRequest, user: dict = Depends(get_current_user)):
+# @limiter.limit("30/minute")  # Temporarily disabled
+async def chat_with_ai(chat_request: ChatRequest, user: dict = Depends(get_current_user)):
     # Get analysis
     analysis = await db.analyses.find_one(
         {"id": chat_request.analysis_id, "user_id": user['id']},
