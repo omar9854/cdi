@@ -2325,44 +2325,89 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
     
     # Use analysis_id as session for continuity
     try:
-        # Use Google Gemini API with automatic key rotation
-        model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+        # Get AI provider from request (default: phi3)
+        ai_provider = getattr(chat_request, 'ai_provider', 'phi3') or 'phi3'
         
         # Get chat history for context
-        chat_history = []
         previous_messages = await db.chat_messages.find(
             {"analysis_id": chat_request.analysis_id}
         ).sort("created_at", 1).to_list(100)
         
-        # Build chat history
-        for msg in previous_messages:
-            # Handle both open chat messages (with 'role') and predefined questions (with 'question'/'answer')
-            if 'role' in msg:
-                if msg['role'] == 'user':
-                    chat_history.append({'role': 'user', 'parts': [msg['message']]})
-                else:
-                    chat_history.append({'role': 'model', 'parts': [msg['message']]})
-            elif 'question' in msg and 'answer' in msg:
-                # Predefined question format
-                chat_history.append({'role': 'user', 'parts': [msg['question']]})
-                chat_history.append({'role': 'model', 'parts': [msg['answer']]})
-        
-        # Start chat with history and retry logic
-        max_retries = len(GEMINI_API_KEYS)
         response_text = None
         
-        for attempt in range(max_retries):
+        if ai_provider == 'phi3':
+            # Use Phi-3-Mini (local, offline) for interactive chat
+            import requests
+            
+            # Build conversation history
+            conversation_text = f"{system_message}\n\n"
+            for msg in previous_messages:
+                if 'role' in msg:
+                    role = "User" if msg['role'] == 'user' else "Assistant"
+                    conversation_text += f"{role}: {msg['message']}\n"
+            
+            conversation_text += f"User: {chat_request.message}\nAssistant:"
+            
             try:
-                chat = model.start_chat(history=chat_history)
-                response = chat.send_message(chat_request.message)
-                response_text = response.text
-                break  # Success, exit retry loop
+                ollama_url = "http://localhost:11434/api/generate"
+                payload = {
+                    "model": "phi3:mini",
+                    "prompt": conversation_text,
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.7,
+                        "num_predict": 500,
+                        "num_ctx": 4096
+                    }
+                }
+                
+                response = requests.post(ollama_url, json=payload, timeout=60)
+                response.raise_for_status()
+                response_text = response.json().get('response', '').strip()
+                logger.info("✅ Phi-3 chat successful")
+                
             except Exception as e:
-                if attempt < max_retries - 1:
-                    logger.warning(f"Chat retry {attempt + 1}/{max_retries} with different API key")
-                    model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
-                else:
-                    raise e
+                logger.error(f"❌ Phi-3 chat error: {str(e)}, falling back to DeepSeek")
+                ai_provider = 'deepseek'
+                response_text = None
+        
+        if ai_provider == 'deepseek' and response_text is None:
+            # Use DeepSeek for interactive chat
+            from openai import OpenAI
+            
+            deepseek_key = os.environ.get('DEEPSEEK_API_KEY')
+            if not deepseek_key:
+                raise HTTPException(status_code=400, detail="DeepSeek API key not configured")
+            
+            client = OpenAI(
+                api_key=deepseek_key,
+                base_url="https://api.deepseek.com"
+            )
+            
+            # Build messages with history
+            messages = [{"role": "system", "content": system_message}]
+            
+            for msg in previous_messages:
+                if 'role' in msg and msg['role'] in ['user', 'assistant']:
+                    messages.append({
+                        "role": msg['role'],
+                        "content": msg['message']
+                    })
+            
+            messages.append({"role": "user", "content": chat_request.message})
+            
+            response = client.chat.completions.create(
+                model="deepseek-chat",
+                messages=messages,
+                temperature=0.7,
+                max_tokens=500
+            )
+            
+            response_text = response.choices[0].message.content.strip()
+            logger.info("✅ DeepSeek chat successful")
+        
+        if not response_text:
+            raise HTTPException(status_code=500, detail="No response from AI provider")
         
         # Save assistant message
         assistant_msg = ChatMessage(
