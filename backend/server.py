@@ -1011,27 +1011,19 @@ async def get_specialties():
 # Get available AI providers
 @api_router.get("/ai-providers")
 async def get_ai_providers():
-    """Get list of available AI providers with their status"""
+    """Get list of available AI providers - Only Phi-3 (local, offline, no API keys)"""
     providers = [
         {
             "id": "phi3",
-            "name": "Phi-3 Mini",
-            "name_ar": "فاي-3 ميني",
-            "description": "Microsoft Phi-3 (Local, Free, Offline)",
-            "description_ar": "مايكروسوفت فاي-3 (محلي، مجاني، بدون إنترنت)",
+            "name": "Phi-3 Mini (Local)",
+            "name_ar": "فاي-3 ميني (محلي)",
+            "description": "Microsoft Phi-3 - Local, Free, Offline, No API Keys Required",
+            "description_ar": "مايكروسوفت فاي-3 - محلي، مجاني، بدون إنترنت، لا يحتاج مفاتيح API",
             "status": "active",
             "is_local": True,
-            "is_free": True
-        },
-        {
-            "id": "deepseek",
-            "name": "DeepSeek",
-            "name_ar": "ديب سيك",
-            "description": "DeepSeek Chat (Cloud, High Accuracy)",
-            "description_ar": "ديب سيك (سحابي، دقة عالية)",
-            "status": "active",
-            "is_local": False,
-            "is_free": False
+            "is_free": True,
+            "note": "May take 30-90 seconds for analysis",
+            "note_ar": "قد يستغرق 30-90 ثانية للتحليل"
         }
     ]
     
