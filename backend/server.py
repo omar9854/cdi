@@ -2397,32 +2397,38 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         response_text = None
         
         if ai_provider == 'azure':
-            # Use Phi-3 for chat
+            # Use Azure for chat
             try:
-                import requests
+                from openai import AzureOpenAI
                 
-                conversation = f"{system_message}\n\n"
-                for msg in previous_messages:
-                    if 'role' in msg:
-                        role = "User" if msg['role'] == 'user' else "Assistant"
-                        conversation += f"{role}: {msg['message']}\n"
-                conversation += f"User: {chat_request.message}\nAssistant:"
+                azure_key = os.environ.get('AZURE_OPENAI_KEY')
+                endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT')
+                deployment = os.environ.get('AZURE_OPENAI_DEPLOYMENT')
+                api_version = os.environ.get('AZURE_OPENAI_API_VERSION', '2024-08-01-preview')
                 
-                response = requests.post(
-                    "http://localhost:11434/api/generate",
-                    json={
-                        "model": "phi3:mini",
-                        "prompt": conversation,
-                        "stream": False,
-                        "options": {"temperature": 0.7, "num_predict": 500}
-                    },
-                    timeout=60
+                client = AzureOpenAI(
+                    api_key=azure_key,
+                    api_version=api_version,
+                    azure_endpoint=endpoint
                 )
-                response_text = response.json().get('response', '').strip()
-                logger.info("✅ Phi-3 chat successful")
+                
+                messages = [{"role": "system", "content": system_message}]
+                for msg in previous_messages:
+                    if 'role' in msg and msg['role'] in ['user', 'assistant']:
+                        messages.append({"role": msg['role'], "content": msg['message']})
+                messages.append({"role": "user", "content": chat_request.message})
+                
+                response = client.chat.completions.create(
+                    model=deployment,
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=500
+                )
+                response_text = response.choices[0].message.content.strip()
+                logger.info("✅ Azure chat successful")
                 
             except Exception as e:
-                logger.error(f"❌ Phi-3 chat error: {str(e)}")
+                logger.error(f"❌ Azure chat error: {str(e)}")
                 raise HTTPException(status_code=500, detail=f"فشلت الدردشة: {str(e)}")
         
         elif ai_provider == 'gemini':
