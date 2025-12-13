@@ -3506,6 +3506,34 @@ async def generate_excel_report(
         adx = analysis_data.get('adx_metrics', {})
         ws_summary[f'A{row}'] = 'ADX due to CDI'
         ws_summary[f'B{row}'] = adx.get('total_added', 0)
+        row += 2
+        
+        # Financial Impact Section
+        financial_fill = PatternFill(start_color="2ECC71", end_color="2ECC71", fill_type="solid")
+        ws_summary[f'A{row}'] = 'الأثر المالي (Financial Impact)'
+        ws_summary[f'A{row}'].font = Font(bold=True, size=14, color="FFFFFF")
+        ws_summary[f'A{row}'].fill = financial_fill
+        ws_summary.merge_cells(f'A{row}:B{row}')
+        row += 1
+        
+        # Calculate financial impact
+        drg_changes_count = drg.get('total_changes', 0)
+        financial_impact = calculate_financial_impact(drg_changes_count)
+        
+        ws_summary[f'A{row}'] = 'عدد تغييرات DRG'
+        ws_summary[f'B{row}'] = financial_impact['drg_changes']
+        row += 1
+        ws_summary[f'A{row}'] = 'متوسط القيمة لكل حالة'
+        ws_summary[f'B{row}'] = f"{financial_impact['avg_case_value_sar']:,.0f} ريال"
+        row += 1
+        ws_summary[f'A{row}'] = 'الأثر المالي الشهري'
+        ws_summary[f'B{row}'] = financial_impact['monthly_impact_formatted']
+        ws_summary[f'B{row}'].font = Font(bold=True, size=12, color="2ECC71")
+        row += 1
+        ws_summary[f'A{row}'] = 'التوقعات السنوية'
+        ws_summary[f'B{row}'] = financial_impact['annual_projection_formatted']
+        ws_summary[f'B{row}'].font = Font(bold=True, size=13, color="2ECC71")
+        row += 2
         
         # Hospitals Analysis Sheet
         ws_hospitals = wb.create_sheet(title="تحليل المستشفيات")
