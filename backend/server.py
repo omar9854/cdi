@@ -2259,8 +2259,8 @@ async def analyze_note(request: Request, analyze_request: AnalyzeRequest, user: 
     
     # Validate AI provider
     ai_provider = analyze_request.ai_provider or 'gemini'
-    if ai_provider not in ['gemini', 'azure', 'deepseek']:
-        raise HTTPException(status_code=400, detail="مزود غير صحيح. يجب أن يكون: gemini, azure, أو deepseek. Invalid AI provider. Must be: gemini, azure, or deepseek")
+    if ai_provider not in ['gemini', 'azure', 'deepseek', 'phi3']:
+        raise HTTPException(status_code=400, detail="مزود غير صحيح. يجب أن يكون: gemini, azure, deepseek, أو phi3. Invalid AI provider. Must be: gemini, azure, deepseek, or phi3")
     
     # Analyze with selected AI provider
     result = await analyze_with_ai(note['title'], note['doctor_notes'], provider=ai_provider)
@@ -2448,8 +2448,8 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
     try:
         # Validate AI provider
         ai_provider = chat_request.ai_provider or 'gemini'
-        if ai_provider not in ['gemini', 'azure', 'deepseek']:
-            raise HTTPException(status_code=400, detail="مزود غير صحيح. يجب أن يكون: gemini, azure, أو deepseek. Invalid AI provider. Must be: gemini, azure, or deepseek")
+        if ai_provider not in ['gemini', 'azure', 'deepseek', 'phi3']:
+            raise HTTPException(status_code=400, detail="مزود غير صحيح. يجب أن يكون: gemini, azure, deepseek, أو phi3. Invalid AI provider. Must be: gemini, azure, deepseek, or phi3")
         
         # Get chat history for context
         previous_messages = await db.chat_messages.find(
