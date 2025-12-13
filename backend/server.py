@@ -2387,7 +2387,7 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         
         response_text = None
         
-        if ai_provider == 'gemini':
+        if ai_provider == 'phi3':
             # Use Gemini for interactive chat
             try:
                 from emergentintegrations.llm.chat import LlmChat, UserMessage
