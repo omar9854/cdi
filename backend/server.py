@@ -1018,6 +1018,36 @@ async def metrics():
 async def get_specialties():
     return MEDICAL_SPECIALTIES
 
+# Get available AI providers
+@api_router.get("/ai-providers")
+async def get_ai_providers():
+    """Get list of available AI providers with their status"""
+    providers = [
+        {
+            "id": "phi3",
+            "name": "Phi-3 Mini",
+            "name_ar": "فاي-3 ميني",
+            "description": "Microsoft Phi-3 (Local, Free, Offline)",
+            "description_ar": "مايكروسوفت فاي-3 (محلي، مجاني، بدون إنترنت)",
+            "status": "active",
+            "is_local": True,
+            "is_free": True
+        },
+        {
+            "id": "deepseek",
+            "name": "DeepSeek",
+            "name_ar": "ديب سيك",
+            "description": "DeepSeek Chat (Cloud, High Accuracy)",
+            "description_ar": "ديب سيك (سحابي، دقة عالية)",
+            "status": "active",
+            "is_local": False,
+            "is_free": False
+        }
+    ]
+    
+    return {"providers": providers, "default": "phi3"}
+
+
 # ========== Auth Routes ==========
 @api_router.post("/auth/register", response_model=Token)
 @limiter.limit("3/hour")
