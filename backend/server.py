@@ -900,7 +900,7 @@ CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLE
         response_text = None
         
         if provider == 'phi3':
-            # Use Microsoft Phi-3-Mini via Ollama (Local/Offline)
+            # Use Microsoft Phi-3-Mini via Ollama (Local/Offline ONLY)
             logger.info("🔄 Using Phi-3-Mini (local offline model)...")
             
             try:
@@ -917,21 +917,33 @@ CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLE
                     }
                 }
                 
-                response = requests.post(ollama_url, json=payload, timeout=180)
+                logger.info("📤 Sending request to Phi-3 (may take 30-90 seconds for long notes)...")
+                response = requests.post(ollama_url, json=payload, timeout=300)  # Increased to 5 minutes
                 response.raise_for_status()
                 
                 response_text = response.json().get('response', '').strip()
                 logger.info("✅ Phi-3-Mini analysis successful (local offline model)")
                 
+            except requests.exceptions.Timeout:
+                logger.error("❌ Phi-3 timeout - request took too long")
+                raise HTTPException(
+                    status_code=504, 
+                    detail="تجاوز وقت التحليل. الرجاء المحاولة مرة أخرى أو استخدام ملاحظات أقصر. Analysis timeout. Please try again or use shorter notes."
+                )
             except requests.exceptions.ConnectionError:
-                logger.error("❌ Phi-3 not available, falling back to DeepSeek")
-                provider = 'deepseek'  # Fallback
-                response_text = None
+                logger.error("❌ Phi-3 (Ollama) not running")
+                raise HTTPException(
+                    status_code=503,
+                    detail="خدمة التحليل المحلي غير متاحة. الرجاء الاتصال بالدعم الفني. Local analysis service unavailable. Please contact support."
+                )
             except Exception as e:
                 logger.error(f"❌ Phi-3 error: {str(e)}")
-                raise HTTPException(status_code=500, detail=f"Phi-3 failed: {str(e)}")
+                raise HTTPException(
+                    status_code=500, 
+                    detail=f"فشل التحليل المحلي: {str(e)}. Local analysis failed: {str(e)}"
+                )
         
-        if provider == 'deepseek' and response_text is None:
+        elif provider == 'deepseek' and response_text is None:
             # Use DeepSeek
             logger.info("🔄 Using DeepSeek (cloud)...")
             from openai import OpenAI
