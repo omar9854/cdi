@@ -2361,41 +2361,48 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         response_text = None
         
         if ai_provider == 'azure':
-            # Use Phi-3-Mini (local, offline) for interactive chat
-            import requests
-            
-            # Build conversation history
-            conversation_text = f"{system_message}\n\n"
-            for msg in previous_messages:
-                if 'role' in msg:
-                    role = "User" if msg['role'] == 'user' else "Assistant"
-                    conversation_text += f"{role}: {msg['message']}\n"
-            
-            conversation_text += f"User: {chat_request.message}\nAssistant:"
-            
+            # Use Azure OpenAI for interactive chat
             try:
-                ollama_url = "http://localhost:11434/api/generate"
-                payload = {
-                    "model": "phi3:mini",
-                    "prompt": conversation_text,
-                    "stream": False,
-                    "options": {
-                        "temperature": 0.7,
-                        "num_predict": 500,
-                        "num_ctx": 4096
-                    }
-                }
+                from openai import AzureOpenAI
                 
-                response = requests.post(ollama_url, json=payload, timeout=60)
-                response.raise_for_status()
-                response_text = response.json().get('response', '').strip()
-                logger.info("✅ Phi-3 chat successful")
+                azure_key = os.environ.get('AZURE_OPENAI_KEY')
+                endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT')
+                deployment = os.environ.get('AZURE_OPENAI_DEPLOYMENT', 'gpt-4o-mini')
+                api_version = os.environ.get('AZURE_OPENAI_API_VERSION', '2024-02-15-preview')
+                
+                client = AzureOpenAI(
+                    api_key=azure_key,
+                    api_version=api_version,
+                    azure_endpoint=endpoint
+                )
+                
+                # Build messages with history
+                messages = [{"role": "system", "content": system_message}]
+                
+                for msg in previous_messages:
+                    if 'role' in msg and msg['role'] in ['user', 'assistant']:
+                        messages.append({
+                            "role": msg['role'],
+                            "content": msg['message']
+                        })
+                
+                messages.append({"role": "user", "content": chat_request.message})
+                
+                response = client.chat.completions.create(
+                    model=deployment,
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=500
+                )
+                
+                response_text = response.choices[0].message.content.strip()
+                logger.info("✅ Azure chat successful")
                 
             except Exception as e:
-                logger.error(f"❌ Phi-3 chat error: {str(e)}")
+                logger.error(f"❌ Azure chat error: {str(e)}")
                 raise HTTPException(
                     status_code=500,
-                    detail=f"فشلت الدردشة مع Phi-3: {str(e)}. Chat with Phi-3 failed: {str(e)}"
+                    detail=f"فشلت الدردشة: {str(e)}. Chat failed: {str(e)}"
                 )
         
         if not response_text:
