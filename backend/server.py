@@ -2360,7 +2360,7 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         
         response_text = None
         
-        if ai_provider == 'phi3':
+        if ai_provider == 'azure':
             # Use Phi-3-Mini (local, offline) for interactive chat
             import requests
             
