@@ -899,37 +899,46 @@ CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLE
         
         response_text = None
         
-        if provider == 'phi3':
-            # Use Microsoft Phi-3-Mini via Ollama (Local/Offline)
-            logger.info("🔄 Using Phi-3-Mini (local)...")
+        if provider == 'azure':
+            # Use Microsoft Azure OpenAI (Fast, Reliable)
+            logger.info("🔄 Using Microsoft Azure OpenAI...")
             
             try:
-                import requests
+                from openai import AzureOpenAI
                 
-                ollama_url = "http://localhost:11434/api/generate"
-                payload = {
-                    "model": "phi3:mini",
-                    "prompt": f"{system_message}\n\n{user_prompt}",
-                    "stream": False,
-                    "options": {
-                        "temperature": 0.7,
-                        "num_predict": 4000,
-                        "num_ctx": 8192
-                    }
-                }
+                azure_key = os.environ.get('AZURE_OPENAI_KEY')
+                endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT')
+                deployment = os.environ.get('AZURE_OPENAI_DEPLOYMENT')
+                api_version = os.environ.get('AZURE_OPENAI_API_VERSION', '2024-08-01-preview')
                 
-                logger.info("📤 Sending to Phi-3 (30-90 sec for long notes)...")
-                response = requests.post(ollama_url, json=payload, timeout=300)
-                response.raise_for_status()
+                if not azure_key or not endpoint or not deployment:
+                    raise HTTPException(status_code=400, detail="Azure OpenAI not configured properly")
                 
-                response_text = response.json().get('response', '').strip()
-                logger.info("✅ Phi-3 analysis successful")
+                client = AzureOpenAI(
+                    api_key=azure_key,
+                    api_version=api_version,
+                    azure_endpoint=endpoint
+                )
                 
-            except requests.exceptions.ConnectionError:
-                raise HTTPException(status_code=503, detail="خدمة Phi-3 غير متاحة. Phi-3 service unavailable.")
+                messages = [
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": user_prompt}
+                ]
+                
+                logger.info(f"📤 Sending to Azure ({deployment})...")
+                response = client.chat.completions.create(
+                    model=deployment,
+                    messages=messages,
+                    temperature=0.7,
+                    max_tokens=4000
+                )
+                
+                response_text = response.choices[0].message.content.strip()
+                logger.info("✅ Azure OpenAI analysis successful")
+                
             except Exception as e:
-                logger.error(f"❌ Phi-3 error: {str(e)}")
-                raise HTTPException(status_code=500, detail=f"فشل Phi-3: {str(e)}")
+                logger.error(f"❌ Azure error: {str(e)}")
+                raise HTTPException(status_code=500, detail=f"فشل Azure: {str(e)}")
         
         elif provider == 'gemini':
             # Use Google Gemini with API keys (12 keys with rotation)
