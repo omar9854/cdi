@@ -2389,44 +2389,11 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
                 logger.info("✅ Phi-3 chat successful")
                 
             except Exception as e:
-                logger.error(f"❌ Phi-3 chat error: {str(e)}, falling back to DeepSeek")
-                ai_provider = 'deepseek'
-                response_text = None
-        
-        if ai_provider == 'deepseek' and response_text is None:
-            # Use DeepSeek for interactive chat
-            from openai import OpenAI
-            
-            deepseek_key = os.environ.get('DEEPSEEK_API_KEY')
-            if not deepseek_key:
-                raise HTTPException(status_code=400, detail="DeepSeek API key not configured")
-            
-            client = OpenAI(
-                api_key=deepseek_key,
-                base_url="https://api.deepseek.com"
-            )
-            
-            # Build messages with history
-            messages = [{"role": "system", "content": system_message}]
-            
-            for msg in previous_messages:
-                if 'role' in msg and msg['role'] in ['user', 'assistant']:
-                    messages.append({
-                        "role": msg['role'],
-                        "content": msg['message']
-                    })
-            
-            messages.append({"role": "user", "content": chat_request.message})
-            
-            response = client.chat.completions.create(
-                model="deepseek-chat",
-                messages=messages,
-                temperature=0.7,
-                max_tokens=500
-            )
-            
-            response_text = response.choices[0].message.content.strip()
-            logger.info("✅ DeepSeek chat successful")
+                logger.error(f"❌ Phi-3 chat error: {str(e)}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"فشلت الدردشة مع Phi-3: {str(e)}. Chat with Phi-3 failed: {str(e)}"
+                )
         
         if not response_text:
             raise HTTPException(status_code=500, detail="No response from AI provider")
