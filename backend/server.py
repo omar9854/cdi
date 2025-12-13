@@ -1038,19 +1038,19 @@ async def get_specialties():
 # Get available AI providers
 @api_router.get("/ai-providers")
 async def get_ai_providers():
-    """Get list of available AI providers - Phi-3 (local) & Gemini"""
+    """Get list of available AI providers - Azure & Gemini"""
     providers = [
         {
-            "id": "phi3",
-            "name": "Phi-3 Mini (Local)",
-            "name_ar": "فاي-3 ميني (محلي)",
-            "description": "Microsoft Phi-3 - Local, Free, Offline",
-            "description_ar": "مايكروسوفت فاي-3 - محلي، مجاني، بدون إنترنت",
+            "id": "azure",
+            "name": "Microsoft Azure AI",
+            "name_ar": "مايكروسوفت أزور AI",
+            "description": "Microsoft Azure OpenAI - Fast, Reliable, Cloud-based",
+            "description_ar": "مايكروسوفت أزور OpenAI - سريع، موثوق، سحابي",
             "status": "active",
-            "is_local": True,
-            "is_free": True,
-            "note": "Free, may take 30-90 seconds",
-            "note_ar": "مجاني، قد يستغرق 30-90 ثانية"
+            "is_local": False,
+            "is_free": False,
+            "note": "Fast (5-15 seconds)",
+            "note_ar": "سريع (5-15 ثانية)"
         },
         {
             "id": "gemini",
@@ -1061,12 +1061,12 @@ async def get_ai_providers():
             "status": "active",
             "is_local": False,
             "is_free": True,
-            "note": "Fast (5-10 seconds), uses API keys",
-            "note_ar": "سريع (5-10 ثواني)، يستخدم مفاتيح API"
+            "note": "Fast (5-10 seconds)",
+            "note_ar": "سريع (5-10 ثواني)"
         }
     ]
     
-    return {"providers": providers, "default": "phi3"}
+    return {"providers": providers, "default": "azure"}
 
 
 # ========== Auth Routes ==========
