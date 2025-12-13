@@ -1014,23 +1014,23 @@ async def get_specialties():
 # Get available AI providers
 @api_router.get("/ai-providers")
 async def get_ai_providers():
-    """Get list of available AI providers - Only Phi-3 (local, offline, no API keys)"""
+    """Get list of available AI providers - Only Azure OpenAI"""
     providers = [
         {
-            "id": "phi3",
-            "name": "Phi-3 Mini (Local)",
-            "name_ar": "فاي-3 ميني (محلي)",
-            "description": "Microsoft Phi-3 - Local, Free, Offline, No API Keys Required",
-            "description_ar": "مايكروسوفت فاي-3 - محلي، مجاني، بدون إنترنت، لا يحتاج مفاتيح API",
+            "id": "azure",
+            "name": "Microsoft Azure AI (GPT-4o-mini)",
+            "name_ar": "مايكروسوفت أزور AI (GPT-4o-mini)",
+            "description": "Microsoft Azure OpenAI - Fast, Accurate, Cloud-based",
+            "description_ar": "مايكروسوفت أزور OpenAI - سريع، دقيق، سحابي",
             "status": "active",
-            "is_local": True,
-            "is_free": True,
-            "note": "May take 30-90 seconds for analysis",
-            "note_ar": "قد يستغرق 30-90 ثانية للتحليل"
+            "is_local": False,
+            "is_free": False,
+            "note": "Fast response time (5-15 seconds)",
+            "note_ar": "وقت استجابة سريع (5-15 ثانية)"
         }
     ]
     
-    return {"providers": providers, "default": "phi3"}
+    return {"providers": providers, "default": "azure"}
 
 
 # ========== Auth Routes ==========
