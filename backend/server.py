@@ -1004,23 +1004,23 @@ async def get_specialties():
 # Get available AI providers
 @api_router.get("/ai-providers")
 async def get_ai_providers():
-    """Get list of available AI providers - Only Azure OpenAI"""
+    """Get list of available AI providers - Gemini with Emergent LLM Key"""
     providers = [
         {
-            "id": "azure",
-            "name": "Microsoft Azure AI (GPT-4o-mini)",
-            "name_ar": "مايكروسوفت أزور AI (GPT-4o-mini)",
-            "description": "Microsoft Azure OpenAI - Fast, Accurate, Cloud-based",
-            "description_ar": "مايكروسوفت أزور OpenAI - سريع، دقيق، سحابي",
+            "id": "gemini",
+            "name": "Google Gemini 2.5 Flash",
+            "name_ar": "جوجل جيميناي 2.5 فلاش",
+            "description": "Google Gemini - Fast, Accurate, Powered by Emergent",
+            "description_ar": "جوجل جيميناي - سريع، دقيق، مدعوم من Emergent",
             "status": "active",
             "is_local": False,
             "is_free": False,
-            "note": "Fast response time (5-15 seconds)",
-            "note_ar": "وقت استجابة سريع (5-15 ثانية)"
+            "note": "Uses your Emergent credits. Fast (5-10 seconds)",
+            "note_ar": "يستخدم رصيد Emergent الخاص بك. سريع (5-10 ثواني)"
         }
     ]
     
-    return {"providers": providers, "default": "azure"}
+    return {"providers": providers, "default": "gemini"}
 
 
 # ========== Auth Routes ==========
