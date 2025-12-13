@@ -2189,8 +2189,8 @@ async def reanalyze_note(note_id: str, user: dict = Depends(get_current_user)):
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
     
-    # Analyze with Gemini
-    result = await analyze_with_gemini(note['title'], note.get('doctor_notes', []))
+    # Analyze with AI (default: phi3)
+    result = await analyze_with_ai(note['title'], note.get('doctor_notes', []), provider='phi3')
     
     # Create new analysis record
     analysis = Analysis(
