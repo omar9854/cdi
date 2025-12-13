@@ -2127,8 +2127,8 @@ async def delete_note(note_id: str, user: dict = Depends(get_current_user)):
 
 # ========== Analysis Routes ==========
 @api_router.post("/analyze", response_model=Analysis)
-@limiter.limit("20/hour")
-async def analyze_note(request: Request, analyze_request: AnalyzeRequest, user: dict = Depends(get_current_user)):
+# @limiter.limit("20/hour")  # Temporarily disabled
+async def analyze_note(analyze_request: AnalyzeRequest, user: dict = Depends(get_current_user)):
     # Track AI request
     start_time = time.time()
     
