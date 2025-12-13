@@ -2141,8 +2141,12 @@ async def analyze_note(request: Request, analyze_request: AnalyzeRequest, user: 
     # Track DB operation
     DB_OPERATIONS.labels(operation='read', collection='clinical_notes').inc()
     
-    # Analyze with Gemini
-    result = await analyze_with_gemini(note['title'], note['doctor_notes'])
+    # Get AI provider from request (default: phi3)
+    ai_provider = getattr(analyze_request, 'ai_provider', 'phi3') or 'phi3'
+    logger.info(f"🤖 Analyzing with provider: {ai_provider}")
+    
+    # Analyze with AI (Phi-3 or DeepSeek)
+    result = await analyze_with_ai(note['title'], note['doctor_notes'], provider=ai_provider)
     
     # Track AI metrics
     AI_REQUESTS.labels(type='analyze').inc()
