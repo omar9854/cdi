@@ -2351,45 +2351,36 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         response_text = None
         
         if ai_provider == 'gemini':
-            # Use Azure OpenAI for interactive chat
+            # Use Gemini for interactive chat
             try:
-                from openai import AzureOpenAI
+                from emergentintegrations.llm.chat import LlmChat, UserMessage
+                from dotenv import load_dotenv
+                load_dotenv()
                 
-                azure_key = os.environ.get('AZURE_OPENAI_KEY')
-                endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT')
-                deployment = os.environ.get('AZURE_OPENAI_DEPLOYMENT', 'gpt-4o-mini')
-                api_version = os.environ.get('AZURE_OPENAI_API_VERSION', '2024-02-15-preview')
+                emergent_key = os.environ.get('EMERGENT_LLM_KEY')
                 
-                client = AzureOpenAI(
-                    api_key=azure_key,
-                    api_version=api_version,
-                    azure_endpoint=endpoint
-                )
-                
-                # Build messages with history
-                messages = [{"role": "system", "content": system_message}]
-                
+                # Build conversation history
+                conversation = f"{system_message}\n\n"
                 for msg in previous_messages:
-                    if 'role' in msg and msg['role'] in ['user', 'assistant']:
-                        messages.append({
-                            "role": msg['role'],
-                            "content": msg['message']
-                        })
+                    if 'role' in msg:
+                        role = "User" if msg['role'] == 'user' else "Assistant"
+                        conversation += f"{role}: {msg['message']}\n"
+                conversation += f"User: {chat_request.message}\nAssistant:"
                 
-                messages.append({"role": "user", "content": chat_request.message})
+                # Initialize chat
+                chat = LlmChat(
+                    api_key=emergent_key,
+                    session_id=chat_request.analysis_id,
+                    system_message=system_message
+                ).with_model("gemini", "gemini-2.5-flash")
                 
-                response = client.chat.completions.create(
-                    model=deployment,
-                    messages=messages,
-                    temperature=0.7,
-                    max_tokens=500
-                )
+                user_message = UserMessage(text=chat_request.message)
+                response_text = await chat.send_message(user_message)
                 
-                response_text = response.choices[0].message.content.strip()
-                logger.info("✅ Azure chat successful")
+                logger.info("✅ Gemini chat successful")
                 
             except Exception as e:
-                logger.error(f"❌ Azure chat error: {str(e)}")
+                logger.error(f"❌ Gemini chat error: {str(e)}")
                 raise HTTPException(
                     status_code=500,
                     detail=f"فشلت الدردشة: {str(e)}. Chat failed: {str(e)}"
