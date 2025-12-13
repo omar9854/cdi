@@ -960,6 +960,10 @@ CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLE
             response_text = response.choices[0].message.content.strip()
             logger.info("✅ DeepSeek analysis successful")
         
+        # Check if we have a response
+        if not response_text:
+            raise HTTPException(status_code=500, detail="No response from AI provider")
+        
         # Enhanced JSON parsing with better error handling
         import re
         
