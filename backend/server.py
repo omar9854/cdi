@@ -2350,7 +2350,7 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         
         response_text = None
         
-        if ai_provider == 'azure':
+        if ai_provider == 'gemini':
             # Use Azure OpenAI for interactive chat
             try:
                 from openai import AzureOpenAI
