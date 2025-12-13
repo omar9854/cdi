@@ -2386,8 +2386,8 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
     
     # Use analysis_id as session for continuity
     try:
-        # Get AI provider from request (default: phi3)
-        ai_provider = getattr(chat_request, 'ai_provider', 'phi3') or 'phi3'
+        # Get AI provider from request (default: azure)
+        ai_provider = getattr(chat_request, 'ai_provider', 'azure') or 'azure'
         
         # Get chat history for context
         previous_messages = await db.chat_messages.find(
