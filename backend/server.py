@@ -312,7 +312,7 @@ class Analysis(BaseModel):
 
 class AnalyzeRequest(BaseModel):
     note_id: str
-    ai_provider: Optional[str] = 'gemini'  # gemini (default)
+    ai_provider: Optional[str] = 'phi3'  # phi3 (local, default)
 
 class ChatMessage(BaseModel):
     model_config = ConfigDict(extra="ignore")
