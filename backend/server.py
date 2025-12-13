@@ -35,9 +35,6 @@ import aiosmtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-# Import coding routes
-import coding_routes
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
@@ -50,14 +47,13 @@ db = client[os.environ['DB_NAME']]
 async def ensure_admin_account():
     """Automatically ensure admin account exists with correct credentials on startup"""
     try:
-        # Get admin credentials from environment variables
-        admin_email = os.environ.get('ADMIN_EMAIL', 'admin@system.com')
-        admin_password = os.environ.get('ADMIN_PASSWORD', 'ChangeMe@123456')
+        admin_email = "almaghthawi.cdi@gmail.com"
+        admin_password = "CDI@2024#Admin"
         
         print(f"🔍 Checking admin account...")
         
-        # Delete only THIS admin email to ensure clean state (keep other users)
-        deleted = await db.users.delete_many({'email': admin_email})
+        # Delete ALL admin accounts first to ensure clean state
+        deleted = await db.users.delete_many({'role': 'admin'})
         if deleted.deleted_count > 0:
             print(f"🗑️  Deleted {deleted.deleted_count} old admin account(s)")
         
@@ -72,9 +68,6 @@ async def ensure_admin_account():
             'full_name': 'مدير النظام - System Administrator',
             'phone_number': '+966500000000',
             'role': 'admin',
-            'department': 'cdi',  # Admin manages both departments
-            'coding_role': None,
-            'daily_case_target': None,
             'mfa_enabled': True,
             'is_active': True,
             'created_at': datetime.now(timezone.utc).isoformat(),
@@ -101,12 +94,10 @@ async def ensure_admin_account():
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
-# Rate Limiting - TEMPORARILY DISABLED TO FIX LOGIN ISSUE
-# The slowapi rate limiter was causing persistent login failures due to in-memory state
-# TODO: Implement rate limiting with Redis or database-backed storage
-# limiter = Limiter(key_func=get_remote_address)
-# app.state.limiter = limiter
-# app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# Rate Limiting
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Prometheus Metrics
 instrumentor = Instrumentator(
@@ -128,27 +119,16 @@ DB_OPERATIONS = Counter('cdi_db_operations_total', 'Total database operations', 
 instrumentor.instrument(app).expose(app, endpoint="/metrics")
 
 # JWT Settings
-SECRET_KEY = os.environ.get('JWT_SECRET')
-if not SECRET_KEY:
-    raise ValueError("JWT_SECRET environment variable is required for production")
+SECRET_KEY = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production')
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 # Emergent LLM Key
-# Load Gemini API Keys (multiple for rotation - up to 12 keys)
+# Load Gemini API Keys (multiple for rotation)
 GEMINI_API_KEYS = [
     os.environ.get('GEMINI_API_KEY_1'),
     os.environ.get('GEMINI_API_KEY_2'),
-    os.environ.get('GEMINI_API_KEY_3'),
-    os.environ.get('GEMINI_API_KEY_4'),
-    os.environ.get('GEMINI_API_KEY_5'),
-    os.environ.get('GEMINI_API_KEY_6'),
-    os.environ.get('GEMINI_API_KEY_7'),
-    os.environ.get('GEMINI_API_KEY_8'),
-    os.environ.get('GEMINI_API_KEY_9'),
-    os.environ.get('GEMINI_API_KEY_10'),
-    os.environ.get('GEMINI_API_KEY_11'),
-    os.environ.get('GEMINI_API_KEY_12')
+    os.environ.get('GEMINI_API_KEY_3')
 ]
 # Filter out None values
 GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
@@ -156,68 +136,14 @@ GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
 if not GEMINI_API_KEYS:
     raise ValueError("No Gemini API keys found in environment variables")
 
-# Calculate capacity (Free tier: 20 requests/day/key)
-capacity_per_key = 20  # Free tier limit
-total_capacity = len(GEMINI_API_KEYS) * capacity_per_key
-
 # Log will be done after logger is initialized
-print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation (Total capacity: {total_capacity} requests/day, Free tier: 20/key/day)")
+print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation")
 
-# Advanced key rotation system with usage tracking
-class GeminiKeyManager:
-    """Manages Gemini API keys with intelligent rotation"""
-    
-    def __init__(self, keys):
-        self.keys = keys
-        self.current_index = 0
-        self.usage_count = {i: 0 for i in range(len(keys))}
-        self.failed_keys = set()  # Track keys that hit quota
-        
-    def get_next_key(self):
-        """Get next key using round-robin with skip for failed keys"""
-        attempts = 0
-        while attempts < len(self.keys):
-            key_index = self.current_index
-            self.current_index = (self.current_index + 1) % len(self.keys)
-            
-            # Skip if key is marked as failed
-            if key_index not in self.failed_keys:
-                self.usage_count[key_index] += 1
-                return self.keys[key_index], key_index
-            
-            attempts += 1
-        
-        # If all keys failed, reset and try again
-        logger.warning("⚠️ All Gemini keys exhausted, resetting failed keys tracker")
-        self.failed_keys.clear()
-        key_index = self.current_index
-        self.current_index = (self.current_index + 1) % len(self.keys)
-        self.usage_count[key_index] += 1
-        return self.keys[key_index], key_index
-    
-    def mark_key_failed(self, key_index):
-        """Mark a key as failed (quota exceeded)"""
-        self.failed_keys.add(key_index)
-        logger.warning(f"⚠️ Gemini key #{key_index + 1} marked as exhausted")
-    
-    def get_usage_stats(self):
-        """Get usage statistics"""
-        return {
-            "total_keys": len(self.keys),
-            "active_keys": len(self.keys) - len(self.failed_keys),
-            "failed_keys": len(self.failed_keys),
-            "usage_per_key": self.usage_count
-        }
-
-# Initialize key manager
-gemini_key_manager = GeminiKeyManager(GEMINI_API_KEYS)
-
-def get_gemini_model(model_name='gemini-2.5-flash', system_instruction=None):
-    """Get Gemini model with intelligent key rotation"""
-    api_key, key_index = gemini_key_manager.get_next_key()
+# Helper function to get a random API key for load balancing
+def get_gemini_model(model_name='gemini-flash-latest', system_instruction=None):
+    """Get a Gemini model with a random API key for load balancing"""
+    api_key = random.choice(GEMINI_API_KEYS)
     genai.configure(api_key=api_key)
-    
-    logger.info(f"🔑 Using Gemini key #{key_index + 1}/{len(GEMINI_API_KEYS)}")
     
     if system_instruction:
         return genai.GenerativeModel(model_name, system_instruction=system_instruction)
@@ -302,9 +228,6 @@ class User(BaseModel):
     phone_number: str  # رقم الجوال
     password_hash: str
     role: str = "user"  # "admin", "supervisor", or "user"
-    department: str = "cdi"  # "cdi" or "coding"
-    coding_role: Optional[str] = None  # For coding department: "coder", "auditor", or None
-    daily_case_target: Optional[int] = 10  # Daily target for coders
     supervisor_id: Optional[str] = None  # ID of supervisor (if user is assigned to one)
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -314,8 +237,6 @@ class UserRegister(BaseModel):
     full_name: str
     phone_number: str  # رقم الجوال مطلوب
     password: str
-    department: str = "cdi"  # Department selection: "cdi" or "coding"
-    coding_role: Optional[str] = None  # If coding department: "coder" or "auditor"
     admin_code: Optional[str] = None  # كود سري للأدمن
 
 class UserLogin(BaseModel):
@@ -391,7 +312,6 @@ class Analysis(BaseModel):
 
 class AnalyzeRequest(BaseModel):
     note_id: str
-    ai_provider: Optional[str] = 'gemini'  # gemini, azure, grok
 
 class ChatMessage(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -405,7 +325,6 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     analysis_id: str
     message: str
-    ai_provider: Optional[str] = 'gemini'  # gemini, azure, grok
 
 class PasswordResetRequest(BaseModel):
     email: EmailStr
@@ -625,8 +544,8 @@ async def send_password_reset_email(user_email: str, user_name: str, reset_token
     
     await send_email(user_email, subject, body_html)
 
-async def analyze_with_ai(notes_text: str, doctor_notes: List[Dict], provider: str = 'gemini') -> Dict:
-    """Analyze clinical notes using specified AI provider - Enhanced CDI Focus"""
+async def analyze_with_gemini(notes_text: str, doctor_notes: List[Dict]) -> Dict:
+    """Analyze clinical notes using Gemini AI - CDI Focus"""
     
     # Format doctor notes with specialties
     formatted_notes = "\n\n".join([
@@ -634,104 +553,67 @@ async def analyze_with_ai(notes_text: str, doctor_notes: List[Dict], provider: s
         for note in doctor_notes
     ])
     
-    system_message = """You are an Expert Clinical Documentation Improvement (CDI) Specialist with deep medical knowledge.
+    system_message = """You are a Clinical Documentation Improvement (CDI) Specialist expert.
 
-🎯 YOUR MISSION:
-Conduct comprehensive CDI analysis to identify ALL documentation opportunities for quality improvement and proper reimbursement.
+Your role is NOT to code or assign ICD-10-CM codes directly. Your role is to:
+1. Review clinical documentation for completeness and specificity
+2. Identify diagnoses that SHOULD BE documented based on clinical findings
+3. Identify missing or incomplete documentation
+4. Provide queries to physicians to improve documentation quality
+5. Ensure documentation supports the severity of illness and risk of mortality
 
-📋 ANALYSIS REQUIREMENTS:
+Focus on CLINICAL DOCUMENTATION IMPROVEMENT, not medical coding.
 
-1. **PRINCIPAL & SECONDARY DIAGNOSES** (التشخيصات الرئيسية والثانوية):
-   - Identify ALL diagnoses present in clinical findings
-   - Categorize each as Principal (الرئيسي) or Secondary (الثانوي)
-   - Include COMPLETE ICD-10-CM codes
-   - Document clinical evidence supporting each diagnosis
-   - Note severity, stage, type when applicable
+⚠️ CRITICAL COMPLIANCE REQUIREMENT FOR PHYSICIAN QUERIES:
 
-2. **DERIVED/IMPLIED DIAGNOSES** (التشخيصات المشتقة):
-   - Identify conditions IMPLIED by clinical data but not explicitly documented
-   - Example: Lab results showing anemia, medications for diabetes, symptoms suggesting infection
-   - These require physician clarification via queries
+**Query Structure (2 Parts):**
 
-3. **MISSING DOCUMENTATION** (التوثيق الناقص):
-   - Severity indicators (mild, moderate, severe, acute, chronic)
-   - Laterality (right, left, bilateral)
-   - Stages of disease
-   - Causal relationships (due to, secondary to)
-   - Complications and manifestations
-   - Type/subtype specifications
+**Part 1 - HEADER (For CDI Staff Only):**
+- Include diagnosis name and ICD code
+- This is for the CDI specialist's reference, NOT sent to physician directly
+- Format: "استفسار يخص: [Diagnosis] ([ICD Code])"
 
-4. **DOCUMENTATION GAPS** (الفجوات والثغرات):
-   - Clinical indicators present without corresponding diagnosis
-   - Treatments/medications without documented indication
-   - Abnormal results without interpretation
-   - Historical conditions mentioned but not current status
-   - Risk factors documented but not assessed
+**Part 2 - QUERY BODY (Sent to Physician):**
+- Cite SPECIFIC clinical findings from the notes (symptoms, medications, lab values, vital signs)
+- DO NOT mention the diagnosis name
+- Ask physician to document based on clinical judgment
+- Specify if principal or secondary diagnosis is needed
 
-⚠️ PHYSICIAN QUERIES - CRITICAL COMPLIANCE FORMAT:
-
-**MANDATORY 2-PART STRUCTURE:**
-
-**PART 1 - HEADER (CDI Staff Reference Only):**
-Format: "استفسار يخص: [Diagnosis + Specification] ([ICD-10 Code])"
-
-Examples:
-- "استفسار يخص: السكري من النوع 2 مع مضاعفات كلوية (E11.22)"
-- "استفسار يخص: فشل القلب الحاد (I50.21)"
-
-**PART 2 - QUERY BODY (Sent to Physician):**
-
-MUST INCLUDE:
-✓ SPECIFIC clinical findings (symptoms, vitals, lab values, medications)
-✓ Request for documentation based on "clinical judgment" only
-✓ Specification of what to document (التشخيص الرئيسي، شدة الحالة، نوع التشخيص، مرحلة المرض)
-
-MUST NOT INCLUDE:
-✗ Any mention of the diagnosis name
-✗ Leading questions suggesting a diagnosis
-✗ Medical coding terminology
-
-✅ CORRECT Query Example (Arabic):
+✅ CORRECT Complete Query Example (Arabic):
 ```
-استفسار يخص: الفشل الكلوي الحاد (N17.9)
+استفسار يخص: ارتفاع ضغط الدم (I10)
 
 بناءً على الملاحظات الطبية:
-- الكرياتينين: 3.8 mg/dL (كان 1.2 قبل أسبوع)
-- معدل الترشيح الكبيبي: 25 mL/min
-- قلة البول: 400 مل خلال 24 ساعة
-- تم البدء بالسوائل الوريدية والمراقبة الدقيقة
+- المريض لديه قراءات ضغط متكررة 150/95، 145/92
+- تم وصف Amlodipine 5mg يومياً
+- التاريخ المرضي يشير إلى ارتفاعات سابقة
 
-بناءً على حكمك الطبي، الرجاء توثيق:
-- التشخيص الرئيسي
-- شدة الحالة (حاد/مزمن)
-- المرحلة إن أمكن
+بناءً على حكمك الطبي، الرجاء توثيق التشخيص الرئيسي.
 ```
 
-✅ CORRECT Query Example (English):
+✅ CORRECT Complete Query Example (English):
 ```
-Query regarding: Acute Kidney Failure (N17.9)
+Query regarding: Hypertension (I10)
 
 Based on clinical documentation:
-- Creatinine: 3.8 mg/dL (was 1.2 one week ago)
-- GFR: 25 mL/min
-- Oliguria: 400 mL in 24 hours
-- Started IV fluids and close monitoring
+- Patient has repeated BP readings of 150/95, 145/92
+- Prescribed Amlodipine 5mg daily
+- Medical history indicates previous elevations
 
-Based on your clinical judgment, please document:
-- The principal diagnosis
-- Severity (acute/chronic)
-- Stage if applicable
+Based on your clinical judgment, please document the principal diagnosis.
 ```
 
-🔍 QUERY SPECIFICATIONS - Request physician to document:
-- "التشخيص الرئيسي" (Principal diagnosis)
-- "التشخيص الثانوي" (Secondary diagnosis)  
-- "شدة الحالة" (Severity: mild/moderate/severe/acute/chronic)
-- "نوع التشخيص" (Type/subtype)
-- "مرحلة المرض" (Stage)
-- "العلاقة السببية" (Causal relationship)
+❌ INCORRECT (DO NOT include diagnosis in query body):
+- "هل التشخيص هو ارتفاع ضغط الدم؟" ✗
+- "Is this hypertension or white coat syndrome?" ✗
+- "يُرجى تأكيد: ارتفاع ضغط الدم" ✗
 
-CRITICAL: ALL responses MUST be in BOTH Arabic AND English."""
+**Key Rules:**
+- Header = diagnosis name + code (for CDI staff)
+- Body = clinical findings ONLY + request for documentation (for physician)
+- NEVER suggest diagnosis in the body sent to physician
+
+IMPORTANT: Provide ALL responses in BOTH Arabic and English."""
 
     user_prompt = f"""Please review the following clinical notes as a CDI Specialist:
 
@@ -792,264 +674,77 @@ Perform a Clinical Documentation Improvement review and provide:
 
 5. **Recommendations**: Specific recommendations to improve the clinical documentation quality
 
-Provide response in this EXACT JSON format:
+Please respond in the following JSON format:
 {{{{
-  "diagnoses_to_document": [
-    {{
-      "diagnosis_ar": "التشخيص بالعربي الكامل مع التفاصيل",
-      "diagnosis_en": "Complete diagnosis in English with details",
-      "icd_code": "Full ICD-10-CM code",
-      "type": "principal" or "secondary" or "derived",
-      "severity": "Severity/Stage/Type if applicable",
-      "clinical_evidence": "Specific clinical findings from notes supporting this diagnosis"
-    }}
-  ],
-  "missing_documentation": [
-    {{
-      "item_ar": "التوثيق الناقص - كن محدداً",
-      "item_en": "Missing documentation - be specific",
-      "impact": "Impact on coding/reimbursement/quality"
-    }}
-  ],
-  "gaps_ar": [
-    "فجوة توثيقية محددة 1 - اشرح بالتفصيل",
-    "ثغرة في التوثيق 2 - مع أمثلة من الملاحظات"
-  ],
-  "gaps_en": [
-    "Specific documentation gap 1 - explain in detail",
-    "Documentation deficiency 2 - with examples from notes"
-  ],
+  "diagnoses_to_document": [{{
+    "diagnosis_ar": "التشخيص بالعربي",
+    "diagnosis_en": "Diagnosis in English", 
+    "icd_code": "Code (for reference)",
+    "type": "principal" or "secondary",
+    "clinical_evidence": "Evidence from notes supporting this diagnosis"
+  }}],
+  "missing_documentation": [{{
+    "item_ar": "التوثيق الناقص بالعربي",
+    "item_en": "Missing item in English"
+  }}],
+  "gaps_ar": ["ثغرة 1", "ثغرة 2"],
+  "gaps_en": ["Gap 1", "Gap 2"],
   "queries_ar": [
-    "استفسار يخص: [التشخيص الكامل] ([ICD-10])\\n\\nبناءً على الملاحظات الطبية:\\n- [معطى سريري محدد 1]\\n- [معطى سريري محدد 2]\\n- [معطى سريري محدد 3]\\n\\nبناءً على حكمك الطبي، الرجاء توثيق:\\n- التشخيص [الرئيسي/الثانوي]\\n- شدة الحالة\\n- المرحلة/النوع إن أمكن"
+    "استفسار يخص: [اسم التشخيص] ([كود ICD-10])\\n\\nبناءً على الملاحظات الطبية:\\n- [معطيات محددة من الملاحظات: الأعراض]\\n- [الأدوية المصروفة]\\n- [القياسات والفحوصات]\\n\\nبناءً على حكمك الطبي، الرجاء توثيق التشخيص [الرئيسي/الثانوي]."
   ],
   "queries_en": [
-    "Query regarding: [Full diagnosis] ([ICD-10])\\n\\nBased on clinical documentation:\\n- [Specific clinical finding 1]\\n- [Specific clinical finding 2]\\n- [Specific clinical finding 3]\\n\\nBased on your clinical judgment, please document:\\n- [Principal/Secondary] diagnosis\\n- Severity\\n- Stage/Type if applicable"
+    "Query regarding: [Diagnosis name] ([ICD-10 Code])\\n\\nBased on clinical documentation:\\n- [Specific findings from notes: symptoms]\\n- [Medications prescribed]\\n- [Measurements/tests]\\n\\nBased on your clinical judgment, please document the [principal/secondary] diagnosis."
   ],
-  "recommendations_ar": [
-    "توصية محددة 1 مع خطوات عملية",
-    "توصية 2 لتحسين جودة التوثيق"
-  ],
-  "recommendations_en": [
-    "Specific recommendation 1 with actionable steps",
-    "Recommendation 2 for documentation quality improvement"
-  ],
-  "summary_ar": "ملخص شامل ومفصل يغطي جميع النقاط الحرجة في التوثيق",
-  "summary_en": "Comprehensive detailed summary covering all critical documentation points"
+  "recommendations_ar": ["توصية 1 لتحسين التوثيق", "توصية 2"],
+  "recommendations_en": ["Recommendation 1 for documentation improvement", "Recommendation 2"],
+  "summary_ar": "ملخص شامل لمراجعة تحسين التوثيق السريري بالعربي",
+  "summary_en": "Comprehensive CDI review summary in English"
 }}}}
 
-CRITICAL REQUIREMENTS:
-- Identify ALL diagnoses (principal, secondary, AND derived/implied)
-- Each query MUST cite 3+ specific clinical findings
-- Gaps MUST be detailed with examples
-- ALL ICD-10-CM codes MUST be complete and accurate"""
+IMPORTANT: For queries, you MUST:
+1. Include the header with diagnosis name and ICD code for CDI staff reference
+2. Cite ACTUAL clinical findings from the provided notes (symptoms, medications, measurements)
+3. Never suggest diagnosis names in the query body itself
+4. Specify if it's principal or secondary diagnosis
+5. Each query should be detailed with real evidence from the notes"""
 
     try:
-        response_text = None  # Initialize to avoid UnboundLocalError
+        # Use Google Gemini API with automatic key rotation
+        model = get_gemini_model('gemini-flash-latest')
         
-        # Select AI provider
-        if provider == 'gemini':
-            # Use Google Gemini API with intelligent key rotation
-            # Combine system message and user prompt
-            full_prompt = f"{system_message}\n\n{user_prompt}"
-            
-            # Try all available keys with intelligent rotation
-            max_retries = len(GEMINI_API_KEYS)
-            last_error = None
-            
-            for attempt in range(max_retries):
-                try:
-                    # Get model with next key in rotation
-                    model = get_gemini_model('gemini-2.5-flash')
-                    response = model.generate_content(full_prompt)
-                    response_text = response.text.strip()
-                    logger.info(f"✅ Gemini analysis successful on attempt {attempt + 1}")
-                    break  # Success, exit retry loop
-                    
-                except Exception as e:
-                    last_error = e
-                    error_msg = str(e)
-                    
-                    # Check if quota exceeded (429 error)
-                    if "429" in error_msg or "quota" in error_msg.lower() or "RESOURCE_EXHAUSTED" in error_msg:
-                        logger.warning(f"⚠️ Gemini key exhausted (attempt {attempt + 1}/{max_retries})")
-                        
-                        # Continue trying other keys
-                        if attempt < max_retries - 1:
-                            logger.info(f"🔄 Trying next Gemini key ({attempt + 2}/{max_retries})...")
-                            continue
-                        else:
-                            # All Gemini keys exhausted, try fallback
-                            logger.error("❌ All Gemini keys exhausted")
-                            
-                            # Try fallback to DeepSeek or Azure
-                            deepseek_key = os.environ.get('DEEPSEEK_API_KEY')
-                            azure_key = os.environ.get('AZURE_OPENAI_KEY')
-                            
-                            if deepseek_key:
-                                logger.info("🔄 Auto-switching to DeepSeek due to Gemini quota limit")
-                                provider = 'deepseek'
-                                response_text = None
-                                break
-                            elif azure_key:
-                                logger.info("🔄 Auto-switching to Azure due to Gemini quota limit")
-                                provider = 'azure'
-                                response_text = None
-                                break
-                            else:
-                                raise HTTPException(
-                                    status_code=429,
-                                    detail=f"جميع مفاتيح Gemini ({len(GEMINI_API_KEYS)}) وصلت للحد اليومي. الرجاء استخدام DeepSeek أو Azure. All {len(GEMINI_API_KEYS)} Gemini keys reached daily quota. Please use DeepSeek or Azure."
-                                )
-                    else:
-                        # Other errors - try next key
-                        if attempt < max_retries - 1:
-                            logger.warning(f"⚠️ Error with key, trying next: {error_msg[:100]}")
-                            continue
-                        else:
-                            raise e
+        # Combine system message and user prompt
+        full_prompt = f"{system_message}\n\n{user_prompt}"
         
-        # Process if response_text is still None (fallback triggered or direct provider selection)
-        if provider == 'azure' and response_text is None:
-            # Use Microsoft Azure OpenAI
-            from openai import AzureOpenAI
-            
-            azure_key = os.environ.get('AZURE_OPENAI_KEY')
-            if not azure_key:
-                # Check database
-                azure_settings = await db.ai_settings.find_one({"provider": "azure"})
-                if azure_settings and azure_settings.get('api_keys'):
-                    azure_key = random.choice(azure_settings['api_keys'])
-                else:
-                    raise HTTPException(status_code=400, detail="Azure OpenAI key not configured")
-            
-            endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT', 'https://your-resource.openai.azure.com/')
-            deployment = os.environ.get('AZURE_OPENAI_DEPLOYMENT', 'gpt-4')
-            api_version = os.environ.get('AZURE_OPENAI_API_VERSION', '2024-02-15-preview')
-            
-            client = AzureOpenAI(
-                api_key=azure_key,
-                api_version=api_version,
-                azure_endpoint=endpoint
-            )
-            
-            messages = [
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": user_prompt}
-            ]
-            
-            response = client.chat.completions.create(
-                model=deployment,
-                messages=messages,
-                temperature=0.7,
-                max_tokens=4000
-            )
-            
-            response_text = response.choices[0].message.content.strip()
+        # Generate response with retry logic
+        max_retries = len(GEMINI_API_KEYS)
+        last_error = None
         
-        elif provider == 'deepseek' and response_text is None:
-            # Use DeepSeek
-            from openai import OpenAI
-            
-            # Get DeepSeek API key
-            deepseek_key = os.environ.get('DEEPSEEK_API_KEY')
-            if not deepseek_key:
-                # Check database
-                deepseek_settings = await db.ai_settings.find_one({"provider": "deepseek"})
-                if deepseek_settings and deepseek_settings.get('api_keys'):
-                    deepseek_key = random.choice(deepseek_settings['api_keys'])
-                else:
-                    raise HTTPException(status_code=400, detail="مفتاح DeepSeek غير مُعدّ. DeepSeek API key not configured")
-            
-            # DeepSeek uses OpenAI-compatible API
-            client = OpenAI(
-                api_key=deepseek_key,
-                base_url="https://api.deepseek.com"
-            )
-            
-            messages = [
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": user_prompt}
-            ]
-            
-            response = client.chat.completions.create(
-                model="deepseek-chat",
-                messages=messages,
-                temperature=0.7,
-                max_tokens=4000
-            )
-            
-            response_text = response.choices[0].message.content.strip()
-        
-        elif provider == 'phi3' and response_text is None:
-            # Use Microsoft Phi-3-Medium-128K via Ollama (Local/Offline)
-            import requests
-            
+        for attempt in range(max_retries):
             try:
-                ollama_url = "http://localhost:11434/api/generate"
-                
-                payload = {
-                    "model": "phi3:medium-128k",
-                    "prompt": f"{system_message}\n\n{user_prompt}",
-                    "stream": False,
-                    "options": {
-                        "temperature": 0.7,
-                        "num_predict": 4000
-                    }
-                }
-                
-                response = requests.post(ollama_url, json=payload, timeout=120)
-                response.raise_for_status()
-                
-                response_text = response.json().get('response', '').strip()
-                logger.info("✅ Phi-3 analysis successful (local model)")
-                
-            except requests.exceptions.ConnectionError:
-                raise HTTPException(
-                    status_code=503,
-                    detail="نموذج Phi-3 غير متاح حالياً. Phi-3 model is not available. Make sure Ollama is running."
-                )
+                response = model.generate_content(full_prompt)
+                response_text = response.text.strip()
+                break  # Success, exit retry loop
             except Exception as e:
-                logger.error(f"❌ Phi-3 error: {str(e)}")
-                raise HTTPException(status_code=500, detail=f"Phi-3 failed: {str(e)}")
+                last_error = e
+                if attempt < max_retries - 1:
+                    # Try with a different key
+                    logger.warning(f"Retry {attempt + 1}/{max_retries} with different API key")
+                    model = get_gemini_model('gemini-flash-latest')
+                else:
+                    raise e
         
-        elif response_text is None:
-            raise HTTPException(status_code=400, detail=f"مزود غير مدعوم أو فشل في المعالجة: {provider}. Unsupported AI provider or processing failed: {provider}")
-        
-        # Enhanced JSON parsing with better error handling
+        # Parse JSON response
         import json
-        import re
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            response_text = response_text.split("```")[1].split("```")[0].strip()
         
-        try:
-            # Remove markdown code blocks if present
-            if "```json" in response_text:
-                response_text = response_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in response_text:
-                response_text = response_text.split("```")[1].split("```")[0].strip()
-            
-            # Remove any BOM or invisible characters
-            response_text = response_text.strip().lstrip('\ufeff').lstrip('\u200b')
-            
-            # Try to find JSON object in the response
-            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
-            if json_match:
-                response_text = json_match.group(0)
-            
-            # Parse JSON
-            result = json.loads(response_text)
-            return result
-            
-        except json.JSONDecodeError as je:
-            logger.error(f"JSON parsing error: {str(je)}")
-            logger.error(f"Response text (first 500 chars): {response_text[:500]}")
-            raise HTTPException(
-                status_code=500, 
-                detail=f"فشل في تحليل استجابة AI. Failed to parse AI response: {str(je)}"
-            )
+        result = json.loads(response_text)
+        return result
         
-    except HTTPException:
-        raise
     except Exception as e:
-        logging.error(f"Error analyzing with AI: {str(e)}")
+        logging.error(f"Error analyzing with Gemini: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error in analysis: {str(e)}")
 
 # Health check route
@@ -1070,7 +765,7 @@ async def get_specialties():
 
 # ========== Auth Routes ==========
 @api_router.post("/auth/register", response_model=Token)
-# @limiter.limit("3/hour")  # Temporarily disabled
+@limiter.limit("3/hour")
 async def register(request: Request, user_data: UserRegister):
     import re
     from security_utils import log_audit, send_welcome_email
@@ -1113,28 +808,12 @@ async def register(request: Request, user_data: UserRegister):
     # Set password expiration (90 days from now)
     password_expires_at = datetime.now(timezone.utc) + timedelta(days=90)
     
-    # Validate department and coding_role
-    department = user_data.department if user_data.department in ['cdi', 'coding'] else 'cdi'
-    coding_role = None
-    daily_case_target = None
-    
-    if department == 'coding':
-        if user_data.coding_role not in ['coder', 'auditor']:
-            raise HTTPException(status_code=400, detail="Invalid coding role. Must be 'coder' or 'auditor'")
-        coding_role = user_data.coding_role
-        
-        if coding_role == 'coder':
-            daily_case_target = 10  # Default target for new coders
-    
     user = User(
         email=user_data.email,
         full_name=user_data.full_name,
         phone_number=user_data.phone_number,
         password_hash=hash_password(user_data.password),
-        role=role,
-        department=department,
-        coding_role=coding_role,
-        daily_case_target=daily_case_target
+        role=role
     )
     
     doc = user.model_dump()
@@ -1166,6 +845,21 @@ async def register(request: Request, user_data: UserRegister):
     except Exception as e:
         logging.error(f"Failed to send welcome email: {str(e)}")
     
+    # Create WhatsApp welcome message link
+    import urllib.parse
+    welcome_message = f"""مرحباً {user.full_name}
+
+شكراً جزيلاً على إنشاء حسابك معنا
+
+الرجاء الضغط على تسجيل الدخول ثم بريدك الإلكتروني وكلمة المرور.
+
+عند تسجيل الدخول على حسابك يمكنك استخدام جميع الخدمات الإلكترونية المتاحة
+
+شكراً"""
+    
+    encoded_message = urllib.parse.quote(welcome_message)
+    whatsapp_link = f"https://wa.me/{user.phone_number}?text={encoded_message}"
+    
     token = create_access_token({
         "user_id": user.id, 
         "email": user.email,
@@ -1180,17 +874,15 @@ async def register(request: Request, user_data: UserRegister):
             "email": user.email, 
             "full_name": user.full_name,
             "phone_number": user.phone_number,
-            "role": user.role,
-            "department": user.department,
-            "coding_role": user.coding_role
-        }
+            "role": user.role
+        },
+        "whatsapp_welcome_link": whatsapp_link
     }
 
 @api_router.post("/auth/login-step1")
-# @limiter.limit("50/minute")  # Temporarily disabled for testing
+@limiter.limit("5/minute")
 async def login_step1(request: Request, credentials: UserLogin):
     """Step 1: Verify credentials and send OTP"""
-    print(f"🔑 LOGIN REQUEST: {credentials.email}")
     try:
         # Import security utils
         from security_utils import (
@@ -1199,18 +891,11 @@ async def login_step1(request: Request, credentials: UserLogin):
             generate_otp, send_otp_email
         )
         
-        # Skip rate limiting and unlock for test accounts
-        test_accounts = ["medidocai@gmail.com", "almaghthawi.cdi@gmail.com", "supervisor@hospital.sa", "coder@hospital.sa", "auditor@hospital.sa"]
-        if credentials.email in test_accounts:
-            # Force unlock test accounts
-            await db.users.update_one(
-                {"email": credentials.email},
-                {"$set": {"account_locked": False, "locked_until": None, "failed_login_attempts": 0}}
-            )
-        else:
-            # Check if account lockout expired
-            await unlock_account_if_expired(db, credentials.email)
-            # Check rate limiting
+        # Check if account lockout expired
+        await unlock_account_if_expired(db, credentials.email)
+        
+        # Check rate limiting - TEMPORARILY DISABLED FOR ADMIN EMAIL
+        if credentials.email != "medidocai@gmail.com":
             is_allowed, remaining = await check_rate_limit(db, credentials.email)
             if not is_allowed:
                 raise HTTPException(
@@ -1245,17 +930,9 @@ async def login_step1(request: Request, credentials: UserLogin):
             raise HTTPException(status_code=500, detail="User account error - please contact support")
         
         print(f"LOGIN DEBUG: Verifying password using field: {password_field}...")
-        print(f"LOGIN DEBUG: Password length: {len(credentials.password)}, Hash length: {len(user[password_field])}")
         
         # Check if password is correct
-        try:
-            password_valid = verify_password(credentials.password, user[password_field])
-            print(f"LOGIN DEBUG: Password verification result: {password_valid}")
-        except Exception as e:
-            print(f"LOGIN DEBUG: Password verification error: {e}")
-            password_valid = False
-        
-        if not password_valid:
+        if not verify_password(credentials.password, user[password_field]):
             print("LOGIN DEBUG: Password verification failed")
             # Record failed attempt
             await record_login_attempt(db, credentials.email, False)
@@ -1341,9 +1018,7 @@ async def login_step1(request: Request, credentials: UserLogin):
                     "email": user['email'], 
                     "full_name": user['full_name'],
                     "phone_number": user.get('phone_number', ''),
-                    "role": user.get('role', 'user'),
-                    "department": user.get('department', 'cdi'),
-                    "coding_role": user.get('coding_role')
+                    "role": user.get('role', 'user')
                 }
             }
     except HTTPException:
@@ -1353,7 +1028,7 @@ async def login_step1(request: Request, credentials: UserLogin):
         raise HTTPException(status_code=500, detail="Login failed")
 
 @api_router.post("/auth/login-step2", response_model=Token)
-# @limiter.limit("10/minute")  # Temporarily disabled
+@limiter.limit("10/minute")
 async def login_step2(request: Request, credentials: OTPVerification):
     """Step 2: Verify OTP and complete login"""
     try:
@@ -1442,9 +1117,7 @@ async def login_step2(request: Request, credentials: OTPVerification):
                 "email": user['email'], 
                 "full_name": user['full_name'],
                 "phone_number": user.get('phone_number', ''),
-                "role": user.get('role', 'user'),
-                "department": user.get('department', 'cdi'),
-                "coding_role": user.get('coding_role')
+                "role": user.get('role', 'user')
             }
         }
     except HTTPException:
@@ -1455,9 +1128,9 @@ async def login_step2(request: Request, credentials: OTPVerification):
 
 # Keep old endpoint for backward compatibility (deprecated)
 @api_router.post("/auth/login", response_model=Token)
-async def login(request: Request, credentials: UserLogin):
+async def login(credentials: UserLogin):
     """Legacy login endpoint - redirects to new MFA flow"""
-    result = await login_step1(request, credentials)
+    result = await login_step1(credentials)
     if result.get('requires_mfa'):
         raise HTTPException(
             status_code=202,
@@ -1482,14 +1155,16 @@ async def get_current_user_info(current_user: dict = Depends(get_current_user)):
 
 @api_router.post("/auth/forgot-password")
 async def forgot_password(request: PasswordResetRequest):
-    """Request password reset - sends link via Email only"""
+    """Request password reset - sends code via WhatsApp"""
     user = await db.users.find_one({"email": request.email}, {"_id": 0})
     
     # Always return success (don't reveal if email exists)
     if not user:
-        return {"message": "If the account exists, a reset link will be sent to email"}
+        return {"message": "If the account exists, a reset code will be sent"}
     
-    # Generate reset token
+    # Generate reset code (6 digits)
+    import random
+    reset_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
     reset_token = str(uuid.uuid4())
     expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
     
@@ -1503,19 +1178,39 @@ async def forgot_password(request: PasswordResetRequest):
     doc = token_doc.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     doc['expires_at'] = doc['expires_at'].isoformat()
+    doc['reset_code'] = reset_code
     await db.password_reset_tokens.insert_one(doc)
     
-    # Send password reset email
+    # Send password reset email (if configured)
     try:
         await send_password_reset_email(user['email'], user['full_name'], reset_token)
-        logging.info(f"Password reset email sent to user {user['email']}")
     except Exception as e:
         logging.error(f"Failed to send password reset email: {str(e)}")
     
-    return {
-        "message": "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني",
-        "message_en": "Password reset link sent to your email"
-    }
+    # Create WhatsApp message with reset code
+    import urllib.parse
+    phone_number = user.get('phone_number', '')
+    if phone_number:
+        whatsapp_message = f"""مرحباً {user['full_name']}
+
+كود استعادة كلمة المرور الخاص بك هو:
+
+{reset_code}
+
+هذا الكود صالح لمدة ساعة واحدة فقط.
+
+للدعم الفني: 966502468148"""
+        
+        encoded_message = urllib.parse.quote(whatsapp_message)
+        whatsapp_link = f"https://wa.me/{phone_number}?text={encoded_message}"
+        
+        return {
+            "message": "Reset code sent",
+            "whatsapp_link": whatsapp_link,
+            "has_phone": True
+        }
+    
+    return {"message": "If the account exists, a reset code will be sent", "has_phone": False}
 
 @api_router.post("/auth/reset-password")
 async def reset_password(request: PasswordReset):
@@ -1549,6 +1244,53 @@ async def reset_password(request: PasswordReset):
     
     return {"message": "Password reset successful"}
 
+@api_router.post("/auth/reset-password-with-code")
+async def reset_password_with_code(request: PasswordResetWithCode):
+    """Reset password using code from WhatsApp"""
+    # Find user by email
+    user = await db.users.find_one({"email": request.email}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=400, detail="Reset failed")
+    
+    # Find valid token with matching code
+    token_doc = await db.password_reset_tokens.find_one({
+        "user_id": user['id'],
+        "reset_code": request.code,
+        "used": False
+    }, {"_id": 0})
+    
+    if not token_doc:
+        raise HTTPException(status_code=400, detail="Invalid code")
+    
+    # Check if token expired
+    expires_at = datetime.fromisoformat(token_doc['expires_at'])
+    if datetime.now(timezone.utc) > expires_at:
+        raise HTTPException(status_code=400, detail="Code has expired")
+    
+    # Update user password
+    new_password_hash = hash_password(request.new_password)
+    await db.users.update_one(
+        {"id": user['id']},
+        {"$set": {"password": new_password_hash}}
+    )
+    
+    # Mark token as used
+    await db.password_reset_tokens.update_one(
+        {"user_id": user['id'], "reset_code": request.code},
+        {"$set": {"used": True}}
+    )
+    
+    return {"message": "Password reset successful"}
+
+@api_router.get("/support/whatsapp")
+async def get_support_whatsapp():
+    """Get support WhatsApp number"""
+    support_number = os.environ.get('SUPPORT_WHATSAPP', '966502468148')
+    return {
+        "whatsapp_number": support_number,
+        "whatsapp_link": f"https://wa.me/{support_number}"
+    }
+
 # ========== Admin Routes ==========
 async def require_admin(user: dict = Depends(get_current_user)):
     if user.get('role') != 'admin':
@@ -1557,49 +1299,2379 @@ async def require_admin(user: dict = Depends(get_current_user)):
 
 @api_router.get("/admin/users-statistics")
 async def get_users_statistics(admin: dict = Depends(require_admin)):
-    """Get detailed statistics for all users - Optimized with aggregation"""
+    """Get detailed statistics for all users"""
     from datetime import datetime, timezone, timedelta
     
+    # Get all users except admins
+    users = await db.users.find(
+        {"role": {"$ne": "admin"}},
+        {"_id": 0, "password_hash": 0}
+    ).to_list(1000)
+    
     today = datetime.now(timezone.utc).date()
-    today_start = datetime.combine(today, datetime.min.time()).isoformat()
-    today_end = datetime.combine(today + timedelta(days=1), datetime.min.time()).isoformat()
+    yesterday = today - timedelta(days=1)
     
-    # Optimized aggregation pipeline - single query instead of N+1
-    pipeline = [
-        {"$match": {"role": {"$ne": "admin"}}},
-        {
-            "$lookup": {
-                "from": "clinical_notes",
-                "localField": "id",
-                "foreignField": "user_id",
-                "as": "notes"
+    user_stats = []
+    for user in users:
+        user_id = user['id']
+        
+        # Count total notes
+        total_notes = await db.clinical_notes.count_documents({"user_id": user_id})
+        
+        # Count total analyses
+        total_analyses = await db.analyses.count_documents({"user_id": user_id})
+        
+        # Count today's notes
+        today_notes = await db.clinical_notes.count_documents({
+            "user_id": user_id,
+            "created_at": {
+                "$gte": datetime.combine(today, datetime.min.time()).isoformat(),
+                "$lt": datetime.combine(today + timedelta(days=1), datetime.min.time()).isoformat()
             }
-        },
-        {
-            "$lookup": {
-                "from": "analyses",
-                "localField": "id",
-                "foreignField": "user_id",
-                "as": "analyses"
+        })
+        
+        # Count today's analyses
+        today_analyses = await db.analyses.count_documents({
+            "user_id": user_id,
+            "created_at": {
+                "$gte": datetime.combine(today, datetime.min.time()).isoformat(),
+                "$lt": datetime.combine(today + timedelta(days=1), datetime.min.time()).isoformat()
             }
-        },
-        {
-            "$addFields": {
-                "total_notes": {"$size": "$notes"},
-                "total_analyses": {"$size": "$analyses"},
-                "today_notes": {
-                    "$size": {
-                        "$filter": {
-                            "input": "$notes",
-                            "cond": {
-                                "$and": [
-                                    {"$gte": ["$$this.created_at", today_start]},
-                                    {"$lt": ["$$this.created_at", today_end]}
-                                ]
-                            }
-                        }
-                    }
-                },
-                "today_analyses": {
-                    "$size": {
+        })
+        
+        # Get last activity
+        last_note = await db.clinical_notes.find_one(
+            {"user_id": user_id},
+            {"_id": 0, "created_at": 1},
+            sort=[("created_at", -1)]
+        )
+        
+        last_activity = last_note['created_at'] if last_note else user.get('created_at')
+        
+        user_stats.append({
+            "user_id": user_id,
+            "full_name": user['full_name'],
+            "email": user['email'],
+            "phone_number": user.get('phone_number', ''),
+            "role": user.get('role', 'user'),
+            "is_active": user.get('is_active', True),
+            "registration_date": user.get('created_at'),
+            "last_activity": last_activity,
+            "total_notes": total_notes,
+            "total_analyses": total_analyses,
+            "today_notes": today_notes,
+            "today_analyses": today_analyses,
+            "is_active_today": today_notes > 0 or today_analyses > 0
+        })
     
+    # Sort by today's activity (most active first)
+    user_stats.sort(key=lambda x: (x['today_notes'] + x['today_analyses']), reverse=True)
+    
+    return {
+        "date": today.isoformat(),
+        "total_users": len(user_stats),
+        "active_today": sum(1 for u in user_stats if u['is_active_today']),
+        "statistics": user_stats
+    }
+
+@api_router.get("/admin/stats")
+async def get_admin_stats(admin: dict = Depends(require_admin)):
+    # Count users
+    total_users = await db.users.count_documents({})
+    admin_users = await db.users.count_documents({"role": "admin"})
+    
+    # Count notes
+    total_notes = await db.clinical_notes.count_documents({})
+    
+    # Count analyses
+    total_analyses = await db.analyses.count_documents({})
+    
+    # Recent activity
+    recent_users = await db.users.find(
+        {}, {"_id": 0, "password_hash": 0}
+    ).sort("created_at", -1).limit(10).to_list(10)
+    
+    recent_analyses = await db.analyses.find(
+        {}, {"_id": 0}
+    ).sort("created_at", -1).limit(10).to_list(10)
+    
+    return {
+        "total_users": total_users,
+        "admin_users": admin_users,
+        "regular_users": total_users - admin_users,
+        "total_notes": total_notes,
+        "total_analyses": total_analyses,
+        "recent_users": recent_users,
+        "recent_analyses": recent_analyses
+    }
+
+@api_router.get("/admin/users")
+async def get_all_users(admin: dict = Depends(require_admin)):
+    users = await db.users.find(
+        {}, {"_id": 0, "password_hash": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    for user in users:
+        if isinstance(user.get('created_at'), str):
+            user['created_at'] = datetime.fromisoformat(user['created_at'])
+    
+    return users
+
+@api_router.put("/admin/users/{user_id}/toggle-active")
+async def toggle_user_active(user_id: str, admin: dict = Depends(require_admin)):
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    new_status = not user.get('is_active', True)
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_active": new_status}}
+    )
+    
+    return {"message": "User status updated", "is_active": new_status}
+
+@api_router.get("/admin/export-statistics")
+async def export_users_statistics(admin: dict = Depends(require_admin)):
+    """Export user statistics to Excel file"""
+    from datetime import datetime, timezone, timedelta
+    
+    # Get statistics
+    stats_data = await get_users_statistics(admin)
+    
+    # Create Excel workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "إحصائيات المستخدمين"
+    
+    # Define headers (Arabic and English)
+    headers = [
+        "الاسم الكامل\nFull Name",
+        "البريد الإلكتروني\nEmail",
+        "رقم الجوال\nPhone",
+        "تاريخ التسجيل\nRegistration Date",
+        "آخر نشاط\nLast Activity",
+        "إجمالي الملاحظات\nTotal Notes",
+        "إجمالي التحليلات\nTotal Analyses",
+        "ملاحظات اليوم\nToday's Notes",
+        "تحليلات اليوم\nToday's Analyses",
+        "نشط اليوم\nActive Today"
+    ]
+    
+    # Style headers
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=12)
+    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num)
+        cell.value = header
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+    
+    # Set column widths
+    ws.column_dimensions['A'].width = 25
+    ws.column_dimensions['B'].width = 30
+    ws.column_dimensions['C'].width = 20
+    ws.column_dimensions['D'].width = 20
+    ws.column_dimensions['E'].width = 20
+    ws.column_dimensions['F'].width = 18
+    ws.column_dimensions['G'].width = 18
+    ws.column_dimensions['H'].width = 18
+    ws.column_dimensions['I'].width = 18
+    ws.column_dimensions['J'].width = 15
+    
+    # Add data
+    for row_num, user_stat in enumerate(stats_data['statistics'], 2):
+        ws.cell(row=row_num, column=1, value=user_stat['full_name'])
+        ws.cell(row=row_num, column=2, value=user_stat['email'])
+        ws.cell(row=row_num, column=3, value=user_stat['phone_number'])
+        
+        # Format dates
+        reg_date = user_stat.get('registration_date')
+        if isinstance(reg_date, str):
+            try:
+                reg_date = datetime.fromisoformat(reg_date).strftime('%Y-%m-%d %H:%M')
+            except:
+                pass
+        ws.cell(row=row_num, column=4, value=reg_date)
+        
+        last_activity = user_stat.get('last_activity')
+        if isinstance(last_activity, str):
+            try:
+                last_activity = datetime.fromisoformat(last_activity).strftime('%Y-%m-%d %H:%M')
+            except:
+                pass
+        ws.cell(row=row_num, column=5, value=last_activity)
+        
+        ws.cell(row=row_num, column=6, value=user_stat['total_notes'])
+        ws.cell(row=row_num, column=7, value=user_stat['total_analyses'])
+        ws.cell(row=row_num, column=8, value=user_stat['today_notes'])
+        ws.cell(row=row_num, column=9, value=user_stat['today_analyses'])
+        ws.cell(row=row_num, column=10, value='نعم / Yes' if user_stat['is_active_today'] else 'لا / No')
+        
+        # Apply alignment
+        for col in range(1, 11):
+            ws.cell(row=row_num, column=col).alignment = Alignment(horizontal="center", vertical="center")
+    
+    # Add summary at the bottom
+    summary_row = len(stats_data['statistics']) + 3
+    ws.cell(row=summary_row, column=1, value="الملخص / Summary").font = Font(bold=True, size=14)
+    ws.cell(row=summary_row + 1, column=1, value=f"إجمالي المستخدمين / Total Users: {stats_data['total_users']}")
+    ws.cell(row=summary_row + 2, column=1, value=f"نشط اليوم / Active Today: {stats_data['active_today']}")
+    ws.cell(row=summary_row + 3, column=1, value=f"التاريخ / Date: {stats_data['date']}")
+    
+    # Save to BytesIO
+    excel_file = io.BytesIO()
+    wb.save(excel_file)
+    excel_file.seek(0)
+    
+    # Return as downloadable file
+    from fastapi.responses import StreamingResponse
+    filename = f"user_statistics_{stats_data['date']}.xlsx"
+    
+    return StreamingResponse(
+        excel_file,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, admin: dict = Depends(require_admin)):
+    # Don't allow deleting yourself
+    if user_id == admin['id']:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+    
+    result = await db.users.delete_one({"id": user_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Also delete user's notes and analyses
+    await db.clinical_notes.delete_many({"user_id": user_id})
+    await db.analyses.delete_many({"user_id": user_id})
+    await db.chat_messages.delete_many({"user_id": user_id})
+    
+    return {"message": "User and all data deleted successfully"}
+
+@api_router.put("/admin/users/{user_id}")
+async def update_user(user_id: str, update_data: dict, admin: dict = Depends(require_admin)):
+    """Update user information"""
+    allowed_fields = ['full_name', 'email', 'phone_number']
+    update_dict = {k: v for k, v in update_data.items() if k in allowed_fields}
+    
+    if not update_dict:
+        raise HTTPException(status_code=400, detail="No valid fields to update")
+    
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": update_dict}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "User updated successfully"}
+
+@api_router.post("/admin/suspend-user/{user_id}")
+async def suspend_user(user_id: str, admin: dict = Depends(require_admin)):
+    """Suspend a user account"""
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_active": False}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "User suspended successfully"}
+
+@api_router.post("/admin/activate-user/{user_id}")
+async def activate_user(user_id: str, admin: dict = Depends(require_admin)):
+    """Activate a user account"""
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_active": True}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "User activated successfully"}
+
+# ========== Supervisor Management Routes ==========
+@api_router.post("/admin/assign-supervisor/{user_id}")
+async def assign_supervisor(user_id: str, admin: dict = Depends(require_admin)):
+    """Promote a user to supervisor role"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if user is admin (use .get() to handle users without role field)
+    if user.get('role') == 'admin':
+        raise HTTPException(status_code=400, detail="Cannot change admin role")
+    
+    # Update user role to supervisor
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"role": "supervisor"}}
+    )
+    
+    return {"message": "User promoted to supervisor successfully"}
+
+@api_router.post("/admin/remove-supervisor/{user_id}")
+async def remove_supervisor(user_id: str, admin: dict = Depends(require_admin)):
+    """Demote a supervisor back to regular user"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user['role'] != 'supervisor':
+        raise HTTPException(status_code=400, detail="User is not a supervisor")
+    
+    # Update user role back to user
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"role": "user"}}
+    )
+    
+    return {"message": "Supervisor demoted to user successfully"}
+
+@api_router.get("/admin/supervisors")
+async def get_supervisors(admin: dict = Depends(require_admin)):
+    """Get all supervisors"""
+    supervisors = await db.users.find(
+        {"role": "supervisor"},
+        {"_id": 0, "password_hash": 0}
+    ).to_list(1000)
+    
+    # Get employee count for each supervisor
+    for supervisor in supervisors:
+        employee_count = await db.users.count_documents({"supervisor_id": supervisor['id']})
+        supervisor['employee_count'] = employee_count
+    
+    return supervisors
+
+# ========== Supervisor Routes ==========
+async def require_supervisor(user: dict = Depends(get_current_user)):
+    if user.get('role') not in ['admin', 'supervisor']:
+        raise HTTPException(status_code=403, detail="Supervisor access required")
+    return user
+
+@api_router.get("/supervisor/employees")
+async def get_supervisor_employees(supervisor: dict = Depends(require_supervisor)):
+    """Get all employees - both admin and supervisor see all regular employees"""
+    # Both admin and supervisor see all non-admin, non-supervisor users
+    employees = await db.users.find(
+        {"role": {"$nin": ["admin", "supervisor"]}},
+        {"_id": 0, "password_hash": 0}
+    ).to_list(1000)
+    
+    # Add notes and analyses counts
+    for employee in employees:
+        notes_count = await db.clinical_notes.count_documents({"user_id": employee['id']})
+        analyses_count = await db.analyses.count_documents({"user_id": employee['id']})
+        employee['notes_count'] = notes_count
+        employee['analyses_count'] = analyses_count
+    
+    return employees
+
+@api_router.post("/admin/change-user-password/{user_id}")
+async def admin_change_user_password(
+    user_id: str,
+    new_password: str,
+    admin: dict = Depends(require_admin)
+):
+    """Admin can change any user's password"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Hash new password
+    hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+    
+    # Update password
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"password_hash": hashed_password.decode('utf-8')}}
+    )
+    
+    return {"message": "Password changed successfully"}
+
+@api_router.post("/admin/impersonate/{user_id}")
+async def impersonate_user(
+    user_id: str,
+    current_user: dict = Depends(require_supervisor)  # Allow both admin and supervisor
+):
+    """Admin/Supervisor can impersonate any user to view their account"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Generate a new token for the impersonated user
+    access_token = create_access_token(data={
+        "user_id": user['id'], 
+        "email": user['email'],
+        "role": user.get('role', 'user')
+    })
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user['id'],
+            "email": user['email'],
+            "full_name": user['full_name'],
+            "role": user.get('role', 'user'),
+            "phone_number": user.get('phone_number', ''),
+            "is_impersonating": True,
+            "impersonated_by": current_user['id']
+        }
+    }
+
+@api_router.get("/supervisor/employee-notes/{employee_id}")
+async def get_employee_notes(employee_id: str, supervisor: dict = Depends(require_supervisor)):
+    """Get all notes for a specific employee"""
+    # Verify employee belongs to this supervisor (unless admin)
+    if supervisor['role'] != 'admin':
+        employee = await db.users.find_one({"id": employee_id}, {"_id": 0})
+        if not employee or employee.get('supervisor_id') != supervisor['id']:
+            raise HTTPException(status_code=403, detail="Not authorized to view this employee's notes")
+    
+    notes = await db.clinical_notes.find(
+        {"user_id": employee_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    for note in notes:
+        if isinstance(note['created_at'], str):
+            note['created_at'] = datetime.fromisoformat(note['created_at'])
+        if 'doctor_notes' not in note:
+            note['doctor_notes'] = []
+    
+    return notes
+
+@api_router.get("/supervisor/employee-analyses/{employee_id}")
+async def get_employee_analyses(employee_id: str, supervisor: dict = Depends(require_supervisor)):
+    """Get all analyses for a specific employee"""
+    # Verify employee belongs to this supervisor (unless admin)
+    if supervisor['role'] != 'admin':
+        employee = await db.users.find_one({"id": employee_id}, {"_id": 0})
+        if not employee or employee.get('supervisor_id') != supervisor['id']:
+            raise HTTPException(status_code=403, detail="Not authorized to view this employee's analyses")
+    
+    analyses = await db.analyses.find(
+        {"user_id": employee_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    for analysis in analyses:
+        if isinstance(analysis['created_at'], str):
+            analysis['created_at'] = datetime.fromisoformat(analysis['created_at'])
+    
+    return analyses
+
+# ========== Notes Routes ==========
+@api_router.post("/notes", response_model=ClinicalNote)
+async def create_note(note_data: ClinicalNoteCreate, user: dict = Depends(get_current_user)):
+    note = ClinicalNote(
+        user_id=user['id'],
+        title=note_data.title,
+        doctor_notes=[dn.model_dump() for dn in note_data.doctor_notes]
+    )
+    
+    doc = note.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.clinical_notes.insert_one(doc)
+    
+    return note
+
+@api_router.get("/notes", response_model=List[ClinicalNote])
+async def get_notes(user: dict = Depends(get_current_user)):
+    notes = await db.clinical_notes.find(
+        {"user_id": user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    for note in notes:
+        if isinstance(note['created_at'], str):
+            note['created_at'] = datetime.fromisoformat(note['created_at'])
+        # تأكد من وجود doctor_notes
+        if 'doctor_notes' not in note:
+            note['doctor_notes'] = []
+    
+    return notes
+
+@api_router.get("/notes/{note_id}", response_model=ClinicalNote)
+async def get_note(note_id: str, user: dict = Depends(get_current_user)):
+    note = await db.clinical_notes.find_one(
+        {"id": note_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    if isinstance(note['created_at'], str):
+        note['created_at'] = datetime.fromisoformat(note['created_at'])
+    
+    return note
+
+@api_router.put("/notes/{note_id}", response_model=ClinicalNote)
+async def update_note(note_id: str, request: ClinicalNoteCreate, user: dict = Depends(get_current_user)):
+    # Check if note exists and belongs to user
+    existing_note = await db.clinical_notes.find_one(
+        {"id": note_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not existing_note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    # Update note data
+    updated_data = {
+        "title": request.title,
+        "doctor_notes": [{"text": n.text, "specialty": n.specialty} for n in request.doctor_notes],
+        "notes_text": " ".join([n.text for n in request.doctor_notes]),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.clinical_notes.update_one(
+        {"id": note_id, "user_id": user['id']},
+        {"$set": updated_data}
+    )
+    
+    # Get updated note
+    note = await db.clinical_notes.find_one(
+        {"id": note_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if isinstance(note['created_at'], str):
+        note['created_at'] = datetime.fromisoformat(note['created_at'])
+    
+    
+    if note.get('updated_at') and isinstance(note['updated_at'], str):
+        note['updated_at'] = datetime.fromisoformat(note['updated_at'])
+    return note
+
+@api_router.delete("/notes/{note_id}")
+async def delete_note(note_id: str, user: dict = Depends(get_current_user)):
+    # Check if note exists and belongs to user
+    note = await db.clinical_notes.find_one(
+        {"id": note_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    # Delete the note
+    await db.clinical_notes.delete_one({"id": note_id, "user_id": user['id']})
+    
+    # Also delete all related analyses
+    await db.analyses.delete_many({"note_id": note_id, "user_id": user['id']})
+    
+    return {"message": "Note and related analyses deleted successfully"}
+
+# ========== Analysis Routes ==========
+@api_router.post("/analyze", response_model=Analysis)
+@limiter.limit("20/hour")
+async def analyze_note(request: Request, analyze_request: AnalyzeRequest, user: dict = Depends(get_current_user)):
+    # Track AI request
+    start_time = time.time()
+    
+    note = await db.clinical_notes.find_one(
+        {"id": analyze_request.note_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    # Track DB operation
+    DB_OPERATIONS.labels(operation='read', collection='clinical_notes').inc()
+    
+    # Analyze with Gemini
+    result = await analyze_with_gemini(note['title'], note['doctor_notes'])
+    
+    # Track AI metrics
+    AI_REQUESTS.labels(type='analyze').inc()
+    AI_RESPONSE_TIME.labels(type='analyze').observe(time.time() - start_time)
+    
+    # Create analysis record
+    analysis = Analysis(
+        note_id=analyze_request.note_id,
+        user_id=user['id'],
+        diagnoses_to_document=[DiagnosisBilingual(**d) for d in result.get('diagnoses_to_document', [])],
+        missing_documentation=result.get('missing_documentation', []),
+        gaps_ar=result.get('gaps_ar', []),
+        gaps_en=result.get('gaps_en', []),
+        queries_ar=result.get('queries_ar', []),
+        queries_en=result.get('queries_en', []),
+        recommendations_ar=result.get('recommendations_ar', []),
+        recommendations_en=result.get('recommendations_en', []),
+        summary_ar=result.get('summary_ar', ''),
+        summary_en=result.get('summary_en', '')
+    )
+    
+    doc = analysis.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    # Convert DiagnosisBilingual to dict
+    doc['diagnoses_to_document'] = [d.model_dump() if hasattr(d, 'model_dump') else d for d in doc['diagnoses_to_document']]
+    await db.analyses.insert_one(doc)
+    
+    return analysis
+
+@api_router.post("/analysis/reanalyze/{note_id}", response_model=Analysis)
+async def reanalyze_note(note_id: str, user: dict = Depends(get_current_user)):
+    """Reanalyze an existing note (useful after edits)"""
+    note = await db.clinical_notes.find_one(
+        {"id": note_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    # Analyze with Gemini
+    result = await analyze_with_gemini(note['title'], note.get('doctor_notes', []))
+    
+    # Create new analysis record
+    analysis = Analysis(
+        note_id=note_id,
+        user_id=user['id'],
+        diagnoses_to_document=[DiagnosisBilingual(**d) for d in result.get('diagnoses_to_document', [])],
+        missing_documentation=result.get('missing_documentation', []),
+        gaps_ar=result.get('gaps_ar', []),
+        gaps_en=result.get('gaps_en', []),
+        queries_ar=result.get('queries_ar', []),
+        queries_en=result.get('queries_en', []),
+        recommendations_ar=result.get('recommendations_ar', []),
+        recommendations_en=result.get('recommendations_en', []),
+        summary_ar=result.get('summary_ar', ''),
+        summary_en=result.get('summary_en', '')
+    )
+    
+    doc = analysis.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    doc['diagnoses_to_document'] = [d.model_dump() if hasattr(d, 'model_dump') else d for d in doc['diagnoses_to_document']]
+    await db.analyses.insert_one(doc)
+    
+    # Log audit
+    from security_utils import log_audit
+    await log_audit(
+        db,
+        action="reanalyze_note",
+        user_id=user['id'],
+        user_email=user.get('email'),
+        resource_type="note",
+        resource_id=note_id,
+        status="success"
+    )
+    
+    return analysis
+
+@api_router.get("/analyses/{note_id}", response_model=List[Analysis])
+async def get_analyses(note_id: str, user: dict = Depends(get_current_user)):
+    analyses = await db.analyses.find(
+        {"note_id": note_id, "user_id": user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    for analysis in analyses:
+        if isinstance(analysis['created_at'], str):
+            analysis['created_at'] = datetime.fromisoformat(analysis['created_at'])
+    
+    return analyses
+
+@api_router.get("/analysis/{analysis_id}", response_model=Analysis)
+async def get_analysis_by_id(analysis_id: str, user: dict = Depends(get_current_user)):
+    """Get specific analysis by analysis ID"""
+    analysis = await db.analyses.find_one(
+        {"id": analysis_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    
+    if isinstance(analysis['created_at'], str):
+        analysis['created_at'] = datetime.fromisoformat(analysis['created_at'])
+    
+    return analysis
+
+@api_router.get("/history", response_model=List[Dict])
+async def get_history(user: dict = Depends(get_current_user)):
+    analyses = await db.analyses.find(
+        {"user_id": user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(1000)
+    
+    result = []
+    for analysis in analyses:
+        note = await db.clinical_notes.find_one(
+            {"id": analysis['note_id']},
+            {"_id": 0, "title": 1}
+        )
+        
+        if isinstance(analysis['created_at'], str):
+            analysis['created_at'] = datetime.fromisoformat(analysis['created_at'])
+        
+        result.append({
+            **analysis,
+            "note_title": note.get('title', '') if note else ''
+        })
+    
+    return result
+
+# ========== Chat Routes ==========
+@api_router.post("/chat")
+@limiter.limit("30/minute")
+async def chat_with_ai(request: Request, chat_request: ChatRequest, user: dict = Depends(get_current_user)):
+    # Get analysis
+    analysis = await db.analyses.find_one(
+        {"id": chat_request.analysis_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    
+    # Get note
+    note = await db.clinical_notes.find_one(
+        {"id": analysis['note_id']},
+        {"_id": 0}
+    )
+    
+    # Save user message
+    user_msg = ChatMessage(
+        analysis_id=chat_request.analysis_id,
+        user_id=user['id'],
+        role='user',
+        message=chat_request.message
+    )
+    user_doc = user_msg.model_dump()
+    user_doc['created_at'] = user_doc['created_at'].isoformat()
+    await db.chat_messages.insert_one(user_doc)
+    
+    # Build context
+    import json
+    context = f"""Clinical Note: {note['title']}
+
+Analysis Summary (Arabic): {analysis.get('summary_ar', '')}
+Analysis Summary (English): {analysis.get('summary_en', '')}
+
+Diagnoses to Document: {json.dumps(analysis.get('diagnoses_to_document', []), ensure_ascii=False)}
+Missing Documentation: {json.dumps(analysis.get('missing_documentation', []), ensure_ascii=False)}"""
+    
+    system_message = f"""You are a Clinical Documentation Improvement (CDI) specialist. You have reviewed a clinical case and now the user wants to discuss the analysis with you.
+
+Context:
+{context}
+
+Answer questions professionally, provide clarifications, and help improve the documentation. Respond in the same language as the user's question. 
+
+IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary details. Focus only on the specific question asked. Maximum 3-4 sentences unless more detail is specifically requested."""
+    
+    # Use analysis_id as session for continuity
+    try:
+        # Use Google Gemini API with automatic key rotation
+        model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+        
+        # Get chat history for context
+        chat_history = []
+        previous_messages = await db.chat_messages.find(
+            {"analysis_id": chat_request.analysis_id}
+        ).sort("created_at", 1).to_list(100)
+        
+        # Build chat history
+        for msg in previous_messages:
+            # Handle both open chat messages (with 'role') and predefined questions (with 'question'/'answer')
+            if 'role' in msg:
+                if msg['role'] == 'user':
+                    chat_history.append({'role': 'user', 'parts': [msg['message']]})
+                else:
+                    chat_history.append({'role': 'model', 'parts': [msg['message']]})
+            elif 'question' in msg and 'answer' in msg:
+                # Predefined question format
+                chat_history.append({'role': 'user', 'parts': [msg['question']]})
+                chat_history.append({'role': 'model', 'parts': [msg['answer']]})
+        
+        # Start chat with history and retry logic
+        max_retries = len(GEMINI_API_KEYS)
+        response_text = None
+        
+        for attempt in range(max_retries):
+            try:
+                chat = model.start_chat(history=chat_history)
+                response = chat.send_message(chat_request.message)
+                response_text = response.text
+                break  # Success, exit retry loop
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    logger.warning(f"Chat retry {attempt + 1}/{max_retries} with different API key")
+                    model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+                else:
+                    raise e
+        
+        # Save assistant message
+        assistant_msg = ChatMessage(
+            analysis_id=chat_request.analysis_id,
+            user_id=user['id'],
+            role='assistant',
+            message=response_text
+        )
+        assistant_doc = assistant_msg.model_dump()
+        assistant_doc['created_at'] = assistant_doc['created_at'].isoformat()
+        await db.chat_messages.insert_one(assistant_doc)
+        
+        return {"message": response_text}
+        
+    except Exception as e:
+        logging.error(f"Error in chat: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error in chat: {str(e)}")
+
+@api_router.get("/chat/{analysis_id}")
+async def get_chat_history(analysis_id: str, user: dict = Depends(get_current_user)):
+    messages = await db.chat_messages.find(
+        {"analysis_id": analysis_id, "user_id": user['id']},
+        {"_id": 0}
+    ).sort("created_at", 1).to_list(1000)
+    
+    for msg in messages:
+        if isinstance(msg['created_at'], str):
+            msg['created_at'] = datetime.fromisoformat(msg['created_at'])
+    
+    return messages
+
+@api_router.post("/chat/{analysis_id}")
+@limiter.limit("30/minute")
+async def chat_with_ai_by_path(request: Request, analysis_id: str, question: dict, user: dict = Depends(get_current_user)):
+    """Alternative chat endpoint for ChatEnhanced.jsx - expects {question: str} in body"""
+    try:
+        # Get analysis
+        analysis = await db.analyses.find_one(
+            {"id": analysis_id, "user_id": user['id']},
+            {"_id": 0}
+        )
+        
+        if not analysis:
+            raise HTTPException(status_code=404, detail="Analysis not found")
+        
+        # Get note
+        note = await db.clinical_notes.find_one(
+            {"id": analysis['note_id']},
+            {"_id": 0}
+        )
+        
+        user_question = question.get('question', '')
+        if not user_question:
+            raise HTTPException(status_code=400, detail="Question is required")
+        
+        # Save user message
+        user_msg = ChatMessage(
+            analysis_id=analysis_id,
+            user_id=user['id'],
+            role='user',
+            message=user_question
+        )
+        user_doc = user_msg.model_dump()
+        user_doc['created_at'] = user_doc['created_at'].isoformat()
+        await db.chat_messages.insert_one(user_doc)
+        
+        # Build context
+        import json
+        
+        # Format doctor notes
+        doctor_notes_text = "\n\n".join([
+            f"**{dn.get('specialty', 'عام')}**:\n{dn.get('text', '')}"
+            for dn in note.get('doctor_notes', [])
+        ])
+        
+        context = f"""Clinical Note: {note['title']}
+
+Clinical Notes:
+{doctor_notes_text}
+
+Analysis Summary (Arabic): {analysis.get('summary_ar', '')}
+Analysis Summary (English): {analysis.get('summary_en', '')}
+
+Diagnoses to Document: {json.dumps(analysis.get('diagnoses_to_document', []), ensure_ascii=False)}
+Missing Documentation: {json.dumps(analysis.get('missing_documentation', []), ensure_ascii=False)}"""
+        
+        system_message = f"""You are a Clinical Documentation Improvement (CDI) specialist. You have reviewed a clinical case and now the user wants to discuss the analysis with you.
+
+Context:
+{context}
+
+Answer questions professionally, provide clarifications, and help improve the documentation. Respond in the same language as the user's question. 
+
+IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary details. Focus only on the specific question asked. Maximum 3-4 sentences unless more detail is specifically requested."""
+        
+        # Use analysis_id as session for continuity
+        try:
+            # Use Google Gemini API with automatic key rotation
+            model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+            
+            # Get chat history for context
+            chat_history = []
+            previous_messages = await db.chat_messages.find(
+                {"analysis_id": analysis_id}
+            ).sort("created_at", 1).to_list(100)
+            
+            # Build chat history
+            for msg in previous_messages:
+                # Handle both open chat messages (with 'role') and predefined questions (with 'question'/'answer')
+                if 'role' in msg:
+                    if msg['role'] == 'user':
+                        chat_history.append({'role': 'user', 'parts': [msg['message']]})
+                    else:
+                        chat_history.append({'role': 'model', 'parts': [msg['message']]})
+                elif 'question' in msg and 'answer' in msg:
+                    # Predefined question format
+                    chat_history.append({'role': 'user', 'parts': [msg['question']]})
+                    chat_history.append({'role': 'model', 'parts': [msg['answer']]})
+            
+            # Start chat with history and retry logic
+            max_retries = len(GEMINI_API_KEYS)
+            response_text = None
+            
+            for attempt in range(max_retries):
+                try:
+                    chat = model.start_chat(history=chat_history)
+                    response = chat.send_message(user_question)
+                    response_text = response.text
+                    break  # Success, exit retry loop
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        logger.warning(f"Chat retry {attempt + 1}/{max_retries} with different API key")
+                        model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+                    else:
+                        raise e
+            
+            # Save assistant message
+            assistant_msg = ChatMessage(
+                analysis_id=analysis_id,
+                user_id=user['id'],
+                role='assistant',
+                message=response_text
+            )
+            assistant_doc = assistant_msg.model_dump()
+            assistant_doc['created_at'] = assistant_doc['created_at'].isoformat()
+            await db.chat_messages.insert_one(assistant_doc)
+            
+            # Return format expected by ChatEnhanced.jsx
+            return {
+                "question": user_question,
+                "answer": response_text
+            }
+            
+        except Exception as e:
+            logging.error(f"Error in chat: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Error in chat: {str(e)}")
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error processing chat: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ========== Export Routes ==========
+@api_router.get("/export/pdf/{analysis_id}")
+async def export_pdf(analysis_id: str, user: dict = Depends(get_current_user)):
+    analysis = await db.analyses.find_one(
+        {"id": analysis_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    
+    note = await db.clinical_notes.find_one(
+        {"id": analysis['note_id']},
+        {"_id": 0}
+    )
+    
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+    
+    elements = []
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor('#1e40af'),
+        alignment=TA_CENTER,
+        spaceAfter=30
+    )
+    
+    elements.append(Paragraph("Clinical Analysis Report / تقرير التحليل السريري", title_style))
+    elements.append(Spacer(1, 0.3*inch))
+    elements.append(Paragraph(f"<b>Note Title:</b> {note.get('title', '')}", styles['Normal']))
+    elements.append(Spacer(1, 0.2*inch))
+    
+    # Diagnoses to Document
+    elements.append(Paragraph("<b>Diagnoses to Document / التشخيصات المطلوب توثيقها:</b>", styles['Heading2']))
+    for diag in analysis.get('diagnoses_to_document', []):
+        elements.append(Paragraph(f"• {diag.get('diagnosis_en', '')} / {diag.get('diagnosis_ar', '')} - {diag.get('icd_code', '')}", styles['Normal']))
+    elements.append(Spacer(1, 0.2*inch))
+    
+    doc.build(elements)
+    buffer.seek(0)
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=analysis_{analysis_id}.pdf"}
+    )
+
+@api_router.get("/download/security-documentation")
+async def download_security_documentation():
+    """Download comprehensive security documentation"""
+    import os
+    
+    file_path = "/app/COMPREHENSIVE_SECURITY_IT_DOCUMENTATION_AR.md"
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Documentation file not found")
+    
+    return FileResponse(
+        path=file_path,
+        filename="COMPREHENSIVE_SECURITY_IT_DOCUMENTATION_AR.md",
+        media_type="text/markdown"
+    )
+
+@api_router.post("/admin/backup/create")
+async def create_backup(backup_key: str = Header(None, alias="X-Backup-Key")):
+    """
+    Create database backup (for cron jobs)
+    Requires X-Backup-Key header for security
+    """
+    import subprocess
+    import json
+    
+    # Verify backup key
+    BACKUP_KEY = os.environ.get('BACKUP_KEY', 'change-this-backup-key-in-production')
+    if backup_key != BACKUP_KEY:
+        raise HTTPException(status_code=403, detail="Invalid backup key")
+    
+    try:
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        backup_dir = "/app/backups"
+        os.makedirs(backup_dir, exist_ok=True)
+        
+        backup_file = f"{backup_dir}/backup_{timestamp}.json"
+        
+        # Export all collections
+        collections_to_backup = [
+            "users",
+            "clinical_notes", 
+            "analyses",
+            "chat_messages",
+            "audit_logs",
+            "login_attempts",
+            "otp_records",
+            "user_sessions",
+            "password_history",
+            "messages"
+        ]
+        
+        backup_data = {}
+        for collection_name in collections_to_backup:
+            collection = db[collection_name]
+            documents = await collection.find({}, {"_id": 0}).to_list(None)
+            
+            # Convert datetime objects to ISO strings
+            for doc in documents:
+                for key, value in doc.items():
+                    if isinstance(value, datetime):
+                        doc[key] = value.isoformat()
+            
+            backup_data[collection_name] = documents
+        
+        # Save to file
+        with open(backup_file, 'w', encoding='utf-8') as f:
+            json.dump(backup_data, f, ensure_ascii=False, indent=2)
+        
+        # Get file size
+        file_size = os.path.getsize(backup_file)
+        
+        # Log backup creation
+        await db.audit_logs.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": "system",
+            "email": "system",
+            "action": "backup_created",
+            "resource_type": "system",
+            "resource_id": backup_file,
+            "ip_address": "cron-job",
+            "user_agent": "automated-backup",
+            "status": "success",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "details": {
+                "collections_backed_up": len(collections_to_backup),
+                "total_documents": sum(len(docs) for docs in backup_data.values()),
+                "file_size_mb": round(file_size / (1024 * 1024), 2)
+            }
+        })
+        
+        return {
+            "success": True,
+            "backup_file": backup_file,
+            "timestamp": timestamp,
+            "collections": len(collections_to_backup),
+            "total_documents": sum(len(docs) for docs in backup_data.values()),
+            "file_size_mb": round(file_size / (1024 * 1024), 2)
+        }
+        
+    except Exception as e:
+        logging.error(f"Backup creation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Backup failed: {str(e)}")
+
+@api_router.get("/admin/backup/list")
+async def list_backups(user: dict = Depends(get_current_user)):
+    """List all available backups (Admin only)"""
+    if user.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    try:
+        backup_dir = "/app/backups"
+        if not os.path.exists(backup_dir):
+            return {"backups": []}
+        
+        backups = []
+        for filename in sorted(os.listdir(backup_dir), reverse=True):
+            if filename.startswith("backup_") and filename.endswith(".json"):
+                filepath = os.path.join(backup_dir, filename)
+                file_size = os.path.getsize(filepath)
+                file_time = os.path.getmtime(filepath)
+                
+                backups.append({
+                    "filename": filename,
+                    "size_mb": round(file_size / (1024 * 1024), 2),
+                    "created_at": datetime.fromtimestamp(file_time).isoformat(),
+                    "download_url": f"/api/admin/backup/download/{filename}"
+                })
+        
+        return {"backups": backups}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/admin/backup/download/{filename}")
+async def download_backup(filename: str, user: dict = Depends(get_current_user)):
+    """Download specific backup file (Admin only)"""
+    if user.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Security: only allow backup files
+    if not filename.startswith("backup_") or not filename.endswith(".json"):
+        raise HTTPException(status_code=400, detail="Invalid backup filename")
+    
+    filepath = f"/app/backups/{filename}"
+    
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="Backup file not found")
+    
+    return FileResponse(
+        path=filepath,
+        filename=filename,
+        media_type="application/json"
+    )
+
+@api_router.get("/export/excel/{analysis_id}")
+async def export_excel(analysis_id: str, user: dict = Depends(get_current_user)):
+    analysis = await db.analyses.find_one(
+        {"id": analysis_id, "user_id": user['id']},
+        {"_id": 0}
+    )
+    
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    
+    note = await db.clinical_notes.find_one(
+        {"id": analysis['note_id']},
+        {"_id": 0}
+    )
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Clinical Analysis"
+    
+    header_fill = PatternFill(start_color="1e40af", end_color="1e40af", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF")
+    
+    ws['A1'] = 'Note Title'
+    ws['B1'] = note.get('title', '')
+    ws['A1'].fill = header_fill
+    ws['A1'].font = header_font
+    
+    row = 3
+    ws[f'A{row}'] = 'Diagnoses to Document'
+    ws[f'A{row}'].fill = header_fill
+    ws[f'A{row}'].font = header_font
+    row += 1
+    
+    ws[f'A{row}'] = 'Diagnosis (EN)'
+    ws[f'B{row}'] = 'Diagnosis (AR)'
+    ws[f'C{row}'] = 'ICD-10 Code'
+    row += 1
+    
+    for diag in analysis.get('diagnoses_to_document', []):
+        ws[f'A{row}'] = diag.get('diagnosis_en', '')
+        ws[f'B{row}'] = diag.get('diagnosis_ar', '')
+        ws[f'C{row}'] = diag.get('icd_code', '')
+        row += 1
+    
+    ws.column_dimensions['A'].width = 40
+    ws.column_dimensions['B'].width = 40
+    ws.column_dimensions['C'].width = 15
+    
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename=analysis_{analysis_id}.xlsx"}
+    )
+
+@api_router.post("/supervisor/upload-cdi-data")
+async def upload_cdi_data(
+    file: UploadFile = File(...),
+    supervisor: dict = Depends(require_supervisor)
+):
+    """Upload and analyze monthly CDI Excel data with comprehensive professional indicators"""
+    import pandas as pd
+    from collections import Counter
+    
+    # Validate file type
+    if not (file.filename.endswith('.xlsx') or file.filename.endswith('.xls')):
+        raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are allowed")
+    
+    try:
+        # Read Excel file
+        contents = await file.read()
+        df = pd.read_excel(io.BytesIO(contents))
+        
+        # Normalize column names
+        df.columns = df.columns.str.lower().str.strip()
+        
+        # Function to find column by keywords
+        def find_column(keywords):
+            for keyword in keywords:
+                matches = [c for c in df.columns if keyword.lower() in c.lower()]
+                if matches:
+                    return matches[0]
+            return None
+        
+        # Find all columns flexibly
+        cds_col = find_column(['cds', 'specialist', 'doctor', 'physician'])
+        hospital_col = find_column(['hospital', 'facility', 'مستشفى', 'مستشفيات'])
+        admission_col = find_column(['admission', 'admit', 'date', 'تاريخ'])
+        
+        # Principal Diagnosis columns
+        pdx_before_col = find_column(['pdx before', 'principal before', 'primary before', 'pdxbefore'])
+        pdx_after_col = find_column(['pdx after', 'principal after', 'primary after', 'pdxafter', 'pdx/after cdi', 'pdx /after cdi', 'pdx after cdi'])
+        pdx_due_to_cdi_col = find_column(['pdx due to cdi', 'pdx added'])
+        
+        # Additional Diagnosis columns - SEPARATED for accuracy
+        adx_due_to_cdi_col = find_column(['adx due to cdi', 'adx added', 'secondary due to cdi'])
+        adx_after_col = find_column(['adx after', 'adx/after cdi', 'adx after cdi', 'secondary after', 'additional after', 'all adx'])
+        
+        # DRG columns
+        drg_before_col = find_column(['drg before', 'before drg', 'drgbefore', 'previous drg'])
+        drg_after_col = find_column(['drg after', 'after drg', 'drgafter', 'current drg', 'new drg'])
+        drg_change_col = find_column(['drg change', 'change', 'drgchange', 'impact'])
+        
+        # Specialty column
+        specialty_col = find_column(['specialty', 'speciality', 'تخصص', 'department', 'dept', 'service'])
+        
+        # Query and Review columns
+        query_col = find_column(['numbers of query', 'query', 'queries', 'استفسار', 'استفسارات', 'number of query'])
+        review_col = find_column(['numbers of review', 'review', 'reviews', 'مراجعة', 'مراجعات', 'number of review'])
+        response_col = find_column(['numbers of response', 'numbers of respons', 'response', 'responses', 'رد', 'ردود', 'number of response'])
+        
+        # Check critical columns
+        if not hospital_col:
+            raise HTTPException(status_code=400, detail="تعذر العثور على عمود المستشفى. يرجى التأكد من وجود عمود 'Hospital Name' أو مشابه.")
+        
+        # Basic Statistics
+        total_records = len(df)
+        hospitals = df[hospital_col].dropna().unique()
+        total_hospitals = len(hospitals)
+        
+        # DRG Analysis
+        drg_changes_count = 0
+        if drg_change_col:
+            # Check for Yes/No values, or numeric values, or compare before/after
+            df['has_drg_change'] = df[drg_change_col].notna() & (
+                (df[drg_change_col].astype(str).str.strip().str.lower().isin(['yes', 'نعم', 'true', '1'])) |
+                ((df[drg_change_col] != 0) & (df[drg_change_col].astype(str).str.lower() != 'no'))
+            )
+            drg_changes_count = int(df['has_drg_change'].sum())
+        elif drg_before_col and drg_after_col:
+            df['has_drg_change'] = (df[drg_before_col] != df[drg_after_col]) & df[drg_before_col].notna() & df[drg_after_col].notna()
+            drg_changes_count = int(df['has_drg_change'].sum())
+        else:
+            df['has_drg_change'] = False
+        
+        # PDX Analysis (Principal Diagnosis after CDI)
+        pdx_changes = 0
+        pdx_added = 0
+        if pdx_after_col:
+            # PDX Added: count all non-empty values in PDX/After CDI column
+            pdx_added_series = df[pdx_after_col].dropna()
+            pdx_added_series = pdx_added_series[pdx_added_series.astype(str).str.strip() != '']
+            pdx_added = len(pdx_added_series)
+            
+            # PDX Changes: only if we have before column
+            if pdx_before_col:
+                df['pdx_changed'] = (df[pdx_before_col] != df[pdx_after_col]) & df[pdx_before_col].notna() & df[pdx_after_col].notna()
+                pdx_changes = int(df['pdx_changed'].sum())
+        
+        # ADX Analysis (Additional Diagnosis due to CDI)
+        adx_added = 0
+        if adx_due_to_cdi_col:
+            df['has_adx'] = df[adx_due_to_cdi_col].notna() & (df[adx_due_to_cdi_col].astype(str).str.strip() != '')
+            adx_added = int(df['has_adx'].sum())
+        
+        # Calculate documentation metrics - with empty string filtering
+        total_pdx_after = int((df[pdx_after_col].notna() & (df[pdx_after_col].astype(str).str.strip() != '')).sum()) if pdx_after_col else 0
+        total_adx = int((df[adx_due_to_cdi_col].notna() & (df[adx_due_to_cdi_col].astype(str).str.strip() != '')).sum()) if adx_due_to_cdi_col else 0
+        
+        # Calculate Query and Review metrics
+        total_queries = 0
+        if query_col:
+            # Sum numeric values in query column
+            query_series = pd.to_numeric(df[query_col], errors='coerce').fillna(0)
+            total_queries = int(query_series.sum())
+        
+        total_reviews = 0
+        if review_col:
+            # Sum numeric values in review column
+            review_series = pd.to_numeric(df[review_col], errors='coerce').fillna(0)
+            total_reviews = int(review_series.sum())
+        
+        total_responses = 0
+        if response_col:
+            # Sum numeric values in response column
+            response_series = pd.to_numeric(df[response_col], errors='coerce').fillna(0)
+            total_responses = int(response_series.sum())
+        
+        # Hospital-Level Comprehensive Analysis
+        # Hospital-Level PRECISE Analysis
+        hospitals_data = []
+        for hospital in hospitals:
+            if pd.notna(hospital) and str(hospital).strip():
+                # Get exact match for this hospital
+                hospital_df = df[df[hospital_col] == hospital].copy()
+                total_cases_hospital = len(hospital_df)
+                
+                # PDX/After CDI Analysis - PRECISE counting
+                pdx_diagnoses = []
+                pdx_diagnoses_full = []
+                if pdx_after_col and pdx_after_col in hospital_df.columns:
+                    # Only count non-null, non-empty values
+                    pdx_list = hospital_df[pdx_after_col].dropna()
+                    pdx_list = pdx_list[pdx_list.astype(str).str.strip() != '']
+                    
+                    if len(pdx_list) > 0:
+                        pdx_counter = Counter(pdx_list)
+                        # Top 10 for display
+                        pdx_diagnoses = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in pdx_counter.most_common(10)
+                        ]
+                        # All diagnoses for comprehensive report
+                        pdx_diagnoses_full = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in pdx_counter.most_common()
+                        ]
+                
+                # PDX due to CDI Analysis - Only added PDX diagnoses
+                pdx_due_to_cdi_diagnoses = []
+                pdx_due_to_cdi_diagnoses_full = []
+                
+                # First, try to find a dedicated PDX due to CDI column
+                if pdx_due_to_cdi_col and pdx_due_to_cdi_col in hospital_df.columns:
+                    pdx_due_list = hospital_df[pdx_due_to_cdi_col].dropna()
+                    pdx_due_list = pdx_due_list[pdx_due_list.astype(str).str.strip() != '']
+                    
+                    if len(pdx_due_list) > 0:
+                        pdx_due_counter = Counter(pdx_due_list)
+                        pdx_due_to_cdi_diagnoses = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in pdx_due_counter.most_common(10)
+                        ]
+                        pdx_due_to_cdi_diagnoses_full = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in pdx_due_counter.most_common()
+                        ]
+                # Fallback: use pdx_added flag if no dedicated column
+                elif pdx_after_col and pdx_after_col in hospital_df.columns and 'pdx_added' in hospital_df.columns:
+                    pdx_added_df = hospital_df[hospital_df['pdx_added'] == True]
+                    pdx_added_list = pdx_added_df[pdx_after_col].dropna()
+                    pdx_added_list = pdx_added_list[pdx_added_list.astype(str).str.strip() != '']
+                    
+                    if len(pdx_added_list) > 0:
+                        pdx_added_counter = Counter(pdx_added_list)
+                        pdx_due_to_cdi_diagnoses = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in pdx_added_counter.most_common(10)
+                        ]
+                        pdx_due_to_cdi_diagnoses_full = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in pdx_added_counter.most_common()
+                        ]
+                
+                # ADX due to CDI Analysis - PRECISE counting
+                adx_diagnoses = []
+                adx_diagnoses_full = []
+                if adx_due_to_cdi_col and adx_due_to_cdi_col in hospital_df.columns:
+                    # Only count non-null, non-empty values
+                    adx_list = hospital_df[adx_due_to_cdi_col].dropna()
+                    adx_list = adx_list[adx_list.astype(str).str.strip() != '']
+                    
+                    if len(adx_list) > 0:
+                        adx_counter = Counter(adx_list)
+                        # Top 10 for display
+                        adx_diagnoses = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in adx_counter.most_common(10)
+                        ]
+                        # All diagnoses for comprehensive report
+                        adx_diagnoses_full = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in adx_counter.most_common()
+                        ]
+                
+                # ADX/After CDI Analysis - ALL secondary diagnoses after CDI
+                adx_after_diagnoses = []
+                adx_after_diagnoses_full = []
+                if adx_after_col and adx_after_col in hospital_df.columns:
+                    # Count all ADX after CDI
+                    adx_after_list = hospital_df[adx_after_col].dropna()
+                    adx_after_list = adx_after_list[adx_after_list.astype(str).str.strip() != '']
+                    
+                    if len(adx_after_list) > 0:
+                        adx_after_counter = Counter(adx_after_list)
+                        # Top 10 for display
+                        adx_after_diagnoses = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in adx_after_counter.most_common(10)
+                        ]
+                        # All diagnoses for comprehensive report
+                        adx_after_diagnoses_full = [
+                            {"diagnosis": str(diag).strip(), "count": int(count)} 
+                            for diag, count in adx_after_counter.most_common()
+                        ]
+                elif adx_due_to_cdi_col and adx_due_to_cdi_col in hospital_df.columns:
+                    # Fallback: if no separate ADX/After column, use ADX due to CDI
+                    adx_after_diagnoses = adx_diagnoses
+                    adx_after_diagnoses_full = adx_diagnoses_full
+                
+                # Calculate metrics with validation
+                drg_changes_hospital = 0
+                if 'has_drg_change' in hospital_df.columns:
+                    drg_changes_hospital = int(hospital_df['has_drg_change'].sum())
+                
+                pdx_changes_hospital = 0
+                if 'pdx_changed' in hospital_df.columns:
+                    pdx_changes_hospital = int(hospital_df['pdx_changed'].sum())
+                
+                # PDX Added: count non-empty values from PDX/After CDI column
+                pdx_added_hospital = 0
+                if pdx_after_col and pdx_after_col in hospital_df.columns:
+                    pdx_added_list = hospital_df[pdx_after_col].dropna()
+                    pdx_added_list = pdx_added_list[pdx_added_list.astype(str).str.strip() != '']
+                    pdx_added_hospital = len(pdx_added_list)
+                
+                adx_added_hospital = 0
+                if 'has_adx' in hospital_df.columns:
+                    adx_added_hospital = int(hospital_df['has_adx'].sum())
+                
+                # Calculate impact rate
+                drg_impact_rate_hospital = 0.0
+                if total_cases_hospital > 0 and 'has_drg_change' in hospital_df.columns:
+                    drg_impact_rate_hospital = round((drg_changes_hospital / total_cases_hospital * 100), 2)
+                
+                # Calculate queries and reviews for this hospital
+                queries_hospital = 0
+                if query_col and query_col in hospital_df.columns:
+                    query_series_hospital = pd.to_numeric(hospital_df[query_col], errors='coerce').fillna(0)
+                    queries_hospital = int(query_series_hospital.sum())
+                
+                reviews_hospital = 0
+                if review_col and review_col in hospital_df.columns:
+                    review_series_hospital = pd.to_numeric(hospital_df[review_col], errors='coerce').fillna(0)
+                    reviews_hospital = int(review_series_hospital.sum())
+                
+                responses_hospital = 0
+                if response_col and response_col in hospital_df.columns:
+                    response_series_hospital = pd.to_numeric(hospital_df[response_col], errors='coerce').fillna(0)
+                    responses_hospital = int(response_series_hospital.sum())
+                
+                hospital_data = {
+                    'hospital_name': str(hospital).strip(),
+                    'total_cases': total_cases_hospital,
+                    'drg_changes': drg_changes_hospital,
+                    'pdx_changes': pdx_changes_hospital,
+                    'pdx_added': pdx_added_hospital,
+                    'adx_added': adx_added_hospital,
+                    'top_pdx_diagnoses': pdx_diagnoses,
+                    'top_pdx_due_to_cdi_diagnoses': pdx_due_to_cdi_diagnoses,
+                    'top_adx_diagnoses': adx_diagnoses,
+                    'top_adx_after_diagnoses': adx_after_diagnoses,
+                    'all_pdx_diagnoses': pdx_diagnoses_full,
+                    'all_pdx_due_to_cdi_diagnoses': pdx_due_to_cdi_diagnoses_full,
+                    'all_adx_diagnoses': adx_diagnoses_full,
+                    'all_adx_after_diagnoses': adx_after_diagnoses_full,
+                    'drg_impact_rate': drg_impact_rate_hospital,
+                    'pdx_diagnoses_count': len(pdx_diagnoses_full),
+                    'pdx_due_to_cdi_count': len(pdx_due_to_cdi_diagnoses_full),
+                    'adx_diagnoses_count': len(adx_diagnoses_full),
+                    'total_queries': queries_hospital,
+                    'total_reviews': reviews_hospital,
+                    'total_responses': responses_hospital
+                }
+                hospitals_data.append(hospital_data)
+        
+        # Sort by DRG impact
+        hospitals_data.sort(key=lambda x: x['drg_changes'], reverse=True)
+        
+        # Overall Top Diagnoses (PDX/After CDI)
+        top_pdx_overall = []
+        if pdx_after_col:
+            pdx_all = df[pdx_after_col].dropna()
+            if len(pdx_all) > 0:
+                pdx_counter = Counter(pdx_all)
+                top_pdx_overall = [
+                    {"diagnosis": str(diag), "count": count, "percentage": round(count/len(pdx_all)*100, 2)} 
+                    for diag, count in pdx_counter.most_common(15)
+                ]
+        
+        # Overall Top PDX due to CDI (only added)
+        top_pdx_due_to_cdi_overall = []
+        if pdx_after_col and 'pdx_added' in df.columns:
+            pdx_added_all_df = df[df['pdx_added'] == True]
+            pdx_added_all = pdx_added_all_df[pdx_after_col].dropna()
+            if len(pdx_added_all) > 0:
+                pdx_added_counter = Counter(pdx_added_all)
+                top_pdx_due_to_cdi_overall = [
+                    {"diagnosis": str(diag), "count": count, "percentage": round(count/len(pdx_added_all)*100, 2)} 
+                    for diag, count in pdx_added_counter.most_common(15)
+                ]
+        
+        # Overall Top ADX Diagnoses
+        top_adx_overall = []
+        if adx_due_to_cdi_col:
+            adx_all = df[adx_due_to_cdi_col].dropna()
+            if len(adx_all) > 0:
+                adx_counter = Counter(adx_all)
+                top_adx_overall = [
+                    {"diagnosis": str(diag), "count": count, "percentage": round(count/len(adx_all)*100, 2)} 
+                    for diag, count in adx_counter.most_common(15)
+                ]
+        
+        # Specialty Analysis
+        specialty_data = []
+        if specialty_col:
+            specialties = df[specialty_col].dropna().unique()
+            for specialty in specialties:
+                if str(specialty).strip():
+                    specialty_df = df[df[specialty_col] == specialty]
+                    
+                    # Calculate PDX count from PDX/After CDI column directly
+                    pdx_count_specialty = 0
+                    if pdx_after_col and pdx_after_col in specialty_df.columns:
+                        pdx_list = specialty_df[pdx_after_col].dropna()
+                        pdx_list = pdx_list[pdx_list.astype(str).str.strip() != '']
+                        pdx_count_specialty = len(pdx_list)
+                    
+                    specialty_data.append({
+                        'specialty': str(specialty),
+                        'total_cases': len(specialty_df),
+                        'drg_changes': int(specialty_df['has_drg_change'].sum()) if 'has_drg_change' in specialty_df.columns else 0,
+                        'pdx_changes': pdx_count_specialty,
+                        'adx_added': int(specialty_df['has_adx'].sum()) if 'has_adx' in specialty_df.columns else 0,
+                        'impact_rate': round((specialty_df['has_drg_change'].sum() / len(specialty_df) * 100), 2) if len(specialty_df) > 0 and 'has_drg_change' in specialty_df.columns else 0
+                    })
+            
+            specialty_data.sort(key=lambda x: x['drg_changes'], reverse=True)
+        
+        # CDS Performance with Status Analysis - PRECISE CALCULATION
+        cds_performance = []
+        status_col = find_column(['status', 'حالة', 'state', 'condition'])
+        
+        if cds_col:
+            cds_specialists = df[cds_col].dropna().unique()
+            for cds in cds_specialists:
+                if str(cds).strip():
+                    # Get all rows for this CDS specialist (exact match)
+                    cds_df = df[df[cds_col] == cds].copy()
+                    total_cases_cds = len(cds_df)
+                    
+                    # PRECISE Status Analysis with validation
+                    status_done = 0
+                    status_to_start = 0
+                    status_working = 0
+                    status_empty = 0
+                    
+                    if status_col and status_col in cds_df.columns:
+                        for idx, status_val in cds_df[status_col].items():
+                            # Check if value exists and is not null/empty
+                            if pd.notna(status_val):
+                                status_str = str(status_val).strip().lower()
+                                
+                                # Empty string check
+                                if not status_str or status_str == '' or status_str == 'nan':
+                                    status_empty += 1
+                                # Done status (exact matching)
+                                elif status_str in ['done', 'تم', 'منتهي', 'complete', 'completed', 'finished']:
+                                    status_done += 1
+                                # To Start status
+                                elif status_str in ['to start', 'للبدء', 'لم يبدأ', 'not started', 'pending']:
+                                    status_to_start += 1
+                                # Working status
+                                elif status_str in ['working', 'working on it', 'جاري', 'قيد العمل', 'in progress', 'ongoing']:
+                                    status_working += 1
+                                # Any other text is considered as not categorized (empty)
+                                else:
+                                    status_empty += 1
+                            else:
+                                # Null/NaN values
+                                status_empty += 1
+                    else:
+                        # No status column means all are empty
+                        status_empty = total_cases_cds
+                    
+                    # VALIDATION: Total should match
+                    status_total = status_done + status_to_start + status_working + status_empty
+                    if status_total != total_cases_cds:
+                        logger.warning(f"CDS {cds}: Status count mismatch. Total cases: {total_cases_cds}, Status sum: {status_total}")
+                    
+                    # Calculate DRG impact with validation
+                    drg_impact_cds = 0
+                    if 'has_drg_change' in cds_df.columns:
+                        drg_impact_cds = int(cds_df['has_drg_change'].sum())
+                    
+                    # Calculate PDX queries from PDX/After CDI column directly
+                    pdx_queries_cds = 0
+                    if pdx_after_col and pdx_after_col in cds_df.columns:
+                        pdx_list_cds = cds_df[pdx_after_col].dropna()
+                        pdx_list_cds = pdx_list_cds[pdx_list_cds.astype(str).str.strip() != '']
+                        pdx_queries_cds = len(pdx_list_cds)
+                    
+                    # Calculate ADX queries with validation
+                    adx_queries_cds = 0
+                    if 'has_adx' in cds_df.columns:
+                        adx_queries_cds = int(cds_df['has_adx'].sum())
+                    
+                    # Calculate total queries from Numbers of Query column
+                    total_queries_cds = 0
+                    if query_col and query_col in cds_df.columns:
+                        query_series_cds = pd.to_numeric(cds_df[query_col], errors='coerce').fillna(0)
+                        total_queries_cds = int(query_series_cds.sum())
+                    
+                    # Calculate success rate with validation
+                    success_rate_cds = 0.0
+                    if total_cases_cds > 0 and 'has_drg_change' in cds_df.columns:
+                        success_rate_cds = round((drg_impact_cds / total_cases_cds * 100), 2)
+                    
+                    cds_performance.append({
+                        'cds_name': str(cds),
+                        'total_cases': total_cases_cds,
+                        'drg_impact': drg_impact_cds,
+                        'pdx_queries': pdx_queries_cds,
+                        'adx_queries': adx_queries_cds,
+                        'total_queries': total_queries_cds,
+                        'success_rate': success_rate_cds,
+                        'status_done': status_done,
+                        'status_to_start': status_to_start,
+                        'status_working': status_working,
+                        'status_empty': status_empty,
+                        # Add validation field
+                        'status_total': status_total,
+                        'validation_passed': (status_total == total_cases_cds)
+                    })
+            
+            cds_performance.sort(key=lambda x: x['drg_impact'], reverse=True)
+        
+        # Calculate rates
+        drg_impact_rate = round((drg_changes_count / total_records * 100), 2) if total_records > 0 else 0
+        pdx_change_rate = round((pdx_changes / total_records * 100), 2) if total_records > 0 else 0
+        adx_rate = round((adx_added / total_records * 100), 2) if total_records > 0 else 0
+        
+        return {
+            # Summary Statistics
+            'summary': {
+                'total_records': int(total_records),
+                'total_hospitals': int(total_hospitals),
+                'total_specialties': len(specialty_data) if specialty_data else 0,
+                'total_cds': len(cds_performance) if cds_performance else 0,
+                'analysis_date': datetime.now(timezone.utc).isoformat()
+            },
+            
+            # DRG Metrics
+            'drg_metrics': {
+                'total_changes': int(drg_changes_count),
+                'change_rate': drg_impact_rate,
+                'no_change': int(total_records - drg_changes_count)
+            },
+            
+            # PDX Metrics (Principal Diagnosis)
+            'pdx_metrics': {
+                'total_after_cdi': int(total_pdx_after),
+                'changes': int(pdx_changes),
+                'newly_added': int(pdx_added),
+                'change_rate': pdx_change_rate
+            },
+            
+            # ADX Metrics (Additional Diagnosis)
+            'adx_metrics': {
+                'total_added': int(adx_added),
+                'addition_rate': adx_rate
+            },
+            
+            # Query and Review Metrics
+            'query_metrics': {
+                'total_queries': int(total_queries)
+            },
+            
+            'review_metrics': {
+                'total_reviews': int(total_reviews)
+            },
+            
+            'response_metrics': {
+                'total_responses': int(total_responses)
+            },
+            
+            # Top Diagnoses Overall
+            'top_diagnoses': {
+                'pdx_after_cdi': top_pdx_overall,
+                'pdx_due_to_cdi': top_pdx_due_to_cdi_overall,
+                'adx_due_to_cdi': top_adx_overall
+            },
+            
+            # Detailed Breakdowns
+            'hospitals_analysis': hospitals_data,
+            'specialty_analysis': specialty_data[:20],
+            'cds_performance': cds_performance[:20],
+            
+            # Data Availability Flags
+            'data_flags': {
+                'has_pdx_data': bool(pdx_after_col),
+                'has_adx_data': bool(adx_due_to_cdi_col),
+                'has_specialty_data': bool(specialty_col),
+                'has_cds_data': bool(cds_col),
+                'has_drg_data': bool(drg_change_col or (drg_before_col and drg_after_col)),
+                'has_status_data': bool(status_col)
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing Excel file: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"خطأ في معالجة الملف: {str(e)}")
+
+@api_router.post("/supervisor/generate-excel-report")
+async def generate_excel_report(
+    analysis_data: dict,
+    supervisor: dict = Depends(require_supervisor)
+):
+    """Generate comprehensive Excel report with recommendations"""
+    try:
+        wb = Workbook()
+        
+        # Summary Sheet
+        ws_summary = wb.active
+        ws_summary.title = "ملخص التحليل"
+        
+        # Header styling
+        header_fill = PatternFill(start_color="1F4788", end_color="1F4788", fill_type="solid")
+        header_font = Font(color="FFFFFF", bold=True, size=12)
+        
+        # Title
+        ws_summary['A1'] = 'تقرير تحليل CDI الشامل'
+        ws_summary['A1'].font = Font(bold=True, size=16)
+        ws_summary.merge_cells('A1:D1')
+        
+        # Summary data
+        ws_summary['A3'] = 'المؤشر'
+        ws_summary['B3'] = 'القيمة'
+        ws_summary['A3'].fill = header_fill
+        ws_summary['A3'].font = header_font
+        ws_summary['B3'].fill = header_fill
+        ws_summary['B3'].font = header_font
+        
+        summary = analysis_data.get('summary', {})
+        row = 4
+        ws_summary[f'A{row}'] = 'إجمالي الحالات'
+        ws_summary[f'B{row}'] = summary.get('total_records', 0)
+        row += 1
+        ws_summary[f'A{row}'] = 'عدد المستشفيات'
+        ws_summary[f'B{row}'] = summary.get('total_hospitals', 0)
+        row += 1
+        
+        # DRG Metrics
+        drg = analysis_data.get('drg_metrics', {})
+        ws_summary[f'A{row}'] = 'تغييرات DRG'
+        ws_summary[f'B{row}'] = drg.get('total_changes', 0)
+        row += 1
+        ws_summary[f'A{row}'] = 'معدل تغيير DRG'
+        ws_summary[f'B{row}'] = f"{drg.get('change_rate', 0)}%"
+        row += 1
+        
+        # PDX Metrics
+        pdx = analysis_data.get('pdx_metrics', {})
+        ws_summary[f'A{row}'] = 'PDX/After CDI'
+        ws_summary[f'B{row}'] = pdx.get('total_after_cdi', 0)
+        row += 1
+        ws_summary[f'A{row}'] = 'PDX المتغيرة'
+        ws_summary[f'B{row}'] = pdx.get('changes', 0)
+        row += 1
+        
+        # ADX Metrics
+        adx = analysis_data.get('adx_metrics', {})
+        ws_summary[f'A{row}'] = 'ADX due to CDI'
+        ws_summary[f'B{row}'] = adx.get('total_added', 0)
+        
+        # Hospitals Analysis Sheet
+        ws_hospitals = wb.create_sheet(title="تحليل المستشفيات")
+        headers = ['المستشفى', 'الحالات', 'DRG Changes', 'PDX Changes', 'PDX Added', 'ADX Added', 'معدل التأثير %']
+        for col_idx, header in enumerate(headers, 1):
+            cell = ws_hospitals.cell(row=1, column=col_idx)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+        
+        hospitals = analysis_data.get('hospitals_analysis', [])
+        for row_idx, hospital in enumerate(hospitals, 2):
+            ws_hospitals.cell(row=row_idx, column=1).value = hospital.get('hospital_name', '')
+            ws_hospitals.cell(row=row_idx, column=2).value = hospital.get('total_cases', 0)
+            ws_hospitals.cell(row=row_idx, column=3).value = hospital.get('drg_changes', 0)
+            ws_hospitals.cell(row=row_idx, column=4).value = hospital.get('pdx_changes', 0)
+            ws_hospitals.cell(row=row_idx, column=5).value = hospital.get('pdx_added', 0)
+            ws_hospitals.cell(row=row_idx, column=6).value = hospital.get('adx_added', 0)
+            ws_hospitals.cell(row=row_idx, column=7).value = hospital.get('drg_impact_rate', 0)
+        
+        # Top PDX Diagnoses Sheet
+        if analysis_data.get('top_diagnoses', {}).get('pdx_after_cdi'):
+            ws_pdx = wb.create_sheet(title="Top PDX Diagnoses")
+            ws_pdx['A1'] = 'التشخيص'
+            ws_pdx['B1'] = 'العدد'
+            ws_pdx['C1'] = 'النسبة %'
+            for col in ['A1', 'B1', 'C1']:
+                ws_pdx[col].fill = header_fill
+                ws_pdx[col].font = header_font
+            
+            for row_idx, diag in enumerate(analysis_data['top_diagnoses']['pdx_after_cdi'], 2):
+                ws_pdx.cell(row=row_idx, column=1).value = diag.get('diagnosis', '')
+                ws_pdx.cell(row=row_idx, column=2).value = diag.get('count', 0)
+                ws_pdx.cell(row=row_idx, column=3).value = diag.get('percentage', 0)
+        
+        # Recommendations Sheet
+        ws_recommendations = wb.create_sheet(title="التوصيات")
+        ws_recommendations['A1'] = 'التوصيات والتوجيهات للتحسين'
+        ws_recommendations['A1'].font = Font(bold=True, size=14)
+        ws_recommendations.merge_cells('A1:B1')
+        
+        recommendations = generate_recommendations(analysis_data)
+        row_idx = 3
+        for rec in recommendations:
+            ws_recommendations.cell(row=row_idx, column=1).value = rec['category']
+            ws_recommendations.cell(row=row_idx, column=1).font = Font(bold=True)
+            ws_recommendations.cell(row=row_idx, column=1).fill = PatternFill(start_color="E7E6E6", end_color="E7E6E6", fill_type="solid")
+            row_idx += 1
+            ws_recommendations.cell(row=row_idx, column=1).value = rec['recommendation']
+            ws_recommendations.cell(row=row_idx, column=1).alignment = Alignment(wrap_text=True)
+            ws_recommendations.row_dimensions[row_idx].height = 40
+            row_idx += 2
+        
+        # Adjust column widths
+        for ws in wb.worksheets:
+            for column in ws.columns:
+                max_length = 0
+                column_letter = None
+                for cell in column:
+                    try:
+                        if hasattr(cell, 'column_letter'):
+                            column_letter = cell.column_letter
+                        if cell.value and len(str(cell.value)) > max_length:
+                            max_length = len(cell.value)
+                    except:
+                        pass
+                if column_letter:
+                    adjusted_width = min(max_length + 2, 50)
+                    ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Save to BytesIO
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        
+        return StreamingResponse(
+            buffer,
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename=CDI_Report_{datetime.now().strftime('%Y%m%d')}.xlsx"}
+        )
+    
+    except Exception as e:
+        logger.error(f"Error generating Excel report: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating report: {str(e)}")
+
+def generate_recommendations(analysis_data):
+    """Generate smart recommendations based on analysis data"""
+    recommendations = []
+    
+    drg_metrics = analysis_data.get('drg_metrics', {})
+    pdx_metrics = analysis_data.get('pdx_metrics', {})
+    adx_metrics = analysis_data.get('adx_metrics', {})
+    hospitals = analysis_data.get('hospitals_analysis', [])
+    
+    # DRG Impact Analysis
+    drg_rate = drg_metrics.get('change_rate', 0)
+    if drg_rate < 20:
+        recommendations.append({
+            'category': '⚠️ معدل تأثير DRG منخفض',
+            'recommendation': f'معدل تغيير DRG الحالي {drg_rate}% أقل من المتوقع. يُنصح بتكثيف جهود CDI والتركيز على المراجعة الدقيقة للملفات قبل الترميز النهائي.'
+        })
+    elif drg_rate > 60:
+        recommendations.append({
+            'category': '✅ معدل تأثير DRG ممتاز',
+            'recommendation': f'معدل تغيير DRG الحالي {drg_rate}% يعتبر ممتازاً. استمروا في تطبيق نفس المعايير والممارسات الحالية.'
+        })
+    
+    # PDX Documentation Analysis
+    pdx_rate = pdx_metrics.get('change_rate', 0)
+    if pdx_rate > 30:
+        recommendations.append({
+            'category': '📋 تحسين التوثيق الرئيسي مطلوب',
+            'recommendation': f'نسبة {pdx_rate}% من التشخيصات الرئيسية تم تعديلها. يجب تدريب الأطباء على توثيق التشخيص الرئيسي بدقة منذ البداية.'
+        })
+    
+    # Hospital-Specific Recommendations
+    if hospitals:
+        # Find hospitals with low performance
+        low_performers = [h for h in hospitals if h.get('drg_impact_rate', 0) < 20]
+        if low_performers:
+            hospital_names = ', '.join([h['hospital_name'] for h in low_performers[:3]])
+            recommendations.append({
+                'category': '🏥 مستشفيات تحتاج تحسين',
+                'recommendation': f'المستشفيات التالية تحتاج إلى تحسين في التوثيق: {hospital_names}. يُنصح بعقد ورش عمل تدريبية وزيادة التواصل مع فريق التوثيق.'
+            })
+        
+        # Find hospitals with high undocumented cases
+        high_undoc = sorted(hospitals, key=lambda x: x.get('pdx_added', 0) + x.get('adx_added', 0), reverse=True)[:3]
+        if high_undoc and (high_undoc[0].get('pdx_added', 0) + high_undoc[0].get('adx_added', 0)) > 50:
+            recommendations.append({
+                'category': '📝 نقص في التوثيق',
+                'recommendation': f'المستشفى {high_undoc[0]["hospital_name"]} يحتاج إلى تحسين كبير في توثيق التشخيصات. تم إضافة {high_undoc[0].get("pdx_added", 0)} تشخيص رئيسي و {high_undoc[0].get("adx_added", 0)} تشخيص إضافي بعد مراجعة CDI.'
+            })
+    
+    # Top Diagnoses Recommendations
+    top_pdx = analysis_data.get('top_diagnoses', {}).get('pdx_after_cdi', [])
+    if top_pdx:
+        top_3 = ', '.join([d['diagnosis'] for d in top_pdx[:3]])
+        recommendations.append({
+            'category': '🎯 التشخيصات الأكثر شيوعاً',
+            'recommendation': f'التشخيصات الأكثر شيوعاً بعد CDI: {top_3}. يُنصح بإنشاء بروتوكولات توثيق محددة لهذه الحالات لتقليل الحاجة للتعديل مستقبلاً.'
+        })
+    
+    # Specialty Recommendations
+    specialties = analysis_data.get('specialty_analysis', [])
+    if specialties:
+        low_spec = [s for s in specialties if s.get('impact_rate', 0) < 15]
+        if low_spec:
+            spec_names = ', '.join([s['specialty'] for s in low_spec[:2]])
+            recommendations.append({
+                'category': '🔬 تخصصات تحتاج دعم',
+                'recommendation': f'التخصصات التالية تحتاج إلى دعم إضافي في التوثيق: {spec_names}. يُفضل تعيين CDS متخصص لهذه الأقسام.'
+            })
+    
+    # General Best Practices
+    recommendations.append({
+        'category': '💡 أفضل الممارسات',
+        'recommendation': 'استمروا في المراجعة الدورية للملفات، وتحديث البروتوكولات بناءً على أحدث إرشادات ICD-10، وعقد اجتماعات دورية بين فريق CDI والأطباء.'
+    })
+    
+    return recommendations
+
+
+# ========== Messaging System ==========
+
+@api_router.post("/messages/send")
+async def send_message(
+    message: MessageCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Send a message to a user or all users"""
+    logger.info(f"User {current_user['id']} sending message to {message.to_user_id}")
+    
+    # Get recipient name if specific user
+    to_user_name = None
+    to_user_id_final = None
+    
+    if message.to_user_id and message.to_user_id != "ALL":
+        recipient = await db.users.find_one({"id": message.to_user_id}, {"_id": 0, "full_name": 1})
+        if not recipient:
+            logger.error(f"Recipient {message.to_user_id} not found")
+            raise HTTPException(status_code=404, detail="Recipient not found")
+        to_user_name = recipient['full_name']
+        to_user_id_final = message.to_user_id
+        logger.info(f"Sending to specific user: {to_user_name} ({to_user_id_final})")
+    else:
+        to_user_name = "الكل"
+        to_user_id_final = "ALL"
+        logger.info("Sending to ALL users")
+    
+    # Create message document
+    message_doc = {
+        "id": str(uuid.uuid4()),
+        "from_user_id": current_user['id'],
+        "from_user_name": current_user['full_name'],
+        "to_user_id": to_user_id_final,
+        "to_user_name": to_user_name,
+        "subject": message.subject,
+        "message": message.body,  # Store as 'message' for frontend compatibility
+        "is_draft": message.is_draft,
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.messages.insert_one(message_doc)
+    logger.info(f"Message saved with id: {message_doc['id']}")
+    
+    return {"message": "Message sent successfully", "id": message_doc['id']}
+
+@api_router.get("/messages/inbox")
+async def get_inbox(current_user: dict = Depends(get_current_user)):
+    """Get inbox messages for current user - includes sent and received"""
+    # Messages sent TO this user, TO all users, OR FROM this user (ascending order - oldest first)
+    messages = await db.messages.find({
+        "$or": [
+            {"to_user_id": current_user['id']},  # Messages to me
+            {"to_user_id": "ALL"},                # Public messages
+            {"from_user_id": current_user['id']}  # Messages I sent
+        ],
+        "is_draft": False
+    }, {"_id": 0}).sort("created_at", 1).to_list(1000)
+    
+    logger.info(f"Retrieved {len(messages)} messages for user {current_user['id']}")
+    return {"messages": messages}
+
+@api_router.get("/messages/sent")
+async def get_sent_messages(current_user: dict = Depends(get_current_user)):
+    """Get sent messages for current user"""
+    messages = await db.messages.find({
+        "from_user_id": current_user['id'],
+        "is_draft": False
+    }, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    # Convert datetime
+    for msg in messages:
+        if isinstance(msg.get('created_at'), str):
+            msg['created_at'] = datetime.fromisoformat(msg['created_at'])
+    
+    return messages
+
+@api_router.get("/messages/drafts")
+async def get_draft_messages(current_user: dict = Depends(get_current_user)):
+    """Get draft messages for current user"""
+    messages = await db.messages.find({
+        "from_user_id": current_user['id'],
+        "is_draft": True
+    }, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    # Convert datetime
+    for msg in messages:
+        if isinstance(msg.get('created_at'), str):
+            msg['created_at'] = datetime.fromisoformat(msg['created_at'])
+    
+    return messages
+
+@api_router.post("/messages/{message_id}/read")
+async def mark_message_as_read(
+    message_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Mark message as read"""
+    await db.messages.update_one(
+        {"id": message_id, "to_user_id": current_user['id']},
+        {"$set": {"is_read": True}}
+    )
+    return {"message": "Marked as read"}
+
+@api_router.delete("/messages/{message_id}")
+async def delete_message(
+    message_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a message"""
+    result = await db.messages.delete_one({
+        "id": message_id,
+        "$or": [
+            {"from_user_id": current_user['id']},
+            {"to_user_id": current_user['id']}
+        ]
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Message not found")
+    
+    return {"message": "Message deleted"}
+
+@api_router.get("/messages/unread-count")
+async def get_unread_count(current_user: dict = Depends(get_current_user)):
+    """Get count of unread messages"""
+    count = await db.messages.count_documents({
+        "$or": [
+            {"to_user_id": current_user['id']},
+            {"to_user_id": None}
+        ],
+        "is_draft": False,
+        "is_read": False
+    })
+    return {"count": count}
+
+
+# ========== Supervisor Impersonation ==========
+
+@api_router.post("/supervisor/impersonate/{user_id}")
+async def impersonate_user(
+    user_id: str,
+    supervisor: dict = Depends(require_supervisor)
+):
+    """Supervisor can impersonate (login as) any user"""
+    # Get target user
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Don't allow impersonating admin
+    if user.get('role') == 'admin':
+        raise HTTPException(status_code=403, detail="Cannot impersonate admin")
+    
+    # Create access token for the target user
+    access_token = create_access_token({
+        "user_id": user['id'], 
+        "email": user['email'],
+        "role": user.get('role', 'user')
+    })
+    
+    # Add impersonation info
+    user['is_impersonated'] = True
+    user['impersonated_by'] = supervisor['id']
+    user['impersonated_by_name'] = supervisor['full_name']
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user,
+        "original_supervisor": {
+            "id": supervisor['id'],
+            "name": supervisor['full_name'],
+            "email": supervisor['email']
+        }
+    }
+
+# ========== Clinical Questions Routes ==========
+# Import clinical questions
+try:
+    from clinical_questions import get_questions, get_question_by_id, get_categories
+    print("✅ Clinical questions loaded successfully")
+except Exception as e:
+    print(f"⚠️ Warning: Could not load clinical questions: {str(e)}")
+
+@api_router.get("/clinical-questions")
+async def get_clinical_questions(language: str = "ar", user: dict = Depends(get_current_user)):
+    """Get all predefined clinical questions"""
+    try:
+        questions = get_questions(language)
+        return {"questions": questions}
+    except Exception as e:
+        print(f"Error getting questions: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to get questions")
+
+@api_router.get("/clinical-questions/categories")
+async def get_question_categories(language: str = "ar", user: dict = Depends(get_current_user)):
+    """Get question categories"""
+    try:
+        categories = get_categories(language)
+        return {"categories": categories}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to get categories")
+
+@api_router.post("/chat/ask-question/{question_id}")
+@limiter.limit("20/minute")
+async def ask_predefined_question(
+    request: Request,
+    question_id: str,
+    analysis_id: str,
+    language: str = "ar",
+    user: dict = Depends(get_current_user)
+):
+    """Ask a predefined clinical question about an analysis"""
+    try:
+        # Get the question
+        question = get_question_by_id(question_id, language)
+        if not question:
+            raise HTTPException(status_code=404, detail="Question not found")
+        
+        # Get the analysis
+        analysis = await db.analyses.find_one(
+            {"id": analysis_id, "user_id": user['id']},
+            {"_id": 0}
+        )
+        if not analysis:
+            raise HTTPException(status_code=404, detail="Analysis not found")
+        
+        # Get the note
+        note = await db.clinical_notes.find_one(
+            {"id": analysis['note_id'], "user_id": user['id']},
+            {"_id": 0}
+        )
+        if not note:
+            raise HTTPException(status_code=404, detail="Note not found")
+        
+        # Build context for AI
+        # Format doctor notes
+        doctor_notes_text = "\n\n".join([
+            f"**{dn.get('specialty', 'عام')}**:\n{dn.get('text', '')}"
+            for dn in note.get('doctor_notes', [])
+        ])
+        
+        # Format missing documentation
+        missing_docs = analysis.get('missing_documentation', [])
+        if missing_docs and isinstance(missing_docs[0], dict):
+            missing_docs_text = ', '.join([d.get('item_ar', '') for d in missing_docs])
+        else:
+            missing_docs_text = ', '.join(missing_docs) if missing_docs else 'لا يوجد'
+        
+        context = f"""
+التحليل السريري:
+العنوان: {note.get('title', 'N/A')}
+
+الملاحظات السريرية:
+{doctor_notes_text}
+
+التشخيصات المحددة للتوثيق:
+{', '.join([d.get('diagnosis_ar', '') for d in analysis.get('diagnoses_to_document', [])])}
+
+التوثيق الناقص:
+{missing_docs_text}
+
+الثغرات في التوثيق:
+{', '.join(analysis.get('gaps_ar', []))}
+
+الاستفسارات للطبيب:
+{', '.join(analysis.get('queries_ar', []))}
+"""
+        
+        # Ask AI with the question's prompt
+        full_prompt = f"{context}\n\n{question['prompt']}"
+        
+        # Use Gemini to answer
+        system_message = """You are a Clinical Documentation Improvement (CDI) specialist expert. 
+Answer the question based on the clinical context provided. 
+
+CRITICAL: Be VERY concise and precise. Give direct answers without unnecessary details or lengthy explanations.
+Use bullet points when listing items. Focus ONLY on what was specifically asked.
+Maximum 5-7 bullet points or 4-5 short paragraphs unless the question explicitly asks for comprehensive detail.
+Respond in Arabic if the question is in Arabic, or in English if the question is in English."""
+        
+        try:
+            model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+            response = model.generate_content(full_prompt)
+            result = response.text
+        except Exception as e:
+            logger.error(f"Error generating AI response: {str(e)}")
+            raise HTTPException(status_code=500, detail="Failed to generate AI response")
+        
+        # Save to chat history
+        chat_message = {
+            "id": str(uuid.uuid4()),
+            "analysis_id": analysis_id,
+            "user_id": user['id'],
+            "question": question['question'],
+            "question_id": question_id,
+            "answer": result,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.chat_messages.insert_one(chat_message)
+        
+        return {
+            "question": question['question'],
+            "answer": result,
+            "category": question['category']
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error asking question: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to process question")
+
+# ========== Include Routers ==========
+app.include_router(api_router)
+
+# Import and include security router
+try:
+    from security_routes import security_router
+    app.include_router(security_router, prefix="/api")
+    print("✅ Security routes loaded successfully")
+except Exception as e:
+    print(f"⚠️ Warning: Could not load security routes: {str(e)}")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+@app.on_event("startup")
+async def startup_monitoring():
+    """Start monitoring tasks and ensure admin account"""
+    import asyncio
+    
+    # CRITICAL: Ensure admin account exists with correct credentials
+    await ensure_admin_account()
+    
+    async def update_active_users():
+        while True:
+            try:
+                # Count active sessions (last 30 minutes)
+                cutoff = datetime.now(timezone.utc) - timedelta(minutes=30)
+                active_count = await db.user_sessions.count_documents({
+                    "last_activity": {"$gte": cutoff.isoformat()},
+                    "is_active": True
+                })
+                ACTIVE_USERS.set(active_count)
+            except Exception as e:
+                logging.error(f"Error updating active users metric: {e}")
+            
+            await asyncio.sleep(60)  # Update every minute
+    
+    # Start background task
+    asyncio.create_task(update_active_users())
+    logging.info("✅ Monitoring tasks started")
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
