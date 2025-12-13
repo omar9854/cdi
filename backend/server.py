@@ -980,6 +980,38 @@ CRITICAL REQUIREMENTS:
             
             response_text = response.choices[0].message.content.strip()
         
+        elif provider == 'phi3' and response_text is None:
+            # Use Microsoft Phi-3-Medium-128K via Ollama (Local/Offline)
+            import requests
+            
+            try:
+                ollama_url = "http://localhost:11434/api/generate"
+                
+                payload = {
+                    "model": "phi3:medium-128k",
+                    "prompt": f"{system_message}\n\n{user_prompt}",
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.7,
+                        "num_predict": 4000
+                    }
+                }
+                
+                response = requests.post(ollama_url, json=payload, timeout=120)
+                response.raise_for_status()
+                
+                response_text = response.json().get('response', '').strip()
+                logger.info("✅ Phi-3 analysis successful (local model)")
+                
+            except requests.exceptions.ConnectionError:
+                raise HTTPException(
+                    status_code=503,
+                    detail="نموذج Phi-3 غير متاح حالياً. Phi-3 model is not available. Make sure Ollama is running."
+                )
+            except Exception as e:
+                logger.error(f"❌ Phi-3 error: {str(e)}")
+                raise HTTPException(status_code=500, detail=f"Phi-3 failed: {str(e)}")
+        
         elif response_text is None:
             raise HTTPException(status_code=400, detail=f"مزود غير مدعوم أو فشل في المعالجة: {provider}. Unsupported AI provider or processing failed: {provider}")
         
