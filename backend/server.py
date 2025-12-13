@@ -2388,15 +2388,10 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         response_text = None
         
         if ai_provider == 'phi3':
-            # Use Gemini for interactive chat
+            # Use Phi-3 for chat
             try:
-                from emergentintegrations.llm.chat import LlmChat, UserMessage
-                from dotenv import load_dotenv
-                load_dotenv()
+                import requests
                 
-                emergent_key = os.environ.get('EMERGENT_LLM_KEY')
-                
-                # Build conversation history
                 conversation = f"{system_message}\n\n"
                 for msg in previous_messages:
                     if 'role' in msg:
@@ -2404,24 +2399,44 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
                         conversation += f"{role}: {msg['message']}\n"
                 conversation += f"User: {chat_request.message}\nAssistant:"
                 
-                # Initialize chat
-                chat = LlmChat(
-                    api_key=emergent_key,
-                    session_id=chat_request.analysis_id,
-                    system_message=system_message
-                ).with_model("gemini", "gemini-2.5-flash")
+                response = requests.post(
+                    "http://localhost:11434/api/generate",
+                    json={
+                        "model": "phi3:mini",
+                        "prompt": conversation,
+                        "stream": False,
+                        "options": {"temperature": 0.7, "num_predict": 500}
+                    },
+                    timeout=60
+                )
+                response_text = response.json().get('response', '').strip()
+                logger.info("✅ Phi-3 chat successful")
                 
-                user_message = UserMessage(text=chat_request.message)
-                response_text = await chat.send_message(user_message)
+            except Exception as e:
+                logger.error(f"❌ Phi-3 chat error: {str(e)}")
+                raise HTTPException(status_code=500, detail=f"فشلت الدردشة: {str(e)}")
+        
+        elif ai_provider == 'gemini':
+            # Use Gemini for chat
+            try:
+                model = get_gemini_model('gemini-2.0-flash-exp', system_instruction=system_message)
                 
+                chat_history = []
+                for msg in previous_messages:
+                    if 'role' in msg:
+                        chat_history.append({
+                            'role': 'user' if msg['role'] == 'user' else 'model',
+                            'parts': [msg['message']]
+                        })
+                
+                chat = model.start_chat(history=chat_history)
+                response = chat.send_message(chat_request.message)
+                response_text = response.text
                 logger.info("✅ Gemini chat successful")
                 
             except Exception as e:
                 logger.error(f"❌ Gemini chat error: {str(e)}")
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"فشلت الدردشة: {str(e)}. Chat failed: {str(e)}"
-                )
+                raise HTTPException(status_code=500, detail=f"فشلت الدردشة: {str(e)}")
         
         if not response_text:
             raise HTTPException(status_code=500, detail="No response from AI provider")
