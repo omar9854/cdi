@@ -4127,7 +4127,7 @@ Maximum 5-7 bullet points or 4-5 short paragraphs unless the question explicitly
 Respond in Arabic if the question is in Arabic, or in English if the question is in English."""
         
         try:
-            model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+            model = get_gemini_model('gemini-2.0-flash-exp', system_instruction=system_message)
             response = model.generate_content(full_prompt)
             result = response.text
         except Exception as e:
