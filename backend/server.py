@@ -123,12 +123,15 @@ SECRET_KEY = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production'
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
-# Emergent LLM Key
-# Load Gemini API Keys (multiple for rotation)
+# Load ALL 7 Gemini API Keys (billed keys for rotation)
 GEMINI_API_KEYS = [
     os.environ.get('GEMINI_API_KEY_1'),
     os.environ.get('GEMINI_API_KEY_2'),
-    os.environ.get('GEMINI_API_KEY_3')
+    os.environ.get('GEMINI_API_KEY_3'),
+    os.environ.get('GEMINI_API_KEY_4'),
+    os.environ.get('GEMINI_API_KEY_5'),
+    os.environ.get('GEMINI_API_KEY_6'),
+    os.environ.get('GEMINI_API_KEY_7'),
 ]
 # Filter out None values
 GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
@@ -136,16 +139,28 @@ GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
 if not GEMINI_API_KEYS:
     raise ValueError("No Gemini API keys found in environment variables")
 
-# Log will be done after logger is initialized
 print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation")
 
-# Helper function to get a random API key for load balancing
+# Track failed keys to avoid reusing them immediately
+_failed_keys = set()
+
 def get_gemini_model(model_name='gemini-2.0-flash-exp', system_instruction=None):
-    """Get a Gemini model with a random API key for load balancing with retry"""
-    # Try up to 3 different keys
-    for attempt in range(min(3, len(GEMINI_API_KEYS))):
+    """Get a Gemini model with smart key rotation and retry on quota errors"""
+    global _failed_keys
+    
+    # Clear failed keys if all keys have failed (reset for retry)
+    if len(_failed_keys) >= len(GEMINI_API_KEYS):
+        _failed_keys.clear()
+    
+    # Get available keys (not recently failed)
+    available_keys = [k for k in GEMINI_API_KEYS if k not in _failed_keys]
+    if not available_keys:
+        available_keys = GEMINI_API_KEYS.copy()
+        _failed_keys.clear()
+    
+    # Try all available keys
+    for attempt, api_key in enumerate(available_keys):
         try:
-            api_key = random.choice(GEMINI_API_KEYS)
             genai.configure(api_key=api_key)
             
             if system_instruction:
@@ -153,17 +168,22 @@ def get_gemini_model(model_name='gemini-2.0-flash-exp', system_instruction=None)
             else:
                 model = genai.GenerativeModel(model_name)
             
-            # Quick test
+            # Quick validation test
             model.count_tokens("test")
             return model
         except Exception as e:
-            if attempt < 2:
-                logger.warning(f"Key failed, trying another (attempt {attempt+1}/3)")
+            error_msg = str(e).lower()
+            if 'quota' in error_msg or 'exhausted' in error_msg or 'insufficient' in error_msg:
+                _failed_keys.add(api_key)
+                print(f"⚠️ Key {attempt+1} quota exhausted, trying next...")
+                continue
+            elif attempt < len(available_keys) - 1:
+                print(f"⚠️ Key {attempt+1} failed: {str(e)[:50]}, trying next...")
                 continue
             else:
                 raise e
     
-    # Fallback: return without test
+    # Fallback: use first key without test
     api_key = GEMINI_API_KEYS[0]
     genai.configure(api_key=api_key)
     if system_instruction:
