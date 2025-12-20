@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://medcode-dashboard.preview.emergentagent.com
+https://clinicalfix-1.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://medcode-dashboard.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://medcode-dashboard.preview.emergentagent.com
+   https://clinicalfix-1.preview.emergentagent.com
    ```
 
 ---
