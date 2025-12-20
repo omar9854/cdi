@@ -1066,7 +1066,7 @@ async def get_ai_providers():
         }
     ]
     
-    return {"providers": providers, "default": "azure"}
+    return {"providers": providers, "default": "gemini"}
 
 
 # ========== Auth Routes ==========
