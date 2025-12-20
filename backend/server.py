@@ -2553,7 +2553,7 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         # Use analysis_id as session for continuity
         try:
             # Use Google Gemini API with automatic key rotation
-            model = get_gemini_model('gemini-flash-latest', system_instruction=system_message)
+            model = get_gemini_model('gemini-2.0-flash-exp', system_instruction=system_message)
             
             # Get chat history for context
             chat_history = []
