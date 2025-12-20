@@ -712,7 +712,7 @@ IMPORTANT: For queries, you MUST:
 
     try:
         # Use Google Gemini API with automatic key rotation
-        model = get_gemini_model('gemini-flash-latest')
+        model = get_gemini_model('gemini-2.0-flash-exp')
         
         # Combine system message and user prompt
         full_prompt = f"{system_message}\n\n{user_prompt}"
