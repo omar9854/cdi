@@ -141,10 +141,31 @@ print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation")
 
 # Helper function to get a random API key for load balancing
 def get_gemini_model(model_name='gemini-2.0-flash-exp', system_instruction=None):
-    """Get a Gemini model with a random API key for load balancing"""
-    api_key = random.choice(GEMINI_API_KEYS)
-    genai.configure(api_key=api_key)
+    """Get a Gemini model with a random API key for load balancing with retry"""
+    # Try up to 3 different keys
+    for attempt in range(min(3, len(GEMINI_API_KEYS))):
+        try:
+            api_key = random.choice(GEMINI_API_KEYS)
+            genai.configure(api_key=api_key)
+            
+            if system_instruction:
+                model = genai.GenerativeModel(model_name, system_instruction=system_instruction)
+            else:
+                model = genai.GenerativeModel(model_name)
+            
+            # Quick test
+            model.count_tokens("test")
+            return model
+        except Exception as e:
+            if attempt < 2:
+                logger.warning(f"Key failed, trying another (attempt {attempt+1}/3)")
+                continue
+            else:
+                raise e
     
+    # Fallback: return without test
+    api_key = GEMINI_API_KEYS[0]
+    genai.configure(api_key=api_key)
     if system_instruction:
         return genai.GenerativeModel(model_name, system_instruction=system_instruction)
     else:
