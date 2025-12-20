@@ -312,7 +312,7 @@ class Analysis(BaseModel):
 
 class AnalyzeRequest(BaseModel):
     note_id: str
-    ai_provider: Optional[str] = 'azure'  # azure (default)
+    ai_provider: Optional[str] = 'gemini'  # gemini (default)
 
 class ChatMessage(BaseModel):
     model_config = ConfigDict(extra="ignore")
