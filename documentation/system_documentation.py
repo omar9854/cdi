@@ -244,7 +244,7 @@ def generate_documentation():
                                     │   • SMTP (Email)          │
                                     └───────────────────────────┘
     """
-    story.append(Paragraph(arch_diagram.replace('\n', '<br/>'), styles['Code']))
+    story.append(Paragraph(arch_diagram.replace('\n', '<br/>'), styles['CodeBlock']))
     
     story.append(PageBreak())
     
