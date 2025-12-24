@@ -73,7 +73,7 @@ def create_styles():
     
     # Code style
     styles.add(ParagraphStyle(
-        name='Code',
+        name='CodeBlock',
         fontName='Courier',
         fontSize=9,
         alignment=TA_LEFT,
