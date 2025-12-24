@@ -334,7 +334,7 @@ def generate_documentation():
       "updated_at": "datetime"
     }
     """
-    story.append(Paragraph(users_schema, styles['Code']))
+    story.append(Paragraph(users_schema, styles['CodeBlock']))
     
     # Clinical Notes Schema
     story.append(Paragraph("جدول الملاحظات السريرية (clinical_notes):", styles['ArabicBody']))
@@ -355,7 +355,7 @@ def generate_documentation():
       "updated_at": "datetime"
     }
     """
-    story.append(Paragraph(notes_schema, styles['Code']))
+    story.append(Paragraph(notes_schema, styles['CodeBlock']))
     
     story.append(PageBreak())
     
@@ -481,7 +481,7 @@ def generate_documentation():
     docker build -t medidoc-ai:offline .
     docker save medidoc-ai:offline > medidoc-offline.tar
     """
-    story.append(Paragraph(offline_steps, styles['Code']))
+    story.append(Paragraph(offline_steps, styles['CodeBlock']))
     
     story.append(PageBreak())
     
@@ -587,7 +587,7 @@ def generate_documentation():
     docker-compose ps
     docker-compose logs -f
     """
-    story.append(Paragraph(docker_install, styles['Code']))
+    story.append(Paragraph(docker_install, styles['CodeBlock']))
     
     story.append(Paragraph("10.2 التثبيت اليدوي", styles['ArabicH2']))
     manual_install = """
@@ -607,7 +607,7 @@ def generate_documentation():
     # MongoDB
     sudo systemctl start mongod
     """
-    story.append(Paragraph(manual_install, styles['Code']))
+    story.append(Paragraph(manual_install, styles['CodeBlock']))
     
     story.append(Paragraph("10.3 متغيرات البيئة المطلوبة", styles['ArabicH2']))
     env_vars = [
@@ -640,7 +640,7 @@ def generate_documentation():
     # حذف النسخ الأقدم من 30 يوم
     find /backup -name "*.tar.gz" -mtime +30 -delete
     """
-    story.append(Paragraph(backup_script, styles['Code']))
+    story.append(Paragraph(backup_script, styles['CodeBlock']))
     
     story.append(Paragraph("11.2 المراقبة", styles['ArabicH2']))
     story.append(Paragraph("""
