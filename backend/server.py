@@ -2385,8 +2385,8 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
     
     # Use analysis_id as session for continuity
     try:
-        # Get AI provider from request (default: azure)
-        ai_provider = getattr(chat_request, 'ai_provider', 'azure') or 'azure'
+        # Always use Meditron-70B for chat
+        ai_provider = 'meditron'
         
         # Get chat history for context
         previous_messages = await db.chat_messages.find(
@@ -2395,44 +2395,46 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         
         response_text = None
         
-        if ai_provider == 'azure':
-            # Use Azure for chat
-            try:
-                from openai import AzureOpenAI
-                
-                azure_key = os.environ.get('AZURE_OPENAI_KEY')
-                endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT')
-                deployment = os.environ.get('AZURE_OPENAI_DEPLOYMENT')
-                api_version = os.environ.get('AZURE_OPENAI_API_VERSION', '2024-08-01-preview')
-                
-                client = AzureOpenAI(
-                    api_key=azure_key,
-                    api_version=api_version,
-                    azure_endpoint=endpoint
-                )
-                
-                messages = [{"role": "system", "content": system_message}]
-                for msg in previous_messages:
-                    if 'role' in msg and msg['role'] in ['user', 'assistant']:
-                        messages.append({"role": msg['role'], "content": msg['message']})
-                messages.append({"role": "user", "content": chat_request.message})
-                
-                response = client.chat.completions.create(
-                    model=deployment,
-                    messages=messages,
-                    temperature=0.7,
-                    max_tokens=500
-                )
-                response_text = response.choices[0].message.content.strip()
-                logger.info("✅ Azure chat successful")
-                
-            except Exception as e:
-                logger.error(f"❌ Azure chat error: {str(e)}")
-                raise HTTPException(status_code=500, detail=f"فشلت الدردشة: {str(e)}")
+        # Use Meditron-70B via Ollama for chat
+        logger.info("🏥 Using Meditron-70B for chat...")
         
-        elif ai_provider == 'gemini':
-            # Use Gemini for chat
-            try:
+        try:
+            import requests
+            
+            ollama_host = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
+            ollama_model = os.environ.get('OLLAMA_MODEL', 'meditron:70b')
+            
+            # Build conversation history
+            conversation = f"{system_message}\n\n"
+            for msg in previous_messages:
+                if 'role' in msg and msg['role'] in ['user', 'assistant']:
+                    role_label = "User" if msg['role'] == 'user' else "Assistant"
+                    conversation += f"{role_label}: {msg['message']}\n\n"
+            conversation += f"User: {chat_request.message}\n\nAssistant:"
+            
+            response = requests.post(
+                f"{ollama_host}/api/generate",
+                json={
+                    "model": ollama_model,
+                    "prompt": conversation,
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.7,
+                        "num_predict": 1000
+                    }
+                },
+                timeout=120
+            )
+            
+            if response.status_code == 200:
+                response_text = response.json().get("response", "").strip()
+                logger.info("✅ Meditron chat successful")
+            else:
+                raise Exception(f"Ollama error: {response.status_code}")
+                
+        except Exception as e:
+            logger.error(f"❌ Meditron chat error: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"فشلت الدردشة: {str(e)}")
                 model = get_gemini_model('gemini-2.0-flash-exp', system_instruction=system_message)
                 
                 chat_history = []
