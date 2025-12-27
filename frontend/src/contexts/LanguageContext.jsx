@@ -125,8 +125,8 @@ export const translations = {
     contactSupport: 'Contact Support',
     
     // App name
-    appName: 'Medical Coding & CDI Center',
-    appSubtitle: 'مركز الترميز الطبي وتحسين التوثيق السريري',
+    appName: 'Clinical Documentation Improvement',
+    appSubtitle: 'Madinah Health Cluster',
     
     // Dashboard
     dashboard: 'Dashboard',
