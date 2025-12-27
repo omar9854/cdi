@@ -951,23 +951,19 @@ VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text b
                 import requests
                 
                 ollama_host = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
-                ollama_model = os.environ.get('OLLAMA_MODEL', 'meditron:70b')
+                # Use phi3 for better instruction following, meditron for complex cases
+                ollama_model = 'phi3:latest'  # Changed to phi3 for better JSON compliance
                 
-                # Effective prompt for Meditron
-                analysis_prompt = f"""You are a medical coding expert and CDI specialist. Analyze this clinical note.
+                # Direct prompt for medical analysis
+                analysis_prompt = f"""Analyze this clinical note as a CDI specialist. Identify diagnoses with ICD-10 codes.
 
-CLINICAL NOTE:
+Clinical Note:
 {formatted_notes}
 
-Analyze the note and identify:
-1. All diagnoses that should be documented with ICD-10 codes
-2. Missing documentation
-3. Queries for the physician
-
-Return ONLY valid JSON in this format:
-{{"diagnoses_to_document": [{{"diagnosis_ar": "التشخيص بالعربية", "diagnosis_en": "Diagnosis in English", "icd_code": "I21.9", "type": "principal", "clinical_evidence": "chest pain, shortness of breath"}}], "missing_documentation": [{{"item_ar": "شدة الحالة", "item_en": "Severity level", "impact": "affects coding accuracy"}}], "gaps_ar": ["التوثيق ناقص للشدة"], "gaps_en": ["Missing severity documentation"], "queries_ar": ["استفسار: بناءً على الأعراض، يرجى توثيق التشخيص الرئيسي"], "queries_en": ["Query: Based on symptoms, please document the principal diagnosis"], "recommendations_ar": ["توثيق شدة الحالة"], "recommendations_en": ["Document severity"], "summary_ar": "ملخص التحليل: مريض يعاني من أعراض قلبية تحتاج توثيق", "summary_en": "Summary: Patient with cardiac symptoms requiring documentation"}}"""
+Provide analysis as JSON (replace examples with actual analysis):
+{{"diagnoses_to_document": [{{"diagnosis_ar": "الم الصدر", "diagnosis_en": "Chest pain", "icd_code": "R07.9", "type": "principal", "clinical_evidence": "patient complains of chest pain"}}], "missing_documentation": [{{"item_ar": "شدة الألم", "item_en": "Pain severity", "impact": "needed for accurate coding"}}], "gaps_ar": ["لم يذكر شدة الألم"], "gaps_en": ["Severity not documented"], "queries_ar": ["يرجى توثيق شدة الحالة"], "queries_en": ["Please document severity"], "recommendations_ar": ["توثيق التفاصيل"], "recommendations_en": ["Document details"], "summary_ar": "تحليل الحالة السريرية", "summary_en": "Clinical case analysis"}}"""
                 
-                logger.info(f"📤 Sending to Meditron-70B ({ollama_model})...")
+                logger.info(f"📤 Sending to {ollama_model}...")
                 
                 response = requests.post(
                     f"{ollama_host}/api/generate",
@@ -976,16 +972,16 @@ Return ONLY valid JSON in this format:
                         "prompt": analysis_prompt,
                         "stream": False,
                         "options": {
-                            "temperature": 0.2,
+                            "temperature": 0.1,
                             "num_predict": 4000
                         }
                     },
-                    timeout=180
+                    timeout=120
                 )
                 
                 if response.status_code == 200:
                     response_text = response.json().get("response", "").strip()
-                    logger.info("✅ Meditron-70B analysis successful")
+                    logger.info(f"✅ {ollama_model} analysis successful")
                 else:
                     raise Exception(f"Ollama error: {response.status_code}")
                     
