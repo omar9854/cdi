@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { FileText, Lock, Mail, User, Phone } from 'lucide-react';
+import { Lock, Mail, User, Phone } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Footer from '@/components/Footer';
 
@@ -22,7 +22,6 @@ const Register = ({ setUser }) => {
     phone_number: '',
     password: '',
     department: 'cdi',
-    coding_role: null,
     admin_code: '' 
   });
   const [loading, setLoading] = useState(false);
@@ -57,7 +56,11 @@ const Register = ({ setUser }) => {
             <img src="/download-2.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <CardTitle className="text-3xl font-bold text-gray-800">{t('register')}</CardTitle>
-          <CardDescription className="text-lg">{t('appName')}<br />{t('appSubtitle')}</CardDescription>
+          <CardDescription className="text-lg">
+            {language === 'ar' ? 'إدارة تحسين التوثيق السريري' : 'Clinical Documentation Improvement'}
+            <br />
+            {language === 'ar' ? 'تجمع المدينة المنورة الصحي' : 'Madinah Health Cluster'}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -84,7 +87,7 @@ const Register = ({ setUser }) => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="example@hospital.com"
+                  placeholder="example@moh.gov.sa"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className={language === 'ar' ? 'pr-10' : 'pl-10'}
@@ -124,77 +127,10 @@ const Register = ({ setUser }) => {
                   data-testid="register-password-input"
                 />
               </div>
+              <p className="text-xs text-gray-500 mt-1">
+                {language === 'ar' ? 'كلمة المرور يجب أن تكون 12 حرف على الأقل' : 'Password must be at least 12 characters'}
+              </p>
             </div>
-            
-            {/* Department Selection */}
-            <div className="space-y-2">
-              <Label>{language === 'ar' ? 'القسم' : 'Department'}</Label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, department: 'cdi', coding_role: null })}
-                  className={`p-3 rounded-lg border-2 transition-all ${
-                    formData.department === 'cdi'
-                      ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 hover:border-blue-300'
-                  }`}
-                >
-                  <div className="font-semibold">
-                    {language === 'ar' ? 'تحسين التوثيق السريري' : 'CDI'}
-                  </div>
-                  <div className="text-xs opacity-75 mt-1">
-                    {language === 'ar' ? 'Clinical Documentation' : 'CDI Specialist'}
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, department: 'coding', coding_role: 'coder' })}
-                  className={`p-3 rounded-lg border-2 transition-all ${
-                    formData.department === 'coding'
-                      ? 'border-green-600 bg-green-50 text-green-700'
-                      : 'border-gray-200 hover:border-green-300'
-                  }`}
-                >
-                  <div className="font-semibold">
-                    {language === 'ar' ? 'الترميز الطبي' : 'Medical Coding'}
-                  </div>
-                  <div className="text-xs opacity-75 mt-1">
-                    {language === 'ar' ? 'ICD-10-AM Coding' : 'Medical Coder'}
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* Coding Role Selection (if coding department) */}
-            {formData.department === 'coding' && (
-              <div className="space-y-2 fade-in">
-                <Label>{language === 'ar' ? 'الدور الوظيفي' : 'Role'}</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, coding_role: 'coder' })}
-                    className={`p-2 rounded-lg border-2 transition-all ${
-                      formData.coding_role === 'coder'
-                        ? 'border-green-600 bg-green-50 text-green-700'
-                        : 'border-gray-200 hover:border-green-300'
-                    }`}
-                  >
-                    {language === 'ar' ? 'مرمز طبي' : 'Medical Coder'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, coding_role: 'auditor' })}
-                    className={`p-2 rounded-lg border-2 transition-all ${
-                      formData.coding_role === 'auditor'
-                        ? 'border-purple-600 bg-purple-50 text-purple-700'
-                        : 'border-gray-200 hover:border-purple-300'
-                    }`}
-                  >
-                    {language === 'ar' ? 'مدقق' : 'Auditor'}
-                  </button>
-                </div>
-              </div>
-            )}
             
             {/* Admin Code Toggle */}
             <div className="text-center">
