@@ -940,82 +940,52 @@ CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLE
         
         response_text = None
         
-        if provider == 'azure':
-            # Use Microsoft Azure OpenAI (Fast, Reliable)
-            logger.info("🔄 Using Microsoft Azure OpenAI...")
+        # Use Meditron-70B via Ollama (local medical AI)
+        if provider in ['meditron', 'phi3', 'azure', 'gemini']:
+            # All providers now use Meditron-70B locally
+            logger.info("🏥 Using Meditron-70B Medical AI via Ollama...")
             
             try:
-                from openai import AzureOpenAI
+                import requests
                 
-                azure_key = os.environ.get('AZURE_OPENAI_KEY')
-                endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT')
-                deployment = os.environ.get('AZURE_OPENAI_DEPLOYMENT')
-                api_version = os.environ.get('AZURE_OPENAI_API_VERSION', '2024-08-01-preview')
+                ollama_host = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
+                ollama_model = os.environ.get('OLLAMA_MODEL', 'meditron:70b')
                 
-                if not azure_key or not endpoint or not deployment:
-                    raise HTTPException(status_code=400, detail="Azure OpenAI not configured properly")
-                
-                client = AzureOpenAI(
-                    api_key=azure_key,
-                    api_version=api_version,
-                    azure_endpoint=endpoint
-                )
-                
-                messages = [
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": user_prompt}
-                ]
-                
-                logger.info(f"📤 Sending to Azure ({deployment})...")
-                response = client.chat.completions.create(
-                    model=deployment,
-                    messages=messages,
-                    temperature=0.7,
-                    max_tokens=4000
-                )
-                
-                response_text = response.choices[0].message.content.strip()
-                logger.info("✅ Azure OpenAI analysis successful")
-                
-            except Exception as e:
-                logger.error(f"❌ Azure error: {str(e)}")
-                raise HTTPException(status_code=500, detail=f"فشل Azure: {str(e)}")
-        
-        elif provider == 'gemini':
-            # Use Google Gemini with API keys (12 keys with rotation)
-            logger.info("🔄 Using Gemini with API keys...")
-            
-            try:
-                model = get_gemini_model('gemini-2.0-flash-exp')
                 full_prompt = f"{system_message}\n\n{user_prompt}"
                 
-                max_retries = len(GEMINI_API_KEYS)
-                for attempt in range(max_retries):
-                    try:
-                        response = model.generate_content(full_prompt)
-                        response_text = response.text.strip()
-                        logger.info(f"✅ Gemini successful (attempt {attempt+1})")
-                        break
-                    except Exception as e:
-                        if "429" in str(e) or "quota" in str(e).lower():
-                            if attempt < max_retries - 1:
-                                logger.warning(f"Key exhausted, trying next ({attempt+2}/{max_retries})")
-                                model = get_gemini_model('gemini-2.0-flash-exp')
-                                continue
-                            else:
-                                raise HTTPException(status_code=429, detail="جميع مفاتيح Gemini نفد رصيدها. All Gemini keys exhausted.")
-                        else:
-                            raise e
-                            
+                logger.info(f"📤 Sending to Meditron-70B ({ollama_model})...")
+                
+                response = requests.post(
+                    f"{ollama_host}/api/generate",
+                    json={
+                        "model": ollama_model,
+                        "prompt": full_prompt,
+                        "stream": False,
+                        "options": {
+                            "temperature": 0.7,
+                            "num_predict": 4000
+                        }
+                    },
+                    timeout=180  # 3 minutes timeout for complex analysis
+                )
+                
+                if response.status_code == 200:
+                    response_text = response.json().get("response", "").strip()
+                    logger.info("✅ Meditron-70B analysis successful")
+                else:
+                    raise Exception(f"Ollama error: {response.status_code}")
+                    
+            except requests.exceptions.Timeout:
+                logger.error("❌ Meditron timeout - analysis taking too long")
+                raise HTTPException(status_code=504, detail="انتهى وقت التحليل. Analysis timeout. Please try again.")
             except Exception as e:
-                logger.error(f"❌ Gemini error: {str(e)}")
-                raise HTTPException(status_code=500, detail=f"فشل Gemini: {str(e)}")
+                logger.error(f"❌ Meditron error: {str(e)}")
+                raise HTTPException(status_code=500, detail=f"فشل التحليل: {str(e)}")
         
         else:
-            # Only Phi-3 is supported - no external API keys
             raise HTTPException(
                 status_code=400,
-                detail="فقط Phi-3 المحلي متاح. Only local Phi-3 analysis is available."
+                detail="مزود AI غير مدعوم. Unsupported AI provider."
             )
         
         # Check if we have a response
