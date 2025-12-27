@@ -75,26 +75,12 @@ const MFAVerification = ({ setUser }) => {
 
       toast.success(language === 'ar' ? 'تم التحقق بنجاح! مرحباً بك' : 'Verification successful! Welcome');
       
-      // Route based on department and role
+      // Route based on role
       const user = loginResponse.data.user;
-      // Admin goes to dashboard by default (can access admin panel from navbar)
-      if (user.department === 'coding') {
-        if (user.coding_role === 'supervisor') {
-          navigate('/coding-supervisor');
-        } else if (user.coding_role === 'coder') {
-          navigate('/coder');
-        } else if (user.coding_role === 'auditor') {
-          navigate('/auditor');
-        } else {
-          navigate('/dashboard');
-        }
+      if (user.role === 'supervisor' || user.role === 'admin') {
+        navigate('/supervisor');
       } else {
-        // CDI department
-        if (user.role === 'supervisor') {
-          navigate('/supervisor');
-        } else {
-          navigate('/dashboard');
-        }
+        navigate('/dashboard');
       }
     } catch (error) {
       logError('MFA Verification', error);
