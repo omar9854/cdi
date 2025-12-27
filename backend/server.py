@@ -932,7 +932,9 @@ Provide response in this EXACT JSON format:
   "summary_en": "Comprehensive detailed summary covering all critical points"
 }}}}
 
-CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLETE and ACCURATE ICD-10-CM codes."""
+CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLETE and ACCURATE ICD-10-CM codes.
+
+VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text before or after the JSON object. Start directly with {{ and end with }}."""
 
     try:
         import requests
