@@ -953,7 +953,19 @@ VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text b
                 ollama_host = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
                 ollama_model = os.environ.get('OLLAMA_MODEL', 'meditron:70b')
                 
-                full_prompt = f"{system_message}\n\n{user_prompt}"
+                # Simplified prompt for better JSON compliance
+                simple_prompt = f"""You are a Clinical Documentation Improvement (CDI) specialist. Analyze this clinical note and provide ICD-10 codes.
+
+CLINICAL NOTE:
+{formatted_notes}
+
+INSTRUCTIONS:
+1. Identify all diagnoses that should be documented
+2. Provide accurate ICD-10-CM codes
+3. Note any missing documentation
+
+Return ONLY valid JSON in this exact format (no text before or after):
+{{"diagnoses_to_document": [{{"diagnosis_ar": "التشخيص بالعربية", "diagnosis_en": "Diagnosis in English", "icd_code": "X00.0", "type": "principal or secondary", "clinical_evidence": "evidence from notes"}}], "missing_documentation": [{{"item_ar": "توثيق ناقص", "item_en": "Missing item", "impact": "impact"}}], "gaps_ar": ["فجوة 1"], "gaps_en": ["gap 1"], "queries_ar": ["استفسار للطبيب"], "queries_en": ["query for physician"], "recommendations_ar": ["توصية"], "recommendations_en": ["recommendation"], "summary_ar": "ملخص التحليل بالعربية", "summary_en": "Analysis summary in English"}}"""
                 
                 logger.info(f"📤 Sending to Meditron-70B ({ollama_model})...")
                 
@@ -961,10 +973,10 @@ VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text b
                     f"{ollama_host}/api/generate",
                     json={
                         "model": ollama_model,
-                        "prompt": full_prompt,
+                        "prompt": simple_prompt,
                         "stream": False,
                         "options": {
-                            "temperature": 0.7,
+                            "temperature": 0.3,  # Lower temperature for more consistent JSON
                             "num_predict": 4000
                         }
                     },
