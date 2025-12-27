@@ -22,29 +22,15 @@ const Dashboard = ({ user, onLogout }) => {
   const [noteToDelete, setNoteToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Auto-redirect based on department and role
-  // Admin can stay on dashboard - they have access to admin panel via navbar
+  // Auto-redirect supervisors to supervisor dashboard
   useEffect(() => {
-    if (user?.department === 'coding') {
-      // Redirect coding users to their specific pages
-      if (user.coding_role === 'supervisor') {
-        navigate('/coding-supervisor');
-      } else if (user.coding_role === 'coder') {
-        navigate('/coder');
-      } else if (user.coding_role === 'auditor') {
-        navigate('/auditor');
-      }
-    } else if (user?.role === 'supervisor' && user?.role !== 'admin') {
-      // Only redirect non-admin supervisors
+    if (user?.role === 'supervisor' && user?.role !== 'admin') {
       navigate('/supervisor');
     }
   }, [user, navigate]);
 
   useEffect(() => {
-    // Only fetch notes if user is CDI department
-    if (user?.department === 'cdi') {
-      fetchNotes();
-    }
+    fetchNotes();
   }, [user]);
 
   const fetchNotes = async () => {
