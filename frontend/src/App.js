@@ -19,9 +19,6 @@ import Messages from '@/pages/Messages';
 import MFAVerification from '@/pages/MFAVerification';
 import SecurityDashboard from '@/pages/SecurityDashboard';
 import AISettings from '@/pages/AISettings';
-import CodingSupervisor from '@/pages/CodingSupervisorPro';
-import CoderWorkspace from '@/pages/CoderWorkspacePro';
-import AuditorWorkspace from '@/pages/AuditorWorkspace';
 import ChatWidget from '@/components/ChatWidget';
 
 function AppContent() {
@@ -68,9 +65,6 @@ function AppContent() {
           <Route path="/supervisor" element={user && (user.role === 'supervisor' || user.role === 'admin') ? <SupervisorDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
           <Route path="/security" element={user && user.role === 'admin' ? <SecurityDashboard user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
           <Route path="/ai-settings" element={user && user.role === 'admin' ? <AISettings user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
-          <Route path="/coding-supervisor" element={user && user.department === 'coding' && (user.coding_role === 'supervisor' || user.role === 'admin') ? <CodingSupervisor user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
-          <Route path="/coder" element={user && user.department === 'coding' && user.coding_role === 'coder' ? <CoderWorkspace user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
-          <Route path="/auditor" element={user && user.department === 'coding' && user.coding_role === 'auditor' ? <AuditorWorkspace user={user} onLogout={handleLogout} /> : <Navigate to="/dashboard" />} />
           <Route path="/mfa-verify" element={!user ? <MFAVerification setUser={setUser} /> : <Navigate to="/dashboard" />} />
           <Route path="/messages" element={user ? <Messages user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
           <Route path="/new-note" element={user ? <NewNote user={user} onLogout={handleLogout} /> : <Navigate to="/login" />} />
