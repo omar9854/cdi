@@ -951,17 +951,16 @@ VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text b
                 import requests
                 
                 ollama_host = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
-                # Use phi3 for better instruction following, meditron for complex cases
-                ollama_model = 'phi3:latest'  # Changed to phi3 for better JSON compliance
+                ollama_model = 'phi3:latest'
                 
-                # Direct prompt for medical analysis
-                analysis_prompt = f"""Analyze this clinical note as a CDI specialist. Identify diagnoses with ICD-10 codes.
+                # Simple clear prompt
+                analysis_prompt = f"""You are a medical coder. Analyze this clinical note and identify all diagnoses with ICD-10 codes.
 
 Clinical Note:
 {formatted_notes}
 
-Provide analysis as JSON (replace examples with actual analysis):
-{{"diagnoses_to_document": [{{"diagnosis_ar": "الم الصدر", "diagnosis_en": "Chest pain", "icd_code": "R07.9", "type": "principal", "clinical_evidence": "patient complains of chest pain"}}], "missing_documentation": [{{"item_ar": "شدة الألم", "item_en": "Pain severity", "impact": "needed for accurate coding"}}], "gaps_ar": ["لم يذكر شدة الألم"], "gaps_en": ["Severity not documented"], "queries_ar": ["يرجى توثيق شدة الحالة"], "queries_en": ["Please document severity"], "recommendations_ar": ["توثيق التفاصيل"], "recommendations_en": ["Document details"], "summary_ar": "تحليل الحالة السريرية", "summary_en": "Clinical case analysis"}}"""
+Identify all conditions mentioned and provide ICD-10-CM codes. Return ONLY JSON:
+{{"diagnoses_to_document": [{{"diagnosis_ar": "التشخيص بالعربية", "diagnosis_en": "Diagnosis in English", "icd_code": "X00.0"}}], "missing_documentation": [{{"item_ar": "عنصر ناقص", "item_en": "Missing item", "impact": "impact"}}], "gaps_ar": ["فجوة"], "gaps_en": ["gap"], "queries_ar": ["استفسار"], "queries_en": ["query"], "recommendations_ar": ["توصية"], "recommendations_en": ["recommendation"], "summary_ar": "ملخص التحليل", "summary_en": "Analysis summary"}}"""
                 
                 logger.info(f"📤 Sending to {ollama_model}...")
                 
