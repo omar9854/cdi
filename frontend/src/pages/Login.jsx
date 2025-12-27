@@ -49,25 +49,11 @@ const Login = ({ setUser }) => {
         
         toast.success(t('loginSuccess'));
         
-        // Route based on department and role
-        // Admin goes to dashboard by default (can access admin panel from navbar)
-        if (user.department === 'coding') {
-          if (user.coding_role === 'supervisor') {
-            navigate('/coding-supervisor');
-          } else if (user.coding_role === 'coder') {
-            navigate('/coder');
-          } else if (user.coding_role === 'auditor') {
-            navigate('/auditor');
-          } else {
-            navigate('/dashboard');
-          }
+        // Route based on role
+        if (user.role === 'supervisor' || user.role === 'admin') {
+          navigate('/supervisor');
         } else {
-          // CDI department users go to dashboard  
-          if (user.role === 'supervisor') {
-            navigate('/supervisor');
-          } else {
-            navigate('/dashboard');
-          }
+          navigate('/dashboard');
         }
       }
     } catch (error) {
