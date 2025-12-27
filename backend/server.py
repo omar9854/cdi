@@ -950,17 +950,29 @@ VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text b
             try:
                 import requests
                 
-                ollama_host = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
-                ollama_model = 'phi3:latest'
+                ollama_host = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434')
+                ollama_model = os.environ.get('OLLAMA_MODEL', 'phi3:latest')
                 
-                # Simple clear prompt
-                analysis_prompt = f"""You are a medical coder. Analyze this clinical note and identify all diagnoses with ICD-10 codes.
+                # Clear medical coding prompt
+                analysis_prompt = f"""You are an expert ICD-10-CM medical coder. Analyze this clinical note carefully.
 
-Clinical Note:
+CLINICAL NOTE:
 {formatted_notes}
 
-Identify all conditions mentioned and provide ICD-10-CM codes. Return ONLY JSON:
-{{"diagnoses_to_document": [{{"diagnosis_ar": "التشخيص بالعربية", "diagnosis_en": "Diagnosis in English", "icd_code": "X00.0"}}], "missing_documentation": [{{"item_ar": "عنصر ناقص", "item_en": "Missing item", "impact": "impact"}}], "gaps_ar": ["فجوة"], "gaps_en": ["gap"], "queries_ar": ["استفسار"], "queries_en": ["query"], "recommendations_ar": ["توصية"], "recommendations_en": ["recommendation"], "summary_ar": "ملخص التحليل", "summary_en": "Analysis summary"}}"""
+TASK: Identify ALL medical conditions, symptoms, and diagnoses mentioned. For each, provide:
+1. Arabic name (التشخيص بالعربية)
+2. English name  
+3. Accurate ICD-10-CM code
+
+Common codes reference:
+- Diabetes Type 2: E11.9, with neuropathy: E11.40, with retinopathy: E11.319
+- Hypertension: I10
+- Chest pain: R07.9
+- Heart failure: I50.9
+- Peripheral neuropathy: G62.9
+
+Return ONLY valid JSON (no extra text):
+{{"diagnoses_to_document": [{{"diagnosis_ar": "السكري النوع الثاني", "diagnosis_en": "Type 2 Diabetes Mellitus", "icd_code": "E11.9", "type": "principal", "clinical_evidence": "diabetic for 10 years"}}], "missing_documentation": [{{"item_ar": "مستوى HbA1c", "item_en": "HbA1c level", "impact": "needed for severity"}}], "gaps_ar": ["توثيق شدة الحالة"], "gaps_en": ["Severity documentation"], "queries_ar": ["يرجى توثيق مستوى السكر"], "queries_en": ["Please document glucose level"], "recommendations_ar": ["إضافة تفاصيل المضاعفات"], "recommendations_en": ["Add complication details"], "summary_ar": "مريض سكري يحتاج توثيق إضافي للمضاعفات", "summary_en": "Diabetic patient needs additional documentation for complications"}}"""
                 
                 logger.info(f"📤 Sending to {ollama_model}...")
                 
