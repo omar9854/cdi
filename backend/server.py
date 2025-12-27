@@ -1079,35 +1079,23 @@ async def get_specialties():
 # Get available AI providers
 @api_router.get("/ai-providers")
 async def get_ai_providers():
-    """Get list of available AI providers - Azure & Gemini"""
+    """Get list of available AI providers - Meditron only for offline medical analysis"""
     providers = [
         {
-            "id": "azure",
-            "name": "Microsoft Azure AI",
-            "name_ar": "مايكروسوفت أزور AI",
-            "description": "Microsoft Azure OpenAI - Fast, Reliable, Cloud-based",
-            "description_ar": "مايكروسوفت أزور OpenAI - سريع، موثوق، سحابي",
+            "id": "meditron",
+            "name": "Meditron-70B Medical AI",
+            "name_ar": "Meditron-70B الطبي",
+            "description": "Specialized Medical AI - Offline, Secure, 70B Parameters",
+            "description_ar": "ذكاء اصطناعي طبي متخصص - أوفلاين، آمن، 70 مليار معامل",
             "status": "active",
-            "is_local": False,
-            "is_free": False,
-            "note": "Fast (5-15 seconds)",
-            "note_ar": "سريع (5-15 ثانية)"
-        },
-        {
-            "id": "gemini",
-            "name": "Google Gemini 2.0",
-            "name_ar": "جوجل جيميناي 2.0",
-            "description": "Google Gemini - Fast, High Accuracy",
-            "description_ar": "جوجل جيميناي - سريع، دقة عالية",
-            "status": "active",
-            "is_local": False,
+            "is_local": True,
             "is_free": True,
-            "note": "Fast (5-10 seconds)",
-            "note_ar": "سريع (5-10 ثواني)"
+            "note": "Local GPU Processing (10-30 seconds)",
+            "note_ar": "معالجة محلية على GPU (10-30 ثانية)"
         }
     ]
     
-    return {"providers": providers, "default": "gemini"}
+    return {"providers": providers, "default": "meditron"}
 
 
 # ========== Auth Routes ==========
