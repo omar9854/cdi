@@ -32,8 +32,8 @@ const Footer = () => {
           <div className="text-center">
             <p className="text-sm font-medium">
               {language === 'ar' 
-                ? 'مركز الترميز الطبي وتحسين التوثيق السريري'
-                : 'Medical Coding & CDI Center'
+                ? 'إدارة تحسين التوثيق السريري - تجمع المدينة المنورة الصحي'
+                : 'Clinical Documentation Improvement - Madinah Health Cluster'
               }
             </p>
           </div>
