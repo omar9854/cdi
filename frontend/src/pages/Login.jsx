@@ -258,8 +258,8 @@ const Login = ({ setUser }) => {
           <div className="space-y-6 w-full max-w-lg">
             <h2 className="text-4xl font-bold text-center mb-8">
               {language === 'ar' 
-                ? 'نظام متكامل لتحسين التوثيق السريري' 
-                : 'Complete CDI Management System'}
+                ? 'إدارة تحسين التوثيق السريري' 
+                : 'Clinical Documentation Improvement'}
             </h2>
             
             <div className="space-y-4">
