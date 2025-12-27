@@ -2435,24 +2435,6 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         except Exception as e:
             logger.error(f"❌ Meditron chat error: {str(e)}")
             raise HTTPException(status_code=500, detail=f"فشلت الدردشة: {str(e)}")
-                model = get_gemini_model('gemini-2.0-flash-exp', system_instruction=system_message)
-                
-                chat_history = []
-                for msg in previous_messages:
-                    if 'role' in msg:
-                        chat_history.append({
-                            'role': 'user' if msg['role'] == 'user' else 'model',
-                            'parts': [msg['message']]
-                        })
-                
-                chat = model.start_chat(history=chat_history)
-                response = chat.send_message(chat_request.message)
-                response_text = response.text
-                logger.info("✅ Gemini chat successful")
-                
-            except Exception as e:
-                logger.error(f"❌ Gemini chat error: {str(e)}")
-                raise HTTPException(status_code=500, detail=f"فشلت الدردشة: {str(e)}")
         
         if not response_text:
             raise HTTPException(status_code=500, detail="No response from AI provider")
