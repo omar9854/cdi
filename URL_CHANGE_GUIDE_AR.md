@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://clinicalfix-1.preview.emergentagent.com
+https://medical-llm.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://clinicalfix-1.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://clinicalfix-1.preview.emergentagent.com
+   https://medical-llm.preview.emergentagent.com
    ```
 
 ---

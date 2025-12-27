@@ -3,7 +3,7 @@
 ## 📋 معلومات التطبيق
 
 **اسم التطبيق:** مركز تحسين التوثيق السريري (CDI Center)
-**URL الحالي:** https://clinicalfix-1.preview.emergentagent.com
+**URL الحالي:** https://medical-llm.preview.emergentagent.com
 
 ---
 
@@ -35,7 +35,7 @@
 
 ### الطريقة الحالية (Preview):
 ```
-https://clinicalfix-1.preview.emergentagent.com
+https://medical-llm.preview.emergentagent.com
 ```
 
 **ملاحظة:** هذا الرابط مؤقت للتطوير والاختبار
