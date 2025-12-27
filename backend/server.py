@@ -2242,11 +2242,24 @@ async def analyze_note(analyze_request: AnalyzeRequest, user: dict = Depends(get
     AI_REQUESTS.labels(type='analyze').inc()
     AI_RESPONSE_TIME.labels(type='analyze').observe(time.time() - start_time)
     
+    # Normalize diagnoses - handle different field names from AI
+    normalized_diagnoses = []
+    for d in result.get('diagnoses_to_document', []):
+        normalized_d = {
+            'diagnosis_ar': d.get('diagnosis_ar', d.get('name_ar', '')),
+            'diagnosis_en': d.get('diagnosis_en', d.get('name_en', '')),
+            'icd_code': d.get('icd_code', d.get('icd-10_code', d.get('icd10', d.get('code', '')))),
+            'type': d.get('type', 'secondary'),
+            'severity': d.get('severity', ''),
+            'clinical_evidence': d.get('clinical_evidence', d.get('evidence', ''))
+        }
+        normalized_diagnoses.append(normalized_d)
+    
     # Create analysis record
     analysis = Analysis(
         note_id=analyze_request.note_id,
         user_id=user['id'],
-        diagnoses_to_document=[DiagnosisBilingual(**d) for d in result.get('diagnoses_to_document', [])],
+        diagnoses_to_document=[DiagnosisBilingual(**d) for d in normalized_diagnoses],
         missing_documentation=result.get('missing_documentation', []),
         gaps_ar=result.get('gaps_ar', []),
         gaps_en=result.get('gaps_en', []),
