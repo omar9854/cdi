@@ -2244,10 +2244,14 @@ async def analyze_note(analyze_request: AnalyzeRequest, user: dict = Depends(get
     # Normalize diagnoses - handle different field names from AI
     normalized_diagnoses = []
     for d in result.get('diagnoses_to_document', []):
+        # Get ICD code from various possible field names
+        icd = (d.get('icd_code') or d.get('icd-10_code') or d.get('icd10') or 
+               d.get('code') or d.get('icd-code') or d.get('icd10_code') or 'N/A')
+        
         normalized_d = {
-            'diagnosis_ar': d.get('diagnosis_ar', d.get('name_ar', '')),
-            'diagnosis_en': d.get('diagnosis_en', d.get('name_en', '')),
-            'icd_code': d.get('icd_code', d.get('icd-10_code', d.get('icd10', d.get('code', '')))),
+            'diagnosis_ar': d.get('diagnosis_ar', d.get('name_ar', d.get('التشخيص', ''))),
+            'diagnosis_en': d.get('diagnosis_en', d.get('name_en', d.get('diagnosis', ''))),
+            'icd_code': icd,
             'type': d.get('type', 'secondary'),
             'severity': d.get('severity', ''),
             'clinical_evidence': d.get('clinical_evidence', d.get('evidence', ''))
