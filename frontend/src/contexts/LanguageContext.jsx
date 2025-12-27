@@ -27,8 +27,8 @@ export const translations = {
     contactSupport: 'تواصل مع الدعم',
     
     // App name
-    appName: 'مركز الترميز الطبي وتحسين التوثيق السريري',
-    appSubtitle: 'Medical Coding & Clinical Documentation Improvement Center',
+    appName: 'إدارة تحسين التوثيق السريري',
+    appSubtitle: 'تجمع المدينة المنورة الصحي',
     
     // Dashboard
     dashboard: 'لوحة التحكم',
