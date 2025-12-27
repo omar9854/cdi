@@ -122,8 +122,8 @@ const Login = ({ setUser }) => {
               </h1>
               <p className="text-gray-600 text-lg">
                 {language === 'ar' 
-                  ? 'مركز الترميز الطبي وتحسين التوثيق السريري' 
-                  : 'Medical Coding & CDI Center'}
+                  ? 'إدارة تحسين التوثيق السريري' 
+                  : 'Clinical Documentation Improvement'}
               </p>
             </div>
           </div>
