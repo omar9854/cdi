@@ -953,19 +953,19 @@ VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text b
                 ollama_host = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
                 ollama_model = os.environ.get('OLLAMA_MODEL', 'meditron:70b')
                 
-                # Simplified prompt for better JSON compliance
-                simple_prompt = f"""You are a Clinical Documentation Improvement (CDI) specialist. Analyze this clinical note and provide ICD-10 codes.
+                # Effective prompt for Meditron
+                analysis_prompt = f"""You are a medical coding expert and CDI specialist. Analyze this clinical note.
 
 CLINICAL NOTE:
 {formatted_notes}
 
-INSTRUCTIONS:
-1. Identify all diagnoses that should be documented
-2. Provide accurate ICD-10-CM codes
-3. Note any missing documentation
+Analyze the note and identify:
+1. All diagnoses that should be documented with ICD-10 codes
+2. Missing documentation
+3. Queries for the physician
 
-Return ONLY valid JSON in this exact format (no text before or after):
-{{"diagnoses_to_document": [{{"diagnosis_ar": "التشخيص بالعربية", "diagnosis_en": "Diagnosis in English", "icd_code": "X00.0", "type": "principal or secondary", "clinical_evidence": "evidence from notes"}}], "missing_documentation": [{{"item_ar": "توثيق ناقص", "item_en": "Missing item", "impact": "impact"}}], "gaps_ar": ["فجوة 1"], "gaps_en": ["gap 1"], "queries_ar": ["استفسار للطبيب"], "queries_en": ["query for physician"], "recommendations_ar": ["توصية"], "recommendations_en": ["recommendation"], "summary_ar": "ملخص التحليل بالعربية", "summary_en": "Analysis summary in English"}}"""
+Return ONLY valid JSON in this format:
+{{"diagnoses_to_document": [{{"diagnosis_ar": "التشخيص بالعربية", "diagnosis_en": "Diagnosis in English", "icd_code": "I21.9", "type": "principal", "clinical_evidence": "chest pain, shortness of breath"}}], "missing_documentation": [{{"item_ar": "شدة الحالة", "item_en": "Severity level", "impact": "affects coding accuracy"}}], "gaps_ar": ["التوثيق ناقص للشدة"], "gaps_en": ["Missing severity documentation"], "queries_ar": ["استفسار: بناءً على الأعراض، يرجى توثيق التشخيص الرئيسي"], "queries_en": ["Query: Based on symptoms, please document the principal diagnosis"], "recommendations_ar": ["توثيق شدة الحالة"], "recommendations_en": ["Document severity"], "summary_ar": "ملخص التحليل: مريض يعاني من أعراض قلبية تحتاج توثيق", "summary_en": "Summary: Patient with cardiac symptoms requiring documentation"}}"""
                 
                 logger.info(f"📤 Sending to Meditron-70B ({ollama_model})...")
                 
@@ -973,14 +973,14 @@ Return ONLY valid JSON in this exact format (no text before or after):
                     f"{ollama_host}/api/generate",
                     json={
                         "model": ollama_model,
-                        "prompt": simple_prompt,
+                        "prompt": analysis_prompt,
                         "stream": False,
                         "options": {
-                            "temperature": 0.3,  # Lower temperature for more consistent JSON
+                            "temperature": 0.2,
                             "num_predict": 4000
                         }
                     },
-                    timeout=180  # 3 minutes timeout for complex analysis
+                    timeout=180
                 )
                 
                 if response.status_code == 200:
