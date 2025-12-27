@@ -180,36 +180,24 @@ const Analysis = ({ user, onLogout }) => {
           </CardContent>
         </Card>
 
-        {/* Analyze Button with AI Provider Selection */}
+        {/* Analyze Button - Using Meditron-70B Medical AI */}
         {!analysis && (
           <Card className="medical-card mb-6 fade-in">
             <CardContent className="text-center py-8">
               <Sparkles className="w-16 h-16 text-blue-600 mx-auto mb-4" />
               <h3 className="text-2xl font-semibold text-gray-800 mb-2">{t('readyToAnalyze')}</h3>
-              <p className="text-gray-600 mb-6">{t('aiAnalysisDescription')}</p>
+              <p className="text-gray-600 mb-4">{t('aiAnalysisDescription')}</p>
               
-              {aiProviders.length > 1 && !analyzing && (
-                <div className="mb-4">
-                  <p className="text-sm text-gray-600 mb-2">
-                    {language === 'ar' ? 'اختر مزود الذكاء الاصطناعي:' : 'Choose AI Provider:'}
-                  </p>
-                  <div className="flex justify-center gap-3 flex-wrap">
-                    {aiProviders.map((provider) => (
-                      <button
-                        key={provider.id}
-                        onClick={() => setSelectedProvider(provider.id)}
-                        className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                          selectedProvider === provider.id
-                            ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold'
-                            : 'border-gray-200 hover:border-blue-300'
-                        }`}
-                      >
-                        {language === 'ar' ? provider.name_ar : provider.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Show Meditron-70B badge */}
+              <div className="mb-6 inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-2 rounded-full border border-blue-200">
+                <span className="text-2xl">🏥</span>
+                <span className="font-semibold text-blue-700">
+                  {language === 'ar' ? 'Meditron-70B الطبي المتخصص' : 'Meditron-70B Medical AI'}
+                </span>
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                  {language === 'ar' ? 'أوفلاين' : 'Offline'}
+                </span>
+              </div>
               
               <Button
                 onClick={() => handleAnalyze()}
