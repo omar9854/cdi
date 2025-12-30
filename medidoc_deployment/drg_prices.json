@@ -1,0 +1,4002 @@
+{
+  "801A": {
+    "description": "GI UNREL TO PDX, MAJC",
+    "alos": 21.46,
+    "price": 57399.12657124229
+  },
+  "801B": {
+    "description": "GI UNREL TO PDX, INTC",
+    "alos": 8.75,
+    "price": 24156.096802409353
+  },
+  "801C": {
+    "description": "GI UNREL TO PDX, MINC",
+    "alos": 2.72,
+    "price": 9086.932966423581
+  },
+  "A13A": {
+    "description": "VENTILATION >=336HRS, MAJC",
+    "alos": 56.74,
+    "price": 325766.5468462854
+  },
+  "A13B": {
+    "description": "VENTILATION >=336HRS, MINC",
+    "alos": 34.39,
+    "price": 200896.94299934802
+  },
+  "A14A": {
+    "description": "VENTILATION >=96&<336HRS, MAJC",
+    "alos": 38.15,
+    "price": 182723.07706650085
+  },
+  "A14B": {
+    "description": "VENTILATION >=96&<336HRS, INTC",
+    "alos": 22.22,
+    "price": 112110.03547325094
+  },
+  "A14C": {
+    "description": "VENTILATION >=96&<336HRS, MINC",
+    "alos": 14.05,
+    "price": 77617.55242153477
+  },
+  "A15A": {
+    "description": "TRACHEOSTOMY, MAJC",
+    "alos": 36.06,
+    "price": 140014.49212431003
+  },
+  "A15B": {
+    "description": "TRACHEOSTOMY, INTC",
+    "alos": 20.56,
+    "price": 82804.67665653488
+  },
+  "A15C": {
+    "description": "TRACHEOSTOMY, MINC",
+    "alos": 12.28,
+    "price": 47024.87810124204
+  },
+  "A40Z": {
+    "description": "ECMO",
+    "alos": 28.62,
+    "price": 212407.05809015123
+  },
+  "B01Z": {
+    "description": "VENTRICULAR SHUNT REV",
+    "alos": 5.67,
+    "price": 36423.45630708119
+  },
+  "B02A": {
+    "description": "CRANIAL PROCEDURES, MAJC",
+    "alos": 18.98,
+    "price": 96548.66276825056
+  },
+  "B02B": {
+    "description": "CRANIAL PROCEDURES, INTC",
+    "alos": 8.47,
+    "price": 46002.59814251939
+  },
+  "B02C": {
+    "description": "CRANIAL PROCEDURES, MINC",
+    "alos": 5.85,
+    "price": 33167.30532744607
+  },
+  "B03A": {
+    "description": "SPINAL PROCEDURES, MAJC",
+    "alos": 15.72,
+    "price": 72165.3926416806
+  },
+  "B03B": {
+    "description": "SPINAL PROCEDURES, INTC",
+    "alos": 6.88,
+    "price": 34606.069713796474
+  },
+  "B03C": {
+    "description": "SPINAL PROCEDURES, MINC",
+    "alos": 3.26,
+    "price": 21505.741353869143
+  },
+  "B04A": {
+    "description": "EXTRACRANIAL VASCULAR PR, MAJC",
+    "alos": 11.65,
+    "price": 50811.100170585196
+  },
+  "B04B": {
+    "description": "EXTRACRANIAL VASCULAR PR, INTC",
+    "alos": 6.79,
+    "price": 32523.64757565774
+  },
+  "B04C": {
+    "description": "EXTRACRANIAL VASCULAR PR, MINC",
+    "alos": 3.35,
+    "price": 21543.603574562578
+  },
+  "B05Z": {
+    "description": "CARPAL TUNNEL RELEASE",
+    "alos": 1.04,
+    "price": 4732.777586678949
+  },
+  "B06A": {
+    "description": "CBL PSY,MUS DYSY,NPTHY PR,MAJC",
+    "alos": 12.58,
+    "price": 41989.20274901563
+  },
+  "B06B": {
+    "description": "CBL PSY,MUS DYSY,NPTHY PR,INTC",
+    "alos": 5.23,
+    "price": 20256.288070985902
+  },
+  "B06C": {
+    "description": "CBL PSY,MUS DYSY,NPTHY PR,MINC",
+    "alos": 1.36,
+    "price": 7004.510828284844
+  },
+  "B07A": {
+    "description": "CRANL/PRPHL NERV&OTH PR, MAJC",
+    "alos": 9.23,
+    "price": 27639.42110620506
+  },
+  "B07B": {
+    "description": "CRANL/PRPHL NERV&OTH PR, MINC",
+    "alos": 1.54,
+    "price": 7951.066345620634
+  },
+  "B40Z": {
+    "description": "PLASMAPHERESIS + NEURO DIS, SD",
+    "alos": 1.0,
+    "price": 1817.3865932847164
+  },
+  "B41A": {
+    "description": "TELEMETRIC EEG MONITOR, MAJC",
+    "alos": 6.5,
+    "price": 19271.87033295668
+  },
+  "B41B": {
+    "description": "TELEMETRIC EEG MONITOR, MINC",
+    "alos": 3.68,
+    "price": 11017.906221788593
+  },
+  "B42A": {
+    "description": "NERV SYS DIS +VENT SUPP, MAJC",
+    "alos": 16.34,
+    "price": 72809.05039346895
+  },
+  "B42B": {
+    "description": "NERV SYS DIS +VENT SUPP, INTC",
+    "alos": 7.98,
+    "price": 46191.90924598654
+  },
+  "B42C": {
+    "description": "NERV SYS DIS +VENT SUPP, MINC",
+    "alos": 3.41,
+    "price": 30289.776554745273
+  },
+  "B62Z": {
+    "description": "APHERESIS",
+    "alos": 1.0,
+    "price": 3028.977655474527
+  },
+  "B63A": {
+    "description": "DMNTIA&CHRNIC DIST CBL FN,MAJC",
+    "alos": 11.24,
+    "price": 23020.230181606406
+  },
+  "B63B": {
+    "description": "DMNTIA&CHRNIC DIST CBL FN,MINC",
+    "alos": 5.42,
+    "price": 11320.803987336045
+  },
+  "B64A": {
+    "description": "DELIRIUM, MAJC",
+    "alos": 7.29,
+    "price": 16205.030456788721
+  },
+  "B64B": {
+    "description": "DELIRIUM, MINC",
+    "alos": 2.33,
+    "price": 5679.333104014739
+  },
+  "B65Z": {
+    "description": "CEREBRAL PALSY",
+    "alos": 1.44,
+    "price": 29532.53214087664
+  },
+  "B66A": {
+    "description": "NERVOUS SYSTEM NEOPLASM, MAJC",
+    "alos": 9.24,
+    "price": 50053.85575671656
+  },
+  "B66B": {
+    "description": "NERVOUS SYSTEM NEOPLASM, MINC",
+    "alos": 3.17,
+    "price": 19309.732553650112
+  },
+  "B67A": {
+    "description": "DEGNRTV NERV SYS DIS, MAJC",
+    "alos": 10.36,
+    "price": 56528.295495293365
+  },
+  "B67B": {
+    "description": "DEGNRTV NERV SYS DIS, INTC",
+    "alos": 3.52,
+    "price": 19991.25252613188
+  },
+  "B67C": {
+    "description": "DEGNRTV NERV SYS DIS, MINC",
+    "alos": 1.13,
+    "price": 5792.919766095033
+  },
+  "B68A": {
+    "description": "MLT SCLROSIS&CBL ATAXIA, MAJC",
+    "alos": 4.05,
+    "price": 24761.89233350426
+  },
+  "B68B": {
+    "description": "MLT SCLROSIS&CBL ATAXIA, MINC",
+    "alos": 1.08,
+    "price": 6890.92416620455
+  },
+  "B69A": {
+    "description": "TIA & PRECEREBRL OCCLUSN, MAJC",
+    "alos": 4.92,
+    "price": 17530.208181058828
+  },
+  "B69B": {
+    "description": "TIA & PRECEREBRL OCCLUSN, MINC",
+    "alos": 1.81,
+    "price": 7193.821931752002
+  },
+  "B70A": {
+    "description": "STROKE & OTH CEREB DIS, MAJC",
+    "alos": 13.43,
+    "price": 40020.36727295719
+  },
+  "B70B": {
+    "description": "STROKE & OTH CEREB DIS, INTC",
+    "alos": 6.25,
+    "price": 19650.492539890998
+  },
+  "B70C": {
+    "description": "STROKE & OTH CEREB DIS, MINC",
+    "alos": 3.39,
+    "price": 11207.21732525575
+  },
+  "B70D": {
+    "description": "STROKE & OTH CEREB DIS, TR<5D",
+    "alos": 1.86,
+    "price": 7686.030800766613
+  },
+  "B71A": {
+    "description": "CRANIAL&PERIPHL NERV DIS, MAJC",
+    "alos": 3.26,
+    "price": 14236.194980730277
+  },
+  "B71B": {
+    "description": "CRANIAL&PERIPHL NERV DIS, MINC",
+    "alos": 1.1,
+    "price": 4164.844276277475
+  },
+  "B72A": {
+    "description": "NRVS SYS INF EX VRL MNGTS,MAJC",
+    "alos": 10.84,
+    "price": 39111.673976314836
+  },
+  "B72B": {
+    "description": "NRVS SYS INF EX VRL MNGTS,MINC",
+    "alos": 2.9,
+    "price": 9086.932966423581
+  },
+  "B73A": {
+    "description": "VIRAL MENINGITIS, MAJC",
+    "alos": 5.06,
+    "price": 22755.19463675239
+  },
+  "B73B": {
+    "description": "VIRAL MENINGITIS, MINC",
+    "alos": 2.4,
+    "price": 12078.048401204676
+  },
+  "B74A": {
+    "description": "NONTRAUMATIC STUPOR&COMA, MAJC",
+    "alos": 4.7,
+    "price": 11320.803987336045
+  },
+  "B74B": {
+    "description": "NONTRAUMATIC STUPOR&COMA, MINC",
+    "alos": 1.46,
+    "price": 3786.222069343159
+  },
+  "B75Z": {
+    "description": "FEBRILE CONVULSIONS",
+    "alos": 1.22,
+    "price": 5565.746441934443
+  },
+  "B76A": {
+    "description": "SEIZURES, MAJC",
+    "alos": 4.1,
+    "price": 13895.434994489393
+  },
+  "B76B": {
+    "description": "SEIZURES, MINC",
+    "alos": 1.45,
+    "price": 4581.328703905222
+  },
+  "B77A": {
+    "description": "HEADACHES, MAJC",
+    "alos": 2.6,
+    "price": 12911.017256460173
+  },
+  "B77B": {
+    "description": "HEADACHES, MINC",
+    "alos": 1.18,
+    "price": 4922.088690146106
+  },
+  "B78A": {
+    "description": "INTRACRANIAL INJURIES, MAJC",
+    "alos": 9.96,
+    "price": 22565.88353328523
+  },
+  "B78B": {
+    "description": "INTRACRANIAL INJURIES, MINC",
+    "alos": 3.06,
+    "price": 7761.7552421534765
+  },
+  "B78C": {
+    "description": "INTRACRANIAL INJURIES, TR<5D",
+    "alos": 1.47,
+    "price": 4732.777586678949
+  },
+  "B79A": {
+    "description": "SKULL FRACTURES, MAJC",
+    "alos": 4.97,
+    "price": 15977.85713262813
+  },
+  "B79B": {
+    "description": "SKULL FRACTURES, MINC",
+    "alos": 1.63,
+    "price": 5868.644207481896
+  },
+  "B80A": {
+    "description": "OTHER HEAD INJURIES, MAJC",
+    "alos": 2.8,
+    "price": 15220.6127187595
+  },
+  "B80B": {
+    "description": "OTHER HEAD INJURIES, MINC",
+    "alos": 1.06,
+    "price": 5300.710897080423
+  },
+  "B81A": {
+    "description": "OTHER DIS OF NERVOUS SYS, MAJC",
+    "alos": 7.04,
+    "price": 28169.492195913102
+  },
+  "B81B": {
+    "description": "OTHER DIS OF NERVOUS SYS, MINC",
+    "alos": 2.06,
+    "price": 9238.381849197307
+  },
+  "B82A": {
+    "description": "CHRONIC & UNSP PARA/QUAD, MAJC",
+    "alos": 14.05,
+    "price": 30441.225437519
+  },
+  "B82B": {
+    "description": "CHRONIC & UNSP PARA/QUAD, INTC",
+    "alos": 5.38,
+    "price": 10790.732897628002
+  },
+  "B82C": {
+    "description": "CHRONIC & UNSP PARA/QUAD, MINC",
+    "alos": 2.47,
+    "price": 5338.573117773854
+  },
+  "B83A": {
+    "description": "AC PARA/QUAD&SPINAL CORD, MAJC",
+    "alos": 16.96,
+    "price": 45321.07817003762
+  },
+  "B83B": {
+    "description": "AC PARA/QUAD&SPINAL CORD, INTC",
+    "alos": 6.28,
+    "price": 17795.243725912846
+  },
+  "B83C": {
+    "description": "AC PARA/QUAD&SPINAL CORD, MINC",
+    "alos": 2.78,
+    "price": 8784.03520087613
+  },
+  "C01A": {
+    "description": "PR FOR PENETRTNG EYE INJ, MAJC",
+    "alos": 3.85,
+    "price": 28320.94107868683
+  },
+  "C01B": {
+    "description": "PR FOR PENETRTNG EYE INJ, MINC",
+    "alos": 1.74,
+    "price": 14652.679408358024
+  },
+  "C02A": {
+    "description": "ENUCLE & ORBITAL PROCS, MAJC",
+    "alos": 4.73,
+    "price": 27601.55888551163
+  },
+  "C02B": {
+    "description": "ENUCLE & ORBITAL PROCS, MINC",
+    "alos": 1.61,
+    "price": 13630.399449635372
+  },
+  "C03A": {
+    "description": "RETINAL PROCEDURES, MAJC",
+    "alos": 1.41,
+    "price": 13668.261670328804
+  },
+  "C03B": {
+    "description": "RETINAL PROCEDURES, MINC",
+    "alos": 1.01,
+    "price": 3937.6709521168855
+  },
+  "C04A": {
+    "description": "MJR CORN,SCLERL&CNJNCT PR,MAJC",
+    "alos": 3.93,
+    "price": 21846.50134011003
+  },
+  "C04B": {
+    "description": "MJR CORN,SCLERL&CNJNCT PR,MINC",
+    "alos": 1.13,
+    "price": 11585.839532190066
+  },
+  "C05Z": {
+    "description": "DACRYOCYSTORHINOSTOMY",
+    "alos": 1.13,
+    "price": 9617.004056131624
+  },
+  "C10Z": {
+    "description": "STRABISMUS PROCEDURES",
+    "alos": 1.01,
+    "price": 8556.861876715539
+  },
+  "C11Z": {
+    "description": "EYELID PROCEDURES",
+    "alos": 1.15,
+    "price": 4354.155379744633
+  },
+  "C12A": {
+    "description": "OTH CORN SCLERAL&CONJ PR, MAJC",
+    "alos": 4.03,
+    "price": 6701.613062737391
+  },
+  "C12B": {
+    "description": "OTH CORN SCLERAL&CONJ PR, MINC",
+    "alos": 1.05,
+    "price": 2612.4932278467795
+  },
+  "C13Z": {
+    "description": "LACRIMAL PROCEDURES",
+    "alos": 1.15,
+    "price": 4808.502028065812
+  },
+  "C14A": {
+    "description": "OTHER EYE PROCEDURES, MAJC",
+    "alos": 4.67,
+    "price": 18817.5236846355
+  },
+  "C14B": {
+    "description": "OTHER EYE PROCEDURES, MINC",
+    "alos": 1.07,
+    "price": 5641.470883321307
+  },
+  "C15Z": {
+    "description": "GLAUCOMA/CMPLX CATARACT PROCS",
+    "alos": 1.34,
+    "price": 9995.62626306594
+  },
+  "C16Z": {
+    "description": "LENS PROCEDURES",
+    "alos": 1.01,
+    "price": 8670.448538795834
+  },
+  "C60A": {
+    "description": "AC & MJR EYE INFECTIONS, MAJC",
+    "alos": 7.43,
+    "price": 21354.292471095418
+  },
+  "C60B": {
+    "description": "AC & MJR EYE INFECTIONS, MINC",
+    "alos": 2.97,
+    "price": 8973.346304343288
+  },
+  "C61A": {
+    "description": "NEURO & VASCLR DIS EYE, MAJC",
+    "alos": 3.32,
+    "price": 9238.381849197307
+  },
+  "C61B": {
+    "description": "NEURO & VASCLR DIS EYE, MINC",
+    "alos": 1.56,
+    "price": 4089.119834890612
+  },
+  "C62A": {
+    "description": "HYPH & MED M TRAUMA EYE, MAJC",
+    "alos": 3.27,
+    "price": 16205.030456788721
+  },
+  "C62B": {
+    "description": "HYPH & MED M TRAUMA EYE, MINC",
+    "alos": 1.17,
+    "price": 5490.02200054758
+  },
+  "C63A": {
+    "description": "OTH DIS OF THE EYE, MAJC",
+    "alos": 2.79,
+    "price": 9806.315159598782
+  },
+  "C63B": {
+    "description": "OTH DIS OF THE EYE, MINC",
+    "alos": 1.3,
+    "price": 3672.635407262864
+  },
+  "D01Z": {
+    "description": "COCHLEAR IMPLANT",
+    "alos": 1.23,
+    "price": 43655.14045952662
+  },
+  "D02A": {
+    "description": "HEAD & NECK PROCEDURES, MAJC",
+    "alos": 9.7,
+    "price": 36158.42076222717
+  },
+  "D02B": {
+    "description": "HEAD & NECK PROCEDURES, MINC",
+    "alos": 2.04,
+    "price": 10374.248470000255
+  },
+  "D03A": {
+    "description": "REPR CLEFT LIP/PALATE, MAJC",
+    "alos": 2.33,
+    "price": 15977.85713262813
+  },
+  "D03B": {
+    "description": "REPR CLEFT LIP/PALATE, MINC",
+    "alos": 1.59,
+    "price": 10904.319559708298
+  },
+  "D04A": {
+    "description": "MAXILLO SURGERY, MAJC",
+    "alos": 2.52,
+    "price": 17075.86153273765
+  },
+  "D04B": {
+    "description": "MAXILLO SURGERY, MINC",
+    "alos": 1.55,
+    "price": 10222.79958722653
+  },
+  "D05Z": {
+    "description": "PAROTID GLAND PROCEDURES",
+    "alos": 2.45,
+    "price": 15258.47493945293
+  },
+  "D06Z": {
+    "description": "SINUS & COMPLEX MIDDLE EAR PR",
+    "alos": 1.21,
+    "price": 14501.230525584298
+  },
+  "D10Z": {
+    "description": "NASAL PROCEDURES",
+    "alos": 1.07,
+    "price": 10374.248470000255
+  },
+  "D11Z": {
+    "description": "TONSILLECTOMY, ADENOIDECTOMY",
+    "alos": 1.12,
+    "price": 3861.946510730022
+  },
+  "D12A": {
+    "description": "OTH EAR,NOSE,MTH&THRT PR, MAJC",
+    "alos": 4.61,
+    "price": 18666.074801861774
+  },
+  "D12B": {
+    "description": "OTH EAR,NOSE,MTH&THRT PR, MINC",
+    "alos": 1.28,
+    "price": 6625.888621350528
+  },
+  "D13Z": {
+    "description": "MYRINGOTOMY + TUBE INSERTION",
+    "alos": 1.13,
+    "price": 5906.5064281753275
+  },
+  "D14A": {
+    "description": "MOUTH&SALIVRY GLAND PR, MAJC",
+    "alos": 2.12,
+    "price": 9162.657407810444
+  },
+  "D14B": {
+    "description": "MOUTH&SALIVRY GLAND PR, MINC",
+    "alos": 1.06,
+    "price": 3748.359848649727
+  },
+  "D15Z": {
+    "description": "MASTOID PROCEDURES",
+    "alos": 1.91,
+    "price": 14728.403849744887
+  },
+  "D40Z": {
+    "description": "DENTAL EXTRACT & RESTORATIONS",
+    "alos": 1.08,
+    "price": 3104.70209686139
+  },
+  "D60A": {
+    "description": "EAR,NOSE,MTH&THRT MALIG, MAJC",
+    "alos": 7.61,
+    "price": 23058.09240229984
+  },
+  "D60B": {
+    "description": "EAR,NOSE,MTH&THRT MALIG, MINC",
+    "alos": 1.61,
+    "price": 5641.470883321307
+  },
+  "D61A": {
+    "description": "DYSEQUILIBRIUM, MAJC",
+    "alos": 3.19,
+    "price": 13403.226125474783
+  },
+  "D61B": {
+    "description": "DYSEQUILIBRIUM, MINC",
+    "alos": 1.34,
+    "price": 5490.02200054758
+  },
+  "D62A": {
+    "description": "EPISTAXIS, MAJC",
+    "alos": 3.43,
+    "price": 11169.355104562319
+  },
+  "D62B": {
+    "description": "EPISTAXIS, MINC",
+    "alos": 1.32,
+    "price": 3483.3243037957063
+  },
+  "D63A": {
+    "description": "OTITIS MEDIA&UPP RESP INF,MAJC",
+    "alos": 2.81,
+    "price": 4846.364248759243
+  },
+  "D63B": {
+    "description": "OTITIS MEDIA&UPP RESP INF,MINC",
+    "alos": 1.25,
+    "price": 1893.1110346715795
+  },
+  "D64A": {
+    "description": "LARYNGOTRTIS&EPIGLOTTITIS,MAJC",
+    "alos": 1.91,
+    "price": 8329.68855255495
+  },
+  "D64B": {
+    "description": "LARYNGOTRTIS&EPIGLOTTITIS,MINC",
+    "alos": 1.13,
+    "price": 3028.977655474527
+  },
+  "D65A": {
+    "description": "NASAL TRAUMA & DEFORMITY, MAJC",
+    "alos": 3.28,
+    "price": 7118.097490365139
+  },
+  "D65B": {
+    "description": "NASAL TRAUMA & DEFORMITY, MINC",
+    "alos": 1.08,
+    "price": 2461.044345073053
+  },
+  "D66A": {
+    "description": "OTH EAR,NOSE,MTH&THRT DIS,MAJC",
+    "alos": 2.62,
+    "price": 6966.648607591413
+  },
+  "D66B": {
+    "description": "OTH EAR,NOSE,MTH&THRT DIS,MINC",
+    "alos": 1.21,
+    "price": 2309.5954622993268
+  },
+  "D67A": {
+    "description": "ORAL & DENTAL DISORDERS, MAJC",
+    "alos": 3.3,
+    "price": 8935.484083649855
+  },
+  "D67B": {
+    "description": "ORAL & DENTAL DISORDERS, MINC",
+    "alos": 1.22,
+    "price": 2763.942110620506
+  },
+  "E01A": {
+    "description": "MAJOR CHEST PROCEDURES, MAJC",
+    "alos": 17.26,
+    "price": 85947.24097408971
+  },
+  "E01B": {
+    "description": "MAJOR CHEST PROCEDURES, INTC",
+    "alos": 9.45,
+    "price": 47138.46476332233
+  },
+  "E01C": {
+    "description": "MAJOR CHEST PROCEDURES, MINC",
+    "alos": 6.14,
+    "price": 33205.16754813951
+  },
+  "E02A": {
+    "description": "OTHER RESPIRATORY SYS GI, MAJC",
+    "alos": 12.47,
+    "price": 71067.3882415711
+  },
+  "E02B": {
+    "description": "OTHER RESPIRATORY SYS GI, INTC",
+    "alos": 2.66,
+    "price": 21505.741353869143
+  },
+  "E02C": {
+    "description": "OTHER RESPIRATORY SYS GI, MINC",
+    "alos": 1.07,
+    "price": 20294.150291679332
+  },
+  "E03Z": {
+    "description": "LUNG OR HEART-LUNG TRANSPLANT",
+    "alos": 28.49,
+    "price": 259280.48730861954
+  },
+  "E40A": {
+    "description": "RESP SYS DIS, VENT SUPP, MAJC",
+    "alos": 12.4,
+    "price": 76822.44578697269
+  },
+  "E40B": {
+    "description": "RESP SYS DIS, VENT SUPP, MINC",
+    "alos": 7.3,
+    "price": 52552.762322483046
+  },
+  "E41A": {
+    "description": "RESP SYS DIS,NON-INV VENT,MAJC",
+    "alos": 12.06,
+    "price": 51946.96679138814
+  },
+  "E41B": {
+    "description": "RESP SYS DIS,NON-INV VENT,MINC",
+    "alos": 6.14,
+    "price": 25519.13674737289
+  },
+  "E42A": {
+    "description": "BRONCHOSCOPY, MAJC",
+    "alos": 12.07,
+    "price": 56793.33104014739
+  },
+  "E42B": {
+    "description": "BRONCHOSCOPY, INTC",
+    "alos": 3.97,
+    "price": 20937.80804346767
+  },
+  "E42C": {
+    "description": "BRONCHOSCOPY, MINC",
+    "alos": 1.29,
+    "price": 7799.617462846907
+  },
+  "E60A": {
+    "description": "CYSTIC FIBROSIS, MAJC",
+    "alos": 11.38,
+    "price": 44791.007080329575
+  },
+  "E60B": {
+    "description": "CYSTIC FIBROSIS, MINC",
+    "alos": 6.57,
+    "price": 19650.492539890998
+  },
+  "E61A": {
+    "description": "PULMONARY EMBOLISM, MAJC",
+    "alos": 6.23,
+    "price": 25443.41230598603
+  },
+  "E61B": {
+    "description": "PULMONARY EMBOLISM, MINC",
+    "alos": 2.54,
+    "price": 10563.559573467413
+  },
+  "E62A": {
+    "description": "RESPIR INFECTN/INFLAMM, MAJC",
+    "alos": 5.81,
+    "price": 10222.79958722653
+  },
+  "E62B": {
+    "description": "RESPIR INFECTN/INFLAMM, MINC",
+    "alos": 2.52,
+    "price": 4581.328703905222
+  },
+  "E63A": {
+    "description": "SLEEP APNOEA, MAJC",
+    "alos": 1.69,
+    "price": 7345.270814525728
+  },
+  "E63B": {
+    "description": "SLEEP APNOEA, MINC",
+    "alos": 1.13,
+    "price": 4013.395393503749
+  },
+  "E64A": {
+    "description": "PULM OEDEMA & RESP FAIL, MAJC",
+    "alos": 6.01,
+    "price": 41799.89164554847
+  },
+  "E64B": {
+    "description": "PULM OEDEMA & RESP FAIL, MINC",
+    "alos": 2.4,
+    "price": 16432.20378094931
+  },
+  "E65A": {
+    "description": "CHRONIC OBSTR AIRWAY DIS, MAJC",
+    "alos": 5.62,
+    "price": 15637.097146387247
+  },
+  "E65B": {
+    "description": "CHRONIC OBSTR AIRWAY DIS, MINC",
+    "alos": 2.71,
+    "price": 7534.581917992887
+  },
+  "E66A": {
+    "description": "MAJOR CHEST TRAUMA, MAJC",
+    "alos": 8.85,
+    "price": 25443.41230598603
+  },
+  "E66B": {
+    "description": "MAJOR CHEST TRAUMA, INTC",
+    "alos": 3.99,
+    "price": 12759.568373686445
+  },
+  "E66C": {
+    "description": "MAJOR CHEST TRAUMA, MINC",
+    "alos": 1.83,
+    "price": 6360.853076496507
+  },
+  "E67A": {
+    "description": "RESP SIGNS & SYMPTOMS, MAJC",
+    "alos": 2.5,
+    "price": 22187.261326350912
+  },
+  "E67B": {
+    "description": "RESP SIGNS & SYMPTOMS, MINC",
+    "alos": 1.16,
+    "price": 9579.141835438191
+  },
+  "E68A": {
+    "description": "PNEUMOTHORAX, MAJC",
+    "alos": 5.28,
+    "price": 25594.861188759754
+  },
+  "E68B": {
+    "description": "PNEUMOTHORAX, MINC",
+    "alos": 2.27,
+    "price": 11093.630663175456
+  },
+  "E69A": {
+    "description": "BRONCHITIS & ASTHMA, MAJC",
+    "alos": 3.14,
+    "price": 10298.524028613392
+  },
+  "E69B": {
+    "description": "BRONCHITIS & ASTHMA, MINC",
+    "alos": 1.4,
+    "price": 4354.155379744633
+  },
+  "E70A": {
+    "description": "WHOOPNG CGH&ACTE BRNCHIO, MAJC",
+    "alos": 2.79,
+    "price": 8443.275214635245
+  },
+  "E70B": {
+    "description": "WHOOPNG CGH&ACTE BRNCHIO, MINC",
+    "alos": 1.62,
+    "price": 4505.604262518359
+  },
+  "E71A": {
+    "description": "RESPIRATORY NEOPLASMS, MAJC",
+    "alos": 7.59,
+    "price": 22262.985767737773
+  },
+  "E71B": {
+    "description": "RESPIRATORY NEOPLASMS, MINC",
+    "alos": 2.74,
+    "price": 8594.724097408971
+  },
+  "E72Z": {
+    "description": "RESP PROBS FROM NEONATL PERIOD",
+    "alos": 1.79,
+    "price": 15561.372705000384
+  },
+  "E73A": {
+    "description": "PLEURAL EFFUSION, MAJC",
+    "alos": 8.91,
+    "price": 36347.731865694324
+  },
+  "E73B": {
+    "description": "PLEURAL EFFUSION, INTC",
+    "alos": 4.16,
+    "price": 17265.172636204803
+  },
+  "E73C": {
+    "description": "PLEURAL EFFUSION, MINC",
+    "alos": 1.86,
+    "price": 7420.995255912591
+  },
+  "E74A": {
+    "description": "INTERSTITIAL LUNG DIS, MAJC",
+    "alos": 6.43,
+    "price": 20672.77249861365
+  },
+  "E74B": {
+    "description": "INTERSTITIAL LUNG DIS, MINC",
+    "alos": 2.54,
+    "price": 8746.172980182697
+  },
+  "E75A": {
+    "description": "OTHER RESP SYS DIS, MAJC",
+    "alos": 3.8,
+    "price": 11282.941766642614
+  },
+  "E75B": {
+    "description": "OTHER RESP SYS DIS, MINC",
+    "alos": 1.49,
+    "price": 4581.328703905222
+  },
+  "E76Z": {
+    "description": "RESPIRATORY TUBERCULOSIS",
+    "alos": 14.75,
+    "price": 27033.625575110156
+  },
+  "E77A": {
+    "description": "BRONCHIECTASIS, MAJC",
+    "alos": 7.65,
+    "price": 19385.456995036973
+  },
+  "E77B": {
+    "description": "BRONCHIECTASIS, MINC",
+    "alos": 4.33,
+    "price": 10033.48848375937
+  },
+  "F01A": {
+    "description": "IMPL/REPL AICD, TOT SYS, MAJC",
+    "alos": 11.34,
+    "price": 123960.91055029503
+  },
+  "F01B": {
+    "description": "IMPL/REPL AICD, TOT SYS, MINC",
+    "alos": 1.79,
+    "price": 53499.31783981884
+  },
+  "F02Z": {
+    "description": "OTHER AICD PROCEDURES",
+    "alos": 3.73,
+    "price": 35552.62523113227
+  },
+  "F03A": {
+    "description": "CRD VLV PR+PMP+INV INVES, MAJC",
+    "alos": 24.85,
+    "price": 201237.7029855889
+  },
+  "F03B": {
+    "description": "CRD VLV PR+PMP+INV INVES, MINC",
+    "alos": 12.86,
+    "price": 128466.5148128134
+  },
+  "F04A": {
+    "description": "CRD VLV PR+PMP-INV INVES, MAJC",
+    "alos": 20.8,
+    "price": 180489.20604558842
+  },
+  "F04B": {
+    "description": "CRD VLV PR+PMP-INV INVES, INTC",
+    "alos": 10.07,
+    "price": 107225.80900379826
+  },
+  "F04C": {
+    "description": "CRD VLV PR+PMP-INV INVES, MINC",
+    "alos": 6.62,
+    "price": 82766.81443584146
+  },
+  "F05A": {
+    "description": "CRNRY BYPSS+INV INVES, MAJC",
+    "alos": 18.48,
+    "price": 154780.75819474834
+  },
+  "F05B": {
+    "description": "CRNRY BYPSS+INV INVES, MINC",
+    "alos": 12.8,
+    "price": 111428.51550076918
+  },
+  "F06A": {
+    "description": "CRNRY BYPSS-INV INVES, MAJC",
+    "alos": 16.2,
+    "price": 91740.16074018474
+  },
+  "F06B": {
+    "description": "CRNRY BYPSS-INV INVES, INTC",
+    "alos": 9.88,
+    "price": 61866.868613067214
+  },
+  "F06C": {
+    "description": "CRNRY BYPSS-INV INVES, MINC",
+    "alos": 7.45,
+    "price": 51076.13571543922
+  },
+  "F07A": {
+    "description": "OTH CARDTHOR/VASC PR+PMP, MAJC",
+    "alos": 13.57,
+    "price": 161671.6823609529
+  },
+  "F07B": {
+    "description": "OTH CARDTHOR/VASC PR+PMP, MINC",
+    "alos": 7.31,
+    "price": 87953.93867084158
+  },
+  "F08A": {
+    "description": "MJR RECNSTR VASC PR-PUMP, MAJC",
+    "alos": 19.89,
+    "price": 153644.89157394538
+  },
+  "F08B": {
+    "description": "MJR RECNSTR VASC PR-PUMP, INTC",
+    "alos": 9.06,
+    "price": 82766.81443584146
+  },
+  "F08C": {
+    "description": "MJR RECNSTR VASC PR-PUMP, MINC",
+    "alos": 4.18,
+    "price": 48690.815811753026
+  },
+  "F09A": {
+    "description": "OTH CARDIOTHR PR-CPB PMP, MAJC",
+    "alos": 11.42,
+    "price": 58194.233205804354
+  },
+  "F09B": {
+    "description": "OTH CARDIOTHR PR-CPB PMP, INTC",
+    "alos": 5.43,
+    "price": 30100.465451278116
+  },
+  "F09C": {
+    "description": "OTH CARDIOTHR PR-CPB PMP, MINC",
+    "alos": 2.23,
+    "price": 16280.754898175584
+  },
+  "F10A": {
+    "description": "INTERVENT CRNRY PR + AMI, MAJC",
+    "alos": 7.04,
+    "price": 50205.30463949029
+  },
+  "F10B": {
+    "description": "INTERVENT CRNRY PR + AMI, MINC",
+    "alos": 3.1,
+    "price": 26806.452250949565
+  },
+  "F11A": {
+    "description": "AMP CIRC DIS-UP LMB&TOE, MAJC",
+    "alos": 29.48,
+    "price": 160195.05575390905
+  },
+  "F11B": {
+    "description": "AMP CIRC DIS-UP LMB&TOE, MINC",
+    "alos": 15.62,
+    "price": 76178.78803518436
+  },
+  "F12A": {
+    "description": "IMPL/REPL PM, TOT SYS, MAJC",
+    "alos": 7.61,
+    "price": 59178.65094383358
+  },
+  "F12B": {
+    "description": "IMPL/REPL PM, TOT SYS, MINC",
+    "alos": 2.31,
+    "price": 27904.456651059085
+  },
+  "F13A": {
+    "description": "AMP CIRC DIS,UPP LMB&TOE, MAJC",
+    "alos": 16.51,
+    "price": 74815.74809022082
+  },
+  "F13B": {
+    "description": "AMP CIRC DIS,UPP LMB&TOE, MINC",
+    "alos": 7.34,
+    "price": 33848.82529992784
+  },
+  "F14A": {
+    "description": "VASC PR-MJR RECONSTR-PMP, MAJC",
+    "alos": 12.8,
+    "price": 80835.84118047645
+  },
+  "F14B": {
+    "description": "VASC PR-MJR RECONSTR-PMP, INTC",
+    "alos": 3.77,
+    "price": 33545.92753438039
+  },
+  "F14C": {
+    "description": "VASC PR-MJR RECONSTR-PMP, MINC",
+    "alos": 1.51,
+    "price": 18173.865932847162
+  },
+  "F17A": {
+    "description": "INSERT/REPLACE PACEM GEN, MAJC",
+    "alos": 4.29,
+    "price": 35931.24743806658
+  },
+  "F17B": {
+    "description": "INSERT/REPLACE PACEM GEN, MINC",
+    "alos": 1.1,
+    "price": 15977.85713262813
+  },
+  "F18Z": {
+    "description": "OTHER PACEMAKER PR",
+    "alos": 3.89,
+    "price": 29456.807699489775
+  },
+  "F19A": {
+    "description": "TRNS-VSCLR PERC CRDC INT, MAJC",
+    "alos": 5.8,
+    "price": 44942.455963103304
+  },
+  "F19B": {
+    "description": "TRNS-VSCLR PERC CRDC INT, MINC",
+    "alos": 1.47,
+    "price": 22414.4346505115
+  },
+  "F20Z": {
+    "description": "VEIN LIGATION & STRIPPING",
+    "alos": 1.16,
+    "price": 10222.79958722653
+  },
+  "F21A": {
+    "description": "OTH CIRCULATORY SYS GI, MAJC",
+    "alos": 22.37,
+    "price": 69250.00164828637
+  },
+  "F21B": {
+    "description": "OTH CIRCULATORY SYS GI, INTC",
+    "alos": 9.46,
+    "price": 29116.047713248892
+  },
+  "F21C": {
+    "description": "OTH CIRCULATORY SYS GI, MINC",
+    "alos": 2.57,
+    "price": 13176.052801314194
+  },
+  "F22Z": {
+    "description": "INSERT ARTIFICIAL HEART DEVICE",
+    "alos": 55.54,
+    "price": 951553.3304673227
+  },
+  "F23Z": {
+    "description": "HEART TRANSPLANT",
+    "alos": 32.15,
+    "price": 434847.60466406186
+  },
+  "F24A": {
+    "description": "INTERV CRNRY PR-AMI, MAJC",
+    "alos": 6.88,
+    "price": 48766.54025313989
+  },
+  "F24B": {
+    "description": "INTERV CRNRY PR-AMI, MINC",
+    "alos": 1.61,
+    "price": 21354.292471095418
+  },
+  "F40A": {
+    "description": "CIRC DIS +VENT SUPP, MAJC",
+    "alos": 12.19,
+    "price": 104991.9379828858
+  },
+  "F40B": {
+    "description": "CIRC DIS +VENT SUPP, MINC",
+    "alos": 4.34,
+    "price": 51379.03348098667
+  },
+  "F41A": {
+    "description": "CRC DSRD+AMI+INVA INV PR, MAJC",
+    "alos": 6.77,
+    "price": 35439.03856905197
+  },
+  "F41B": {
+    "description": "CRC DSRD+AMI+INVA INV PR, MINC",
+    "alos": 3.14,
+    "price": 18968.97256740923
+  },
+  "F42A": {
+    "description": "CIRC DIS-AMI+INVA INV PR, MAJC",
+    "alos": 5.74,
+    "price": 29911.154347810956
+  },
+  "F42B": {
+    "description": "CIRC DIS-AMI+INVA INV PR, MINC",
+    "alos": 1.57,
+    "price": 10184.937366533097
+  },
+  "F43A": {
+    "description": "CIRC DIS +N-INVAS VENT, MAJC",
+    "alos": 14.53,
+    "price": 81858.1211391991
+  },
+  "F43B": {
+    "description": "CIRC DIS +N-INVAS VENT, MINC",
+    "alos": 8.09,
+    "price": 42292.100514563084
+  },
+  "F60A": {
+    "description": "CIRC DIS+AMI-INVA INV PR",
+    "alos": 4.76,
+    "price": 21430.01691248228
+  },
+  "F60B": {
+    "description": "CIRC DIS+AMI-INVA INV PR,T<5D",
+    "alos": 1.5,
+    "price": 9503.417394051328
+  },
+  "F61A": {
+    "description": "INFECTIVE ENDOCARDITIS, MAJC",
+    "alos": 23.28,
+    "price": 82085.29446335969
+  },
+  "F61B": {
+    "description": "INFECTIVE ENDOCARDITIS, INTC",
+    "alos": 14.26,
+    "price": 43920.17600438064
+  },
+  "F61C": {
+    "description": "INFECTIVE ENDOCARDITIS, MINC",
+    "alos": 7.31,
+    "price": 16621.51488441647
+  },
+  "F62A": {
+    "description": "HEART FAILURE & SHOCK, MAJC",
+    "alos": 7.75,
+    "price": 22906.643519526115
+  },
+  "F62B": {
+    "description": "HEART FAILURE & SHOCK, MINC",
+    "alos": 3.38,
+    "price": 10147.075145839666
+  },
+  "F62C": {
+    "description": "HEART FAILURE & SHOCK, TR<5D",
+    "alos": 1.55,
+    "price": 6057.955310949054
+  },
+  "F63A": {
+    "description": "VENOUS THROMBOSIS, MAJC",
+    "alos": 4.84,
+    "price": 16810.825987883625
+  },
+  "F63B": {
+    "description": "VENOUS THROMBOSIS, MINC",
+    "alos": 2.06,
+    "price": 6133.679752335917
+  },
+  "F64A": {
+    "description": "SKN ULCERS IN CIRC DIS, MAJC",
+    "alos": 11.2,
+    "price": 14084.746097956551
+  },
+  "F64B": {
+    "description": "SKN ULCERS IN CIRC DIS, INTC",
+    "alos": 5.43,
+    "price": 6474.439738576802
+  },
+  "F64C": {
+    "description": "SKN ULCERS IN CIRC DIS, MINC",
+    "alos": 2.3,
+    "price": 2612.4932278467795
+  },
+  "F65A": {
+    "description": "PERIPHERAL VASCULAR DIS, MAJC",
+    "alos": 5.58,
+    "price": 7951.066345620634
+  },
+  "F65B": {
+    "description": "PERIPHERAL VASCULAR DIS, MINC",
+    "alos": 1.8,
+    "price": 2763.942110620506
+  },
+  "F66A": {
+    "description": "CORONARY ATHEROSCLEROSIS, MAJC",
+    "alos": 3.94,
+    "price": 31501.367616935084
+  },
+  "F66B": {
+    "description": "CORONARY ATHEROSCLEROSIS, MINC",
+    "alos": 1.38,
+    "price": 10639.284014854276
+  },
+  "F67A": {
+    "description": "HYPERTENSION, MAJC",
+    "alos": 3.98,
+    "price": 18325.314815620888
+  },
+  "F67B": {
+    "description": "HYPERTENSION, MINC",
+    "alos": 1.38,
+    "price": 5717.19532470817
+  },
+  "F68Z": {
+    "description": "CONGENITAL HEART DISEASE",
+    "alos": 1.88,
+    "price": 44185.21154923467
+  },
+  "F69A": {
+    "description": "VALVULAR DISORDERS, MAJC",
+    "alos": 4.83,
+    "price": 30933.434306533607
+  },
+  "F69B": {
+    "description": "VALVULAR DISORDERS, MINC",
+    "alos": 1.2,
+    "price": 7042.373048978276
+  },
+  "F72A": {
+    "description": "UNSTABLE ANGINA, MAJC",
+    "alos": 3.4,
+    "price": 23095.95462299327
+  },
+  "F72B": {
+    "description": "UNSTABLE ANGINA, MINC",
+    "alos": 1.53,
+    "price": 10639.284014854276
+  },
+  "F73A": {
+    "description": "SYNCOPE & COLLAPSE, MAJC",
+    "alos": 4.43,
+    "price": 13478.950566861646
+  },
+  "F73B": {
+    "description": "SYNCOPE & COLLAPSE, MINC",
+    "alos": 1.46,
+    "price": 4657.053145292086
+  },
+  "F74A": {
+    "description": "CHEST PAIN, MAJC",
+    "alos": 1.84,
+    "price": 20786.359160693944
+  },
+  "F74B": {
+    "description": "CHEST PAIN, MINC",
+    "alos": 1.08,
+    "price": 10071.350704452803
+  },
+  "F75A": {
+    "description": "OTHER CIRCULATORY DIS, MAJC",
+    "alos": 9.57,
+    "price": 38051.53179689875
+  },
+  "F75B": {
+    "description": "OTHER CIRCULATORY DIS, INTC",
+    "alos": 4.28,
+    "price": 17000.137091350785
+  },
+  "F75C": {
+    "description": "OTHER CIRCULATORY DIS, MINC",
+    "alos": 1.88,
+    "price": 7458.857476606023
+  },
+  "F76A": {
+    "description": "ARRHY,CARD ARRST&COND DIS,MAJC",
+    "alos": 3.99,
+    "price": 26011.345616387505
+  },
+  "F76B": {
+    "description": "ARRHY,CARD ARRST&COND DIS,MINC",
+    "alos": 1.44,
+    "price": 9086.932966423581
+  },
+  "G01A": {
+    "description": "RECTAL RESECTION, MAJC",
+    "alos": 25.17,
+    "price": 80949.42784255675
+  },
+  "G01B": {
+    "description": "RECTAL RESECTION, INTC",
+    "alos": 13.17,
+    "price": 44715.28263894271
+  },
+  "G01C": {
+    "description": "RECTAL RESECTION, MINC",
+    "alos": 7.76,
+    "price": 30403.363216825568
+  },
+  "G02A": {
+    "description": "MJR SMALL&LARGE BOWEL PR, MAJC",
+    "alos": 23.19,
+    "price": 80002.87232522096
+  },
+  "G02B": {
+    "description": "MJR SMALL&LARGE BOWEL PR, INTC",
+    "alos": 10.2,
+    "price": 36915.665176095805
+  },
+  "G02C": {
+    "description": "MJR SMALL&LARGE BOWEL PR, MINC",
+    "alos": 5.4,
+    "price": 21619.32801594944
+  },
+  "G03A": {
+    "description": "STOMCH,OESHPGL&DUODNL PR, MAJC",
+    "alos": 18.38,
+    "price": 91020.77854700956
+  },
+  "G03B": {
+    "description": "STOMCH,OESHPGL&DUODNL PR, INTC",
+    "alos": 7.49,
+    "price": 38316.567341752765
+  },
+  "G03C": {
+    "description": "STOMCH,OESHPGL&DUODNL PR, MINC",
+    "alos": 3.44,
+    "price": 19726.21698127786
+  },
+  "G04A": {
+    "description": "PERITONEAL ADHESOLYSIS, MAJC",
+    "alos": 13.65,
+    "price": 49750.95799116911
+  },
+  "G04B": {
+    "description": "PERITONEAL ADHESOLYSIS, INTC",
+    "alos": 5.81,
+    "price": 22982.367960912976
+  },
+  "G04C": {
+    "description": "PERITONEAL ADHESOLYSIS, MINC",
+    "alos": 2.57,
+    "price": 13100.328359927329
+  },
+  "G05A": {
+    "description": "MNR SMALL&LARGE BOWEL PR, MAJC",
+    "alos": 10.88,
+    "price": 23360.990167847292
+  },
+  "G05B": {
+    "description": "MNR SMALL&LARGE BOWEL PR, MINC",
+    "alos": 3.92,
+    "price": 9957.764042372508
+  },
+  "G06Z": {
+    "description": "PYLOROMYOTOMY",
+    "alos": 3.32,
+    "price": 13971.159435876256
+  },
+  "G07A": {
+    "description": "APPENDICECTOMY, MAJC",
+    "alos": 4.37,
+    "price": 13176.052801314194
+  },
+  "G07B": {
+    "description": "APPENDICECTOMY, MINC",
+    "alos": 2.11,
+    "price": 7951.066345620634
+  },
+  "G10A": {
+    "description": "HERNIA PROCEDURES, MAJC",
+    "alos": 3.74,
+    "price": 16621.51488441647
+  },
+  "G10B": {
+    "description": "HERNIA PROCEDURES, MINC",
+    "alos": 1.24,
+    "price": 7951.066345620634
+  },
+  "G11A": {
+    "description": "ANAL & STOMAL PROCEDURES, MAJC",
+    "alos": 4.55,
+    "price": 13327.50168408792
+  },
+  "G11B": {
+    "description": "ANAL & STOMAL PROCEDURES, MINC",
+    "alos": 1.4,
+    "price": 5224.986455693559
+  },
+  "G12A": {
+    "description": "OTH DIGESTIVE SYS GI, MAJC",
+    "alos": 17.32,
+    "price": 29456.807699489775
+  },
+  "G12B": {
+    "description": "OTH DIGESTIVE SYS GI, INTC",
+    "alos": 7.08,
+    "price": 12456.670608138993
+  },
+  "G12C": {
+    "description": "OTH DIGESTIVE SYS GI, MINC",
+    "alos": 2.39,
+    "price": 5641.470883321307
+  },
+  "G46A": {
+    "description": "COMPLEX ENDOSCOPY, MAJC",
+    "alos": 5.34,
+    "price": 14311.91942211714
+  },
+  "G46B": {
+    "description": "COMPLEX ENDOSCOPY, MINC",
+    "alos": 1.08,
+    "price": 3104.70209686139
+  },
+  "G47A": {
+    "description": "GASTROSCOPY, MAJC",
+    "alos": 6.04,
+    "price": 14009.021656569688
+  },
+  "G47B": {
+    "description": "GASTROSCOPY&COLONOSCOPY, INTC",
+    "alos": 2.1,
+    "price": 5149.262014306696
+  },
+  "G47C": {
+    "description": "GASTROSCOPY, MINC",
+    "alos": 1.1,
+    "price": 2196.0088002190323
+  },
+  "G48A": {
+    "description": "COLONOSCOPY, MAJC",
+    "alos": 4.01,
+    "price": 9654.866276825056
+  },
+  "G48B": {
+    "description": "COLONOSCOPY, MINC",
+    "alos": 1.07,
+    "price": 2726.0798899270744
+  },
+  "G60A": {
+    "description": "DIGESTIVE MALIGNANCY, MAJC",
+    "alos": 6.5,
+    "price": 18249.590374234027
+  },
+  "G60B": {
+    "description": "DIGESTIVE MALIGNANCY, MINC",
+    "alos": 2.21,
+    "price": 6057.955310949054
+  },
+  "G61A": {
+    "description": "GASTROINT HAEMORRHAGE, MAJC",
+    "alos": 3.96,
+    "price": 6550.1641799636645
+  },
+  "G61B": {
+    "description": "GASTROINT HAEMORRHAGE, MINC",
+    "alos": 1.64,
+    "price": 2536.7687864599166
+  },
+  "G64A": {
+    "description": "INFLAM BOWEL DISEASE, MAJC",
+    "alos": 4.15,
+    "price": 22149.39910565748
+  },
+  "G64B": {
+    "description": "INFLAM BOWEL DISEASE, MINC",
+    "alos": 1.11,
+    "price": 6133.679752335917
+  },
+  "G65A": {
+    "description": "GASTROINT OBSTRUCTION, MAJC",
+    "alos": 5.54,
+    "price": 12153.77284259154
+  },
+  "G65B": {
+    "description": "GASTROINT OBSTRUCTION, MINC",
+    "alos": 2.44,
+    "price": 5490.02200054758
+  },
+  "G66A": {
+    "description": "ABDMNL PAIN/MESENT ADNTS, MAJC",
+    "alos": 2.04,
+    "price": 7686.030800766613
+  },
+  "G66B": {
+    "description": "ABDMNL PAIN/MESENT ADNTS, MINC",
+    "alos": 1.18,
+    "price": 4013.395393503749
+  },
+  "G67A": {
+    "description": "OESOPHS & GASTROENTS, MAJC",
+    "alos": 3.51,
+    "price": 7193.821931752002
+  },
+  "G67B": {
+    "description": "OESOPHS & GASTROENTS, MINC",
+    "alos": 1.28,
+    "price": 2309.5954622993268
+  },
+  "G70A": {
+    "description": "OTHER DIGESTIVE SYS DIS, MAJC",
+    "alos": 5.06,
+    "price": 9427.692952664465
+  },
+  "G70B": {
+    "description": "OTHER DIGESTIVE SYS DIS, INTC",
+    "alos": 2.27,
+    "price": 4164.844276277475
+  },
+  "G70C": {
+    "description": "OTHER DIGESTIVE SYS DIS, MINC",
+    "alos": 1.26,
+    "price": 2196.0088002190323
+  },
+  "H01A": {
+    "description": "PANCREAS,LIVER&SHUNT PR, MAJC",
+    "alos": 21.21,
+    "price": 59330.09982660731
+  },
+  "H01B": {
+    "description": "PANCREAS,LIVER&SHUNT PR, INTC",
+    "alos": 7.85,
+    "price": 25443.41230598603
+  },
+  "H01C": {
+    "description": "PANCREAS,LIVER&SHUNT PR, MINC",
+    "alos": 2.78,
+    "price": 9730.590718211919
+  },
+  "H02A": {
+    "description": "MJR BILIARY TRACT PR, MAJC",
+    "alos": 18.04,
+    "price": 47479.22474956322
+  },
+  "H02B": {
+    "description": "MJR BILIARY TRACT PR, INTC",
+    "alos": 9.21,
+    "price": 23588.163492007883
+  },
+  "H02C": {
+    "description": "MJR BILIARY TRACT PR, MINC",
+    "alos": 4.16,
+    "price": 11055.768442482024
+  },
+  "H05A": {
+    "description": "HEPATOBILIARY DIAG PR, MAJC",
+    "alos": 10.18,
+    "price": 29153.909933942323
+  },
+  "H05B": {
+    "description": "HEPATOBILIARY DIAG PR, INTC",
+    "alos": 4.02,
+    "price": 11964.461739124383
+  },
+  "H05C": {
+    "description": "HEPATOBILIARY DIAG PR, MINC",
+    "alos": 1.39,
+    "price": 4581.328703905222
+  },
+  "H06A": {
+    "description": "OTH HEPTOBILRY&PANCRS GI, MAJC",
+    "alos": 21.05,
+    "price": 40701.887245438964
+  },
+  "H06B": {
+    "description": "OTH HEPTOBILRY&PANCRS GI, INTC",
+    "alos": 8.47,
+    "price": 15750.683808467542
+  },
+  "H06C": {
+    "description": "OTH HEPTOBILRY&PANCRS GI, MINC",
+    "alos": 1.57,
+    "price": 7004.510828284844
+  },
+  "H07A": {
+    "description": "OPEN CHOLECYSTECTOMY, MAJC",
+    "alos": 14.06,
+    "price": 30441.225437519
+  },
+  "H07B": {
+    "description": "OPEN CHOLECYSTECTOMY, INTC",
+    "alos": 7.64,
+    "price": 17227.310415511376
+  },
+  "H07C": {
+    "description": "OPEN CHOLECYSTECTOMY, MINC",
+    "alos": 4.72,
+    "price": 12343.083946058698
+  },
+  "H08A": {
+    "description": "LAP CHOLECYSTECTOMY, MAJC",
+    "alos": 5.91,
+    "price": 21695.052457336304
+  },
+  "H08B": {
+    "description": "LAP CHOLECYSTECTOMY, MINC",
+    "alos": 1.97,
+    "price": 11131.492883868887
+  },
+  "H09Z": {
+    "description": "LIVER TRANSPLANT",
+    "alos": 28.2,
+    "price": 142589.12313146336
+  },
+  "H60A": {
+    "description": "CIRRHOSIS&ALC HEPATITIS, MAJC",
+    "alos": 11.74,
+    "price": 21732.91467802973
+  },
+  "H60B": {
+    "description": "CIRRHOSIS&ALC HEPATITIS, INTC",
+    "alos": 4.78,
+    "price": 8443.275214635245
+  },
+  "H60C": {
+    "description": "CIRRHOSIS&ALC HEPATITIS, MINC",
+    "alos": 1.6,
+    "price": 2915.3909933942323
+  },
+  "H61A": {
+    "description": "MALG HEPATOBIL SYS&PANCR, MAJC",
+    "alos": 8.04,
+    "price": 14311.91942211714
+  },
+  "H61B": {
+    "description": "MALG HEPATOBIL SYS&PANCR, MINC",
+    "alos": 2.46,
+    "price": 4657.053145292086
+  },
+  "H62A": {
+    "description": "PANCREAS DIS -MALIG, MAJC",
+    "alos": 6.58,
+    "price": 18249.590374234027
+  },
+  "H62B": {
+    "description": "PANCREAS DIS -MALIG, MINC",
+    "alos": 2.47,
+    "price": 6285.128635109644
+  },
+  "H63A": {
+    "description": "OTH DISORDERS OF LIVER, MAJC",
+    "alos": 7.39,
+    "price": 6966.648607591413
+  },
+  "H63B": {
+    "description": "OTH DISORDERS OF LIVER, INTC",
+    "alos": 2.52,
+    "price": 2309.5954622993268
+  },
+  "H63C": {
+    "description": "OTH DISORDERS OF LIVER, MINC",
+    "alos": 1.17,
+    "price": 1211.5910621898108
+  },
+  "H64A": {
+    "description": "BILIARY TRACT DISORDERS, MAJC",
+    "alos": 7.14,
+    "price": 7118.097490365139
+  },
+  "H64B": {
+    "description": "BILIARY TRACT DISORDERS, INTC",
+    "alos": 3.06,
+    "price": 3028.977655474527
+  },
+  "H64C": {
+    "description": "BILIARY TRACT DISORDERS, MINC",
+    "alos": 1.68,
+    "price": 1703.7999312044215
+  },
+  "H65A": {
+    "description": "BLEED OESOPHAGEAL VARICES,MAJC",
+    "alos": 10.22,
+    "price": 24761.89233350426
+  },
+  "H65B": {
+    "description": "BLEED OESOPHAGEAL VARICES,INTC",
+    "alos": 4.49,
+    "price": 10563.559573467413
+  },
+  "H65C": {
+    "description": "BLEED OESOPHAGEAL VARICES,MINC",
+    "alos": 2.31,
+    "price": 4884.226469452675
+  },
+  "I01A": {
+    "description": "BL&MLT MJR JNT PR LWR LMB,MAJC",
+    "alos": 24.63,
+    "price": 92194.50738850592
+  },
+  "I01B": {
+    "description": "BL&MLT MJR JNT PR LWR LMB,MINC",
+    "alos": 5.53,
+    "price": 46191.90924598654
+  },
+  "I02A": {
+    "description": "MCRVAS TT/SKIN GRAFT-HAND,MAJC",
+    "alos": 34.66,
+    "price": 131344.04358551418
+  },
+  "I02B": {
+    "description": "MCRVAS TT/SKIN GRAFT-HAND,INTC",
+    "alos": 17.18,
+    "price": 62169.76637861467
+  },
+  "I02C": {
+    "description": "MCRVAS TT/SKIN GRAFT-HAND,MINC",
+    "alos": 6.03,
+    "price": 24193.959023102787
+  },
+  "I03A": {
+    "description": "HIP REPLACEMENT, TRAUMA, MAJC",
+    "alos": 12.98,
+    "price": 46040.46036321281
+  },
+  "I03B": {
+    "description": "HIP REPLACEMENT, TRAUMA, MINC",
+    "alos": 7.33,
+    "price": 31084.883189307337
+  },
+  "I04A": {
+    "description": "KNEE REPLACEMENT, MAJC",
+    "alos": 8.32,
+    "price": 62131.90415792124
+  },
+  "I04B": {
+    "description": "KNEE REPLACEMENT, MINC",
+    "alos": 4.42,
+    "price": 45169.62928726389
+  },
+  "I05A": {
+    "description": "OTHER JOINT REPLACEMENT, MAJC",
+    "alos": 8.16,
+    "price": 45093.90484587703
+  },
+  "I05B": {
+    "description": "OTHER JOINT REPLACEMENT, MINC",
+    "alos": 2.97,
+    "price": 30289.776554745273
+  },
+  "I06Z": {
+    "description": "SPINAL FUSION FOR DEFORMITY",
+    "alos": 8.02,
+    "price": 88256.83643638903
+  },
+  "I07Z": {
+    "description": "AMPUTATION",
+    "alos": 21.75,
+    "price": 52931.384529417366
+  },
+  "I08A": {
+    "description": "OTHER HIP & FEMUR PR, MAJC",
+    "alos": 16.71,
+    "price": 37332.14960372355
+  },
+  "I08B": {
+    "description": "OTHER HIP & FEMUR PR, INTC",
+    "alos": 9.21,
+    "price": 22111.536884964047
+  },
+  "I08C": {
+    "description": "OTHER HIP & FEMUR PR, MINC",
+    "alos": 5.83,
+    "price": 15372.061601533225
+  },
+  "I09A": {
+    "description": "SPINAL FUSION, MAJC",
+    "alos": 17.25,
+    "price": 77920.45018708221
+  },
+  "I09B": {
+    "description": "SPINAL FUSION, INTC",
+    "alos": 7.17,
+    "price": 45018.18040449016
+  },
+  "I09C": {
+    "description": "SPINAL FUSION, MINC",
+    "alos": 4.02,
+    "price": 32372.19869288401
+  },
+  "I10A": {
+    "description": "OTHER BACK & NECK PR, MAJC",
+    "alos": 8.07,
+    "price": 47100.6025426289
+  },
+  "I10B": {
+    "description": "OTHER BACK & NECK PR, MINC",
+    "alos": 2.65,
+    "price": 23058.09240229984
+  },
+  "I11Z": {
+    "description": "LIMB LENGTHENING PROCEDURES",
+    "alos": 5.66,
+    "price": 39414.57174186229
+  },
+  "I12A": {
+    "description": "MISC PR INFC/INFM BNE/JNT,MAJC",
+    "alos": 22.1,
+    "price": 22187.261326350912
+  },
+  "I12B": {
+    "description": "MISC PR INFC/INFM BNE/JNT,INTC",
+    "alos": 10.0,
+    "price": 10298.524028613392
+  },
+  "I12C": {
+    "description": "MISC PR INFC/INFM BNE/JNT,MINC",
+    "alos": 4.28,
+    "price": 5149.262014306696
+  },
+  "I13A": {
+    "description": "HUMER,TIBIA,FIBUL,ANKL PR,MAJC",
+    "alos": 11.09,
+    "price": 27147.21223719045
+  },
+  "I13B": {
+    "description": "HUMER,TIBIA,FIBUL,ANKL PR,INTC",
+    "alos": 4.78,
+    "price": 15069.163835985773
+  },
+  "I13C": {
+    "description": "HUMER,TIBIA,FIBUL,ANKL PR,MINC",
+    "alos": 2.22,
+    "price": 9503.417394051328
+  },
+  "I15Z": {
+    "description": "CRANIO-FACIAL SURGERY",
+    "alos": 4.9,
+    "price": 33053.71866536578
+  },
+  "I16Z": {
+    "description": "OTHER SHOULDER PROCEDURES",
+    "alos": 1.27,
+    "price": 20066.97696751874
+  },
+  "I17A": {
+    "description": "MAXILLO-FACIAL SURGERY, MAJC",
+    "alos": 3.95,
+    "price": 27563.6966648182
+  },
+  "I17B": {
+    "description": "MAXILLO-FACIAL SURGERY, MINC",
+    "alos": 1.48,
+    "price": 12040.186180511246
+  },
+  "I18A": {
+    "description": "OTHER KNEE PROCEDURES, MAJC",
+    "alos": 2.97,
+    "price": 22225.123547044346
+  },
+  "I18B": {
+    "description": "OTHER KNEE PROCEDURES, MINC",
+    "alos": 1.04,
+    "price": 10109.212925146234
+  },
+  "I19A": {
+    "description": "OTHER ELBOW & FOREARM PR, MAJC",
+    "alos": 5.71,
+    "price": 17605.93262244569
+  },
+  "I19B": {
+    "description": "OTHER ELBOW & FOREARM PR, MINC",
+    "alos": 1.65,
+    "price": 8821.89742156956
+  },
+  "I20A": {
+    "description": "OTHER FOOT PROCEDURES, MAJC",
+    "alos": 5.43,
+    "price": 16205.030456788721
+  },
+  "I20B": {
+    "description": "OTHER FOOT PROCEDURES, MINC",
+    "alos": 1.49,
+    "price": 7610.30635937975
+  },
+  "I21A": {
+    "description": "LOC EX&REM DEV HP&FMR, MAJC",
+    "alos": 3.15,
+    "price": 10563.559573467413
+  },
+  "I21B": {
+    "description": "LOC EX&REM DEV HP&FMR, MINC",
+    "alos": 1.11,
+    "price": 5641.470883321307
+  },
+  "I23A": {
+    "description": "LOC EX&REM INT DEV-HP&FMR,MAJC",
+    "alos": 1.92,
+    "price": 14728.403849744887
+  },
+  "I23B": {
+    "description": "LOC EX&REM INT DEV-HP&FMR,MINC",
+    "alos": 1.03,
+    "price": 6322.990855803076
+  },
+  "I24A": {
+    "description": "ARTHROSCOPY, MAJC",
+    "alos": 3.44,
+    "price": 18817.5236846355
+  },
+  "I24B": {
+    "description": "ARTHROSCOPY, MINC",
+    "alos": 1.13,
+    "price": 8178.239669781224
+  },
+  "I25A": {
+    "description": "BONE&JNT DIAG PR INC BIOP,MAJC",
+    "alos": 10.08,
+    "price": 51644.06902584069
+  },
+  "I25B": {
+    "description": "BONE&JNT DIAG PR INC BIOP,MINC",
+    "alos": 1.79,
+    "price": 11737.288414963792
+  },
+  "I27A": {
+    "description": "SOFT TISSUE PROCEDURES, MAJC",
+    "alos": 9.85,
+    "price": 13327.50168408792
+  },
+  "I27B": {
+    "description": "SOFT TISSUE PROCEDURES, MINC",
+    "alos": 1.67,
+    "price": 3445.462083102275
+  },
+  "I28A": {
+    "description": "OTH MUSCULOSKELETAL PR, MAJC",
+    "alos": 11.77,
+    "price": 20445.59917445306
+  },
+  "I28B": {
+    "description": "OTH MUSCULOSKELETAL PR, INTC",
+    "alos": 2.42,
+    "price": 7951.066345620634
+  },
+  "I28C": {
+    "description": "OTH MUSCULOSKELETAL PR, MINC",
+    "alos": 1.54,
+    "price": 4089.119834890612
+  },
+  "I29Z": {
+    "description": "KNEE RECONSTRUCTION/REVISION",
+    "alos": 1.23,
+    "price": 15296.337160146362
+  },
+  "I30Z": {
+    "description": "HAND PROCEDURES",
+    "alos": 1.22,
+    "price": 5641.470883321307
+  },
+  "I31A": {
+    "description": "REV OF HIP REPLACEMENT, MAJC",
+    "alos": 22.92,
+    "price": 79737.83678036692
+  },
+  "I31B": {
+    "description": "REV OF HIP REPLACEMENT, INTC",
+    "alos": 11.41,
+    "price": 50962.549053358925
+  },
+  "I31C": {
+    "description": "REV OF HIP REPLACEMENT, MINC",
+    "alos": 6.26,
+    "price": 35060.416362117656
+  },
+  "I32A": {
+    "description": "REV OF KNEE REPLACEMENT, MAJC",
+    "alos": 15.68,
+    "price": 59822.30869562191
+  },
+  "I32B": {
+    "description": "REV OF KNEE REPLACEMENT, MINC",
+    "alos": 6.48,
+    "price": 36764.216293322075
+  },
+  "I33A": {
+    "description": "HIP REPLACE, NON-TRAUMA, MAJC",
+    "alos": 8.5,
+    "price": 45775.42481835879
+  },
+  "I33B": {
+    "description": "HIP REPLACE, NON-TRAUMA, MINC",
+    "alos": 4.15,
+    "price": 32788.68312051176
+  },
+  "I60Z": {
+    "description": "FEMORAL SHAFT FRACTURES",
+    "alos": 8.21,
+    "price": 22300.847988431207
+  },
+  "I61A": {
+    "description": "DISTAL FEMORAL FRACTURES, MAJC",
+    "alos": 10.1,
+    "price": 20748.49694000051
+  },
+  "I61B": {
+    "description": "DISTAL FEMORAL FRACTURES, MINC",
+    "alos": 3.31,
+    "price": 7686.030800766613
+  },
+  "I63A": {
+    "description": "SPR,STR&DSL HIP,PEL&THIGH,MAJC",
+    "alos": 4.3,
+    "price": 15826.408249854405
+  },
+  "I63B": {
+    "description": "SPR,STR&DSL HIP,PEL&THIGH,MINC",
+    "alos": 1.35,
+    "price": 5717.19532470817
+  },
+  "I64A": {
+    "description": "OSTEOMYELITIS, MAJC",
+    "alos": 13.71,
+    "price": 23663.887933394744
+  },
+  "I64B": {
+    "description": "OSTEOMYELITIS, MINC",
+    "alos": 6.12,
+    "price": 9276.24406989074
+  },
+  "I65A": {
+    "description": "MUSCULOSK MALIG NEOPLASM, MAJC",
+    "alos": 9.44,
+    "price": 17378.759298285102
+  },
+  "I65B": {
+    "description": "MUSCULOSK MALIG NEOPLASM, MINC",
+    "alos": 3.59,
+    "price": 7383.13303521916
+  },
+  "I66A": {
+    "description": "INFLAM MUSCULOSK DIS, MAJC",
+    "alos": 6.67,
+    "price": 35931.24743806658
+  },
+  "I66B": {
+    "description": "INFLAM MUSCULOSK DIS, MINC",
+    "alos": 1.24,
+    "price": 5982.230869562191
+  },
+  "I67A": {
+    "description": "SEPTIC ARTHRITIS, MAJC",
+    "alos": 10.9,
+    "price": 20445.59917445306
+  },
+  "I67B": {
+    "description": "SEPTIC ARTHRITIS, MINC",
+    "alos": 4.75,
+    "price": 7875.341904233771
+  },
+  "I68A": {
+    "description": "NON-SURG SPINAL DIS, MAJC",
+    "alos": 5.38,
+    "price": 46002.59814251939
+  },
+  "I68B": {
+    "description": "NON-SURG SPINAL DIS, MINC",
+    "alos": 1.46,
+    "price": 13024.603918540466
+  },
+  "I69A": {
+    "description": "BONE DISEASES & ARTHROP, MAJC",
+    "alos": 4.96,
+    "price": 18590.350360474913
+  },
+  "I69B": {
+    "description": "BONE DISEASES & ARTHROP, MINC",
+    "alos": 1.59,
+    "price": 5149.262014306696
+  },
+  "I71A": {
+    "description": "OTH MUSCULOTENDINOUS DIS, MAJC",
+    "alos": 4.05,
+    "price": 10336.386249306825
+  },
+  "I71B": {
+    "description": "OTH MUSCULOTENDINOUS DIS, MINC",
+    "alos": 1.31,
+    "price": 3180.4265382482536
+  },
+  "I72A": {
+    "description": "SPECIFIC MUSCTENDIN DIS, MAJC",
+    "alos": 5.59,
+    "price": 8178.239669781224
+  },
+  "I72B": {
+    "description": "SPECIFIC MUSCTENDIN DIS, MINC",
+    "alos": 1.77,
+    "price": 2461.044345073053
+  },
+  "I73A": {
+    "description": "AFTCARE MUSCSK IMPL/PROS, MAJC",
+    "alos": 10.73,
+    "price": 18476.763698394614
+  },
+  "I73B": {
+    "description": "AFTCARE MUSCSK IMPL/PROS, INTC",
+    "alos": 4.15,
+    "price": 6474.439738576802
+  },
+  "I73C": {
+    "description": "AFTCARE MUSCSK IMPL/PROS, MINC",
+    "alos": 1.24,
+    "price": 2953.2532140876638
+  },
+  "I74A": {
+    "description": "INJ FOREARM,WRIST,HAND,FT,MAJC",
+    "alos": 3.51,
+    "price": 11547.977311496636
+  },
+  "I74B": {
+    "description": "INJ FOREARM,WRIST,HAND,FT,MINC",
+    "alos": 1.13,
+    "price": 4657.053145292086
+  },
+  "I75A": {
+    "description": "INJ SH,ARM,ELB,KN,LEG,ANK,MAJC",
+    "alos": 8.16,
+    "price": 17265.172636204803
+  },
+  "I75B": {
+    "description": "INJ SH,ARM,ELB,KN,LEG,ANK,INTC",
+    "alos": 1.94,
+    "price": 4997.81313153297
+  },
+  "I75C": {
+    "description": "INJ SH,ARM,ELB,KN,LEG,ANK,MINC",
+    "alos": 1.16,
+    "price": 2612.4932278467795
+  },
+  "I76A": {
+    "description": "OTH MUSCULOSKELETAL DIS, MAJC",
+    "alos": 5.95,
+    "price": 19574.768098504133
+  },
+  "I76B": {
+    "description": "OTH MUSCULOSKELETAL DIS, MINC",
+    "alos": 1.33,
+    "price": 4922.088690146106
+  },
+  "I77A": {
+    "description": "FRACTURES OF PELVIS, MAJC",
+    "alos": 8.25,
+    "price": 17681.657063832554
+  },
+  "I77B": {
+    "description": "FRACTURES OF PELVIS, MINC",
+    "alos": 3.33,
+    "price": 7420.995255912591
+  },
+  "I78A": {
+    "description": "FRACTURES NECK OF FEMUR, MAJC",
+    "alos": 8.92,
+    "price": 24572.581230037104
+  },
+  "I78B": {
+    "description": "FRACTURES NECK OF FEMUR, MINC",
+    "alos": 3.85,
+    "price": 12040.186180511246
+  },
+  "I79A": {
+    "description": "PATHOLOGICAL FRACTURES, MAJC",
+    "alos": 12.0,
+    "price": 27753.007768285355
+  },
+  "I79B": {
+    "description": "PATHOLOGICAL FRACTURES, INTC",
+    "alos": 6.09,
+    "price": 13933.297215182825
+  },
+  "I79C": {
+    "description": "PATHOLOGICAL FRACTURES, MINC",
+    "alos": 3.07,
+    "price": 7307.408593832297
+  },
+  "I80Z": {
+    "description": "FEMORAL FRACT, TRANSFERRED <2D",
+    "alos": 1.0,
+    "price": 2953.2532140876638
+  },
+  "J01A": {
+    "description": "MICRVS TSS TRNS SKN/BRST, MAJC",
+    "alos": 20.53,
+    "price": 77693.27686292163
+  },
+  "J01B": {
+    "description": "MICRVS TSS TRNS SKN/BRST, MINC",
+    "alos": 7.79,
+    "price": 42746.447162884266
+  },
+  "J06A": {
+    "description": "MAJOR PR FOR BREAST DIS, MAJC",
+    "alos": 5.76,
+    "price": 16772.963767190195
+  },
+  "J06B": {
+    "description": "MAJOR PR FOR BREAST DIS, MINC",
+    "alos": 2.9,
+    "price": 11207.21732525575
+  },
+  "J07Z": {
+    "description": "MINOR PR FOR BREAST DIS",
+    "alos": 1.14,
+    "price": 5906.5064281753275
+  },
+  "J08A": {
+    "description": "OTH SKN GRF& DBRDMNT PR, MAJC",
+    "alos": 16.12,
+    "price": 36272.00742430746
+  },
+  "J08B": {
+    "description": "OTH SKN GRF& DBRDMNT PR, INTC",
+    "alos": 4.03,
+    "price": 10790.732897628002
+  },
+  "J08C": {
+    "description": "OTH SKN GRF& DBRDMNT PR, MINC",
+    "alos": 1.43,
+    "price": 5376.435338467286
+  },
+  "J09Z": {
+    "description": "PERIANAL & PILONIDAL PROCS",
+    "alos": 2.02,
+    "price": 4846.364248759243
+  },
+  "J10A": {
+    "description": "SKN,TIS&BRST PLASTIC GI, MAJC",
+    "alos": 2.62,
+    "price": 10260.661807919962
+  },
+  "J10B": {
+    "description": "SKN,TIS&BRST PLASTIC GI, MINC",
+    "alos": 1.06,
+    "price": 4694.915365985517
+  },
+  "J11A": {
+    "description": "OTH SKN,SUBC TIS&BRST PR, MAJC",
+    "alos": 2.83,
+    "price": 8443.275214635245
+  },
+  "J11B": {
+    "description": "OTH SKN,SUBC TIS&BRST PR, MINC",
+    "alos": 1.03,
+    "price": 3369.7376417154114
+  },
+  "J12A": {
+    "description": "LWR LMB PR +ULC/CEL, MAJC",
+    "alos": 16.23,
+    "price": 27033.625575110156
+  },
+  "J12B": {
+    "description": "LWR LMB PR +ULC/CEL, MINC",
+    "alos": 6.28,
+    "price": 10677.146235547709
+  },
+  "J13A": {
+    "description": "LWR LMB PR -ULC/CEL, MAJC",
+    "alos": 7.59,
+    "price": 17189.448194817942
+  },
+  "J13B": {
+    "description": "LWR LMB PR -ULC/CEL, MINC",
+    "alos": 2.43,
+    "price": 6625.888621350528
+  },
+  "J14Z": {
+    "description": "MAJOR BREAST RECONSTRUCTIONS",
+    "alos": 6.51,
+    "price": 29381.083258102914
+  },
+  "J60A": {
+    "description": "SKIN ULCERS, MAJC",
+    "alos": 9.79,
+    "price": 24383.270126569943
+  },
+  "J60B": {
+    "description": "SKIN ULCERS, INTC",
+    "alos": 4.13,
+    "price": 9276.24406989074
+  },
+  "J60C": {
+    "description": "SKIN ULCERS, MINC",
+    "alos": 2.12,
+    "price": 4240.568717664338
+  },
+  "J62A": {
+    "description": "MALIGNANT BREAST DIS, MAJC",
+    "alos": 6.71,
+    "price": 12191.635063284972
+  },
+  "J62B": {
+    "description": "MALIGNANT BREAST DIS, MINC",
+    "alos": 2.07,
+    "price": 3445.462083102275
+  },
+  "J63A": {
+    "description": "NON-MALIGNANT BREAST DIS, MAJC",
+    "alos": 2.41,
+    "price": 4354.155379744633
+  },
+  "J63B": {
+    "description": "NON-MALIGNANT BREAST DIS, MINC",
+    "alos": 1.44,
+    "price": 2271.7332416058953
+  },
+  "J64A": {
+    "description": "CELLULITIS, MAJC",
+    "alos": 5.32,
+    "price": 6285.128635109644
+  },
+  "J64B": {
+    "description": "CELLULITIS, MINC",
+    "alos": 2.44,
+    "price": 2877.528772700801
+  },
+  "J65A": {
+    "description": "TRAUMA TO SKN,SUB TIS&BST,MAJC",
+    "alos": 3.79,
+    "price": 10790.732897628002
+  },
+  "J65B": {
+    "description": "TRAUMA TO SKN,SUB TIS&BST,MINC",
+    "alos": 1.19,
+    "price": 3672.635407262864
+  },
+  "J67A": {
+    "description": "MINOR SKIN DISORDERS, MAJC",
+    "alos": 3.08,
+    "price": 5224.986455693559
+  },
+  "J67B": {
+    "description": "MINOR SKIN DISORDERS, MINC",
+    "alos": 1.21,
+    "price": 1893.1110346715795
+  },
+  "J68A": {
+    "description": "MAJOR SKIN DISORDERS, MAJC",
+    "alos": 4.07,
+    "price": 17340.897077591668
+  },
+  "J68B": {
+    "description": "MAJOR SKIN DISORDERS, MINC",
+    "alos": 1.52,
+    "price": 4997.81313153297
+  },
+  "J69A": {
+    "description": "SKIN MALIGNANCY, MAJC",
+    "alos": 6.99,
+    "price": 29153.909933942323
+  },
+  "J69B": {
+    "description": "SKIN MALIGNANCY, MINC",
+    "alos": 1.56,
+    "price": 5149.262014306696
+  },
+  "K01A": {
+    "description": "GI FOR DIABETIC COMPL, MAJC",
+    "alos": 28.45,
+    "price": 60503.82866810368
+  },
+  "K01B": {
+    "description": "GI FOR DIABETIC COMPL, INTC",
+    "alos": 14.06,
+    "price": 28207.354416606537
+  },
+  "K01C": {
+    "description": "GI FOR DIABETIC COMPL, MINC",
+    "alos": 6.35,
+    "price": 12153.77284259154
+  },
+  "K02Z": {
+    "description": "PITUITARY PROCEDURES",
+    "alos": 7.25,
+    "price": 30516.94987890586
+  },
+  "K03Z": {
+    "description": "ADRENAL PROCEDURES",
+    "alos": 5.45,
+    "price": 26541.416706095544
+  },
+  "K05A": {
+    "description": "PARATHYROID PROCEDURES, MAJC",
+    "alos": 5.42,
+    "price": 22035.812443577186
+  },
+  "K05B": {
+    "description": "PARATHYROID PROCEDURES, MINC",
+    "alos": 1.36,
+    "price": 9314.106290584172
+  },
+  "K06A": {
+    "description": "THYROID PROCEDURES, MAJC",
+    "alos": 4.04,
+    "price": 21392.154691788848
+  },
+  "K06B": {
+    "description": "THYROID PROCEDURES, MINC",
+    "alos": 1.55,
+    "price": 11055.768442482024
+  },
+  "K08Z": {
+    "description": "THYROGLOSSAL PROCEDURES",
+    "alos": 1.35,
+    "price": 8178.239669781224
+  },
+  "K09A": {
+    "description": "OTH ENDCRN,NUTR&METAB GI, MAJC",
+    "alos": 16.15,
+    "price": 46684.118115001154
+  },
+  "K09B": {
+    "description": "OTH ENDCRN,NUTR&METAB GI, MINC",
+    "alos": 5.19,
+    "price": 16394.34156025588
+  },
+  "K10Z": {
+    "description": "REV & OPEN BARIATRIC PR",
+    "alos": 5.63,
+    "price": 23512.43905062102
+  },
+  "K11Z": {
+    "description": "MAJOR LAP BARIATRIC PR",
+    "alos": 2.8,
+    "price": 16659.3771051099
+  },
+  "K12Z": {
+    "description": "OTHER BARIATRIC PROCS",
+    "alos": 1.58,
+    "price": 11434.39064941634
+  },
+  "K13Z": {
+    "description": "PLAS GI - END,NUT,MET DIS",
+    "alos": 5.03,
+    "price": 17000.137091350785
+  },
+  "K40A": {
+    "description": "ENDO&INVEST PR METAB DIS, MAJC",
+    "alos": 9.48,
+    "price": 23398.852388540723
+  },
+  "K40B": {
+    "description": "ENDO&INVEST PR METAB DIS, MINC",
+    "alos": 1.05,
+    "price": 2763.942110620506
+  },
+  "K60A": {
+    "description": "DIABETES, MAJC",
+    "alos": 5.33,
+    "price": 14652.679408358024
+  },
+  "K60B": {
+    "description": "DIABETES, MINC",
+    "alos": 2.44,
+    "price": 5717.19532470817
+  },
+  "K61A": {
+    "description": "SEV NUTRIT DISTURBANCE, MAJC",
+    "alos": 11.6,
+    "price": 25367.687864599164
+  },
+  "K61B": {
+    "description": "SEV NUTRIT DISTURBANCE, MINC",
+    "alos": 5.59,
+    "price": 11813.012856350655
+  },
+  "K62A": {
+    "description": "MISC METABOLIC DISORDERS, MAJC",
+    "alos": 5.63,
+    "price": 22603.74575397866
+  },
+  "K62B": {
+    "description": "MISC METABOLIC DISORDERS, INTC",
+    "alos": 2.23,
+    "price": 8935.484083649855
+  },
+  "K62C": {
+    "description": "MISC METABOLIC DISORDERS, MINC",
+    "alos": 1.22,
+    "price": 3180.4265382482536
+  },
+  "K63A": {
+    "description": "INBORN ERR OF METABOLISM, MAJC",
+    "alos": 4.02,
+    "price": 10639.284014854276
+  },
+  "K63B": {
+    "description": "INBORN ERR OF METABOLISM, MINC",
+    "alos": 1.05,
+    "price": 1552.351048430695
+  },
+  "K64A": {
+    "description": "ENDOCRINE DISORDERS, MAJC",
+    "alos": 4.0,
+    "price": 12911.017256460173
+  },
+  "K64B": {
+    "description": "ENDOCRINE DISORDERS, MINC",
+    "alos": 1.39,
+    "price": 3445.462083102275
+  },
+  "L02A": {
+    "description": "OP INS PERI CTH DIALYSIS, MAJC",
+    "alos": 10.05,
+    "price": 28472.389961460554
+  },
+  "L02B": {
+    "description": "OP INS PERI CTH DIALYSIS, MINC",
+    "alos": 1.45,
+    "price": 7648.168580073181
+  },
+  "L03A": {
+    "description": "KDNY,URT&MJR BLDR PR NPSM,MAJC",
+    "alos": 13.58,
+    "price": 71559.5971105857
+  },
+  "L03B": {
+    "description": "KDNY,URT&MJR BLDR PR NPSM,INTC",
+    "alos": 5.66,
+    "price": 36120.55854153374
+  },
+  "L03C": {
+    "description": "KDNY,URT&MJR BLDR PR NPSM,MINC",
+    "alos": 3.2,
+    "price": 22414.4346505115
+  },
+  "L04A": {
+    "description": "KDY,URT&MJR BLDR PR N-NPM,MAJC",
+    "alos": 10.81,
+    "price": 40474.71392127837
+  },
+  "L04B": {
+    "description": "KDY,URT&MJR BLDR PR N-NPM,INTC",
+    "alos": 3.44,
+    "price": 16356.479339562447
+  },
+  "L04C": {
+    "description": "KDY,URT&MJR BLDR PR N-NPM,MINC",
+    "alos": 1.37,
+    "price": 8594.724097408971
+  },
+  "L05A": {
+    "description": "TRANSURTH PROSTMY,URI DIS,MAJC",
+    "alos": 6.67,
+    "price": 25822.034512920345
+  },
+  "L05B": {
+    "description": "TRANSURTH PROSTMY,URI DIS,MINC",
+    "alos": 2.3,
+    "price": 11472.25287010977
+  },
+  "L06A": {
+    "description": "MINOR BLADDER PROCEDURES, MAJC",
+    "alos": 11.27,
+    "price": 32485.785354964304
+  },
+  "L06B": {
+    "description": "MINOR BLADDER PROCEDURES, INTC",
+    "alos": 3.66,
+    "price": 12532.395049525856
+  },
+  "L06C": {
+    "description": "MINOR BLADDER PROCEDURES, MINC",
+    "alos": 1.71,
+    "price": 6890.92416620455
+  },
+  "L07A": {
+    "description": "OTH TRANSURETHRAL PROCS, MAJC",
+    "alos": 4.93,
+    "price": 14198.332760036847
+  },
+  "L07B": {
+    "description": "OTH TRANSURETHRAL PROCS, MINC",
+    "alos": 1.25,
+    "price": 5187.124235000128
+  },
+  "L08A": {
+    "description": "URETHRAL PROCEDURES, MAJC",
+    "alos": 3.39,
+    "price": 9617.004056131624
+  },
+  "L08B": {
+    "description": "URETHRAL PROCEDURES, MINC",
+    "alos": 1.26,
+    "price": 4013.395393503749
+  },
+  "L09A": {
+    "description": "OTH PR KIDNY&URNRY TR DIS,MAJC",
+    "alos": 16.46,
+    "price": 17833.10594660628
+  },
+  "L09B": {
+    "description": "OTH PR KIDNY&URNRY TR DIS,INTC",
+    "alos": 3.77,
+    "price": 5490.02200054758
+  },
+  "L09C": {
+    "description": "OTH PR KIDNY&URNRY TR DIS,MINC",
+    "alos": 1.19,
+    "price": 2877.528772700801
+  },
+  "L10A": {
+    "description": "KDNY TRANSPLNT, AGE<=16Y/MAJC",
+    "alos": 15.48,
+    "price": 84091.99216011156
+  },
+  "L10B": {
+    "description": "KDNY TRANSPLNT, AGE>=17Y+MINC",
+    "alos": 8.07,
+    "price": 52136.2778948553
+  },
+  "L40Z": {
+    "description": "URETEROSCOPY",
+    "alos": 1.61,
+    "price": 5527.884221241012
+  },
+  "L41Z": {
+    "description": "CYSTOURETHROSCOPY URI DIS, SD",
+    "alos": 1.0,
+    "price": 5300.710897080423
+  },
+  "L42Z": {
+    "description": "ESW LITHOTRIPSY",
+    "alos": 1.12,
+    "price": 5641.470883321307
+  },
+  "L60A": {
+    "description": "KIDNEY FAILURE, MAJC",
+    "alos": 10.57,
+    "price": 35476.9007897454
+  },
+  "L60B": {
+    "description": "KIDNEY FAILURE, INTC",
+    "alos": 3.98,
+    "price": 12532.395049525856
+  },
+  "L60C": {
+    "description": "KIDNEY FAILURE, MINC",
+    "alos": 1.57,
+    "price": 8102.515228394361
+  },
+  "L61Z": {
+    "description": "HAEMODIALYSIS",
+    "alos": 1.0,
+    "price": 719.3821931752002
+  },
+  "L62A": {
+    "description": "KDNY&UNRY TR NEOPLASMS, MAJC",
+    "alos": 9.33,
+    "price": 27487.972223431334
+  },
+  "L62B": {
+    "description": "KDNY&UNRY TR NEOPLASMS, INTC",
+    "alos": 3.85,
+    "price": 12343.083946058698
+  },
+  "L62C": {
+    "description": "KDNY&UNRY TR NEOPLASMS, MINC",
+    "alos": 1.59,
+    "price": 5490.02200054758
+  },
+  "L63A": {
+    "description": "KDNY&UNRY TR INFECTIONS, MAJC",
+    "alos": 4.69,
+    "price": 11207.21732525575
+  },
+  "L63B": {
+    "description": "KDNY&UNRY TR INFECTIONS, MINC",
+    "alos": 1.77,
+    "price": 4240.568717664338
+  },
+  "L64A": {
+    "description": "URINARY STONES & OBSTR, MAJC",
+    "alos": 2.17,
+    "price": 6285.128635109644
+  },
+  "L64B": {
+    "description": "URINARY STONES & OBSTR, MINC",
+    "alos": 1.15,
+    "price": 2763.942110620506
+  },
+  "L65A": {
+    "description": "KDNY&UNRY TR SGNS&SYMPS, MAJC",
+    "alos": 4.94,
+    "price": 13062.466139233899
+  },
+  "L65B": {
+    "description": "KDNY&UNRY TR SGNS&SYMPS, MINC",
+    "alos": 1.59,
+    "price": 4089.119834890612
+  },
+  "L66Z": {
+    "description": "URETHRAL STRICTURE",
+    "alos": 1.63,
+    "price": 4657.053145292086
+  },
+  "L67A": {
+    "description": "OTH KIDNY&URNRY TRCT DIS, MAJC",
+    "alos": 4.25,
+    "price": 13327.50168408792
+  },
+  "L67B": {
+    "description": "OTH KIDNY&URNRY TRCT DIS, INTC",
+    "alos": 1.38,
+    "price": 3937.6709521168855
+  },
+  "L67C": {
+    "description": "OTH KIDNY&URNRY TRCT DIS, MINC",
+    "alos": 1.04,
+    "price": 2196.0088002190323
+  },
+  "L68Z": {
+    "description": "PERITONEAL DIALYSIS",
+    "alos": 1.0,
+    "price": 1098.0044001095162
+  },
+  "M01A": {
+    "description": "MAJOR MALE PELVIC PROCS, MAJC",
+    "alos": 6.03,
+    "price": 28131.629975219672
+  },
+  "M01B": {
+    "description": "MAJOR MALE PELVIC PROCS, MINC",
+    "alos": 3.11,
+    "price": 19650.492539890998
+  },
+  "M02A": {
+    "description": "TRANSURTH PROSTMY,REP DIS,MAJC",
+    "alos": 5.53,
+    "price": 14728.403849744887
+  },
+  "M02B": {
+    "description": "TRANSURTH PROSTMY,REP DIS,MINC",
+    "alos": 2.27,
+    "price": 7799.617462846907
+  },
+  "M03A": {
+    "description": "PENIS PROCEDURES, MAJC",
+    "alos": 2.81,
+    "price": 13706.123891022235
+  },
+  "M03B": {
+    "description": "PENIS PROCEDURES, MINC",
+    "alos": 1.2,
+    "price": 6777.337504124254
+  },
+  "M04Z": {
+    "description": "TESTES PROCEDURES",
+    "alos": 1.25,
+    "price": 6550.1641799636645
+  },
+  "M05Z": {
+    "description": "CIRCUMCISION",
+    "alos": 1.03,
+    "price": 1060.1421794160844
+  },
+  "M06A": {
+    "description": "OTH MALE REPROD SYS GI,MAJC",
+    "alos": 6.3,
+    "price": 18401.039257007753
+  },
+  "M06B": {
+    "description": "OTH MALE REPROD SYS GI,MINC",
+    "alos": 1.36,
+    "price": 9427.692952664465
+  },
+  "M40Z": {
+    "description": "CYSTURTHRSCPY,MALE REPR DIS,SD",
+    "alos": 1.0,
+    "price": 1665.93771051099
+  },
+  "M60A": {
+    "description": "MALE REPR SYS MALIG, MAJC",
+    "alos": 5.8,
+    "price": 23323.12794715386
+  },
+  "M60B": {
+    "description": "MALE REPR SYS MALIG, MINC",
+    "alos": 1.09,
+    "price": 5792.919766095033
+  },
+  "M61A": {
+    "description": "BENIGN PROSTATIC HYPERTR, MAJC",
+    "alos": 5.15,
+    "price": 20029.11474682531
+  },
+  "M61B": {
+    "description": "BENIGN PROSTATIC HYPERTR, MINC",
+    "alos": 1.3,
+    "price": 6057.955310949054
+  },
+  "M62A": {
+    "description": "MALE REPROD SYS INFLAMM, MAJC",
+    "alos": 4.55,
+    "price": 1817.3865932847164
+  },
+  "M62B": {
+    "description": "MALE REPROD SYS INFLAMM, MINC",
+    "alos": 1.78,
+    "price": 643.657751788337
+  },
+  "M63Z": {
+    "description": "MALE STERILISATION PROCS",
+    "alos": 1.0,
+    "price": 2953.2532140876638
+  },
+  "M64A": {
+    "description": "OTHER MALE REPROD SYS DIS,MAJC",
+    "alos": 2.32,
+    "price": 10298.524028613392
+  },
+  "M64B": {
+    "description": "OTHER MALE REPROD SYS DIS,MINC",
+    "alos": 1.12,
+    "price": 4505.604262518359
+  },
+  "N01Z": {
+    "description": "PELVIC EVISC & RAD VLVMY",
+    "alos": 6.72,
+    "price": 37483.59848649728
+  },
+  "N04A": {
+    "description": "HYSTERECTOMY FOR N-MAL, MAJC",
+    "alos": 4.1,
+    "price": 22755.19463675239
+  },
+  "N04B": {
+    "description": "HYSTERECTOMY FOR N-MAL, MINC",
+    "alos": 2.46,
+    "price": 15712.821587774111
+  },
+  "N05A": {
+    "description": "OOPH&COM FAL TBE PR N-MAL,MAJC",
+    "alos": 4.08,
+    "price": 24193.959023102787
+  },
+  "N05B": {
+    "description": "OOPH&COM FAL TBE PR N-MAL,MINC",
+    "alos": 1.49,
+    "price": 12683.843932299582
+  },
+  "N06A": {
+    "description": "FEM REP SYS RECON PROC, MAJC",
+    "alos": 3.4,
+    "price": 12570.257270219288
+  },
+  "N06B": {
+    "description": "FEM REP SYS RECON PROC, MINC",
+    "alos": 1.84,
+    "price": 7610.30635937975
+  },
+  "N07A": {
+    "description": "OTH UTRS & ADNX PR N-MAL, MAJC",
+    "alos": 1.46,
+    "price": 12683.843932299582
+  },
+  "N07B": {
+    "description": "OTH UTRS & ADNX PR N-MAL, MINC",
+    "alos": 1.01,
+    "price": 5906.5064281753275
+  },
+  "N08Z": {
+    "description": "ENDOS & LAPAR PR, FEM REPR SYS",
+    "alos": 1.32,
+    "price": 11472.25287010977
+  },
+  "N09A": {
+    "description": "OTH VAG,CERVIX&VULVA PR, MAJC",
+    "alos": 2.15,
+    "price": 8784.03520087613
+  },
+  "N09B": {
+    "description": "OTH VAG,CERVIX&VULVA PR, MINC",
+    "alos": 1.04,
+    "price": 3748.359848649727
+  },
+  "N10Z": {
+    "description": "DXC CURETTGE, DXC HYSTEROSCOPY",
+    "alos": 1.06,
+    "price": 3445.462083102275
+  },
+  "N11A": {
+    "description": "OTH FEM REPROD SYS GI, MAJC",
+    "alos": 6.68,
+    "price": 27601.55888551163
+  },
+  "N11B": {
+    "description": "OTH FEM REPROD SYS GI, MINC",
+    "alos": 1.0,
+    "price": 3218.288758941685
+  },
+  "N12A": {
+    "description": "UTERUS & ADNEXA PR MALIG, MAJC",
+    "alos": 9.7,
+    "price": 49637.37132908882
+  },
+  "N12B": {
+    "description": "UTERUS & ADNEXA PR MALIG, INTC",
+    "alos": 4.31,
+    "price": 26049.207837080932
+  },
+  "N12C": {
+    "description": "UTERUS & ADNEXA PR MALIG, MINC",
+    "alos": 2.34,
+    "price": 17719.519284525984
+  },
+  "N60A": {
+    "description": "FEMALE REPROD SYS MALIG, MAJC",
+    "alos": 7.94,
+    "price": 16280.754898175584
+  },
+  "N60B": {
+    "description": "FEMALE REPROD SYS MALIG, MINC",
+    "alos": 2.15,
+    "price": 5300.710897080423
+  },
+  "N61A": {
+    "description": "FEM REPROD SYS INFECT, MAJC",
+    "alos": 3.2,
+    "price": 7080.235269671707
+  },
+  "N61B": {
+    "description": "FEM REPROD SYS INFECT, MINC",
+    "alos": 1.54,
+    "price": 3104.70209686139
+  },
+  "N62A": {
+    "description": "MNSTRL&OTH FEM REPR DIS, MAJC",
+    "alos": 2.22,
+    "price": 9730.590718211919
+  },
+  "N62B": {
+    "description": "MNSTRL&OTH FEM REPR DIS, MINC",
+    "alos": 1.14,
+    "price": 4164.844276277475
+  },
+  "O01A": {
+    "description": "CAESAREAN DELIVERY, MAJC",
+    "alos": 6.71,
+    "price": 16621.51488441647
+  },
+  "O01B": {
+    "description": "CAESAREAN DELIVERY, INTC",
+    "alos": 4.1,
+    "price": 11358.666208029477
+  },
+  "O01C": {
+    "description": "CAESAREAN DELIVERY, MINC",
+    "alos": 3.0,
+    "price": 9162.657407810444
+  },
+  "O02A": {
+    "description": "VAGINAL DELIVERY +GI, MAJC",
+    "alos": 4.11,
+    "price": 11282.941766642614
+  },
+  "O02B": {
+    "description": "VAGINAL DELIVERY +GI, MINC",
+    "alos": 2.83,
+    "price": 7572.444138686318
+  },
+  "O03Z": {
+    "description": "ECTOPIC PREGNANCY",
+    "alos": 1.7,
+    "price": 12267.359504671835
+  },
+  "O04A": {
+    "description": "POSTPARTUM&POST ABORTN+GI,MAJC",
+    "alos": 4.45,
+    "price": 5565.746441934443
+  },
+  "O04B": {
+    "description": "POSTPARTUM&POST ABORTN+GI,MINC",
+    "alos": 1.6,
+    "price": 2044.559917445306
+  },
+  "O05Z": {
+    "description": "ABORTION WITH GI",
+    "alos": 1.07,
+    "price": 3445.462083102275
+  },
+  "O60A": {
+    "description": "VAGINAL DELIVERY, MAJC",
+    "alos": 3.71,
+    "price": 10715.00845624114
+  },
+  "O60B": {
+    "description": "VAGINAL DELIVERY, INTC",
+    "alos": 2.42,
+    "price": 7193.821931752002
+  },
+  "O60C": {
+    "description": "VAGINAL DELIVERY, MINC",
+    "alos": 1.74,
+    "price": 5338.573117773854
+  },
+  "O61A": {
+    "description": "POSTPART&POST ABORTN -GI, MAJC",
+    "alos": 3.31,
+    "price": 3559.0487451825693
+  },
+  "O61B": {
+    "description": "POSTPART&POST ABORTN -GI, MINC",
+    "alos": 1.88,
+    "price": 1665.93771051099
+  },
+  "O63A": {
+    "description": "ABORTION W/O GI, MAJC",
+    "alos": 1.63,
+    "price": 4505.604262518359
+  },
+  "O63B": {
+    "description": "ABORTION W/O GI, MINC",
+    "alos": 1.1,
+    "price": 1817.3865932847164
+  },
+  "O66A": {
+    "description": "ANTENATAL&OTH OBS ADM, MAJC",
+    "alos": 2.49,
+    "price": 7610.30635937975
+  },
+  "O66B": {
+    "description": "ANTENATAL&OTH OBS ADM, INTC",
+    "alos": 1.22,
+    "price": 2763.942110620506
+  },
+  "O66C": {
+    "description": "ANTENATAL&OTH OBS ADM, MINC",
+    "alos": 1.02,
+    "price": 1476.6266070438319
+  },
+  "P01Z": {
+    "description": "NEONATE W SIG GI/VENT, D/TR<5D",
+    "alos": 1.48,
+    "price": 12948.879477153603
+  },
+  "P02Z": {
+    "description": "NEO,CARDIOTHORACIC/VASCULAR PR",
+    "alos": 31.95,
+    "price": 223955.03540164785
+  },
+  "P03A": {
+    "description": "NEO,ADMWT 1000-1499G+GI/V,MAJC",
+    "alos": 62.92,
+    "price": 204266.68064106343
+  },
+  "P03B": {
+    "description": "NEO,ADMWT 1000-1499G+GI/V,MINC",
+    "alos": 37.28,
+    "price": 115517.6353356598
+  },
+  "P04A": {
+    "description": "NEO,ADMWT 1500-1999G+GI/V,MAJC",
+    "alos": 55.08,
+    "price": 183934.66812869065
+  },
+  "P04B": {
+    "description": "NEO,ADMWT 1500-1999G+GI/V,MINC",
+    "alos": 26.04,
+    "price": 74399.26366259308
+  },
+  "P05A": {
+    "description": "NEO,ADMWT 2000-2499G+GI/V,MAJC",
+    "alos": 50.81,
+    "price": 189879.03677755943
+  },
+  "P05B": {
+    "description": "NEO,ADMWT 2000-2499G+GI/V,MINC",
+    "alos": 18.75,
+    "price": 61715.4197302935
+  },
+  "P06A": {
+    "description": "NEO,ADMWT >=2500G+GI/VENT,MAJC",
+    "alos": 32.0,
+    "price": 134940.9545513902
+  },
+  "P06B": {
+    "description": "NEO,ADMWT >=2500G+GI/VENT,MINC",
+    "alos": 11.92,
+    "price": 44450.24709408869
+  },
+  "P07Z": {
+    "description": "NEONATE, ADMWT <750G +GI",
+    "alos": 112.57,
+    "price": 477707.6384890264
+  },
+  "P08Z": {
+    "description": "NEONATE, ADMWT 750-999G +GI",
+    "alos": 92.55,
+    "price": 350944.92360741744
+  },
+  "P60A": {
+    "description": "NEONATE -GI/V, D/TR<5D, MAJC",
+    "alos": 2.37,
+    "price": 9238.381849197307
+  },
+  "P60B": {
+    "description": "NEONATE -GI/V, D/TR<5D, MINC",
+    "alos": 1.64,
+    "price": 5527.884221241012
+  },
+  "P61Z": {
+    "description": "NEONATE, ADMWT <750G -GI",
+    "alos": 80.34,
+    "price": 301383.2767197155
+  },
+  "P62A": {
+    "description": "NEO, ADMWT 750-999G -GI, MAJC",
+    "alos": 71.94,
+    "price": 248527.61663168497
+  },
+  "P62B": {
+    "description": "NEO, ADMWT 750-999G -GI, MINC",
+    "alos": 28.9,
+    "price": 92308.09405058622
+  },
+  "P63A": {
+    "description": "NEO,ADMWT 1000-1249G-GI/V,MAJC",
+    "alos": 38.37,
+    "price": 101962.96032741127
+  },
+  "P63B": {
+    "description": "NEO,ADMWT 1000-1249G-GI/V,MINC",
+    "alos": 14.46,
+    "price": 35590.48745182569
+  },
+  "P64A": {
+    "description": "NEO,ADMWT 1250-1499G-GI/V,MAJC",
+    "alos": 32.53,
+    "price": 81100.87672533047
+  },
+  "P64B": {
+    "description": "NEO,ADMWT 1250-1499G-GI/V,MINC",
+    "alos": 21.87,
+    "price": 50848.96239127863
+  },
+  "P65A": {
+    "description": "NEO,ADMWT 1500-1999G-GI/V,EXTC",
+    "alos": 26.98,
+    "price": 63608.53076496507
+  },
+  "P65B": {
+    "description": "NEO,ADMWT 1500-1999G-GI/V,MAJC",
+    "alos": 20.03,
+    "price": 47176.326984015766
+  },
+  "P65C": {
+    "description": "NEO,ADMWT 1500-1999G-GI/V,INTC",
+    "alos": 16.19,
+    "price": 36158.42076222717
+  },
+  "P65D": {
+    "description": "NEO,ADMWT 1500-1999G-GI/V,MINC",
+    "alos": 12.15,
+    "price": 28131.629975219672
+  },
+  "P66A": {
+    "description": "NEO,ADMWT 2000-2499G-GI/V,EXTC",
+    "alos": 17.02,
+    "price": 40853.33612821269
+  },
+  "P66B": {
+    "description": "NEO,ADMWT 2000-2499G-GI/V,MAJC",
+    "alos": 12.15,
+    "price": 28548.11440284742
+  },
+  "P66C": {
+    "description": "NEO,ADMWT 2000-2499G-GI/V,INTC",
+    "alos": 7.95,
+    "price": 18552.48813978148
+  },
+  "P66D": {
+    "description": "NEO,ADMWT 2000-2499G-GI/V,MINC",
+    "alos": 3.86,
+    "price": 9238.381849197307
+  },
+  "P67A": {
+    "description": "NEO,WT>=2500G-GI/V,<37WKS,EXTC",
+    "alos": 13.62,
+    "price": 71862.49487613316
+  },
+  "P67B": {
+    "description": "NEO,WT>=2500G-GI/V,<37WKS,MAJC",
+    "alos": 8.61,
+    "price": 43617.27823883319
+  },
+  "P67C": {
+    "description": "NEO,WT>=2500G-GI/V,<37WKS,INTC",
+    "alos": 6.72,
+    "price": 34795.380817263635
+  },
+  "P67D": {
+    "description": "NEO,WT>=2500G-GI/V,<37WKS,MINC",
+    "alos": 4.62,
+    "price": 23247.403505766997
+  },
+  "P68A": {
+    "description": "NEO,W>=2500G-GI/V,>=37WKS,EXTC",
+    "alos": 8.05,
+    "price": 22603.74575397866
+  },
+  "P68B": {
+    "description": "NEO,W>=2500G-GI/V,>=37WKS,MAJC",
+    "alos": 4.13,
+    "price": 11320.803987336045
+  },
+  "P68C": {
+    "description": "NEO,W>=2500G-GI/V,>=37WKS,INTC",
+    "alos": 2.89,
+    "price": 7988.928566314065
+  },
+  "P68D": {
+    "description": "NEO,W>=2500G-GI/V,>=37WKS,MINC",
+    "alos": 2.17,
+    "price": 5792.919766095033
+  },
+  "Q01Z": {
+    "description": "SPLENECTOMY",
+    "alos": 7.32,
+    "price": 59367.96204730073
+  },
+  "Q02A": {
+    "description": "BLD&IMM SYS DIS+OTH GI,MAJC",
+    "alos": 11.14,
+    "price": 40285.40281781121
+  },
+  "Q02B": {
+    "description": "BLD&IMM SYS DIS+OTH GI,MINC",
+    "alos": 1.53,
+    "price": 6701.613062737391
+  },
+  "Q60A": {
+    "description": "RETICLENDO&IMMUNITY DIS, MAJC",
+    "alos": 4.68,
+    "price": 13933.297215182825
+  },
+  "Q60B": {
+    "description": "RETICLENDO&IMMUNITY DIS, MINC",
+    "alos": 1.07,
+    "price": 2461.044345073053
+  },
+  "Q61A": {
+    "description": "RED BLOOD CELL DISORDERS, MAJC",
+    "alos": 2.78,
+    "price": 14311.91942211714
+  },
+  "Q61B": {
+    "description": "RED BLOOD CELL DISORDERS, INTC",
+    "alos": 1.09,
+    "price": 4164.844276277475
+  },
+  "Q61C": {
+    "description": "RED BLOOD CELL DISORDERS, MINC",
+    "alos": 1.0,
+    "price": 1211.5910621898108
+  },
+  "Q62A": {
+    "description": "COAGULATION DISORDERS, MAJC",
+    "alos": 5.23,
+    "price": 25859.896733613776
+  },
+  "Q62B": {
+    "description": "COAGULATION DISORDERS, MINC",
+    "alos": 1.36,
+    "price": 6550.1641799636645
+  },
+  "R01A": {
+    "description": "LYMPHMA&LEUKMA+MJR GI, MAJC",
+    "alos": 19.59,
+    "price": 69098.55276551266
+  },
+  "R01B": {
+    "description": "LYMPHMA&LEUKMA+MJR GI, MINC",
+    "alos": 3.57,
+    "price": 14576.954966971161
+  },
+  "R02A": {
+    "description": "OTH NPLSTC DIS+MJR GI, MAJC",
+    "alos": 14.59,
+    "price": 58004.922102337194
+  },
+  "R02B": {
+    "description": "OTH NPLSTC DIS+MJR GI, INTC",
+    "alos": 7.4,
+    "price": 28018.043313139377
+  },
+  "R02C": {
+    "description": "OTH NPLSTC DIS+MJR GI, MINC",
+    "alos": 3.79,
+    "price": 15561.372705000384
+  },
+  "R03A": {
+    "description": "LYMPHMA&LEUKMA+OTH GI, MAJC",
+    "alos": 31.4,
+    "price": 99009.70711332362
+  },
+  "R03B": {
+    "description": "LYMPHMA&LEUKMA+OTH GI, INTC",
+    "alos": 11.34,
+    "price": 32864.40756189862
+  },
+  "R03C": {
+    "description": "LYMPHMA&LEUKMA+OTH GI, MINC",
+    "alos": 2.16,
+    "price": 8784.03520087613
+  },
+  "R04A": {
+    "description": "OTH NPLSTC DIS+OTH GI, MAJC",
+    "alos": 7.8,
+    "price": 25784.172292226915
+  },
+  "R04B": {
+    "description": "OTH NPLSTC DIS+OTH GI, MINC",
+    "alos": 1.43,
+    "price": 7534.581917992887
+  },
+  "R05A": {
+    "description": "ALLOGENEIC BMT, AGE<=16Y/MAJC",
+    "alos": 52.88,
+    "price": 267648.0380818679
+  },
+  "R05B": {
+    "description": "ALLOGENEIC BMT, AGE>=17Y+MINC",
+    "alos": 25.97,
+    "price": 88332.5608777759
+  },
+  "R06A": {
+    "description": "AUTOLOGOUS BMT, MAJC",
+    "alos": 23.54,
+    "price": 79927.14788383408
+  },
+  "R06B": {
+    "description": "AUTOLOGOUS BMT, MINC",
+    "alos": 12.92,
+    "price": 31577.092058321945
+  },
+  "R60A": {
+    "description": "ACUTE LEUKAEMIA, MAJC",
+    "alos": 17.21,
+    "price": 54635.184460621786
+  },
+  "R60B": {
+    "description": "ACUTE LEUKAEMIA, INTC",
+    "alos": 2.99,
+    "price": 8518.999656022108
+  },
+  "R60C": {
+    "description": "ACUTE LEUKAEMIA, MINC",
+    "alos": 1.5,
+    "price": 3369.7376417154114
+  },
+  "R61A": {
+    "description": "LYMPHOMA&N-ACUTE LEUK, MAJC",
+    "alos": 9.65,
+    "price": 42405.68717664338
+  },
+  "R61B": {
+    "description": "LYMPHOMA&N-ACUTE LEUK, INTC",
+    "alos": 2.03,
+    "price": 9238.381849197307
+  },
+  "R61C": {
+    "description": "LYMPHOMA&N-ACUTE LEUK, MINC",
+    "alos": 1.1,
+    "price": 3861.946510730022
+  },
+  "R62A": {
+    "description": "OTHER NEOPLASTIC DIS, MAJC",
+    "alos": 8.78,
+    "price": 11888.73729773752
+  },
+  "R62B": {
+    "description": "OTHER NEOPLASTIC DIS, INTC",
+    "alos": 2.24,
+    "price": 4732.777586678949
+  },
+  "R62C": {
+    "description": "OTHER NEOPLASTIC DIS, MINC",
+    "alos": 1.26,
+    "price": 2461.044345073053
+  },
+  "R63Z": {
+    "description": "CHEMOTHERAPY",
+    "alos": 1.0,
+    "price": 2309.5954622993268
+  },
+  "T01A": {
+    "description": "INFECT&PARAS DIS +GI, MAJC",
+    "alos": 24.72,
+    "price": 46570.531452920855
+  },
+  "T01B": {
+    "description": "INFECT&PARAS DIS +GI, INTC",
+    "alos": 11.34,
+    "price": 18666.074801861774
+  },
+  "T01C": {
+    "description": "INFECT&PARAS DIS +GI, MINC",
+    "alos": 6.14,
+    "price": 10298.524028613392
+  },
+  "T40Z": {
+    "description": "INFECT&PARASTIC DIS +VENT SUPP",
+    "alos": 11.75,
+    "price": 36537.042969161485
+  },
+  "T60A": {
+    "description": "SEPTICAEMIA, MAJC",
+    "alos": 12.64,
+    "price": 21430.01691248228
+  },
+  "T60B": {
+    "description": "SEPTICAEMIA, INTC",
+    "alos": 6.48,
+    "price": 10147.075145839666
+  },
+  "T60C": {
+    "description": "SEPTICAEMIA, MINC",
+    "alos": 3.8,
+    "price": 5641.470883321307
+  },
+  "T61A": {
+    "description": "POSTOP INFECT, MAJC",
+    "alos": 6.4,
+    "price": 8102.515228394361
+  },
+  "T61B": {
+    "description": "POSTOP INFECT, MINC",
+    "alos": 3.08,
+    "price": 3672.635407262864
+  },
+  "T62A": {
+    "description": "FEVER OF UNKNOWN ORIGIN, MAJC",
+    "alos": 5.42,
+    "price": 10715.00845624114
+  },
+  "T62B": {
+    "description": "FEVER OF UNKNOWN ORIGIN, MINC",
+    "alos": 1.94,
+    "price": 3748.359848649727
+  },
+  "T63A": {
+    "description": "VIRAL ILLNESS, MAJC",
+    "alos": 3.93,
+    "price": 17151.58597412451
+  },
+  "T63B": {
+    "description": "VIRAL ILLNESS, MINC",
+    "alos": 1.34,
+    "price": 5224.986455693559
+  },
+  "T64A": {
+    "description": "OTH INFECT&PARASITIC DIS, MAJC",
+    "alos": 19.0,
+    "price": 21505.741353869143
+  },
+  "T64B": {
+    "description": "OTH INFECT&PARASITIC DIS, INTC",
+    "alos": 8.69,
+    "price": 7951.066345620634
+  },
+  "T64C": {
+    "description": "OTH INFECT&PARASITIC DIS, MINC",
+    "alos": 3.55,
+    "price": 3104.70209686139
+  },
+  "U40A": {
+    "description": "MTL HEALTH TREAT+ECT, SD, MAJC",
+    "alos": 1.0,
+    "price": 832.968855255495
+  },
+  "U40B": {
+    "description": "MTL HEALTH TREAT+ECT, SD, MINC",
+    "alos": 1.0,
+    "price": 832.968855255495
+  },
+  "U60Z": {
+    "description": "MENTAL HEALTH -ECT, SD",
+    "alos": 1.0,
+    "price": 1211.5910621898108
+  },
+  "U61A": {
+    "description": "SCHIZOPHRENIA DISORDERS, MAJC",
+    "alos": 11.97,
+    "price": 15372.061601533225
+  },
+  "U61B": {
+    "description": "SCHIZOPHRENIA DISORDERS, MINC",
+    "alos": 4.48,
+    "price": 5755.057545401602
+  },
+  "U62A": {
+    "description": "PARA&ACUTE PSYCH DIS, MAJC",
+    "alos": 9.54,
+    "price": 14728.403849744887
+  },
+  "U62B": {
+    "description": "PARA&ACUTE PSYCH DIS, MINC",
+    "alos": 3.02,
+    "price": 5073.537572919833
+  },
+  "U63A": {
+    "description": "MAJOR AFFECTIVE DIS, MAJC",
+    "alos": 11.23,
+    "price": 16962.27487065735
+  },
+  "U63B": {
+    "description": "MAJOR AFFECTIVE DIS, MINC",
+    "alos": 4.14,
+    "price": 6209.40419372278
+  },
+  "U64A": {
+    "description": "OTH AFFECT&SOMATOFRM DIS, MAJC",
+    "alos": 6.43,
+    "price": 11207.21732525575
+  },
+  "U64B": {
+    "description": "OTH AFFECT&SOMATOFRM DIS, MINC",
+    "alos": 2.62,
+    "price": 4997.81313153297
+  },
+  "U65A": {
+    "description": "ANXIETY DISORDERS, MAJC",
+    "alos": 5.52,
+    "price": 7913.204124927202
+  },
+  "U65B": {
+    "description": "ANXIETY DISORDERS, MINC",
+    "alos": 2.24,
+    "price": 3331.87542102198
+  },
+  "U66A": {
+    "description": "EATNG&OBSESSV-COMPLSV DIS,MAJC",
+    "alos": 17.99,
+    "price": 27980.181092445946
+  },
+  "U66B": {
+    "description": "EATNG&OBSESSV-COMPLSV DIS,MINC",
+    "alos": 9.58,
+    "price": 15485.64826361352
+  },
+  "U67A": {
+    "description": "PERSONLTY DIS&ACUTE REACT,MAJC",
+    "alos": 6.78,
+    "price": 4581.328703905222
+  },
+  "U67B": {
+    "description": "PERSONLTY DIS&ACUTE REACT,MINC",
+    "alos": 2.21,
+    "price": 1703.7999312044215
+  },
+  "U68A": {
+    "description": "CHILDHOOD MENTAL DIS, MAJC",
+    "alos": 6.9,
+    "price": 2688.217669233643
+  },
+  "U68B": {
+    "description": "CHILDHOOD MENTAL DIS, MINC",
+    "alos": 3.06,
+    "price": 1060.1421794160844
+  },
+  "V60A": {
+    "description": "ALCOHOL INTOX & WITHDRWL, MAJC",
+    "alos": 2.92,
+    "price": 5755.057545401602
+  },
+  "V60B": {
+    "description": "ALCOHOL INTOX & WITHDRWL, MINC",
+    "alos": 1.21,
+    "price": 2158.1465795256004
+  },
+  "V61A": {
+    "description": "DRUG INTOXN&WITHDRAWAL, MAJC",
+    "alos": 2.68,
+    "price": 5679.333104014739
+  },
+  "V61B": {
+    "description": "DRUG INTOXN&WITHDRAWAL, MINC",
+    "alos": 1.5,
+    "price": 3066.8398761679587
+  },
+  "V62A": {
+    "description": "ALCOHOL USE & DEPENDENCE, MAJC",
+    "alos": 7.77,
+    "price": 13668.261670328804
+  },
+  "V62B": {
+    "description": "ALCOHOL USE & DEPENDENCE, MINC",
+    "alos": 3.68,
+    "price": 4429.879821131496
+  },
+  "V63Z": {
+    "description": "OPIOID USE & DEPENDENCE",
+    "alos": 5.19,
+    "price": 7572.444138686318
+  },
+  "V64A": {
+    "description": "OTH DRUG USE&DEPENDENCE, MAJC",
+    "alos": 6.91,
+    "price": 8897.621862956423
+  },
+  "V64B": {
+    "description": "OTH DRUG USE&DEPENDENCE, MINC",
+    "alos": 3.19,
+    "price": 4202.706496970906
+  },
+  "W01A": {
+    "description": "VENT/TRACH/CRA PR FOR MT, MAJC",
+    "alos": 38.29,
+    "price": 200783.35633726773
+  },
+  "W01B": {
+    "description": "VENT/TRACH/CRA PR FOR MT, INTC",
+    "alos": 21.82,
+    "price": 120136.82626025843
+  },
+  "W01C": {
+    "description": "VENT/TRACH/CRA PR FOR MT, MINC",
+    "alos": 13.31,
+    "price": 77011.75689043985
+  },
+  "W02A": {
+    "description": "HIP,FMR&LWR LMB PR FOR MT,MAJC",
+    "alos": 19.25,
+    "price": 73679.88146941787
+  },
+  "W02B": {
+    "description": "HIP,FMR&LWR LMB PR FOR MT,MINC",
+    "alos": 9.91,
+    "price": 30176.18989266498
+  },
+  "W03Z": {
+    "description": "ABDOMINAL PR MULT SIG TRAUMA",
+    "alos": 9.96,
+    "price": 39035.949534927975
+  },
+  "W04A": {
+    "description": "MULT SIG TRAUMA+OTH GI,MAJC",
+    "alos": 16.43,
+    "price": 61261.07308197231
+  },
+  "W04B": {
+    "description": "MULT SIG TRAUMA+OTH GI,MINC",
+    "alos": 7.81,
+    "price": 30403.363216825568
+  },
+  "W60Z": {
+    "description": "MULT SIG TRAUMA, TRAN<5D",
+    "alos": 1.66,
+    "price": 8784.03520087613
+  },
+  "W61A": {
+    "description": "MULT SIG TRAUMA -GI, MAJC",
+    "alos": 10.22,
+    "price": 9314.106290584172
+  },
+  "W61B": {
+    "description": "MULT SIG TRAUMA -GI, MINC",
+    "alos": 4.7,
+    "price": 4429.879821131496
+  },
+  "X02A": {
+    "description": "MVSCLR TT/SKN GR INJ HAND,MAJC",
+    "alos": 7.09,
+    "price": 28472.389961460554
+  },
+  "X02B": {
+    "description": "MVSCLR TT/SKN GR INJ HAND,MINC",
+    "alos": 1.66,
+    "price": 7383.13303521916
+  },
+  "X04A": {
+    "description": "OTH PR INJURIES LWR LIMB, MAJC",
+    "alos": 10.49,
+    "price": 26882.176692336427
+  },
+  "X04B": {
+    "description": "OTH PR INJURIES LWR LIMB, MINC",
+    "alos": 2.0,
+    "price": 6815.199724817686
+  },
+  "X05A": {
+    "description": "OTH PR FOR INJ TO HAND, MAJC",
+    "alos": 2.71,
+    "price": 10715.00845624114
+  },
+  "X05B": {
+    "description": "OTH PR FOR INJ TO HAND, MINC",
+    "alos": 1.27,
+    "price": 4240.568717664338
+  },
+  "X06A": {
+    "description": "OTH PR FOR OTH INJURIES, MAJC",
+    "alos": 12.29,
+    "price": 33508.06531368696
+  },
+  "X06B": {
+    "description": "OTH PR FOR OTH INJURIES, INTC",
+    "alos": 4.04,
+    "price": 12078.048401204676
+  },
+  "X06C": {
+    "description": "OTH PR FOR OTH INJURIES, MINC",
+    "alos": 1.71,
+    "price": 6436.57751788337
+  },
+  "X07A": {
+    "description": "SKIN GRAFT, INJ EXCL HAND,MAJC",
+    "alos": 18.92,
+    "price": 44563.833756168984
+  },
+  "X07B": {
+    "description": "SKIN GRAFT, INJ EXCL HAND,INTC",
+    "alos": 8.27,
+    "price": 19234.008112263247
+  },
+  "X07C": {
+    "description": "SKIN GRAFT, INJ EXCL HAND,MINC",
+    "alos": 4.13,
+    "price": 11434.39064941634
+  },
+  "X40A": {
+    "description": "INJ,POIS,TOX EF+VENT SUPP,MAJC",
+    "alos": 8.48,
+    "price": 41004.785010986416
+  },
+  "X40B": {
+    "description": "INJ,POIS,TOX EF+VENT SUPP,MINC",
+    "alos": 4.12,
+    "price": 24080.37236102249
+  },
+  "X60A": {
+    "description": "INJURIES, MAJC",
+    "alos": 3.44,
+    "price": 10412.110690693688
+  },
+  "X60B": {
+    "description": "INJURIES, MINC",
+    "alos": 1.21,
+    "price": 3937.6709521168855
+  },
+  "X61A": {
+    "description": "ALLERGIC REACTIONS, MAJC",
+    "alos": 1.8,
+    "price": 9200.519628503876
+  },
+  "X61B": {
+    "description": "ALLERGIC REACTIONS, MINC",
+    "alos": 1.03,
+    "price": 3180.4265382482536
+  },
+  "X62A": {
+    "description": "POISON/TOXIC EFF DRUGS, MAJC",
+    "alos": 2.92,
+    "price": 5224.98645569356
+  },
+  "X62B": {
+    "description": "POISON/TOXIC EFF DRUGS, MINC",
+    "alos": 1.18,
+    "price": 1628.0754898175583
+  },
+  "X63A": {
+    "description": "SEQUELAE OF TREATMENT, MAJC",
+    "alos": 4.88,
+    "price": 8935.484083649855
+  },
+  "X63B": {
+    "description": "SEQUELAE OF TREATMENT, MINC",
+    "alos": 1.74,
+    "price": 3066.8398761679587
+  },
+  "X64A": {
+    "description": "OTH INJ,POIS&TOXIC EFFCTS,MAJC",
+    "alos": 5.08,
+    "price": 9541.27961474476
+  },
+  "X64B": {
+    "description": "OTH INJ,POIS&TOXIC EFFCTS,INTC",
+    "alos": 1.56,
+    "price": 3256.1509796351165
+  },
+  "X64C": {
+    "description": "OTH INJ,POIS&TOXIC EFFCTS,MINC",
+    "alos": 1.09,
+    "price": 1968.8354760584427
+  },
+  "Y01Z": {
+    "description": "VENT/TRACH/GI SEV BURN",
+    "alos": 48.37,
+    "price": 309750.8274929639
+  },
+  "Y02A": {
+    "description": "SKIN GRAFT OTHER BURNS, MAJC",
+    "alos": 16.24,
+    "price": 52893.522308723936
+  },
+  "Y02B": {
+    "description": "SKIN GRAFT OTHER BURNS, INTC",
+    "alos": 5.89,
+    "price": 20142.701408905607
+  },
+  "Y02C": {
+    "description": "SKIN GRAFT OTHER BURNS, MINC",
+    "alos": 2.07,
+    "price": 8140.377449087792
+  },
+  "Y03A": {
+    "description": "OTH GI FOR OTHER BURNS,MAJC",
+    "alos": 6.0,
+    "price": 16545.790443029608
+  },
+  "Y03B": {
+    "description": "OTH GI FOR OTHER BURNS,MINC",
+    "alos": 1.79,
+    "price": 5527.884221241012
+  },
+  "Y60Z": {
+    "description": "BURNS, TR<5D",
+    "alos": 1.27,
+    "price": 4278.430938357769
+  },
+  "Y61Z": {
+    "description": "SEVERE BURNS",
+    "alos": 3.23,
+    "price": 6966.648607591413
+  },
+  "Y62A": {
+    "description": "OTHER BURNS, MAJC",
+    "alos": 3.66,
+    "price": 19574.768098504133
+  },
+  "Y62B": {
+    "description": "OTHER BURNS, MINC",
+    "alos": 1.64,
+    "price": 8026.790787007498
+  },
+  "Z01A": {
+    "description": "OTH CNT HLTH SRV +GI, MAJC",
+    "alos": 8.1,
+    "price": 13743.986111715667
+  },
+  "Z01B": {
+    "description": "OTH CNT HLTH SRV +GI, MINC",
+    "alos": 1.14,
+    "price": 2801.8043313139374
+  },
+  "Z40Z": {
+    "description": "OTH CONTCT HLTH SRV +ENDOSCOPY",
+    "alos": 1.05,
+    "price": 1173.7288414963793
+  },
+  "Z60A": {
+    "description": "REHABILITATION, MAJC",
+    "alos": 51.0,
+    "price": 39793.19394879661
+  },
+  "Z60B": {
+    "description": "REHABILITATION, MINC",
+    "alos": 7.0,
+    "price": 7875.341904233771
+  },
+  "Z61A": {
+    "description": "SIGNS & SYMPTOMS, MAJC",
+    "alos": 4.63,
+    "price": 14236.194980730277
+  },
+  "Z61B": {
+    "description": "SIGNS & SYMPTOMS, MINC",
+    "alos": 1.37,
+    "price": 4505.604262518359
+  },
+  "Z63A": {
+    "description": "OTH FLLW UP SURG/MED CARE,MAJC",
+    "alos": 8.62,
+    "price": 7572.444138686318
+  },
+  "Z63B": {
+    "description": "OTH FLLW UP SURG/MED CARE,MINC",
+    "alos": 3.35,
+    "price": 2839.6665520073693
+  },
+  "Z64A": {
+    "description": "OTH FACTORS INFL HLTH ST, MAJC",
+    "alos": 2.7,
+    "price": 1893.1110346715795
+  },
+  "Z64B": {
+    "description": "OTH FACTORS INFL HLTH ST, MINC",
+    "alos": 1.19,
+    "price": 719.3821931752002
+  },
+  "Z65Z": {
+    "description": "CONGNTL ANML&PROB FR NEO PERD",
+    "alos": 2.88,
+    "price": 13213.915022007624
+  },
+  "Z66Z": {
+    "description": "SLEEP DISORDERS",
+    "alos": 2.4,
+    "price": 2158.1465795256004
+  }
+}
