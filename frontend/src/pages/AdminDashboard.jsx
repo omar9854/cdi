@@ -379,28 +379,24 @@ const AdminDashboard = ({ user, onLogout }) => {
                       <TableCell className="text-center text-sm">{userStat.email}</TableCell>
                       <TableCell className="text-center text-sm">{userStat.phone_number || '-'}</TableCell>
                       <TableCell className="text-center">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          userStat.department === 'coding' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {userStat.department === 'coding' ? 
-                            (language === 'ar' ? 'ترميز طبي' : 'Medical Coding') : 
-                            (language === 'ar' ? 'تحسين توثيق' : 'CDI')}
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {language === 'ar' ? 'تحسين التوثيق السريري' : 'CDI'}
                         </span>
                         {userStat.coding_role && (
                           <div className="text-xs text-gray-600 mt-1">
-                            {userStat.coding_role === 'coder' ? (language === 'ar' ? 'مرمز' : 'Coder') :
-                             userStat.coding_role === 'auditor' ? (language === 'ar' ? 'مدقق' : 'Auditor') : ''}
+                            {userStat.coding_role === 'supervisor' ? (language === 'ar' ? 'مشرف' : 'Supervisor') :
+                             userStat.coding_role === 'cdi_specialist' ? (language === 'ar' ? 'أخصائي' : 'Specialist') : ''}
                           </div>
                         )}
                       </TableCell>
                       <TableCell className="text-center">
-                        {userStat.role === 'supervisor' ? (
+                        {userStat.role === 'supervisor' || userStat.coding_role === 'supervisor' ? (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                            {language === 'ar' ? 'مشرف' : 'Supervisor'}
+                            {language === 'ar' ? 'مشرف تحسين التوثيق' : 'CDI Supervisor'}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            {language === 'ar' ? 'موظف' : 'User'}
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            {language === 'ar' ? 'أخصائي تحسين التوثيق' : 'CDI Specialist'}
                           </span>
                         )}
                       </TableCell>
