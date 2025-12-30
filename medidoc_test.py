@@ -25,10 +25,12 @@ class MediDocAITester:
         self.analysis_id = None
         
         # Test user data as specified in the request
+        import time
+        timestamp = str(int(time.time()))
         self.test_user = {
-            "email": "test.cdi@hospital.sa",
+            "email": f"test.cdi.{timestamp}@hospital.sa",
             "full_name": "Test CDI User",
-            "phone_number": "966500000001",
+            "phone_number": f"96650000{timestamp[-4:]}",
             "password": "TestPassword123!"
         }
         
