@@ -180,7 +180,7 @@ const Analysis = ({ user, onLogout }) => {
           </CardContent>
         </Card>
 
-        {/* Analyze Button - Using Meditron-70B Medical AI */}
+        {/* Analyze Button - Using Qwen2.5-72B Local AI */}
         {!analysis && (
           <Card className="medical-card mb-6 fade-in">
             <CardContent className="text-center py-8">
@@ -188,14 +188,14 @@ const Analysis = ({ user, onLogout }) => {
               <h3 className="text-2xl font-semibold text-gray-800 mb-2">{t('readyToAnalyze')}</h3>
               <p className="text-gray-600 mb-4">{t('aiAnalysisDescription')}</p>
               
-              {/* Show Meditron-70B badge */}
+              {/* Show Qwen2.5-72B badge */}
               <div className="mb-6 inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-2 rounded-full border border-blue-200">
                 <span className="text-2xl">🏥</span>
                 <span className="font-semibold text-blue-700">
-                  {language === 'ar' ? 'Meditron-70B الطبي المتخصص' : 'Meditron-70B Medical AI'}
+                  {language === 'ar' ? 'Qwen2.5-72B الطبي المتخصص' : 'Qwen2.5-72B Medical AI'}
                 </span>
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                  {language === 'ar' ? 'أوفلاين' : 'Offline'}
+                  {language === 'ar' ? 'محلي 100%' : '100% Local'}
                 </span>
               </div>
               
