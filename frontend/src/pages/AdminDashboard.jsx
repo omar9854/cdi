@@ -593,102 +593,37 @@ const AdminDashboard = ({ user, onLogout }) => {
 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold">
-                    {language === 'ar' ? 'القسم' : 'Department'}
+                    {language === 'ar' ? 'الدور الوظيفي' : 'Role'}
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
-                      onClick={() => setDepartmentForm({...departmentForm, department: 'cdi', coding_role: null})}
+                      onClick={() => setDepartmentForm({...departmentForm, department: 'cdi', coding_role: 'cdi_specialist'})}
                       className={`p-3 rounded-lg border-2 transition-all ${
-                        departmentForm.department === 'cdi'
+                        departmentForm.coding_role === 'cdi_specialist'
                           ? 'border-blue-600 bg-blue-50 text-blue-700'
                           : 'border-gray-200 hover:border-blue-300'
                       }`}
                     >
                       <div className="font-semibold text-sm">
-                        {language === 'ar' ? 'تحسين التوثيق السريري' : 'CDI'}
+                        {language === 'ar' ? 'أخصائي تحسين التوثيق' : 'CDI Specialist'}
                       </div>
                     </button>
                     <button
                       type="button"
-                      onClick={() => setDepartmentForm({...departmentForm, department: 'coding'})}
+                      onClick={() => setDepartmentForm({...departmentForm, department: 'cdi', coding_role: 'supervisor'})}
                       className={`p-3 rounded-lg border-2 transition-all ${
-                        departmentForm.department === 'coding'
+                        departmentForm.coding_role === 'supervisor'
                           ? 'border-green-600 bg-green-50 text-green-700'
                           : 'border-gray-200 hover:border-green-300'
                       }`}
                     >
                       <div className="font-semibold text-sm">
-                        {language === 'ar' ? 'الترميز الطبي' : 'Medical Coding'}
+                        {language === 'ar' ? 'مشرف تحسين التوثيق' : 'CDI Supervisor'}
                       </div>
                     </button>
                   </div>
                 </div>
-
-                {departmentForm.department === 'coding' && (
-                  <>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">
-                        {language === 'ar' ? 'الدور الوظيفي' : 'Role'}
-                      </label>
-                      <div className="grid grid-cols-3 gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setDepartmentForm({...departmentForm, coding_role: 'supervisor', daily_case_target: null})}
-                          className={`p-3 rounded-lg border-2 transition-all ${
-                            departmentForm.coding_role === 'supervisor'
-                              ? 'border-blue-600 bg-blue-50 text-blue-700'
-                              : 'border-gray-200 hover:border-blue-300'
-                          }`}
-                        >
-                          <div className="font-semibold text-sm">
-                            {language === 'ar' ? 'مشرف' : 'Supervisor'}
-                          </div>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDepartmentForm({...departmentForm, coding_role: 'coder'})}
-                          className={`p-3 rounded-lg border-2 transition-all ${
-                            departmentForm.coding_role === 'coder'
-                              ? 'border-green-600 bg-green-50 text-green-700'
-                              : 'border-gray-200 hover:border-green-300'
-                          }`}
-                        >
-                          <div className="font-semibold text-sm">
-                            {language === 'ar' ? 'مرمز طبي' : 'Medical Coder'}
-                          </div>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDepartmentForm({...departmentForm, coding_role: 'auditor', daily_case_target: null})}
-                          className={`p-3 rounded-lg border-2 transition-all ${
-                            departmentForm.coding_role === 'auditor'
-                              ? 'border-purple-600 bg-purple-50 text-purple-700'
-                              : 'border-gray-200 hover:border-purple-300'
-                          }`}
-                        >
-                          <div className="font-semibold text-sm">
-                            {language === 'ar' ? 'مدقق' : 'Auditor'}
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-
-                    {departmentForm.coding_role === 'coder' && (
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold">
-                          {language === 'ar' ? 'الهدف اليومي (عدد الحالات)' : 'Daily Target (Cases)'}
-                        </label>
-                        <Input
-                          type="number"
-                          value={departmentForm.daily_case_target}
-                          onChange={(e) => setDepartmentForm({...departmentForm, daily_case_target: parseInt(e.target.value)})}
-                          min="1"
-                        />
-                      </div>
-                    )}
-                  </>
-                )}
 
                 <div className="flex gap-2 pt-4">
                   <Button onClick={handleUpdateDepartment} className="flex-1 bg-green-600">
