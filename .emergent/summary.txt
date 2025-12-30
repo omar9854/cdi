@@ -1,211 +1,127 @@
 <analysis>**original_problem_statement:**
-The user's initial goal was a major platform overhaul. During this session, the scope expanded dramatically and pivoted multiple times. The primary requests addressed were:
+The user's initial goal was to fix an unstable offline medical analysis application on a dedicated server (). The primary issue was the unreliability of  as the local LLM inference engine.
 
-1.  **Fix Gemini Insufficient Balance Error:** The user's initial Gemini API keys ran out of credit, blocking all analysis features.
-2.  **Integrate a Local Offline AI Model:** The user requested the integration of a local model (, then ) using Ollama to avoid reliance on cloud APIs and ensure data privacy. This became a major, problematic task.
-3.  **Integrate and Fix Microsoft Azure AI:** The user provided multiple sets of Azure credentials to use as an alternative, but integration failed repeatedly.
-4.  **Fix Frontend Bugs:**
-    *   Users were being incorrectly redirected to the supervisor page after login.
-    *   The Home button was not working correctly.
-    *   Pre-defined questions in the chat interface were causing errors.
-    *   User reported that logging out was deleting their notes.
-5.  **Improve Supervisor Reports:** Add financial impact calculations and improved Excel exports to the supervisor's monthly analysis tool.
-6.  **Optimize AI Performance:** The user complained about slow analysis times and requested that non-working API keys be removed.
-7.  **Final Key Update:** The user provided a definitive list of 7 new, billed Gemini keys to replace all previous keys.
+After successfully replacing  with a stable Hugging Face Transformers implementation and making the application fully offline, the user provided a new, comprehensive set of requirements for a more advanced version.
+
+**New Product Requirements (as of Message #346):**
+1.  **Model Upgrade:** Utilize the  model on a new  GPU server.
+2.  **AI Role:** The model must act as a 'Senior Medical Auditor', distinguishing between Principal and Secondary diagnoses.
+3.  **Evidence-Based Reasoning:** For every diagnosis, the model must extract and provide the specific supporting text (evidence) from the clinical notes.
+4.  **RAG for Costing:** Implement a Retrieval-Augmented Generation (RAG) pipeline or a lookup function to process a user-provided Excel file (). This system must map clinical findings to  codes, fetch the 'Relative Weight' from the Excel file, and calculate the 'Total Estimated Cost'.
+5.  **Structured Output:** The final analysis must be in a structured JSON format containing: , , , and .
+6.  **New Server:** The entire new application is to be deployed on a new server provided by the user ().
 
 **User's preferred language**: Arabic ()
 
 **what currently exists?**
-The application is in a partially functional state.
-- **Backend:** The backend code in  is bloated with logic for multiple AI providers (Gemini, Azure, DeepSeek, and the local Phi-3 via Ollama). The default provider has been switched multiple times, currently set to Gemini. A key improvement was made to the Gemini key handling, which now retries with different keys upon quota failure. New endpoints and logic for enhanced supervisor reports (financial impact) have been added. The Ollama integration for the local model is present but highly unstable and non-functional. The Azure integration is coded but has never worked due to persistent credential/configuration errors.
-- **Frontend:** The critical  error from the previous session is resolved. However, new critical bugs exist: users are incorrectly redirected after login, and the pre-defined chat questions are broken. A UI for AI provider selection exists in  but its effectiveness depends on the unstable backend provider logic.
-- **Overall Health:** The application is unstable. While Gemini analysis may work due to the new retry logic, the local model (Phi-3) and Azure integrations are completely broken. Critical frontend navigation bugs hinder usability.
+The agent has successfully created a complete, self-contained deployment package for the new requirements in the  directory. This package includes:
+-   New Python modules for the LLM logic (), DRG price lookup (), and API endpoints ().
+-   A server setup script () to automate deployment on the new server.
+-   Supporting files like , , and an .
+-   The user-provided DRG price list () has been downloaded into this directory.
+
+A new server () has been provisioned by the user and is ready for the deployment.
 
 **Last working item**:
-- Last item agent was working: The user provided a list of 7 new, billed Gemini API keys and explicitly instructed the agent to remove all old keys and use only these new ones to ensure stable performance. The agent was acknowledging this request and preparing to implement it.
-- Status: NOT STARTED
-- Agent Testing Done: N
-- Which testing method agent to use? backend testing agent
-- User Testing Done: N
+-   **Last item agent was working:** The agent was working on integrating the user-provided DRG price list () into the new RAG pipeline. It successfully downloaded the file and used  to inspect its structure and column names. The immediate next step is to adapt the  script to correctly parse this specific Excel file and extract the required data for cost calculation.
+-   **Status:** IN PROGRESS
+-   **Agent Testing Done:** N
+-   **Which testing method agent to use?** Manual testing by  on the new server after the application is deployed to validate the end-to-end RAG pipeline.
+-   **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-- Issue 1: Replace all existing Gemini API keys with the 7 new billed keys (P0)
-- Issue 2: Critical Frontend Redirection Bug (P1)
-- Issue 3: Pre-defined Chat Questions Fail (P1)
-- Issue 4: Notes Deleted on Logout Bug (P2)
-- Issue 5: Azure Integration Failure (P3)
-- Issue 6: Unstable Offline Model (Phi-3/Ollama) (P4)
-
-Issues Detail:
-- Issue 1: 
-     - Description: The agent must edit  to remove all existing  variables and add the 7 new keys provided by the user in their last message. This is expected to solve the Insufficient Balance errors and improve analysis speed.
-     - Attempted fixes: The agent previously improved key rotation but this did not solve the root problem of using free, exhausted keys.
-     - Next debug checklist: 
-        1. Edit  to replace the keys.
-        2. Restart the backend service.
-        3. Run a test analysis using Gemini to confirm it's fast and does not produce a balance-related error.
-     - Why fix this issue and what will be achieved with the fix? This is the user's highest priority. It will provide a stable, working AI analysis feature and resolve the primary complaint of slow speeds and balance errors.
-     - Status:  NOT STARTED
-     - Is recurring issue? Y
-     - Should Test frontend/backend/both after fix? backend
-     - Blocked on other issue: No.
-
-- Issue 2: 
-     - Description: After logging in, users are incorrectly redirected to  instead of . The Home button is also reportedly non-functional.
-     - Attempted fixes: The agent briefly inspected  but did not implement a fix.
-     - Next debug checklist:
-        1.  Thoroughly review the routing and navigation logic in , , , and any relevant layout components (, ).
-        2.  Check the logic that depends on  or .
-        3.  Verify the  handlers for navigation links.
-     - Why fix this issue and what will be achieved with the fix? This is a critical usability bug that prevents users from accessing the correct parts of the application.
-     - Status:  NOT STARTED
-     - Is recurring issue? N
-     - Should Test frontend/backend/both after fix? frontend
-     - Blocked on other issue: No.
-
-- Issue 3: 
-     - Description: Clicking the pre-defined (canned) questions in the chat interface results in an error, while manually typed questions work.
-     - Attempted fixes: The agent identified that the frontend  calls a dedicated backend endpoint (). It also implemented a retry mechanism for Gemini keys, which was thought to be the cause, but the issue may persist.
-     - Next debug checklist:
-        1.  Confirm the frontend is passing the correct  to the backend.
-        2.  Trace the execution of the  endpoint in .
-        3.  Ensure the improved Gemini key rotation logic correctly handles these specific requests.
-     - Why fix this issue and what will be achieved with the fix? Fixes a broken feature in the chat interface.
-     - Status:  NOT STARTED
-     - Is recurring issue? Y
-     - Should Test frontend/backend/both after fix? both
-     - Blocked on other issue: No.
-
-- Issue 4:
-     - Description: User reported that clinical notes are being deleted after logging out.
-     - Attempted fixes: The agent did a quick check of the frontend  function and saw no code that would delete notes, suspecting a backend issue. No fix was implemented.
-     - Next debug checklist:
-        1.  Reproduce the issue: create a note, log out, log back in, and check if the note is gone.
-        2.  Inspect the backend  endpoint if one exists.
-        3.  Check if any frontend state management libraries (like Redux, if present) are clearing data inappropriately on logout.
-     - Why fix this issue and what will be achieved with the fix? Prevents critical data loss for the user.
-     - Status:  NOT STARTED
-     - Is recurring issue? N
-     - Should Test frontend/backend/both after fix? both
-     - Blocked on other issue: No.
-
-- Issue 5: 
-     - Description: The Azure integration has never worked, consistently failing with 401 (Access Denied) or 404 (Deployment Not Found) errors, despite the user providing multiple sets of credentials.
-     - Attempted fixes: The agent updated  and  multiple times with new keys, endpoints, and deployment names. All attempts failed.
-     - Next debug checklist: This task should be de-prioritized as per the user's focus on Gemini and local models. If revisited, a systematic check of Key, Endpoint, Region, and Deployment Name is needed.
-     - Status:  BLOCKED
-     - Is recurring issue? Y
-     - Blocked on other issue: Blocked on receiving verified, correct credentials from the user.
-
-- Issue 6:
-     - Description: The local AI model (Phi-3) powered by Ollama is extremely unstable. The  process frequently stops, disappears from the file system, or fails to start, making the feature unusable.
-     - Attempted fixes: Numerous reinstalls of Ollama, attempts to run it via , and running it as a background  process. None have provided a stable solution.
-     - Next debug checklist: This task should be de-prioritized. The fundamental instability of the Ollama service in this environment needs to be addressed, which may require a different installation strategy or investigating environment constraints.
-     - Status:  BLOCKED
-     - Is recurring issue? Y
-     - Blocked on other issue: Blocked by the underlying instability of the Ollama process.
+There are no outstanding bugs from the previous implementation. All work is focused on the new feature development and deployment.
 
 **In progress Task List**:
-There are no tasks currently in progress. The agent was about to start the Gemini key replacement.
+-   **Task 1: Complete the DRG RAG Pipeline (P0)**
+    -   **Where to resume:** Modify the file . The script needs to be updated to read the user's Excel file (), correctly identify the columns for 'DRG Code' and 'Relative Weight' (despite the 'Unnamed' column names), and implement the logic to find the weight for a given code.
+    -   **What will be achieved with this?** This will complete the core logic for the new cost estimation feature.
+    -   **Status:** IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** backend
+    -   **Blocked on something:** No.
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-    - (P1) **Implement PowerPoint Export:** Add functionality to the supervisor's monthly analysis report to export summaries to PowerPoint.
-    - (P2) **Complete Medical Coding UI:** Fully implement the frontend pages and logic for the Medical Coding roles (, , etc.) which are currently placeholders.
+    - (P0) **Integrate RAG with Main Logic:** Modify  to call the  function, passing the identified ICD/DRG codes and receiving the calculated cost to be included in the final JSON output.
+    - (P0) **Deploy to New Server:** Package the completed code into a  archive, transfer it to the new server (), and execute the  script to install dependencies and set up the application.
+    - (P1) **End-to-End Testing:** Once deployed, perform a full test on the new server: create a user, submit a note, and trigger the analysis. Verify the JSON output contains all required fields, including evidence and the correctly calculated DRG cost.
+    - (P2) **Production Configuration:** Configure  as a reverse proxy and set up a  service for the backend on the new server to ensure it runs persistently.
+
 - **Future Tasks:**
-    - (P3) **Final Code Cleanup:** Perform a global search to remove any last remnants of whatsapp or twilio from the codebase.
-    - (P4) **Refactor :** The main backend file is extremely large and convoluted with commented-out code and confusing logic branches. It needs to be refactored for clarity and maintainability.
+    - (P2) **Confirm/Remove PowerPoint Export Feature:** This was requested for a supervisor role that was removed. Confirm if still needed.
+    - (P3) **Notes Deleted on Logout Bug:** An old, low-priority bug that was never addressed.
+    - (P3) **Final Code Cleanup:** Remove any legacy code (e.g., whatsapp, twilio) from the application.
 
 **Completed work in this session**
-- **Gemini Reliability:** Implemented a robust retry loop in the Gemini key manager () to automatically cycle to the next key on quota failures, significantly improving the reliability of analysis requests.
-- **Supervisor Report Enhancements:**
-  - Added a backend function and integrated it to calculate financial impact into the monthly supervisor report.
-  - Added a new sheet to the generated Excel report for detailed financial impact data.
-  - Created a new endpoint  to support a future visual dashboard.
-- **Bug Fixes:**
-  - Resolved a backend crash () by adding a check for  responses from AI providers.
-  - Created the  endpoint, allowing the frontend to dynamically fetch available AI models.
-- **Model Updates:** Updated the Gemini model in the backend to  as per the user's request.
+- **Offline AI Engine Replacement:** Successfully replaced the unstable  with a stable, high-performance  implementation on the original server ().
+- **Resolved Critical Bugs:**
+    - Fixed a persistent frontend Network Error by correcting a misconfigured Nginx reverse proxy.
+    - Fixed a major frontend bug where API calls were being sent to an old, hardcoded URL by patching the production JavaScript build.
+    - Resolved multiple backend crashes related to library version incompatibilities and syntax errors.
+- **Made Application 100% Offline:** Scoured the entire codebase and removed all remaining dependencies on external APIs, including all  calls from three different chat endpoints.
+- **Improved Analysis Quality:** Iteratively improved the quality of the AI analysis by enhancing prompts and logic, ensuring queries are supported by clinical evidence from the notes.
+- **Created a New Deployment Package:** Based on new user requirements, created a full, modular deployment package () for a new version of the application featuring a RAG pipeline for DRG cost estimation.
 
 **Earlier issues found/mentioned but not fixed**
-All known issues are captured in the All Pending/In progress Issue list above.
-
-**Known issue recurrence from previous fork**
-- The Insufficient Balance issue with API keys was a constant problem throughout the session and is the primary driver for the user's final request to switch to billed keys.
+-   **Issue 1: Notes Deleted on Logout Bug**
+    -   This issue from the initial handoff was never addressed due to the constant shift in higher-priority tasks. Its status is unknown.
+    -   **Debug checklist:** Reproduce the bug on the live application, then inspect frontend state management (e.g., Redux, Context) on logout and any backend API calls related to the logout process.
+    -   **Why to solve this issue and what will be achieved with this?** Prevents accidental data loss for users.
+    -   **Should Test frontend/backend/both after fix:** both
+    -   **Is recurring issue?** N
 
 **Code Architecture**
+The agent is creating a new deployment package with a modular structure in :
 
 
 **Key Technical Concepts**
-- **Multi-AI Provider Logic:** The backend attempts to manage multiple AI providers, with complex (and often failing) fallback mechanisms.
-- **API Key Rotation with Retry:** A key improvement was adding a retry loop to the Gemini integration to handle quota-exhausted keys gracefully.
-- **Local AI Model Serving:** Extensive, unsuccessful attempts to use  to serve the  model locally.
-- **Dynamic Frontend Configuration:** The frontend now calls a backend endpoint () to determine which AI options to show the user.
-
-**key DB schema**
-- **ai_settings**:  (This collection exists but the logic has largely been controlled within  directly).
+- **Offline LLM Inference:** Using the  library with large models () on a dedicated GPU server.
+- **Retrieval-Augmented Generation (RAG):** Using a user-provided Excel spreadsheet as a knowledge base to augment the LLM's output with specific data (DRG costs).
+- **Bare-Metal Deployment:** Preparing scripts and code for a full deployment on a new, clean Ubuntu server.
+- **Code Packaging:** Creating a self-contained, deployable application package.
 
 **All files of reference**
-- **Heavily Updated:**
-  - : The epicenter of all changes, successes, and failures. Contains new features, bug fixes, and remnants of many failed approaches.
-  - : Updated multiple times with various API keys for different services.
-- **Updated:**
-  - : To add the AI provider selection dropdown.
-  - : Investigated for the pre-defined questions bug.
-  - : Investigated for the redirection bug.
-
-**Areas that need refactoring**:
-- ** is in critical need of refactoring.** It's over 4000 lines long and contains a mix of active code, commented-out experiments, and duplicated logic. The functions for different AI providers should be modularized, and all unused code should be removed.
+All relevant files are located within the  directory. The primary files for the next steps are:
+-  (to be modified)
+-  (to be integrated with the lookup)
+-  (to be used for deployment)
+-  (the data source)
 
 **Critical Info for New Agent**
-1.  **PRIORITY 1: Implement the Gemini Key Update.** Your first and only task is to replace the old Gemini keys in  with the 7 new billed keys the user provided. This is their top priority and will solve the most significant user-facing issue.
-2.  **PRIORITY 2: Fix the Frontend Bugs.** After the keys are fixed, immediately address the navigation/redirection bug and the broken pre-defined questions. These are critical usability issues.
-3.  **IGNORE OFFLINE & AZURE:** Do not attempt to fix the Phi-3/Ollama or Azure integrations unless explicitly told to by the user. They are unstable rabbit holes. The user's final instructions were to focus on making Gemini work with the new keys.
-4.  **Expect a Mess in :** Be prepared for a very large and confusing  file. Use search () extensively to navigate it. Avoid making broad changes; focus on surgical fixes for the specific bugs you are targeting.
+1.  **Focus on the New Server:** All future work is for the new server . The old server () should be considered deprecated.
+2.  **Complete the RAG Pipeline:** Your immediate priority is to finish the DRG lookup logic in . The Excel file has unnamed columns, so you will need to parse it by index or clean the headers first.
+3.  **Prepare for Deployment:** The goal is to get the  package ready and then deploy and test it on the new server.
+4.  **User Language:** All communication with the user must be in **Arabic ()**.
 
-**documents and test_reports created in this job**
-None.
+**documents and test reports created in this job**
+-  (contains all newly created code)
+-  (downloaded user artifact)
 
 **Last 10 User Messages and any pending HUMAN messages**
-- **User (734):** Excellent! I will replace all the keys with the 7 new paid ones.
-- **User (733):** Only work with these Gemini keys and delete the rest... (provides 7 keys)... These are billed keys, so their free balance won't run out.
-- **User (702):** When using the site, the analysis is very slow. Also, when I click on the questions in the chat, an error appears; it only responds to what I write, not the ready-made questions. Check the gemini keys and delete the ones that don't work so the analysis isn't delayed.
-- **User (669):** I've worked on it now... (provides new Azure and Gemini info and reports the frontend redirection/logout bugs).
-- **User (664):** Project name (RG-MedicalAI)... (provides new Azure keys).
-- **User (637):** HealthInsightsCreate-20251213153740
-- **User (634):** Microsoft keys... Project name MedLocalAI.
-- **User (631):** The local tool still doesn't work. Can it be replaced with another tool from Microsoft?
-- **User (614):** When requesting analysis with the local tool, this message appeared automatically (Phi-3 service unavailable).
-- **User (583):** Stop work on Emergent LLM Key. Make it only on the gemini keys and the local tool. I need the local tool to work efficiently. Find the problem of it not working correctly.
+1.  **User (Final Task):** Provided detailed new requirements: use , act as a 'Senior Medical Auditor', extract evidence, and implement a RAG pipeline with a provided DRG price list to calculate costs. Requested the code be prepared for a new A100 server.
+2.  **Agent:** Acknowledged and asked for the DRG price list file.
+3.  **User:** Confirmed the code should use  (Australian version) and stated they will provide server details once the code is ready.
+4.  **Agent:** Confirmed plan to prepare the code package.
+5.  **Agent:** Created and packaged all necessary files (, , , etc.) into .
+6.  **User:** Provided the new server details () and uploaded the  file.
+7.  **Agent:** Confirmed receipt and stated the plan: download the file, connect to the new server, and deploy.
+8.  **Agent:** Downloaded and successfully inspected the structure of the DRG Excel file using pandas.
 
 **Project Health Check:**
-- **Broken**:
-  - Local AI model integration (Ollama/Phi-3) is completely non-functional and unstable.
-  - Microsoft Azure integration is non-functional due to credential/configuration issues.
-  - Frontend navigation has critical redirection and non-working link bugs.
-  - A data-loss bug (notes deleted on logout) has been reported.
-- **Mocked**: None.
+-   **Local Workspace:** Healthy. A complete deployment package is being built in .
+-   **Old Server ():** Healthy. The application is fully functional and 100% offline but is now considered deprecated.
+-   **New Server ():** Healthy but empty. It's a fresh instance waiting for the application deployment.
 
 **3rd Party Integrations**
-- **Google Gemini API**: Semi-functional. The logic has been improved with retries, but it's using exhausted free-tier keys. Awaiting update to new billed keys.
-- **Microsoft Azure OpenAI**: Integrated but **non-functional** due to persistent credential/configuration errors.
-- **DeepSeek API**: Integrated but likely **non-functional** as keys were reported to have insufficient balance.
-- **Ollama (for Phi-3 local model)**: Integrated but **non-functional** and highly unstable. The service process repeatedly fails.
+- **Hugging Face Models (Offline):** The new implementation is designed for , to be run locally on the user's server.
 
 **Testing status**
-- Testing agent used after significant changes: NO
+- Testing agent used after significant changes: NO (Agent performed extensive manual testing with  and screenshots).
 - Troubleshoot agent used after agent stuck in loop: NO
 - Test files created: None.
-- Known regressions: New frontend navigation bugs were introduced. The local AI feature, which was partially working at one point, is now completely broken.
+- Known regressions: None on the final version of the old server. The new deployment is untested.
 
 **Credentials to test flow:**
-A demo user was created and modified during the session. Use these credentials after fixing the login redirection bug.
-- **Email:** 
-- **Password:** 
-- **MFA:** Disabled
-
-**What agent forgot to execute**
-- The agent never successfully stabilized the local Phi-3/Ollama model, despite many attempts.
-- The agent did not fix the frontend navigation bugs (redirect and home button).
-- The agent did not fix the bug where notes are allegedly deleted on logout.
-- The agent did not implement the requested PowerPoint export feature for supervisor reports.</analysis>
+- **New Server SSH:** 
+- **Application URL (after deployment):** 
+- **Test User:** A new user will need to be created via the registration page on the live server for testing.</analysis>

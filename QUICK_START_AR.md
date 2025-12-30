@@ -6,7 +6,7 @@
 
 1. **اذهب إلى صفحة التسجيل:**
    ```
-   https://medical-llm.preview.emergentagent.com/register
+   https://medcoder-1.preview.emergentagent.com/register
    ```
 
 2. **املأ البيانات:**
@@ -66,7 +66,7 @@
 
 1. **انسخ الرابط:**
    ```
-   https://medical-llm.preview.emergentagent.com
+   https://medcoder-1.preview.emergentagent.com
    ```
 
 2. **أرسله للفريق الطبي عبر:**

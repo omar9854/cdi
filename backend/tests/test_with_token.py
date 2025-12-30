@@ -12,7 +12,7 @@ from datetime import datetime
 
 class MediDocTokenTester:
     def __init__(self):
-        self.base_url = "https://medical-llm.preview.emergentagent.com"
+        self.base_url = "https://medcoder-1.preview.emergentagent.com"
         self.api_url = f"{self.base_url}/api"
         
         # Token from test_result.md
