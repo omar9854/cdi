@@ -1,179 +1,153 @@
-# MediDoc AI - Clinical Documentation Improvement System
+# MediDoc AI - نظام تحسين التوثيق السريري
 
-## 🏥 Overview
+## 🏥 نظرة عامة | Overview
 
-MediDoc AI is an advanced Clinical Documentation Improvement (CDI) system powered by **Qwen2.5-72B** large language model. It acts as a **Senior Medical Auditor** to analyze clinical notes and provide:
+MediDoc AI هو نظام ذكاء اصطناعي متكامل لتحسين التوثيق السريري (CDI) مصمم خصيصاً للمؤسسات الصحية في المملكة العربية السعودية.
 
-- **Principal & Secondary Diagnosis Identification**
-- **ICD-10-AM Code Assignment**
-- **Evidence-Based Clinical Reasoning**
-- **DRG Cost Estimation with RAG Pipeline**
-- **Physician Query Generation**
+**✅ آمن 100% - يعمل بالكامل محلياً بدون اتصال بالإنترنت**
 
-## 🖥️ System Requirements
+MediDoc AI is a comprehensive AI-powered Clinical Documentation Improvement (CDI) system designed specifically for healthcare institutions in Saudi Arabia.
 
-### Hardware
-- **GPU**: NVIDIA A100 40GB (required for 72B model)
-- **RAM**: 64GB minimum
-- **Storage**: 500GB SSD
-- **CPU**: 8+ cores
+**✅ 100% Secure - Operates entirely offline without internet connection**
 
-### Software
-- Ubuntu 22.04 LTS
+---
+
+## 🔒 ميزات الأمان | Security Features
+
+- **لا توجد تبعيات خارجية**: جميع البيانات الطبية تبقى داخل الشبكة المحلية
+- **معالجة محلية 100%**: نموذج الذكاء الاصطناعي يعمل على السيرفر المحلي
+- **متوافق مع HIPAA**: تصميم يراعي خصوصية البيانات الطبية
+- **تشفير البيانات**: في الراحة والنقل
+
+---
+
+## 🤖 نموذج الذكاء الاصطناعي | AI Model
+
+- **النموذج**: Qwen2.5-72B-Instruct
+- **التكميم**: 4-bit NF4 (لتقليل استخدام الذاكرة)
+- **الجهاز المطلوب**: NVIDIA A100 40GB GPU
+- **الدور**: مدقق طبي أول متخصص في CDI
+
+---
+
+## 📊 قدرات النظام | System Capabilities
+
+### تحليل التوثيق السريري
+- تحديد التشخيص الرئيسي والثانوي
+- استخراج الأدلة السريرية لكل تشخيص
+- تعيين أكواد ICD-10-AM بدقة
+
+### حساب تكلفة DRG
+- قاعدة بيانات AR-DRG v9 للسعودية
+- 800+ كود DRG
+- حساب التكلفة حسب نوع المستشفى (A, B, C)
+
+### توليد الاستفسارات للأطباء
+- استفسارات مدعومة بأدلة سريرية
+- تحديد الثغرات في التوثيق
+- تحسين دقة الترميز
+
+---
+
+## 🚀 التثبيت | Installation
+
+### المتطلبات
+- Ubuntu Server 22.04+
+- NVIDIA A100 GPU (40GB)
 - Python 3.11+
-- NVIDIA CUDA 11.8+
-- MongoDB 6.0+
-- Nginx
+- MongoDB
+- 64GB+ RAM
 
-## 📦 Installation
-
-### 1. Clone and Setup
+### خطوات التثبيت
 
 ```bash
-# Run setup script
+# 1. نقل الملفات للسيرفر
+scp -i MediDoc-Security.pem medidoc_deployment.tar.gz ubuntu@YOUR_SERVER_IP:/home/ubuntu/
+
+# 2. الاتصال بالسيرفر
+ssh -i MediDoc-Security.pem ubuntu@YOUR_SERVER_IP
+
+# 3. فك الضغط
+tar -xzf medidoc_deployment.tar.gz
+cd medidoc_deployment
+
+# 4. تشغيل سكربت التثبيت
 chmod +x setup_server.sh
 ./setup_server.sh
 ```
 
-### 2. Configure Environment
+---
+
+## 📁 هيكل الملفات | File Structure
+
+```
+medidoc_deployment/
+├── local_llm.py          # منطق الذكاء الاصطناعي المحلي
+├── drg_lookup.py         # البحث في قاعدة بيانات DRG
+├── cdi_endpoints.py      # نقاط API للتحليل
+├── icd10am_codes.py      # أكواد ICD-10-AM
+├── server_integration.py # تعليمات الدمج
+├── setup_server.sh       # سكربت التثبيت
+├── requirements.txt      # متطلبات Python
+├── drg_prices.xlsx       # قائمة أسعار DRG
+└── README.md             # هذا الملف
+```
+
+---
+
+## ⚙️ التكوين | Configuration
+
+### ملف .env
+```bash
+# MongoDB
+MONGO_URL=mongodb://127.0.0.1:27017
+DB_NAME=medidoc_production
+
+# JWT Security
+JWT_SECRET=your-secure-secret-key
+ACCESS_TOKEN_EXPIRE_MINUTES=10080
+
+# Model Configuration
+MODEL_NAME=Qwen/Qwen2.5-72B-Instruct
+HOSPITAL_TYPE=A
+
+# DRG Price List
+DRG_PRICE_LIST=/opt/medidoc-ai/data/drg_prices.xlsx
+```
+
+---
+
+## 🔧 الأوامر المفيدة | Useful Commands
 
 ```bash
-cp .env.example .env
-nano .env  # Edit with your settings
-```
-
-### 3. Load DRG Price List (Optional)
-
-Place your DRG price list file at:
-```
-/opt/medidoc-ai/backend/data/drg_prices.xlsx
-```
-
-Expected columns:
-- `DRG_Code`: DRG code (e.g., K60A)
-- `Description`: DRG description
-- `Relative_Weight`: Relative weight for cost calculation
-
-## 🚀 Usage
-
-### Start Services
-
-```bash
-sudo systemctl start medidoc-backend
-sudo systemctl start nginx
-```
-
-### Check Status
-
-```bash
+# التحقق من حالة الخدمة
 sudo systemctl status medidoc-backend
-sudo journalctl -u medidoc-backend -f  # View logs
+
+# عرض السجلات
+sudo journalctl -u medidoc-backend -f
+
+# إعادة التشغيل
+sudo systemctl restart medidoc-backend
+
+# التحقق من GPU
+nvidia-smi
 ```
 
-## 📊 API Endpoints
+---
 
-### Analysis
+## 📞 الدعم | Support
 
-```http
-POST /api/analyze
-Content-Type: application/json
-Authorization: Bearer <token>
+للدعم الفني، يرجى التواصل مع فريق تحسين التوثيق السريري.
 
-{
-    "note_id": "uuid"
-}
-```
+---
 
-**Response:**
-```json
-{
-    "principal_diagnosis": {
-        "diagnosis_en": "Type 2 Diabetes with poor control",
-        "diagnosis_ar": "داء السكري النوع 2 مع سوء التحكم",
-        "icd_code": "E11.65",
-        "evidence": "HbA1c 9.5% indicating poor glycemic control",
-        "drg_code": "K60A",
-        "relative_weight": 1.45,
-        "estimated_cost": 7250.0
-    },
-    "secondary_diagnoses": [...],
-    "physician_queries": [...],
-    "drg_summary": {
-        "estimated_drg": "K60A",
-        "base_drg_weight": 1.45,
-        "cc_adjustment": 0.3,
-        "final_weight": 1.75,
-        "base_rate": 5000.0,
-        "total_estimated_cost": 8750.0
-    }
-}
-```
+## 📝 ملاحظات مهمة | Important Notes
 
-### Chat (CDI-Focused)
+1. **الأمان**: تأكد من تغيير JWT_SECRET قبل الإنتاج
+2. **HTTPS**: قم بتثبيت شهادة SSL للإنتاج
+3. **النسخ الاحتياطي**: قم بعمل نسخ احتياطي منتظم لقاعدة البيانات
+4. **التحديثات**: قم بتحديث النظام بشكل دوري
 
-```http
-POST /api/chat/{analysis_id}
-Content-Type: application/json
-Authorization: Bearer <token>
+---
 
-{
-    "message": "What is the evidence for diabetic nephropathy?"
-}
-```
-
-## 🔧 Configuration
-
-### Model Settings
-
-In `local_llm.py`:
-```python
-DEFAULT_MODEL = "Qwen/Qwen2.5-72B-Instruct"  # Main model
-FALLBACK_MODEL = "Qwen/Qwen2.5-7B-Instruct"  # Fallback if 72B fails
-```
-
-### DRG Base Rate
-
-In `.env`:
-```
-DRG_BASE_RATE=5000.0  # SAR
-```
-
-### Load Custom DRG Price List
-
-```python
-from drg_lookup import DRGLookup
-
-drg = DRGLookup()
-drg.load_from_file("/path/to/drg_prices.xlsx")
-drg.set_base_rate(5000.0)
-```
-
-## 📋 ICD-10-AM Codes
-
-The system uses **ICD-10-AM (Australian Modification)** codes. Key mappings:
-
-| Code | Description | DRG | Weight |
-|------|-------------|-----|--------|
-| E11.65 | Type 2 DM with hyperglycemia | K60A | 1.45 |
-| E11.40 | Type 2 DM with neuropathy | K60A | 1.45 |
-| E11.21 | Type 2 DM with nephropathy | K60A | 1.45 |
-| I10 | Essential hypertension | F74B | 0.55 |
-| I50.9 | Heart failure | F62B | 1.05 |
-| N18.3 | CKD Stage 3 | L63A | 1.25 |
-| N18.5 | CKD Stage 5 | L60A | 3.20 |
-
-## 🔒 Security Notes
-
-1. Change `JWT_SECRET_KEY` in production
-2. Use HTTPS with SSL certificate
-3. Configure firewall rules
-4. Regular security updates
-
-## 📞 Support
-
-For issues or questions, contact:
-- Email: support@medidoc.ai
-
-## 📄 License
-
-Proprietary - All rights reserved.
+© 2025 - تجمع المدينة المنورة الصحي | Madinah Health Cluster
