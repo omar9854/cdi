@@ -266,9 +266,9 @@ class MediDocAITester:
             return False
 
     def test_analysis_create(self):
-        """Test POST /api/analysis/{note_id} - تحليل ملاحظة سريرية"""
+        """Test POST /api/analyze - تحليل ملاحظة سريرية"""
         if not self.token or not self.note_id:
-            self.log_test("POST /api/analysis/{note_id}", False, "No authentication token or note ID")
+            self.log_test("POST /api/analyze", False, "No authentication token or note ID")
             return False
         
         try:
@@ -279,7 +279,7 @@ class MediDocAITester:
             start_time = time.time()
             
             response = requests.post(
-                f"{self.api_url}/analysis/{self.note_id}",
+                f"{self.api_url}/analyze",
                 json=analyze_data,
                 headers=headers,
                 timeout=60  # Longer timeout for AI processing
@@ -311,10 +311,10 @@ class MediDocAITester:
             else:
                 details = f"Status: {response.status_code}, Error: {response.text}"
             
-            self.log_test("POST /api/analysis/{note_id}", success, details, response.json() if success else None)
+            self.log_test("POST /api/analyze", success, details, response.json() if success else None)
             return success
         except Exception as e:
-            self.log_test("POST /api/analysis/{note_id}", False, str(e))
+            self.log_test("POST /api/analyze", False, str(e))
             return False
 
     def test_json_format_validation(self):
