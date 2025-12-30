@@ -29,52 +29,21 @@ class MediDocAITester:
         self.note_id = None
         self.analysis_id = None
         
-        # Admin credentials for Gemini API testing (test admin without MFA)
-        self.admin_credentials = {
-            "email": "test.admin@cdi.com",
-            "password": "TestAdmin123!"
-        }
-        
-        # Test user data (for clinical questions testing - MFA disabled)
-        import time
-        timestamp = str(int(time.time()))
+        # Test user data as specified in the request
         self.test_user = {
-            "email": f"clinical_test_{timestamp}@test.com",
-            "full_name": "Clinical Test User",
-            "phone_number": f"9665012{timestamp[-5:]}",
-            "password": "ClinicalTest123!"
+            "email": "test.cdi@hospital.sa",
+            "full_name": "Test CDI User",
+            "phone_number": "966500000001",
+            "password": "TestPassword123!"
         }
         
-        self.arabic_clinical_note = {
-            "title": "ملاحظات سريرية - مريض السكري",
+        # Clinical note data as specified in the request
+        self.test_clinical_note = {
+            "title": "Test Clinical Note",
             "doctor_notes": [
                 {
-                    "text": """المريض: محمد أحمد، 45 سنة، ذكر
-
-الشكوى الرئيسية:
-- ارتفاع مستوى السكر في الدم
-- تعب عام وإرهاق
-- كثرة التبول والعطش
-
-التاريخ المرضي:
-- مصاب بداء السكري النوع الثاني منذ 5 سنوات
-- ارتفاع ضغط الدم
-- تاريخ عائلي لأمراض القلب""",
+                    "text": "Patient is a 55-year-old male with Type 2 Diabetes Mellitus, HbA1c 9.2%, on Metformin. Also has hypertension on Lisinopril. Reports bilateral foot numbness.",
                     "specialty": "internal_medicine"
-                },
-                {
-                    "text": """الفحص السريري:
-- ضغط الدم: 150/90 mmHg
-- نبضات القلب: 88 نبضة/دقيقة
-- الوزن: 85 كغ، الطول: 170 سم
-- BMI: 29.4
-
-نتائج المختبر:
-- سكر الدم الصائم: 180 mg/dl
-- HbA1c: 8.5%
-- الكوليسترول الكلي: 220 mg/dl
-- وظائف الكلى: طبيعية""",
-                    "specialty": "endocrinology"
                 }
             ]
         }
