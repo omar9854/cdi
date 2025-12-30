@@ -1,34 +1,48 @@
-# MediDoc AI - Requirements
-# For Qwen2.5-72B with 4-bit quantization on A100 40GB
+# MediDoc AI Requirements - 100% Offline Medical Application
+# For NVIDIA A100 GPU Server
 
-# Core ML
+# === Core AI & ML ===
 torch>=2.0.0
-transformers>=4.40.0
-accelerate>=0.25.0
+torchvision
+torchaudio
+transformers>=4.35.0
+accelerate>=0.24.0
 bitsandbytes>=0.41.0
+scipy
 
-# Web Framework
-fastapi>=0.109.0
-uvicorn[standard]>=0.27.0
-python-multipart>=0.0.6
+# === FastAPI Backend ===
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart
+aiofiles
 
-# Database
+# === Database ===
 motor>=3.3.0
-pymongo>=4.6.0
+pymongo>=4.5.0
 
-# Utils
+# === Security ===
+bcrypt>=4.0.0
+pyjwt>=2.8.0
 python-dotenv>=1.0.0
-pydantic>=2.5.0
-python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4
-slowapi>=0.1.9
+pydantic[email]>=2.5.0
 
-# For DRG file loading
+# === Data Processing ===
 pandas>=2.0.0
 openpyxl>=3.1.0
 
-# Email
-aiosmtplib>=3.0.0
+# === Email (Optional) ===
+aiosmtplib>=2.0.0
 
-# Logging
-loguru>=0.7.0
+# === PDF Generation ===
+reportlab>=4.0.0
+
+# === Monitoring (Optional) ===
+prometheus-client>=0.18.0
+prometheus-fastapi-instrumentator>=6.1.0
+slowapi>=0.1.9
+
+# === Logging ===
+logging
+
+# Note: NO external API dependencies
+# This application runs 100% offline
