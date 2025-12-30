@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for Arabic Medical Coding Application
-Tests all endpoints including auth, notes, analysis, admin, supervisor, and CDI Excel upload functionality
+Backend API Testing for MediDoc AI Medical Application
+Comprehensive testing based on user requirements in Arabic
+اختبار شامل للتطبيق الطبي MediDoc AI
 """
 
 import requests
@@ -13,7 +14,7 @@ import io
 import pandas as pd
 from openpyxl import Workbook
 
-class MedicalCodingAPITester:
+class MediDocAITester:
     def __init__(self, base_url="https://medcoder-1.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
@@ -25,6 +26,8 @@ class MedicalCodingAPITester:
         self.tests_run = 0
         self.tests_passed = 0
         self.test_results = []
+        self.note_id = None
+        self.analysis_id = None
         
         # Admin credentials for Gemini API testing (test admin without MFA)
         self.admin_credentials = {
