@@ -198,3 +198,7 @@ CDI_System_Complete.zip
 # Environment files
 *.env
 *.env.*
+-e 
+# Environment files
+*.env
+*.env.*
