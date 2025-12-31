@@ -1,0 +1,307 @@
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
+import { Lock, Mail, ArrowRight, Activity, Shield, TrendingUp } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { getErrorMessage } from '@/utils/errorHandler';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+const Login = ({ setUser }) => {
+  const navigate = useNavigate();
+  const { language, t } = useLanguage();
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Try new MFA flow first
+      const response = await axios.post(`${API}/auth/login-step1`, formData);
+      
+      if (response.data.requires_mfa) {
+        // Navigate to MFA verification page
+        toast.success(
+          language === 'ar' 
+            ? '✅ تم إرسال رمز التحقق إلى بريدك الإلكتروني' 
+            : '✅ Verification code sent to your email'
+        );
+        navigate('/mfa-verify', {
+          state: {
+            email: response.data.email,
+            tempToken: formData.password // We'll handle this differently in production
+          }
+        });
+      } else {
+        // MFA disabled, login directly
+        const { access_token, user } = response.data;
+        localStorage.setItem('token', access_token);
+        localStorage.setItem('user', JSON.stringify(user));
+        setUser(user);
+        
+        toast.success(t('loginSuccess'));
+        
+        // Route based on role
+        if (user.role === 'supervisor' || user.role === 'admin') {
+          navigate('/supervisor');
+        } else {
+          navigate('/dashboard');
+        }
+      }
+    } catch (error) {
+      // Handle errors safely
+      let errorMessage;
+      
+      if (error.response?.status === 429) {
+        errorMessage = language === 'ar'
+          ? '⚠️ تم قفل الحساب مؤقتاً بسبب محاولات فاشلة متعددة. حاول لاحقاً.'
+          : '⚠️ Account temporarily locked due to multiple failed attempts. Try again later.';
+      } else if (error.response?.status === 403) {
+        errorMessage = language === 'ar'
+          ? '⚠️ الحساب مقفل. يرجى الاتصال بالدعم الفني.'
+          : '⚠️ Account is locked. Please contact support.';
+      } else if (error.response?.status === 401) {
+        errorMessage = language === 'ar' 
+          ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' 
+          : 'Invalid email or password';
+      } else {
+        // Use error handler to safely extract message
+        const defaultMsg = language === 'ar' ? 'حدث خطأ في تسجيل الدخول' : 'Login error';
+        errorMessage = getErrorMessage(error, defaultMsg);
+      }
+      
+      toast.error(errorMessage, {
+        duration: 4000,
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+          fontSize: '16px',
+          fontWeight: 'bold'
+        }
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Right Side - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-white/95 backdrop-blur-sm">
+        <div className="w-full max-w-md space-y-8 animate-fade-in">
+          {/* Logo and Title */}
+          <div className="text-center space-y-4">
+            <div className="mx-auto w-24 h-24 flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-300">
+              <img src="/logo.jpeg" alt="Logo" className="w-20 h-20 object-contain rounded-xl" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                {language === 'ar' ? 'مرحباً بك' : 'Welcome Back'}
+              </h1>
+              <p className="text-gray-600 text-lg">
+                {language === 'ar' 
+                  ? 'إدارة تحسين التوثيق السريري' 
+                  : 'Clinical Documentation Improvement'}
+              </p>
+            </div>
+          </div>
+
+          {/* Login Form */}
+          <Card className="border-0 shadow-2xl bg-white">
+            <CardHeader className="space-y-1 pb-6">
+              <CardTitle className="text-2xl font-bold text-center text-gray-800">
+                {language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
+              </CardTitle>
+              <CardDescription className="text-center text-gray-600">
+                {language === 'ar' 
+                  ? 'أدخل بياناتك للوصول إلى حسابك' 
+                  : 'Enter your credentials to access your account'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Email Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-blue-600" />
+                    {language === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder={language === 'ar' ? 'example@domain.com' : 'example@domain.com'}
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="h-12 pl-4 pr-4 border-2 border-gray-200 focus:border-blue-500 rounded-xl transition-all duration-300 hover:border-blue-300"
+                      required
+                      data-testid="email-input"
+                    />
+                  </div>
+                </div>
+
+                {/* Password Field */}
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-blue-600" />
+                    {language === 'ar' ? 'كلمة المرور' : 'Password'}
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder={language === 'ar' ? '••••••••' : '••••••••'}
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      className="h-12 pl-4 pr-4 border-2 border-gray-200 focus:border-blue-500 rounded-xl transition-all duration-300 hover:border-blue-300"
+                      required
+                      data-testid="password-input"
+                    />
+                  </div>
+                </div>
+
+                {/* Forgot Password Link */}
+                <div className="flex justify-end">
+                  <Link 
+                    to="/forgot-password" 
+                    className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:underline transition-colors duration-300"
+                  >
+                    {language === 'ar' ? 'نسيت كلمة المرور؟' : 'Forgot Password?'}
+                  </Link>
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
+                  data-testid="login-button"
+                >
+                  {loading ? (
+                    <Activity className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      {language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
+                </Button>
+
+                {/* Register Link */}
+                <div className="text-center pt-4">
+                  <p className="text-gray-600">
+                    {language === 'ar' ? 'ليس لديك حساب؟' : "Don't have an account?"}{' '}
+                    <Link 
+                      to="/register" 
+                      className="text-blue-600 hover:text-blue-800 font-semibold hover:underline transition-colors duration-300"
+                    >
+                      {language === 'ar' ? 'إنشاء حساب جديد' : 'Create Account'}
+                    </Link>
+                  </p>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Footer Text */}
+          <div className="text-center text-sm text-gray-500 pt-4">
+            <p>© 2025 {language === 'ar' ? 'جميع الحقوق محفوظة' : 'All Rights Reserved'}</p>
+            <p className="mt-1 font-semibold text-gray-700">
+              {language === 'ar' ? 'عمر المغذوي' : 'Omar Almaghthawi'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Left Side - Image/Illustration */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col items-center justify-center p-12 text-white space-y-8">
+          {/* Main Image */}
+          <div className="w-full max-w-lg">
+            <img 
+              src="/download-2.png" 
+              alt="Medical Illustration" 
+              className="w-full h-auto drop-shadow-2xl animate-float"
+            />
+          </div>
+
+          {/* Features */}
+          <div className="space-y-6 w-full max-w-lg">
+            <h2 className="text-4xl font-bold text-center mb-8">
+              {language === 'ar' 
+                ? 'إدارة تحسين التوثيق السريري' 
+                : 'Clinical Documentation Improvement'}
+            </h2>
+            
+            <div className="space-y-4">
+              <div className="flex items-start gap-4 bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300">
+                <div className="bg-white/20 p-3 rounded-lg">
+                  <Activity className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg mb-1">
+                    {language === 'ar' ? 'تحليل ذكي بالـ AI' : 'AI-Powered Analysis'}
+                  </h3>
+                  <p className="text-white/80 text-sm">
+                    {language === 'ar' 
+                      ? 'تحليل تلقائي للملفات الطبية مع اقتراحات دقيقة' 
+                      : 'Automatic medical file analysis with precise suggestions'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300">
+                <div className="bg-white/20 p-3 rounded-lg">
+                  <TrendingUp className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg mb-1">
+                    {language === 'ar' ? 'تقارير احترافية' : 'Professional Reports'}
+                  </h3>
+                  <p className="text-white/80 text-sm">
+                    {language === 'ar' 
+                      ? 'رسوم بيانية وتقارير شاملة قابلة للتحميل' 
+                      : 'Charts and comprehensive downloadable reports'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300">
+                <div className="bg-white/20 p-3 rounded-lg">
+                  <Shield className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg mb-1">
+                    {language === 'ar' ? 'أمان عالي' : 'High Security'}
+                  </h3>
+                  <p className="text-white/80 text-sm">
+                    {language === 'ar' 
+                      ? 'حماية متقدمة للبيانات الطبية الحساسة' 
+                      : 'Advanced protection for sensitive medical data'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Login;

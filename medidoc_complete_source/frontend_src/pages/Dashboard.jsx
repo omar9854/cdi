@@ -1,0 +1,259 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { FileText, Plus, History, LogOut, Loader2, Edit, Trash2 } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import { useLanguage } from '@/contexts/LanguageContext';
+import Footer from '@/components/Footer';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+const Dashboard = ({ user, onLogout }) => {
+  const navigate = useNavigate();
+  const { language, t } = useLanguage();
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Auto-redirect supervisors to supervisor dashboard
+  useEffect(() => {
+    if (user?.role === 'supervisor' && user?.role !== 'admin') {
+      navigate('/supervisor');
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    fetchNotes();
+  }, [user]);
+
+  const fetchNotes = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API}/notes`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNotes(response.data);
+    } catch (error) {
+      toast.error('فشل تحميل الملاحظات');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ar-SA', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const handleEdit = (e, noteId) => {
+    e.stopPropagation(); // Prevent card click
+    navigate(`/edit-note/${noteId}`);
+  };
+
+  const handleDeleteClick = (e, note) => {
+    e.stopPropagation(); // Prevent card click
+    setNoteToDelete(note);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!noteToDelete) return;
+    
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API}/notes/${noteToDelete.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      toast.success(language === 'ar' ? 'تم حذف الملاحظة بنجاح' : 'Note deleted successfully');
+      setDeleteDialogOpen(false);
+      setNoteToDelete(null);
+      fetchNotes(); // Refresh list
+    } catch (error) {
+      toast.error(language === 'ar' ? 'فشل حذف الملاحظة' : 'Failed to delete note');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <Navbar user={user} onLogout={onLogout} />
+      
+      <main className="container mx-auto px-4 py-8 max-w-7xl" data-testid="dashboard-main">
+        {/* Header */}
+        <div className="mb-8 fade-in">
+          <h1 className="text-4xl font-bold text-gray-800 mb-2">لوحة التحكم</h1>
+          <p className="text-gray-600 text-lg">مرحباً بك، {user.full_name}</p>
+        </div>
+
+        {/* Action Cards */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8 fade-in">
+          <Card className="medical-card card-hover cursor-pointer" onClick={() => navigate('/new-note')} data-testid="new-note-card">
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                <Plus className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">ملاحظة جديدة</h3>
+                <p className="text-gray-600">أضف ملاحظات سريرية جديدة للتحليل</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="medical-card card-hover cursor-pointer" onClick={() => navigate('/history')} data-testid="history-card">
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="w-14 h-14 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center">
+                <History className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800">السجل</h3>
+                <p className="text-gray-600">عرض جميع التحليلات السابقة</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Notes */}
+        <div className="fade-in">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">الملاحظات الأخيرة</h2>
+          
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+            </div>
+          ) : notes.length === 0 ? (
+            <Card className="medical-card">
+              <CardContent className="text-center py-12">
+                <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 text-lg mb-4">لا توجد ملاحظات حتى الآن</p>
+                <Button onClick={() => navigate('/new-note')} className="medical-blue" data-testid="create-first-note-button">
+                  <Plus className="ml-2" /> إنشاء أول ملاحظة
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {notes.map((note) => (
+                <Card
+                  key={note.id}
+                  className="medical-card card-hover cursor-pointer"
+                  onClick={() => navigate(`/analysis/${note.id}`)}
+                  data-testid={`note-card-${note.id}`}
+                >
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <CardTitle className="text-xl text-gray-800">{note.title}</CardTitle>
+                        <p className="text-sm text-gray-500">{formatDate(note.created_at)}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handleEdit(e, note.id)}
+                          className="text-blue-600 hover:bg-blue-50 border-blue-300"
+                          data-testid={`edit-note-${note.id}`}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => handleDeleteClick(e, note)}
+                          className="text-red-600 hover:bg-red-50 border-red-300"
+                          data-testid={`delete-note-${note.id}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-700 line-clamp-2">{note.notes_text}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600 flex items-center gap-2">
+              <Trash2 className="h-5 w-5" />
+              {language === 'ar' ? 'تأكيد الحذف' : 'Confirm Delete'}
+            </DialogTitle>
+            <DialogDescription className="text-base pt-4">
+              {language === 'ar' ? (
+                <>
+                  <p className="font-semibold mb-2">هل أنت متأكد من حذف هذه الملاحظة؟</p>
+                  <p className="text-gray-600">
+                    سيتم حذف الملاحظة "{noteToDelete?.title}" وجميع التحليلات المرتبطة بها بشكل نهائي.
+                  </p>
+                  <p className="text-red-600 mt-2">لا يمكن التراجع عن هذا الإجراء.</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold mb-2">Are you sure you want to delete this note?</p>
+                  <p className="text-gray-600">
+                    The note "{noteToDelete?.title}" and all its associated analyses will be permanently deleted.
+                  </p>
+                  <p className="text-red-600 mt-2">This action cannot be undone.</p>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setNoteToDelete(null);
+              }}
+              disabled={deleting}
+              className="flex-1"
+            >
+              {language === 'ar' ? 'لا، إلغاء' : 'No, Cancel'}
+            </Button>
+            <Button
+              onClick={confirmDelete}
+              disabled={deleting}
+              className="flex-1 bg-red-600 hover:bg-red-700"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className={`h-4 w-4 animate-spin ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+                  {language === 'ar' ? 'جاري الحذف...' : 'Deleting...'}
+                </>
+              ) : (
+                <>
+                  {language === 'ar' ? 'نعم، احذف' : 'Yes, Delete'}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default Dashboard;
