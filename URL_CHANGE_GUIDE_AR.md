@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://medcoder-1.preview.emergentagent.com
+https://clinical-doc.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://medcoder-1.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://medcoder-1.preview.emergentagent.com
+   https://clinical-doc.preview.emergentagent.com
    ```
 
 ---
