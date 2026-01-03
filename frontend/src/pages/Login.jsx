@@ -234,9 +234,9 @@ const Login = ({ setUser }) => {
           {/* Main Image */}
           <div className="w-full max-w-lg">
             <img 
-              src="/download-2.png" 
-              alt="Medical Illustration" 
-              className="w-full h-auto drop-shadow-2xl animate-float"
+              src="/login-logo.png" 
+              alt="نبيه - Nabeeh" 
+              className="w-full h-auto max-h-64 object-contain drop-shadow-2xl animate-float"
             />
           </div>
 
