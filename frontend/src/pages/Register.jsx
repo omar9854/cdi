@@ -57,7 +57,7 @@ const Register = ({ setUser }) => {
           </div>
           <CardTitle className="text-3xl font-bold text-gray-800">{t('register')}</CardTitle>
           <CardDescription className="text-lg">
-            {language === 'ar' ? 'إدارة تحسين التوثيق السريري' : 'Clinical Documentation Improvement'}
+            {language === 'ar' ? 'منصة نبيه' : 'Nabeeh Platform'}
             <br />
             {language === 'ar' ? 'تجمع المدينة المنورة الصحي' : 'Madinah Health Cluster'}
           </CardDescription>

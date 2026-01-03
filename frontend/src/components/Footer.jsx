@@ -33,7 +33,7 @@ const Footer = () => {
             <p className="text-sm font-medium">
               {language === 'ar' 
                 ? 'إدارة تحسين التوثيق السريري - تجمع المدينة المنورة الصحي'
-                : 'Clinical Documentation Improvement - Madinah Health Cluster'
+                : 'نبيه - Nabeeh AI Platform'
               }
             </p>
           </div>

@@ -125,7 +125,7 @@ export const translations = {
     contactSupport: 'Contact Support',
     
     // App name
-    appName: 'Clinical Documentation Improvement',
+    appName: 'Nabeeh Platform',
     appSubtitle: 'Madinah Health Cluster',
     
     // Dashboard

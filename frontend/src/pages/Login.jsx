@@ -108,8 +108,8 @@ const Login = ({ setUser }) => {
               </h1>
               <p className="text-gray-600 text-lg">
                 {language === 'ar' 
-                  ? 'إدارة تحسين التوثيق السريري' 
-                  : 'Clinical Documentation Improvement'}
+                  ? 'منصة نبيه' 
+                  : 'Nabeeh Platform'}
               </p>
             </div>
           </div>
@@ -244,8 +244,8 @@ const Login = ({ setUser }) => {
           <div className="space-y-6 w-full max-w-lg">
             <h2 className="text-4xl font-bold text-center mb-8">
               {language === 'ar' 
-                ? 'إدارة تحسين التوثيق السريري' 
-                : 'Clinical Documentation Improvement'}
+                ? 'منصة نبيه' 
+                : 'Nabeeh Platform'}
             </h2>
             
             <div className="space-y-4">
