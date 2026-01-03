@@ -6,7 +6,7 @@
 
 1. **اذهب إلى صفحة التسجيل:**
    ```
-   https://clinical-doc.preview.emergentagent.com/register
+   https://cdi-doctor.preview.emergentagent.com/register
    ```
 
 2. **املأ البيانات:**
@@ -66,7 +66,7 @@
 
 1. **انسخ الرابط:**
    ```
-   https://clinical-doc.preview.emergentagent.com
+   https://cdi-doctor.preview.emergentagent.com
    ```
 
 2. **أرسله للفريق الطبي عبر:**
