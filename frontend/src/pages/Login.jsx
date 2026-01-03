@@ -100,7 +100,7 @@ const Login = ({ setUser }) => {
           {/* Logo and Title */}
           <div className="text-center space-y-4">
             <div className="mx-auto w-24 h-24 flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-300">
-              <img src="/logo.jpeg" alt="Logo" className="w-20 h-20 object-contain rounded-xl" />
+              <img src="/login-logo.png" alt="نبيه Logo" className="w-20 h-20 object-contain rounded-xl" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-800 mb-2">
