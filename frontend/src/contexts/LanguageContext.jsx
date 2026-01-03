@@ -125,8 +125,8 @@ export const translations = {
     contactSupport: 'Contact Support',
     
     // App name
-    appName: 'Nabeeh Platform',
-    appSubtitle: 'Nabeeh AI Platform',
+    appName: 'NABIH',
+    appSubtitle: 'Clinical Documentation Improvement',
     
     // Dashboard
     dashboard: 'Dashboard',
