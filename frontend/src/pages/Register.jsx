@@ -59,7 +59,7 @@ const Register = ({ setUser }) => {
           <CardDescription className="text-lg">
             {language === 'ar' ? 'منصة نبيه' : 'Nabeeh Platform'}
             <br />
-            {language === 'ar' ? 'تجمع المدينة المنورة الصحي' : 'Madinah Health Cluster'}
+            {language === 'ar' ? 'منصة نبيه للذكاء الاصطناعي' : 'Madinah Health Cluster'}
           </CardDescription>
         </CardHeader>
         <CardContent>

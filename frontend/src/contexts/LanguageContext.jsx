@@ -126,7 +126,7 @@ export const translations = {
     
     // App name
     appName: 'Nabeeh Platform',
-    appSubtitle: 'Madinah Health Cluster',
+    appSubtitle: 'Nabeeh AI Platform',
     
     // Dashboard
     dashboard: 'Dashboard',
