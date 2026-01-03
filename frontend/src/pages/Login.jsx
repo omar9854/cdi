@@ -4,7 +4,6 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Lock, Mail, ArrowRight, Activity, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -25,11 +24,9 @@ const Login = ({ setUser }) => {
     setLoading(true);
 
     try {
-      // Try new MFA flow first
       const response = await axios.post(`${API}/auth/login-step1`, formData);
       
       if (response.data.requires_mfa) {
-        // Navigate to MFA verification page
         toast.success(
           language === 'ar' 
             ? '✅ تم إرسال رمز التحقق إلى بريدك الإلكتروني' 
@@ -42,7 +39,6 @@ const Login = ({ setUser }) => {
           }
         });
       } else {
-        // MFA disabled, login directly
         const { access_token, user } = response.data;
         localStorage.setItem('token', access_token);
         localStorage.setItem('user', JSON.stringify(user));
@@ -50,7 +46,6 @@ const Login = ({ setUser }) => {
         
         toast.success(t('loginSuccess'));
         
-        // Route based on role
         if (user.role === 'supervisor' || user.role === 'admin') {
           navigate('/supervisor');
         } else {
@@ -92,175 +87,164 @@ const Login = ({ setUser }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-      {/* Right Side - Image/Illustration (appears on left in RTL) */}
+    <div 
+      className="min-h-screen flex items-center justify-center relative overflow-hidden"
+      dir={language === 'ar' ? 'rtl' : 'ltr'}
+    >
+      {/* Full Background Image */}
       <div 
-        className="hidden lg:flex lg:w-3/5 relative overflow-hidden"
+        className="absolute inset-0 z-0"
         style={{
-          backgroundImage: `url('https://customer-assets.emergentagent.com/job_696a10ac-e29e-498a-b073-aa134e8b40d7/artifacts/o61m4nq4_IMG_2949.jpeg')`,
+          backgroundImage: `url('https://customer-assets.emergentagent.com/job_696a10ac-e29e-498a-b073-aa134e8b40d7/artifacts/dwpck0no_IMG_2950.jpeg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
         }}
-      >
-        {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-l from-[#0a1628]/80 via-[#0a1628]/40 to-transparent"></div>
-        
-        {/* Content over image */}
-        <div className="relative z-10 flex flex-col items-center justify-center w-full p-12 text-white">
-          {/* Logo and Title */}
-          <div className="text-center space-y-6">
-            <div className="mx-auto w-32 h-32 flex items-center justify-center bg-white/10 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20">
-              <img src="/login-logo.png" alt="نبيه Logo" className="w-28 h-28 object-contain" />
-            </div>
-            <div>
-              <h1 className="text-5xl font-bold mb-3 drop-shadow-lg">
-                نـبـيـه | NABIH
-              </h1>
-              <p className="text-xl text-white/90 font-medium">
-                {language === 'ar' 
-                  ? 'منصة الذكاء الاصطناعي لتحسين التوثيق السريري' 
-                  : 'AI Platform for Clinical Documentation Improvement'}
-              </p>
-            </div>
+      />
+      
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0a1628]/90 via-[#0a1628]/70 to-[#0a1628]/90 z-10" />
+
+      {/* Content */}
+      <div className="relative z-20 w-full max-w-md mx-4 sm:mx-auto">
+        {/* Logo and Title */}
+        <div className="text-center mb-8">
+          <div className="mx-auto w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 mb-6">
+            <img src="/login-logo.png" alt="نبيه Logo" className="w-20 h-20 sm:w-24 sm:h-24 object-contain" />
           </div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 drop-shadow-lg">
+            نـبـيـه | NABIH
+          </h1>
+          <p className="text-white/80 text-sm sm:text-base">
+            {language === 'ar' 
+              ? 'منصة الذكاء الاصطناعي لتحسين التوثيق السريري' 
+              : 'AI Platform for Clinical Documentation Improvement'}
+          </p>
         </div>
-      </div>
 
-      {/* Left Side - Login Form (appears on right in RTL) */}
-      <div className="w-full lg:w-2/5 flex items-center justify-center p-6 lg:p-12 bg-[#0a1628]">
-        <div className="w-full max-w-md space-y-8">
-          {/* Mobile Logo - only shown on small screens */}
-          <div className="lg:hidden text-center space-y-4 mb-8">
-            <div className="mx-auto w-20 h-20 flex items-center justify-center bg-white/10 backdrop-blur-md rounded-2xl shadow-xl border border-white/20">
-              <img src="/login-logo.png" alt="نبيه Logo" className="w-16 h-16 object-contain" />
-            </div>
-            <h1 className="text-2xl font-bold text-white">نـبـيـه | NABIH</h1>
-          </div>
-
-          {/* Login Card */}
-          <Card className="border-0 shadow-2xl bg-[#111d32] rounded-3xl overflow-hidden">
-            <CardHeader className="space-y-2 pb-6 pt-8 bg-gradient-to-r from-blue-600 to-cyan-500">
-              <CardTitle className="text-2xl font-bold text-center text-white">
-                {language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
-              </CardTitle>
-              <p className="text-center text-white/80 text-sm">
-                {language === 'ar' 
-                  ? 'أدخل بياناتك للوصول إلى حسابك' 
-                  : 'Enter your credentials to access your account'}
-              </p>
-            </CardHeader>
-            <CardContent className="p-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Email Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-semibold text-gray-300 flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-blue-400" />
-                    {language === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder={language === 'ar' ? 'example@domain.com' : 'example@domain.com'}
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="h-12 bg-[#1a2942] border-2 border-[#2a3f5f] focus:border-blue-500 rounded-xl text-white placeholder:text-gray-500 transition-all duration-300"
-                      required
-                      data-testid="email-input"
-                    />
-                  </div>
-                </div>
-
-                {/* Password Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-semibold text-gray-300 flex items-center gap-2">
-                    <Lock className="w-4 h-4 text-blue-400" />
-                    {language === 'ar' ? 'كلمة المرور' : 'Password'}
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••••••"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="h-12 bg-[#1a2942] border-2 border-[#2a3f5f] focus:border-blue-500 rounded-xl text-white placeholder:text-gray-500 transition-all duration-300 pe-12"
-                      required
-                      data-testid="password-input"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute top-1/2 -translate-y-1/2 end-4 text-gray-400 hover:text-white transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Forgot Password Link */}
-                <div className="flex justify-end">
-                  <Link 
-                    to="/forgot-password" 
-                    className="text-sm text-blue-400 hover:text-blue-300 font-medium hover:underline transition-colors duration-300"
-                  >
-                    {language === 'ar' ? 'نسيت كلمة المرور؟' : 'Forgot Password?'}
-                  </Link>
-                </div>
-
-                {/* Submit Button */}
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-12 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
-                  data-testid="login-button"
-                >
-                  {loading ? (
-                    <Activity className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <>
-                      {language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
-                      <ArrowRight className="w-5 h-5 rtl:rotate-180" />
-                    </>
-                  )}
-                </Button>
-
-                {/* Divider */}
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-[#2a3f5f]"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-[#111d32] text-gray-400">
-                      {language === 'ar' ? 'أو' : 'OR'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Register Link */}
-                <div className="text-center">
-                  <p className="text-gray-400">
-                    {language === 'ar' ? 'ليس لديك حساب؟' : "Don't have an account?"}{' '}
-                    <Link 
-                      to="/register" 
-                      className="text-blue-400 hover:text-blue-300 font-semibold hover:underline transition-colors duration-300"
-                    >
-                      {language === 'ar' ? 'إنشاء حساب جديد' : 'Create Account'}
-                    </Link>
-                  </p>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Footer Text */}
-          <div className="text-center text-sm text-gray-500 pt-4">
-            <p>© 2025 {language === 'ar' ? 'جميع الحقوق محفوظة' : 'All Rights Reserved'}</p>
-            <p className="mt-1 font-semibold text-gray-400">
-              {language === 'ar' ? 'عمر المغذوي' : 'Omar Almaghthawi'}
+        {/* Login Card */}
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+          {/* Card Header */}
+          <div className="bg-gradient-to-r from-blue-600/80 to-cyan-500/80 px-6 py-5">
+            <h2 className="text-xl sm:text-2xl font-bold text-center text-white">
+              {language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
+            </h2>
+            <p className="text-center text-white/80 text-sm mt-1">
+              {language === 'ar' 
+                ? 'أدخل بياناتك للوصول إلى حسابك' 
+                : 'Enter your credentials to access your account'}
             </p>
           </div>
+
+          {/* Card Content */}
+          <div className="p-6 sm:p-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Email Field */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-semibold text-white/90 flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-cyan-400" />
+                  {language === 'ar' ? 'البريد الإلكتروني' : 'Email Address'}
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="example@domain.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="h-12 bg-white/10 border-2 border-white/20 focus:border-cyan-400 rounded-xl text-white placeholder:text-white/40 transition-all duration-300"
+                  required
+                  data-testid="email-input"
+                />
+              </div>
+
+              {/* Password Field */}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-semibold text-white/90 flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-cyan-400" />
+                  {language === 'ar' ? 'كلمة المرور' : 'Password'}
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••••••"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="h-12 bg-white/10 border-2 border-white/20 focus:border-cyan-400 rounded-xl text-white placeholder:text-white/40 transition-all duration-300 pe-12"
+                    required
+                    data-testid="password-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute top-1/2 -translate-y-1/2 end-4 text-white/50 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Forgot Password Link */}
+              <div className="flex justify-end">
+                <Link 
+                  to="/forgot-password" 
+                  className="text-sm text-cyan-400 hover:text-cyan-300 font-medium hover:underline transition-colors duration-300"
+                >
+                  {language === 'ar' ? 'نسيت كلمة المرور؟' : 'Forgot Password?'}
+                </Link>
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
+                data-testid="login-button"
+              >
+                {loading ? (
+                  <Activity className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    {language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}
+                    <ArrowRight className="w-5 h-5 rtl:rotate-180" />
+                  </>
+                )}
+              </Button>
+
+              {/* Divider */}
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/20"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-transparent text-white/50">
+                    {language === 'ar' ? 'أو' : 'OR'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Register Link */}
+              <div className="text-center">
+                <p className="text-white/70">
+                  {language === 'ar' ? 'ليس لديك حساب؟' : "Don't have an account?"}{' '}
+                  <Link 
+                    to="/register" 
+                    className="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline transition-colors duration-300"
+                  >
+                    {language === 'ar' ? 'إنشاء حساب جديد' : 'Create Account'}
+                  </Link>
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {/* Footer Text */}
+        <div className="text-center text-sm text-white/50 mt-6">
+          <p>© 2025 {language === 'ar' ? 'جميع الحقوق محفوظة' : 'All Rights Reserved'}</p>
+          <p className="mt-1 font-semibold text-white/60">
+            {language === 'ar' ? 'عمر المغذوي' : 'Omar Almaghthawi'}
+          </p>
         </div>
       </div>
     </div>
