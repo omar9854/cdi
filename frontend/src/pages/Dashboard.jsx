@@ -91,37 +91,37 @@ const Dashboard = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#f0fdfa]">
       <Navbar user={user} onLogout={onLogout} />
       
       <main className="container mx-auto px-4 py-8 max-w-7xl" data-testid="dashboard-main">
         {/* Header */}
         <div className="mb-8 fade-in">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">لوحة التحكم</h1>
+          <h1 className="text-4xl font-bold text-[#0066a1] mb-2">لوحة التحكم</h1>
           <p className="text-gray-600 text-lg">مرحباً بك، {user.full_name}</p>
         </div>
 
         {/* Action Cards */}
         <div className="grid md:grid-cols-2 gap-6 mb-8 fade-in">
-          <Card className="medical-card card-hover cursor-pointer" onClick={() => navigate('/new-note')} data-testid="new-note-card">
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer border-t-4 border-[#0066a1]" onClick={() => navigate('/new-note')} data-testid="new-note-card">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-[#0066a1] to-[#00a99d] rounded-xl flex items-center justify-center">
                 <Plus className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-gray-800">ملاحظة جديدة</h3>
+                <h3 className="text-xl font-semibold text-[#0066a1]">ملاحظة جديدة</h3>
                 <p className="text-gray-600">أضف ملاحظات سريرية جديدة للتحليل</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="medical-card card-hover cursor-pointer" onClick={() => navigate('/history')} data-testid="history-card">
+          <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow cursor-pointer border-t-4 border-[#00a99d]" onClick={() => navigate('/history')} data-testid="history-card">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="w-14 h-14 bg-gradient-to-br from-green-600 to-emerald-600 rounded-xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-gradient-to-br from-[#00a99d] to-[#0066a1] rounded-xl flex items-center justify-center">
                 <History className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-gray-800">السجل</h3>
+                <h3 className="text-xl font-semibold text-[#00a99d]">السجل</h3>
                 <p className="text-gray-600">عرض جميع التحليلات السابقة</p>
               </div>
             </CardContent>
@@ -130,18 +130,18 @@ const Dashboard = ({ user, onLogout }) => {
 
         {/* Recent Notes */}
         <div className="fade-in">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">الملاحظات الأخيرة</h2>
+          <h2 className="text-2xl font-bold text-[#0066a1] mb-4">الملاحظات الأخيرة</h2>
           
           {loading ? (
             <div className="flex justify-center items-center py-12">
-              <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+              <Loader2 className="w-10 h-10 text-[#0066a1] animate-spin" />
             </div>
           ) : notes.length === 0 ? (
-            <Card className="medical-card">
+            <Card className="bg-white shadow-lg">
               <CardContent className="text-center py-12">
                 <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600 text-lg mb-4">لا توجد ملاحظات حتى الآن</p>
-                <Button onClick={() => navigate('/new-note')} className="medical-blue" data-testid="create-first-note-button">
+                <Button onClick={() => navigate('/new-note')} className="bg-gradient-to-r from-[#0066a1] to-[#00a99d] hover:from-[#005588] hover:to-[#008877] text-white" data-testid="create-first-note-button">
                   <Plus className="ml-2" /> إنشاء أول ملاحظة
                 </Button>
               </CardContent>
