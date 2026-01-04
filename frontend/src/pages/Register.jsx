@@ -56,14 +56,14 @@ const Register = ({ setUser }) => {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center relative overflow-hidden py-8"
+      className="min-h-screen flex items-center justify-end relative overflow-hidden py-8"
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
       {/* Full Background Image */}
       <div 
         className="absolute inset-0 z-0"
         style={{
-          backgroundImage: `url('https://customer-assets.emergentagent.com/job_696a10ac-e29e-498a-b073-aa134e8b40d7/artifacts/dwpck0no_IMG_2950.jpeg')`,
+          backgroundImage: `url('https://customer-assets.emergentagent.com/job_e770b79e-b869-458f-8e5a-632dba9ea2b3/artifacts/j4zvqtlv_IMG_2950.jpeg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
@@ -71,19 +71,19 @@ const Register = ({ setUser }) => {
       />
       
       {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0a1628]/90 via-[#0a1628]/70 to-[#0a1628]/90 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-l from-[#0a1628]/95 via-[#0a1628]/70 to-transparent z-10" />
 
-      {/* Content */}
-      <div className="relative z-20 w-full max-w-md mx-4 sm:mx-auto">
+      {/* Content - Right Side */}
+      <div className="relative z-20 w-full max-w-md mx-8 lg:mx-16">
         {/* Logo and Title */}
         <div className="text-center mb-6">
-          <div className="mx-auto w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 mb-4">
-            <img src="/login-logo.png" alt="نبيه Logo" className="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
+          <div className="mx-auto w-24 h-24 flex items-center justify-center mb-4">
+            <img src="/nabeeh-logo.png" alt="نبيه Logo" className="w-full h-full object-contain drop-shadow-2xl" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 drop-shadow-lg">
-            نـبـيـه | NABIH
+            نـبـيـه | NABEEH
           </h1>
-          <p className="text-white/80 text-xs sm:text-sm">
+          <p className="text-cyan-300 text-xs sm:text-sm">
             {language === 'ar' 
               ? 'منصة الذكاء الاصطناعي لتحسين التوثيق السريري' 
               : 'AI Platform for Clinical Documentation Improvement'}
@@ -93,7 +93,7 @@ const Register = ({ setUser }) => {
         {/* Register Card */}
         <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
           {/* Card Header */}
-          <div className="bg-gradient-to-r from-emerald-600/80 to-cyan-500/80 px-6 py-4">
+          <div className="bg-gradient-to-r from-[#0066a1] to-[#00a99d] px-6 py-4">
             <h2 className="text-xl sm:text-2xl font-bold text-center text-white">
               {language === 'ar' ? 'إنشاء حساب جديد' : 'Create Account'}
             </h2>
@@ -110,7 +110,7 @@ const Register = ({ setUser }) => {
               {/* Full Name Field */}
               <div className="space-y-1">
                 <Label htmlFor="full_name" className="text-sm font-semibold text-white/90 flex items-center gap-2">
-                  <User className="w-4 h-4 text-emerald-400" />
+                  <User className="w-4 h-4 text-cyan-400" />
                   {language === 'ar' ? 'الاسم الكامل' : 'Full Name'}
                 </Label>
                 <Input
