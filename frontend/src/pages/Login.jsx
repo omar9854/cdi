@@ -88,7 +88,7 @@ const Login = ({ setUser }) => {
 
   return (
     <div 
-      className="min-h-screen flex items-center relative overflow-hidden"
+      className="min-h-screen flex items-center justify-end relative overflow-hidden"
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
       {/* Full Page Background Image */}
@@ -102,10 +102,10 @@ const Login = ({ setUser }) => {
         }}
       />
       
-      {/* Dark Overlay for better readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#0a1628]/95 via-[#0a1628]/70 to-transparent z-10" />
+      {/* Dark Overlay for better readability - gradient from right */}
+      <div className="absolute inset-0 bg-gradient-to-l from-[#0a1628]/95 via-[#0a1628]/70 to-transparent z-10" />
 
-      {/* Login Form - Left Side */}
+      {/* Login Form - Right Side */}
       <div className="relative z-20 w-full max-w-md mx-8 lg:mx-16">
         {/* Logo and Title */}
         <div className="text-center mb-8">
