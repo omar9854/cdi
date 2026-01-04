@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://cdi-doctor.preview.emergentagent.com
+https://nabihmed.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://cdi-doctor.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://cdi-doctor.preview.emergentagent.com
+   https://nabihmed.preview.emergentagent.com
    ```
 
 ---

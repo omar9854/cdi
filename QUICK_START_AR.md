@@ -6,7 +6,7 @@
 
 1. **اذهب إلى صفحة التسجيل:**
    ```
-   https://cdi-doctor.preview.emergentagent.com/register
+   https://nabihmed.preview.emergentagent.com/register
    ```
 
 2. **املأ البيانات:**
@@ -66,7 +66,7 @@
 
 1. **انسخ الرابط:**
    ```
-   https://cdi-doctor.preview.emergentagent.com
+   https://nabihmed.preview.emergentagent.com
    ```
 
 2. **أرسله للفريق الطبي عبر:**
