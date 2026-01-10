@@ -114,8 +114,8 @@ const Login = ({ setUser }) => {
       {/* Dark Overlay for better readability - gradient from right */}
       <div className="absolute inset-0 bg-gradient-to-l from-[#0a1628]/95 via-[#0a1628]/70 to-transparent z-10" />
 
-      {/* Login Form - Right Side */}
-      <div className="relative z-20 w-full max-w-md mx-8 lg:mx-16">
+      {/* Login Form - Always on Right Side */}
+      <div className="relative z-20 w-full max-w-md mr-8 lg:mr-16 ml-auto">
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="mx-auto w-28 h-28 flex items-center justify-center mb-6">
