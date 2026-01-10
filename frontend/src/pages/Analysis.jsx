@@ -146,7 +146,7 @@ const Analysis = ({ user, onLogout }) => {
       
       <main className="container mx-auto px-4 py-8 max-w-6xl" data-testid="analysis-page">
         <div className="mb-6 fade-in">
-          <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4 text-gray-800 hover:bg-white/80" data-testid="back-button">
+          <Button variant="ghost" onClick={() => navigate('/dashboard')} className="mb-4 text-gray-800 hover:bg-gray-100" data-testid="back-button">
             {language === 'ar' ? <ArrowRight className="ml-2" /> : <ArrowRight className="mr-2" />}
             {t('back')}
           </Button>
@@ -226,11 +226,11 @@ const Analysis = ({ user, onLogout }) => {
                 {language === 'ar' ? <MessageSquare className="ml-2" /> : <MessageSquare className="mr-2" />}
                 {t('discussWithAI')}
               </Button>
-              <Button onClick={() => handleExport('pdf')} variant="outline" className="border-gray-300 text-gray-800 hover:bg-white/80" data-testid="export-pdf-button">
+              <Button onClick={() => handleExport('pdf')} variant="outline" className="border-gray-300 text-gray-800 hover:bg-gray-100" data-testid="export-pdf-button">
                 {language === 'ar' ? <FileDown className="ml-2" /> : <FileDown className="mr-2" />}
                 {t('exportPDF')}
               </Button>
-              <Button onClick={() => handleExport('excel')} variant="outline" className="border-gray-300 text-gray-800 hover:bg-white/80" data-testid="export-excel-button">
+              <Button onClick={() => handleExport('excel')} variant="outline" className="border-gray-300 text-gray-800 hover:bg-gray-100" data-testid="export-excel-button">
                 {language === 'ar' ? <FileSpreadsheet className="ml-2" /> : <FileSpreadsheet className="mr-2" />}
                 {t('exportExcel')}
               </Button>
