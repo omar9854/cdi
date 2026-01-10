@@ -279,13 +279,13 @@ const AdminDashboard = ({ user, onLogout }) => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-blue-600">{t('loading')}</div>
+        <div className="text-xl text-[#0066a1]">{t('loading')}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#f0fdfa]">
       <Navbar user={user} onLogout={onLogout} />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
@@ -304,7 +304,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               <CardTitle className="text-sm font-medium">
                 {language === 'ar' ? 'إجمالي المستخدمين' : 'Total Users'}
               </CardTitle>
-              <Users className="h-4 w-4 text-blue-600" />
+              <Users className="h-4 w-4 text-[#0066a1]" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-blue-700">{statistics?.total_users || 0}</div>
@@ -328,7 +328,7 @@ const AdminDashboard = ({ user, onLogout }) => {
               <CardTitle className="text-sm font-medium">
                 {language === 'ar' ? 'التاريخ' : 'Date'}
               </CardTitle>
-              <Calendar className="h-4 w-4 text-purple-600" />
+              <Calendar className="h-4 w-4 text-[#0066a1]" />
             </CardHeader>
             <CardContent>
               <div className="text-xl font-bold text-purple-700">{statistics?.date}</div>
@@ -403,7 +403,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                       <TableCell className="text-center">
                         <span className="font-bold text-orange-600">{userStat.today_notes}</span>
                         {' / '}
-                        <span className="font-bold text-purple-600">{userStat.today_analyses}</span>
+                        <span className="font-bold text-[#0066a1]">{userStat.today_analyses}</span>
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -435,7 +435,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-blue-600"
+                            className="text-[#0066a1]"
                             onClick={() => setChangePasswordUser(userStat)}
                             title={language === 'ar' ? 'تغيير كلمة المرور' : 'Change Password'}
                           >
@@ -456,7 +456,7 @@ const AdminDashboard = ({ user, onLogout }) => {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="text-purple-600"
+                              className="text-[#0066a1]"
                               onClick={() => handlePromoteToSupervisor(userStat.user_id)}
                               title={language === 'ar' ? 'تعيين كمشرف' : 'Make Supervisor'}
                             >

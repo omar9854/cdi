@@ -84,7 +84,7 @@ const History = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#f0fdfa]">
       <Navbar user={user} onLogout={onLogout} />
       
       <main className="container mx-auto px-4 py-8 max-w-6xl" data-testid="history-page">
@@ -99,7 +99,7 @@ const History = ({ user, onLogout }) => {
 
         {loading ? (
           <div className="flex justify-center items-center py-12">
-            <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+            <Loader2 className="w-12 h-12 text-[#0066a1] animate-spin" />
           </div>
         ) : history.length === 0 ? (
           <Card className="medical-card fade-in">
@@ -128,7 +128,7 @@ const History = ({ user, onLogout }) => {
                         variant="outline"
                         size="sm"
                         onClick={(e) => handleEdit(e, item.note_id)}
-                        className="text-blue-600 hover:bg-blue-50 border-blue-300"
+                        className="text-[#0066a1] hover:bg-blue-50 border-blue-300"
                         data-testid={`edit-note-${item.id}`}
                       >
                         <Edit className="h-4 w-4" />

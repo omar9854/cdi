@@ -62,7 +62,7 @@ const ResetPassword = () => {
     // Redirect to forgot password if no token
     return (
       <div className="min-h-screen flex flex-col">
-        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4">
+        <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#f0fdfa] p-4">
           <Card className="w-full max-w-md medical-card fade-in">
             <CardHeader className="text-center space-y-4">
               <div className="mx-auto w-32 h-32 flex items-center justify-center">
@@ -84,7 +84,7 @@ const ResetPassword = () => {
                 >
                   {language === 'ar' ? 'طلب رابط جديد' : 'Request New Link'}
                 </Button>
-                <Link to="/login" className="block text-blue-600 font-semibold hover:underline">
+                <Link to="/login" className="block text-[#0066a1] font-semibold hover:underline">
                   {t('backToLogin')}
                 </Link>
               </div>
@@ -97,7 +97,7 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4">
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#f0fdfa] p-4">
         <Card className="w-full max-w-md medical-card fade-in">
           <CardHeader className="text-center space-y-4">
             <div className="mx-auto w-32 h-32 flex items-center justify-center">
@@ -152,7 +152,7 @@ const ResetPassword = () => {
               </Button>
             </form>
             <div className="mt-6 text-center">
-              <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+              <Link to="/login" className="text-[#0066a1] font-semibold hover:underline">
                 {t('backToLogin')}
               </Link>
             </div>

@@ -196,11 +196,11 @@ const SupervisorDashboard = ({ user, onLogout }) => {
             <CardTitle className="text-sm font-medium">
               {language === 'ar' ? 'إجمالي الحالات' : 'Total Cases'}
             </CardTitle>
-            <FileSpreadsheet className="h-5 w-5 text-blue-600" />
+            <FileSpreadsheet className="h-5 w-5 text-[#0066a1]" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-700">{analysis.summary.total_records}</div>
-            <p className="text-xs text-blue-600 mt-1">
+            <p className="text-xs text-[#0066a1] mt-1">
               {analysis.summary.total_hospitals} {language === 'ar' ? 'مستشفى' : 'hospitals'}
             </p>
           </CardContent>
@@ -211,11 +211,11 @@ const SupervisorDashboard = ({ user, onLogout }) => {
             <CardTitle className="text-sm font-medium">
               {language === 'ar' ? 'تغييرات DRG' : 'DRG Changes'}
             </CardTitle>
-            <TrendingUp className="h-5 w-5 text-purple-600" />
+            <TrendingUp className="h-5 w-5 text-[#0066a1]" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-purple-700">{analysis.drg_metrics.total_changes}</div>
-            <p className="text-xs text-purple-600 mt-1">
+            <p className="text-xs text-[#0066a1] mt-1">
               {analysis.drg_metrics.change_rate}% {language === 'ar' ? 'معدل التغيير' : 'change rate'}
             </p>
           </CardContent>
@@ -226,11 +226,11 @@ const SupervisorDashboard = ({ user, onLogout }) => {
             <CardTitle className="text-sm font-medium">
               {language === 'ar' ? 'PDX/After CDI' : 'PDX/After CDI'}
             </CardTitle>
-            <Stethoscope className="h-5 w-5 text-blue-600" />
+            <Stethoscope className="h-5 w-5 text-[#0066a1]" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-600">{analysis.pdx_metrics.total_after_cdi}</div>
-            <p className="text-xs text-blue-600 mt-1">
+            <div className="text-3xl font-bold text-[#0066a1]">{analysis.pdx_metrics.total_after_cdi}</div>
+            <p className="text-xs text-[#0066a1] mt-1">
               {analysis.pdx_metrics.changes} {language === 'ar' ? 'تغييرات' : 'changes'} | {analysis.pdx_metrics.newly_added} {language === 'ar' ? 'جديد' : 'new'}
             </p>
           </CardContent>
@@ -315,7 +315,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
               <div key={index} className="border rounded-lg p-4 bg-gradient-to-r from-gray-50 to-white">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <Hospital className="h-5 w-5 text-blue-600" />
+                    <Hospital className="h-5 w-5 text-[#0066a1]" />
                     {hospital.hospital_name}
                   </h3>
                   <div className="text-sm text-gray-600">
@@ -325,9 +325,9 @@ const SupervisorDashboard = ({ user, onLogout }) => {
 
                 <div className="grid md:grid-cols-6 gap-4 mb-4">
                   <div className="bg-purple-50 p-3 rounded-lg">
-                    <div className="text-xs text-purple-600 mb-1">{language === 'ar' ? 'تغييرات DRG' : 'DRG Changes'}</div>
+                    <div className="text-xs text-[#0066a1] mb-1">{language === 'ar' ? 'تغييرات DRG' : 'DRG Changes'}</div>
                     <div className="text-2xl font-bold text-purple-700">{hospital.drg_changes}</div>
-                    <div className="text-xs text-purple-600">{hospital.drg_impact_rate}%</div>
+                    <div className="text-xs text-[#0066a1]">{hospital.drg_impact_rate}%</div>
                   </div>
                   
                   <div className="bg-green-50 p-3 rounded-lg">
@@ -366,7 +366,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                         {hospital.top_pdx_diagnoses.slice(0, 5).map((diag, i) => (
                           <div key={i} className="flex justify-between text-xs bg-white p-2 rounded">
                             <span className="text-gray-700 truncate flex-1">{diag.diagnosis}</span>
-                            <span className="font-bold text-blue-600 ml-2">{diag.count}</span>
+                            <span className="font-bold text-[#0066a1] ml-2">{diag.count}</span>
                           </div>
                         ))}
                       </div>
@@ -417,7 +417,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                       <div className="font-medium text-gray-800 text-sm">{diag.diagnosis}</div>
                       <div className="text-xs text-gray-600">{diag.percentage}%</div>
                     </div>
-                    <div className="text-xl font-bold text-blue-600">{diag.count}</div>
+                    <div className="text-xl font-bold text-[#0066a1]">{diag.count}</div>
                   </div>
                 ))}
               </div>
@@ -443,7 +443,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                       <div className="font-medium text-gray-800 text-sm">{diag.diagnosis}</div>
                       <div className="text-xs text-gray-600">{diag.percentage}%</div>
                     </div>
-                    <div className="text-xl font-bold text-blue-600">{diag.count}</div>
+                    <div className="text-xl font-bold text-[#0066a1]">{diag.count}</div>
                   </div>
                 ))}
               </div>
@@ -506,16 +506,16 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                     <TableCell className="text-center font-medium">{spec.specialty}</TableCell>
                     <TableCell className="text-center">{spec.total_cases}</TableCell>
                     <TableCell className="text-center">
-                      <span className="font-bold text-purple-600">{spec.drg_changes}</span>
+                      <span className="font-bold text-[#0066a1]">{spec.drg_changes}</span>
                     </TableCell>
                     <TableCell className="text-center">
-                      <span className="font-bold text-blue-600">{spec.pdx_changes}</span>
+                      <span className="font-bold text-[#0066a1]">{spec.pdx_changes}</span>
                     </TableCell>
                     <TableCell className="text-center">
                       <span className="font-bold text-orange-600">{spec.adx_added}</span>
                     </TableCell>
                     <TableCell className="text-center">
-                      <span className="font-bold text-blue-600">{spec.impact_rate}%</span>
+                      <span className="font-bold text-[#0066a1]">{spec.impact_rate}%</span>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -577,10 +577,10 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                       )}
                     </TableCell>
                     <TableCell className="text-center">
-                      <span className="font-bold text-purple-600">{cds.drg_impact}</span>
+                      <span className="font-bold text-[#0066a1]">{cds.drg_impact}</span>
                     </TableCell>
                     <TableCell className="text-center">
-                      <span className="font-bold text-blue-600">{cds.pdx_queries}</span>
+                      <span className="font-bold text-[#0066a1]">{cds.pdx_queries}</span>
                     </TableCell>
                     <TableCell className="text-center">
                       <span className="font-bold text-orange-600">{cds.adx_queries}</span>
@@ -598,7 +598,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                           </span>
                         </TableCell>
                         <TableCell className="text-center">
-                          <span className="inline-block bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                          <span className="inline-block bg-[#0066a1] text-white px-2 py-1 rounded-full text-xs font-bold">
                             {cds.status_to_start || 0}
                           </span>
                         </TableCell>
@@ -615,7 +615,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                       </>
                     )}
                     <TableCell className="text-center">
-                      <span className="font-bold text-blue-600">{cds.success_rate}%</span>
+                      <span className="font-bold text-[#0066a1]">{cds.success_rate}%</span>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -668,7 +668,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                             <span>{language === 'ar' ? 'تم' : 'Done'}: {cds.status_done || 0}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <div className="w-3 h-3 bg-blue-600 rounded"></div>
+                            <div className="w-3 h-3 bg-[#0066a1] rounded"></div>
                             <span>{language === 'ar' ? 'للبدء' : 'Start'}: {cds.status_to_start || 0}</span>
                           </div>
                           <div className="flex items-center gap-1">
@@ -729,7 +729,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
         <Card className="medical-card">
           <CardHeader>
             <CardTitle className="text-xl text-gray-800 flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-blue-600" />
+              <BarChart3 className="h-5 w-5 text-[#0066a1]" />
               {language === 'ar' ? 'مقارنة المستشفيات (Top 10)' : 'Hospitals Comparison (Top 10)'}
             </CardTitle>
           </CardHeader>
@@ -752,7 +752,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
         <Card className="medical-card">
           <CardHeader>
             <CardTitle className="text-xl text-gray-800 flex items-center gap-2">
-              <PieChart className="h-5 w-5 text-purple-600" />
+              <PieChart className="h-5 w-5 text-[#0066a1]" />
               {language === 'ar' ? 'توزيع تأثير DRG' : 'DRG Impact Distribution'}
             </CardTitle>
           </CardHeader>
@@ -876,7 +876,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
       <Card className="medical-card mb-8 bg-gradient-to-br from-indigo-50 to-blue-50">
         <CardHeader>
           <CardTitle className="text-2xl text-gray-800 flex items-center gap-2">
-            <Hospital className="h-6 w-6 text-blue-600" />
+            <Hospital className="h-6 w-6 text-[#0066a1]" />
             {language === 'ar' ? 'تحليل تفصيلي لكل مستشفى - التشخيصات والتكرار' : 'Detailed Hospital Analysis - Diagnoses & Frequency'}
           </CardTitle>
         </CardHeader>
@@ -907,11 +907,11 @@ const SupervisorDashboard = ({ user, onLogout }) => {
               {/* Hospital Summary - Enhanced with PDX/After and ADX/After */}
               <div className="grid md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-blue-100 p-4 rounded-lg text-center">
-                  <div className="text-sm text-blue-600 mb-1">{language === 'ar' ? 'إجمالي الحالات' : 'Total Cases'}</div>
+                  <div className="text-sm text-[#0066a1] mb-1">{language === 'ar' ? 'إجمالي الحالات' : 'Total Cases'}</div>
                   <div className="text-3xl font-bold text-blue-700">{currentHospital.total_cases}</div>
                 </div>
                 <div className="bg-purple-100 p-4 rounded-lg text-center">
-                  <div className="text-sm text-purple-600 mb-1">{language === 'ar' ? 'تغييرات DRG' : 'DRG Changes'}</div>
+                  <div className="text-sm text-[#0066a1] mb-1">{language === 'ar' ? 'تغييرات DRG' : 'DRG Changes'}</div>
                   <div className="text-3xl font-bold text-purple-700">{currentHospital.drg_changes}</div>
                 </div>
                 <div className="bg-indigo-100 p-4 rounded-lg text-center">
@@ -923,11 +923,11 @@ const SupervisorDashboard = ({ user, onLogout }) => {
               {/* Diagnosis Indicators Grid - 2 Main Indicators */}
               <div className="grid md:grid-cols-2 gap-6 mb-6">
                 <div className="bg-purple-100 p-4 rounded-lg text-center border-l-4 border-purple-500">
-                  <div className="text-xs text-purple-600 mb-1">{language === 'ar' ? 'PDX/After CDI' : 'PDX/After CDI'}</div>
+                  <div className="text-xs text-[#0066a1] mb-1">{language === 'ar' ? 'PDX/After CDI' : 'PDX/After CDI'}</div>
                   <div className="text-2xl font-bold text-purple-700">
                     {currentHospital.top_pdx_diagnoses ? currentHospital.top_pdx_diagnoses.reduce((sum, d) => sum + d.count, 0) : 0}
                   </div>
-                  <div className="text-xs text-purple-600 mt-1">{language === 'ar' ? 'جميع التشخيصات الرئيسية' : 'All primary diagnoses'}</div>
+                  <div className="text-xs text-[#0066a1] mt-1">{language === 'ar' ? 'جميع التشخيصات الرئيسية' : 'All primary diagnoses'}</div>
                 </div>
                 
                 <div className="bg-orange-100 p-4 rounded-lg text-center border-l-4 border-orange-500">
@@ -1091,7 +1091,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#f0fdfa]">
       <Navbar user={user} onLogout={onLogout} />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8 animate-fade-in">
@@ -1138,10 +1138,10 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                         <TableCell className="text-center text-sm">{emp.email}</TableCell>
                         <TableCell className="text-center text-sm">{emp.phone_number || '-'}</TableCell>
                         <TableCell className="text-center">
-                          <span className="font-bold text-blue-600">{emp.notes_count || 0}</span>
+                          <span className="font-bold text-[#0066a1]">{emp.notes_count || 0}</span>
                         </TableCell>
                         <TableCell className="text-center">
-                          <span className="font-bold text-blue-600">{emp.analyses_count || 0}</span>
+                          <span className="font-bold text-[#0066a1]">{emp.analyses_count || 0}</span>
                         </TableCell>
                         <TableCell className="text-center">
                           <div className="flex items-center justify-center gap-2">
@@ -1199,7 +1199,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
                 />
               </div>
               {uploading && (
-                <div className="flex items-center gap-2 text-blue-600">
+                <div className="flex items-center gap-2 text-[#0066a1]">
                   <Activity className="animate-spin" />
                   <span>{language === 'ar' ? 'جاري التحليل...' : 'Analyzing...'}</span>
                 </div>
@@ -1273,7 +1273,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
               </Button>
               <Button
                 onClick={handleChangePassword}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-[#0066a1] hover:bg-[#005588]"
               >
                 {language === 'ar' ? 'تغيير كلمة المرور' : 'Change Password'}
               </Button>
