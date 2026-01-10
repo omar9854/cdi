@@ -432,7 +432,7 @@ Omar Almaghthawi
 Omar Almaghthawi
 
 **رابط التطبيق:**
-https://nabihmed.preview.emergentagent.com
+https://med-analysis-app.preview.emergentagent.com
 
 **حساب الأدمن:**
 📧 admin@cdi-center.sa

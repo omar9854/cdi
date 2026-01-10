@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://nabihmed.preview.emergentagent.com
+https://med-analysis-app.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://nabihmed.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://nabihmed.preview.emergentagent.com
+   https://med-analysis-app.preview.emergentagent.com
    ```
 
 ---

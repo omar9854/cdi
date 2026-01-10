@@ -6,7 +6,7 @@
 
 1. **اذهب إلى صفحة التسجيل:**
    ```
-   https://nabihmed.preview.emergentagent.com/register
+   https://med-analysis-app.preview.emergentagent.com/register
    ```
 
 2. **املأ البيانات:**
@@ -66,7 +66,7 @@
 
 1. **انسخ الرابط:**
    ```
-   https://nabihmed.preview.emergentagent.com
+   https://med-analysis-app.preview.emergentagent.com
    ```
 
 2. **أرسله للفريق الطبي عبر:**
