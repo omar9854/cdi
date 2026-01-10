@@ -88,13 +88,13 @@ const Login = ({ setUser }) => {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-end relative overflow-hidden"
+      className="min-h-screen flex items-center relative overflow-hidden"
       dir={language === 'ar' ? 'rtl' : 'ltr'}
     >
-      {/* Language Toggle Button - Top Corner */}
+      {/* Language Toggle Button - Top Right always */}
       <button
         onClick={toggleLanguage}
-        className="absolute top-4 left-4 z-30 bg-white/20 backdrop-blur-lg hover:bg-white/30 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-all duration-300 border border-white/30"
+        className="absolute top-4 right-4 z-30 bg-white/20 backdrop-blur-lg hover:bg-white/30 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-all duration-300 border border-white/30"
       >
         <Languages className="w-5 h-5" />
         {language === 'ar' ? 'English' : 'العربية'}
