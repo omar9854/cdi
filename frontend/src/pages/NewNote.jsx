@@ -103,7 +103,7 @@ const NewNote = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#f0fdfa]">
       <Navbar user={user} onLogout={onLogout} />
       
       {/* Privacy Warning Dialog */}
