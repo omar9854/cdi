@@ -269,10 +269,10 @@ const ChatEnhanced = ({ user, onLogout }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="min-h-screen bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#f0fdfa]">
         <Navbar user={user} onLogout={onLogout} />
         <div className="flex justify-center items-center py-20">
-          <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+          <Loader2 className="w-12 h-12 text-[#0066a1] animate-spin" />
         </div>
       </div>
     );
