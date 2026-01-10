@@ -20,10 +20,11 @@ const NewNote = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const { language, t } = useLanguage();
   const [title, setTitle] = useState('');
-  const [doctorNotes, setDoctorNotes] = useState([{ text: '', specialty: '' }]);
+  const [doctorNotes, setDoctorNotes] = useState([{ text: '', specialty: '', doctorName: '', noteDate: '', noteTime: '' }]);
   const [specialties, setSpecialties] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showPrivacyDialog, setShowPrivacyDialog] = useState(true);
+  const [hospitalCategory, setHospitalCategory] = useState('A');
 
   useEffect(() => {
     fetchSpecialties();
