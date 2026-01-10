@@ -79,7 +79,8 @@ const NewNote = ({ user, onLogout }) => {
         `${API}/notes`,
         {
           title,
-          doctor_notes: validNotes
+          doctor_notes: validNotes,
+          hospital_category: hospitalCategory
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
