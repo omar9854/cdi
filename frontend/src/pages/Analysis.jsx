@@ -166,7 +166,7 @@ const Analysis = ({ user, onLogout }) => {
                   <p className="font-semibold text-cyan-600 mb-2">
                     {note.doctor_notes[idx].specialty}
                   </p>
-                  <pre className="whitespace-pre-wrap text-gray-800/90 font-sans">{dn.text}</pre>
+                  <pre className="whitespace-pre-wrap text-gray-700 font-sans">{dn.text}</pre>
                 </div>
               ))}
             </div>
@@ -425,7 +425,7 @@ const Analysis = ({ user, onLogout }) => {
                 </CardHeader>
                 <CardContent>
                   <div className="bg-white/60 p-6 rounded-lg" data-testid="full-analysis">
-                    <p className="text-gray-800/90 whitespace-pre-wrap">
+                    <p className="text-gray-700 whitespace-pre-wrap">
                       {language === 'ar' ? analysis.summary_ar : analysis.summary_en}
                     </p>
                   </div>
