@@ -114,13 +114,23 @@ const MFAVerification = ({ setUser }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 relative"
+      style={{
+        backgroundImage: `url('https://customer-assets.emergentagent.com/job_e770b79e-b869-458f-8e5a-632dba9ea2b3/artifacts/j4zvqtlv_IMG_2950.jpeg')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-[#0a1628]/80 z-0" />
+      
+      <Card className="w-full max-w-md relative z-10 bg-white/95 backdrop-blur-xl shadow-2xl border-0">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-            <Shield className="h-8 w-8 text-blue-600" />
+          <div className="mx-auto mb-4 w-16 h-16 bg-gradient-to-br from-[#0066a1] to-[#00a99d] rounded-full flex items-center justify-center">
+            <Shield className="h-8 w-8 text-white" />
           </div>
-          <CardTitle className="text-2xl">
+          <CardTitle className="text-2xl text-[#0066a1]">
             {language === 'ar' ? 'التحقق الأمني' : 'Security Verification'}
           </CardTitle>
           <CardDescription className="text-base mt-2">
@@ -133,7 +143,7 @@ const MFAVerification = ({ setUser }) => {
         <CardContent>
           <form onSubmit={handleVerify} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium mb-2 text-gray-700">
                 {language === 'ar' ? 'رمز التحقق (6 أرقام)' : 'Verification Code (6 digits)'}
               </label>
               <Input
@@ -144,7 +154,7 @@ const MFAVerification = ({ setUser }) => {
                   setOtpCode(value);
                 }}
                 placeholder="000000"
-                className="text-center text-2xl font-bold tracking-widest"
+                className="text-center text-2xl font-bold tracking-widest border-2 border-gray-200 focus:border-[#0066a1]"
                 maxLength={6}
                 autoFocus
               />
@@ -154,7 +164,7 @@ const MFAVerification = ({ setUser }) => {
               <span className="text-gray-600">
                 {language === 'ar' ? 'صالح لمدة:' : 'Valid for:'}
               </span>
-              <span className={`font-bold ${timer < 60 ? 'text-red-600' : 'text-blue-600'}`}>
+              <span className={`font-bold ${timer < 60 ? 'text-red-600' : 'text-[#0066a1]'}`}>
                 {formatTime(timer)}
               </span>
             </div>
@@ -167,7 +177,7 @@ const MFAVerification = ({ setUser }) => {
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 py-6 text-lg"
+              className="w-full bg-gradient-to-r from-[#0066a1] to-[#00a99d] hover:from-[#005588] hover:to-[#008877] py-6 text-lg text-white"
               disabled={loading || otpCode.length !== 6 || timer === 0}
             >
               {loading ? (
@@ -186,9 +196,9 @@ const MFAVerification = ({ setUser }) => {
             <Button
               type="button"
               variant="outline"
-              className="w-full"
+              className="w-full border-2 border-[#0066a1] text-[#0066a1] hover:bg-[#0066a1]/10"
               onClick={handleResend}
-              disabled={resending || timer > 1740} // Allow resend after 1 minute (1800 - 60)
+              disabled={resending || timer > 1740}
             >
               {resending ? (
                 <>
@@ -206,7 +216,7 @@ const MFAVerification = ({ setUser }) => {
             <Button
               type="button"
               variant="ghost"
-              className="w-full"
+              className="w-full text-gray-600 hover:text-[#0066a1]"
               onClick={() => navigate('/login')}
             >
               {language === 'ar' ? 'العودة لتسجيل الدخول' : 'Back to Login'}
@@ -222,6 +232,11 @@ const MFAVerification = ({ setUser }) => {
                 : 'Never share your verification code. Support team will never ask for this code.'
               }
             </p>
+          </div>
+          
+          {/* Platform Name */}
+          <div className="mt-4 text-center">
+            <p className="text-xs text-gray-500">منصة نبيه | NABEEH</p>
           </div>
         </CardContent>
       </Card>
