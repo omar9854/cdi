@@ -279,7 +279,7 @@ const ChatEnhanced = ({ user, onLogout }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#f0fdfa]">
       <Navbar user={user} onLogout={onLogout} />
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
@@ -287,16 +287,16 @@ const ChatEnhanced = ({ user, onLogout }) => {
           <Button 
             variant="ghost" 
             onClick={() => navigate(noteId ? `/analysis/${noteId}` : '/dashboard')} 
-            className="mb-4"
+            className="mb-4 text-[#0066a1] hover:bg-[#0066a1]/10"
           >
             {language === 'ar' ? <ArrowRight className="ml-2" /> : <ArrowRight className="mr-2" />}
             {language === 'ar' ? 'العودة للتحليل' : 'Back to Analysis'}
           </Button>
           
           <div className="flex items-center gap-3">
-            <Sparkles className="h-10 w-10 text-purple-600" />
+            <Sparkles className="h-10 w-10 text-[#0066a1]" />
             <div>
-              <h1 className="text-4xl font-bold text-gray-800">
+              <h1 className="text-4xl font-bold text-[#0066a1]">
                 {language === 'ar' ? 'مناقشة التحليل مع الذكاء الاصطناعي' : 'AI-Powered Analysis Discussion'}
               </h1>
               <p className="text-gray-600 mt-1">
@@ -312,10 +312,10 @@ const ChatEnhanced = ({ user, onLogout }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Quick Questions Sidebar */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-4">
+            <Card className="sticky top-4 shadow-lg border-t-4 border-[#0066a1]">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Sparkles className="h-5 w-5 text-purple-600" />
+                <CardTitle className="flex items-center gap-2 text-lg text-[#0066a1]">
+                  <Sparkles className="h-5 w-5 text-[#0066a1]" />
                   {language === 'ar' ? 'الأسئلة السريعة' : 'Quick Questions'}
                 </CardTitle>
               </CardHeader>
