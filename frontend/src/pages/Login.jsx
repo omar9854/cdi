@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Lock, Mail, ArrowRight, Activity, Eye, EyeOff } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Activity, Eye, EyeOff, Languages } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getErrorMessage } from '@/utils/errorHandler';
 
@@ -14,7 +14,7 @@ const API = `${BACKEND_URL}/api`;
 
 const Login = ({ setUser }) => {
   const navigate = useNavigate();
-  const { language, t } = useLanguage();
+  const { language, t, toggleLanguage } = useLanguage();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
