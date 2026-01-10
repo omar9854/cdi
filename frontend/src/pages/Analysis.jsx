@@ -134,14 +134,14 @@ const Analysis = ({ user, onLogout }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#1a2942] to-[#0d1f35] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#f0fdfa] flex items-center justify-center">
         <Loader2 className="w-12 h-12 text-cyan-400 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#1a2942] to-[#0d1f35]">
+    <div className="min-h-screen bg-gradient-to-br from-[#f0f9ff] via-[#e0f2fe] to-[#f0fdfa]">
       <Navbar user={user} onLogout={onLogout} />
       
       <main className="container mx-auto px-4 py-8 max-w-6xl" data-testid="analysis-page">
