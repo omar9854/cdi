@@ -40,7 +40,7 @@ const NewNote = ({ user, onLogout }) => {
   };
 
   const addNote = () => {
-    setDoctorNotes([...doctorNotes, { text: '', specialty: '' }]);
+    setDoctorNotes([...doctorNotes, { text: '', specialty: '', doctorName: '', noteDate: '', noteTime: '' }]);
   };
 
   const removeNote = (index) => {
