@@ -111,6 +111,15 @@ const Login = ({ setUser }) => {
         }}
       />
       
+      {/* Dark Overlay for better readability - gradient from left */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0a1628]/95 via-[#0a1628]/70 to-transparent z-10" />
+
+      {/* Login Form - Always on LEFT Side */}
+      <div className="relative z-20 w-full max-w-md ml-8 lg:ml-16 mr-auto">
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+      
       {/* Dark Overlay for better readability - gradient from right */}
       <div className="absolute inset-0 bg-gradient-to-l from-[#0a1628]/95 via-[#0a1628]/70 to-transparent z-10" />
 
