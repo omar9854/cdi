@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+*.egg-info/
+
+# Node
+node_modules/
+build/
+dist/
+.yarn/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Data files (keep structure, ignore content)
+data/*.pdf
+data/*.xlsx
+
+# Secrets
+*.pem
+*.key
+secrets/
