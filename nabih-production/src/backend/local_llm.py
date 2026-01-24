@@ -1,5 +1,5 @@
 """
-MediDoc AI - vLLM Engine for V100 GPU
+Nabih AI - vLLM Engine for V100 GPU
 Enhanced CDI Analysis v3.0 - High Precision
 """
 

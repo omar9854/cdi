@@ -28,7 +28,7 @@ export const translations = {
     
     // App name
     appName: 'إدارة تحسين التوثيق السريري',
-    appSubtitle: 'تجمع المدينة المنورة الصحي',
+    appSubtitle: 'منصة نبيه',
     
     // Dashboard
     dashboard: 'لوحة التحكم',

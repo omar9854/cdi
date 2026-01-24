@@ -23,7 +23,7 @@ class DRGLookup:
     """DRG Pricing Lookup System"""
     
     def __init__(self, excel_path: str = None):
-        self.excel_path = excel_path or "/opt/medidoc/backend/reference_data/drg_prices.xlsx"
+        self.excel_path = excel_path or "/opt/nabih/backend/reference_data/drg_prices.xlsx"
         self.data = None
         self.loaded = False
         self._load_data()

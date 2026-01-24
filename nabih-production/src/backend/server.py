@@ -476,7 +476,7 @@ async def send_email(to_email: str, subject: str, body_html: str):
 
 async def send_welcome_email(user_email: str, user_name: str):
     """Send welcome email to new users"""
-    subject = "مرحباً بك في مركز الترميز الطبي | Welcome to Medical Coding Center"
+    subject = "مرحباً بك في منصة نبيه | Welcome to Medical Coding Center"
     
     body_html = f"""
     <html dir="rtl">
@@ -1206,7 +1206,7 @@ async def login_step1(credentials: UserLogin):
         await unlock_account_if_expired(db, credentials.email)
         
         # Check rate limiting - TEMPORARILY DISABLED FOR ADMIN EMAIL
-        if credentials.email != "medidocai@gmail.com":
+        if credentials.email != "nabihai@gmail.com":
             is_allowed, remaining = await check_rate_limit(db, credentials.email)
             if not is_allowed:
                 raise HTTPException(

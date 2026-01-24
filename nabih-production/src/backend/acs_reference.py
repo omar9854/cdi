@@ -254,7 +254,7 @@ class ACSReferenceSystem:
     
     def __init__(self, pdf_path: str = None):
         self.standards = ACS_STANDARDS
-        self.pdf_path = pdf_path or "/opt/medidoc/backend/reference_data/acs_standards.pdf"
+        self.pdf_path = pdf_path or "/opt/nabih/backend/reference_data/acs_standards.pdf"
         
     def get_standard(self, number: str) -> Optional[Dict]:
         """Get a specific ACS standard"""
