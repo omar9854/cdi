@@ -1,0 +1,25 @@
+[Unit]
+Description=Nabih CDI Platform - AI-Powered Clinical Documentation Improvement
+After=network.target mongodb.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/nabih/backend
+Environment="PATH=/opt/nabih/backend/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/opt/nabih/backend/venv/bin/uvicorn server:app --host 0.0.0.0 --port 8001 --workers 1
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# GPU Configuration
+Environment="CUDA_VISIBLE_DEVICES=0"
+Environment="PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512"
+
+# Memory limits
+MemoryMax=60G
+MemorySwapMax=0
+
+[Install]
+WantedBy=multi-user.target
