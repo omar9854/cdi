@@ -968,62 +968,9 @@ VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text b
         if not isinstance(result, dict):
             raise HTTPException(status_code=500, detail="Invalid AI result format")
         
-        # Track and normalize will happen below using existing logic
-        
-        # Enhanced JSON parsing with better error handling
-        import re
-        
-        try:
-            # Remove markdown code blocks if present
-            if "```json" in response_text:
-                response_text = response_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in response_text:
-                response_text = response_text.split("```")[1].split("```")[0].strip()
-            
-            # Remove any BOM or invisible characters
-            response_text = response_text.strip().lstrip('\ufeff').lstrip('\u200b')
-            
-            # Try to find JSON object in the response
-            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
-            if json_match:
-                response_text = json_match.group(0)
-            
-            # Parse JSON
-            result = json.loads(response_text)
-            logger.info(f"✅ JSON parsing successful, found {len(result.get('diagnoses_to_document', []))} diagnoses")
-            return result
-            
-        except json.JSONDecodeError as je:
-            logger.error(f"JSON parsing error: {str(je)}")
-            logger.error(f"Response text (first 500 chars): {response_text[:500] if response_text else 'No response'}")
-            
-            # Fallback: Create a structured response from the text
-            logger.info("🔄 Attempting to create structured response from text...")
-            
-            fallback_result = {
-                "diagnoses_to_document": [
-                    {
-                        "diagnosis_ar": "تحليل نصي - راجع الملاحظات",
-                        "diagnosis_en": "Text Analysis - Review Notes",
-                        "icd_code": "R69",
-                        "type": "secondary",
-                        "severity": "N/A",
-                        "clinical_evidence": response_text[:500] if response_text else "No analysis available"
-                    }
-                ],
-                "missing_documentation": [],
-                "gaps_ar": ["يرجى مراجعة التحليل النصي أدناه"],
-                "gaps_en": ["Please review the text analysis below"],
-                "queries_ar": [],
-                "queries_en": [],
-                "recommendations_ar": ["مراجعة التحليل الكامل في الملخص"],
-                "recommendations_en": ["Review full analysis in summary"],
-                "summary_ar": response_text[:1000] if response_text else "لا يوجد تحليل",
-                "summary_en": f"AI Analysis (raw text): {response_text[:1000] if response_text else 'No analysis available'}"
-            }
-            
-            logger.info("✅ Created fallback structured response")
-            return fallback_result
+        # Return the result directly from vLLM (already in proper format)
+        logger.info(f"✅ vLLM analysis successful, found {len(result.get('documented_diagnoses', []))} documented diagnoses")
+        return result
         
     except HTTPException:
         raise
