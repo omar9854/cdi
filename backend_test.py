@@ -29,6 +29,12 @@ class MediDocAITester:
         self.note_id = None
         self.analysis_id = None
         
+        # Admin credentials as specified in the review request
+        self.admin_credentials = {
+            "email": "almaghthawi.cdi@gmail.com",
+            "password": "CDI@2024#Admin"
+        }
+        
         # Test user data as specified in the request
         self.test_user = {
             "email": "test.cdi@hospital.sa",
@@ -37,12 +43,23 @@ class MediDocAITester:
             "password": "TestPassword123!"
         }
         
-        # Clinical note data as specified in the request
+        # Clinical note data with documented and undocumented diagnoses as requested
         self.test_clinical_note = {
-            "title": "Test Clinical Note",
+            "title": "Test Clinical Note - vLLM Analysis",
             "doctor_notes": [
                 {
-                    "text": "Patient is a 55-year-old male with Type 2 Diabetes Mellitus, HbA1c 9.2%, on Metformin. Also has hypertension on Lisinopril. Reports bilateral foot numbness.",
+                    "text": "Patient is a 65-year-old male admitted with chest pain. Past medical history significant for Type 2 Diabetes Mellitus, well controlled on Metformin 1000mg BID. Also has essential hypertension managed with Lisinopril 10mg daily. Laboratory results show: Sodium 148 mEq/L (normal 135-145), Creatinine 1.8 mg/dL (baseline 1.0), BUN 45 mg/dL. Patient started on normal saline for hypernatremia correction. Troponin negative x3. EKG shows normal sinus rhythm. Patient reports polyuria and polydipsia for past week.",
+                    "specialty": "internal_medicine"
+                }
+            ]
+        }
+        
+        # Arabic clinical note for comprehensive testing
+        self.arabic_clinical_note = {
+            "title": "ملاحظة سريرية - اختبار المحرك المحلي",
+            "doctor_notes": [
+                {
+                    "text": "مريض ذكر عمره 58 سنة يعاني من السكري النوع الثاني منذ 10 سنوات، مسيطر عليه بالميتفورمين. لديه ارتفاع ضغط الدم الأساسي يتناول ليسينوبريل. تحاليل المختبر تظهر: الصوديوم 149 مليمول/لتر، الكرياتينين 2.1 ملغ/ديسيلتر، اليوريا 48 ملغ/ديسيلتر. المريض يشكو من كثرة التبول والعطش. تم البدء بالمحلول الملحي لتصحيح ارتفاع الصوديوم.",
                     "specialty": "internal_medicine"
                 }
             ]
