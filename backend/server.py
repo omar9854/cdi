@@ -20,6 +20,9 @@ import bcrypt
 import jwt
 import random
 import google.generativeai as genai
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from local_llm_vllm_fixed import analyze_clinical_notes as vllm_analyze_clinical_notes
 
 import io
