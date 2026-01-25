@@ -20,6 +20,8 @@ import bcrypt
 import jwt
 import random
 import google.generativeai as genai
+from local_llm_vllm_fixed import analyze_clinical_notes as vllm_analyze_clinical_notes
+
 import io
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
