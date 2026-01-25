@@ -321,8 +321,8 @@ class VLLMAnalyzeEndpointTester:
                 "icd_code": principal.get('icd_code', 'N/A')
             },
             "analysis_counts": {
-                "documented_diagnoses": content_stats['documented_count'],
-                "inferred_diagnoses": content_stats['inferred_count'],
+                "total_diagnoses": content_stats['diagnoses_count'],
+                "missing_documentation": content_stats['missing_count'],
                 "physician_queries": content_stats['queries_count'],
                 "has_bilingual_summaries": content_stats['has_summaries']
             },
