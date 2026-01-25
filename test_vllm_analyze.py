@@ -187,6 +187,8 @@ class VLLMAnalyzeEndpointTester:
             # Parse JSON response
             try:
                 analysis_data = response.json()
+                print(f"🔍 DEBUG: Response keys: {list(analysis_data.keys())}")
+                print(f"🔍 DEBUG: Response sample: {str(analysis_data)[:500]}...")
             except json.JSONDecodeError as e:
                 self.log_test("vLLM JSON Parsing", False, f"Invalid JSON: {str(e)}")
                 return None
