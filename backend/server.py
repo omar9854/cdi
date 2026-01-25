@@ -964,7 +964,7 @@ VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text b
         if not isinstance(result, dict):
             raise HTTPException(status_code=500, detail="Invalid AI result format")
         
-        # Track and normalize will happen أدناه باستخدام المنطق الحالي
+        # Track and normalize will happen below using existing logic
         
         # Enhanced JSON parsing with better error handling
         import re
