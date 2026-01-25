@@ -941,81 +941,30 @@ CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLE
 VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text before or after the JSON object. Start directly with {{ and end with }}."""
 
     try:
-        import requests
-        import json
-        
-        response_text = None
-        
-        # Use Meditron-70B via Ollama (local medical AI)
+        # استخدم vLLM المحلي (Qwen2.5-32B) بدل Ollama
         if provider in ['meditron', 'phi3', 'azure', 'gemini']:
-            # All providers now use Meditron-70B locally
-            logger.info("🏥 Using Meditron-70B Medical AI via Ollama...")
-            
+            logger.info("🏥 Using local vLLM Qwen2.5-32B engine for analysis...")
             try:
-                import requests
-                
-                ollama_host = os.environ.get('OLLAMA_HOST', 'http://127.0.0.1:11434')
-                ollama_model = os.environ.get('OLLAMA_MODEL', 'phi3:latest')
-                
-                # Clear medical coding prompt
-                analysis_prompt = f"""You are an expert ICD-10-CM medical coder. Analyze this clinical note carefully.
-
-CLINICAL NOTE:
-{formatted_notes}
-
-TASK: Identify ALL medical conditions, symptoms, and diagnoses mentioned. For each, provide:
-1. Arabic name (التشخيص بالعربية)
-2. English name  
-3. Accurate ICD-10-CM code
-
-Common codes reference:
-- Diabetes Type 2: E11.9, with neuropathy: E11.40, with retinopathy: E11.319
-- Hypertension: I10
-- Chest pain: R07.9
-- Heart failure: I50.9
-- Peripheral neuropathy: G62.9
-
-Return ONLY valid JSON (no extra text):
-{{"diagnoses_to_document": [{{"diagnosis_ar": "السكري النوع الثاني", "diagnosis_en": "Type 2 Diabetes Mellitus", "icd_code": "E11.9", "type": "principal", "clinical_evidence": "diabetic for 10 years"}}], "missing_documentation": [{{"item_ar": "مستوى HbA1c", "item_en": "HbA1c level", "impact": "needed for severity"}}], "gaps_ar": ["توثيق شدة الحالة"], "gaps_en": ["Severity documentation"], "queries_ar": ["يرجى توثيق مستوى السكر"], "queries_en": ["Please document glucose level"], "recommendations_ar": ["إضافة تفاصيل المضاعفات"], "recommendations_en": ["Add complication details"], "summary_ar": "مريض سكري يحتاج توثيق إضافي للمضاعفات", "summary_en": "Diabetic patient needs additional documentation for complications"}}"""
-                
-                logger.info(f"📤 Sending to {ollama_model}...")
-                
-                response = requests.post(
-                    f"{ollama_host}/api/generate",
-                    json={
-                        "model": ollama_model,
-                        "prompt": analysis_prompt,
-                        "stream": False,
-                        "options": {
-                            "temperature": 0.1,
-                            "num_predict": 4000
-                        }
-                    },
-                    timeout=120
-                )
-                
-                if response.status_code == 200:
-                    response_text = response.json().get("response", "").strip()
-                    logger.info(f"✅ {ollama_model} analysis successful")
-                else:
-                    raise Exception(f"Ollama error: {response.status_code}")
-                    
-            except requests.exceptions.Timeout:
-                logger.error("❌ Meditron timeout - analysis taking too long")
-                raise HTTPException(status_code=504, detail="انتهى وقت التحليل. Analysis timeout. Please try again.")
+                # دمج رسالة النظام مع طلب المستخدم لضمان التزام النموذج بالقواعد
+                full_prompt = f"{system_message}\n\n{user_prompt}"
+                result = vllm_analyze_clinical_notes(full_prompt, hospital_type="A")
             except Exception as e:
-                logger.error(f"❌ Meditron error: {str(e)}")
-                raise HTTPException(status_code=500, detail=f"فشل التحليل: {str(e)}")
-        
+                logger.error(f"❌ vLLM analysis error: {str(e)}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"فشل التحليل بواسطة المحرك المحلي: {str(e)}"
+                )
         else:
             raise HTTPException(
                 status_code=400,
                 detail="مزود AI غير مدعوم. Unsupported AI provider."
             )
         
-        # Check if we have a response
-        if not response_text:
-            raise HTTPException(status_code=500, detail="No response from AI provider")
+        # اجعل شكل النتيجة متوافقاً مع ما يتوقعه باقي الكود (diagnoses_to_document, gaps, queries, summary)
+        if not isinstance(result, dict):
+            raise HTTPException(status_code=500, detail="Invalid AI result format")
+        
+        # Track and normalize will happen أدناه باستخدام المنطق الحالي
         
         # Enhanced JSON parsing with better error handling
         import re
