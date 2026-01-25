@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://med-analysis-app.preview.emergentagent.com
+https://medanalyzer-6.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://med-analysis-app.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://med-analysis-app.preview.emergentagent.com
+   https://medanalyzer-6.preview.emergentagent.com
    ```
 
 ---

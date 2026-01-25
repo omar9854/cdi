@@ -3,7 +3,7 @@
 ## 📋 معلومات التطبيق
 
 **اسم التطبيق:** مركز تحسين التوثيق السريري (CDI Center)
-**URL الحالي:** https://med-analysis-app.preview.emergentagent.com
+**URL الحالي:** https://medanalyzer-6.preview.emergentagent.com
 
 ---
 
@@ -35,7 +35,7 @@
 
 ### الطريقة الحالية (Preview):
 ```
-https://med-analysis-app.preview.emergentagent.com
+https://medanalyzer-6.preview.emergentagent.com
 ```
 
 **ملاحظة:** هذا الرابط مؤقت للتطوير والاختبار

@@ -10,7 +10,7 @@ from datetime import datetime
 
 class SupervisorEmployeesTest:
     def __init__(self):
-        self.base_url = "https://med-analysis-app.preview.emergentagent.com"
+        self.base_url = "https://medanalyzer-6.preview.emergentagent.com"
         self.api_url = f"{self.base_url}/api"
         self.admin_token = None
         

@@ -6,7 +6,7 @@
 
 1. **اذهب إلى صفحة التسجيل:**
    ```
-   https://med-analysis-app.preview.emergentagent.com/register
+   https://medanalyzer-6.preview.emergentagent.com/register
    ```
 
 2. **املأ البيانات:**
@@ -66,7 +66,7 @@
 
 1. **انسخ الرابط:**
    ```
-   https://med-analysis-app.preview.emergentagent.com
+   https://medanalyzer-6.preview.emergentagent.com
    ```
 
 2. **أرسله للفريق الطبي عبر:**
