@@ -265,23 +265,18 @@ class VLLMAnalyzeEndpointTester:
         """Step 4c: Verify analysis content quality"""
         print("\n📊 Step 4c: Verify Content Quality")
         
-        # Check principal diagnosis
-        principal = analysis_data.get('principal_diagnosis', {})
-        has_principal = bool(principal.get('diagnosis_ar') or principal.get('diagnosis_en'))
+        # Check diagnoses to document (includes principal, documented, and inferred)
+        diagnoses_to_document = analysis_data.get('diagnoses_to_document', [])
+        diagnoses_count = len(diagnoses_to_document) if isinstance(diagnoses_to_document, list) else 0
         
-        # Check documented diagnoses
-        documented = analysis_data.get('documented_diagnoses', analysis_data.get('secondary_diagnoses', []))
-        documented_count = len(documented) if isinstance(documented, list) else 0
-        
-        # Check inferred diagnoses
-        inferred = analysis_data.get('inferred_diagnoses', [])
-        inferred_count = len(inferred) if isinstance(inferred, list) else 0
+        # Check missing documentation
+        missing_docs = analysis_data.get('missing_documentation', [])
+        missing_count = len(missing_docs) if isinstance(missing_docs, list) else 0
         
         # Check queries
         queries_ar = analysis_data.get('queries_ar', [])
         queries_en = analysis_data.get('queries_en', [])
-        physician_queries = analysis_data.get('physician_queries', [])
-        total_queries = len(queries_ar) + len(queries_en) + len(physician_queries)
+        total_queries = len(queries_ar) + len(queries_en)
         
         # Check summaries
         summary_ar = analysis_data.get('summary_ar', '')
@@ -290,25 +285,22 @@ class VLLMAnalyzeEndpointTester:
         
         # Quality assessment
         quality_score = 0
-        if has_principal:
-            quality_score += 2
-        if documented_count > 0:
-            quality_score += 2
-        if inferred_count > 0:
-            quality_score += 2
+        if diagnoses_count > 0:
+            quality_score += 4  # Main content
         if total_queries > 0:
-            quality_score += 2
+            quality_score += 3  # Physician queries
         if has_summaries:
-            quality_score += 2
+            quality_score += 2  # Summaries
+        if missing_count > 0:
+            quality_score += 1  # Missing documentation identified
         
         success = quality_score >= 6  # At least 6/10 points
-        details = f"Principal: {has_principal}, Documented: {documented_count}, Inferred: {inferred_count}, Queries: {total_queries}, Summaries: {has_summaries} (Score: {quality_score}/10)"
+        details = f"Diagnoses: {diagnoses_count}, Missing Docs: {missing_count}, Queries: {total_queries}, Summaries: {has_summaries} (Score: {quality_score}/10)"
         
         self.log_test("Content Quality", success, details)
         return success, {
-            'principal': has_principal,
-            'documented_count': documented_count,
-            'inferred_count': inferred_count,
+            'diagnoses_count': diagnoses_count,
+            'missing_count': missing_count,
             'queries_count': total_queries,
             'has_summaries': has_summaries
         }
