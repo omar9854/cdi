@@ -974,6 +974,12 @@ VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text b
         # Return the transformed result
         logger.info(f"✅ vLLM analysis successful, transformed to backend format")
         return transformed_result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.error(f"Error analyzing with AI: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error in analysis: {str(e)}")
 
 
 def transform_vllm_result_to_backend_format(vllm_result: Dict) -> Dict:
@@ -1052,12 +1058,6 @@ def transform_vllm_result_to_backend_format(vllm_result: Dict) -> Dict:
     }
     
     return transformed
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logging.error(f"Error analyzing with AI: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error in analysis: {str(e)}")
 
 
 # Health check route
