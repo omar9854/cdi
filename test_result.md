@@ -54,6 +54,8 @@
 - Created fully offline local LLM module
 - Updated setup script with security hardening (UFW, fail2ban)
 - Added security headers in Nginx config
+- Jan 2026: Backend /api/analyze moved from Ollama (127.0.0.1:11434) to local vLLM (Qwen2.5-32B) via local_llm_vllm_fixed; frontend Analysis/NewNote flow under test.
+
 - No external API dependencies
 
 ### 2. Role Updates
