@@ -284,41 +284,220 @@ class MediDocAITester:
             self.log_test("Get Single Note", False, str(e))
             return False
 
-    def test_analyze_note(self, note_id):
-        """Test AI analysis of clinical note"""
-        if not self.token or not note_id:
-            self.log_test("Analyze Note", False, "No authentication token or note ID")
-            return False, None
+    def test_vllm_analyze_endpoint_comprehensive(self):
+        """
+        Comprehensive test for /api/analyze endpoint with vLLM engine
+        اختبار شامل لنقطة /api/analyze بعد التعديل الأخير على backend/server.py 
+        لربطها بمحرك vLLM المحلي (Qwen2.5-32B) عبر local_llm_vllm_fixed.analyze_clinical_notes
+        """
+        print("\n🎯 COMPREHENSIVE vLLM /api/analyze ENDPOINT TEST")
+        print("=" * 70)
+        print("Testing vLLM integration - NO Ollama dependency (127.0.0.1:11434)")
+        print("=" * 70)
+        
+        # Step 1: Admin login using specified credentials
+        print("\n🔐 Step 1: Admin Login")
+        try:
+            response = requests.post(
+                f"{self.api_url}/auth/login-step1",
+                json=self.admin_credentials,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('requires_mfa'):
+                    self.log_test("Admin Login - vLLM Test", False, "MFA required - cannot complete automated test")
+                    return False
+                else:
+                    self.admin_token = data.get('access_token')
+                    self.admin_data = data.get('user')
+                    self.log_test("Admin Login - vLLM Test", True, f"Admin logged in: {self.admin_credentials['email']}")
+            else:
+                self.log_test("Admin Login - vLLM Test", False, f"Login failed: {response.status_code} - {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Admin Login - vLLM Test", False, str(e))
+            return False
+        
+        # Step 2: Create clinical note with documented and undocumented diagnoses
+        print("\n📝 Step 2: Create Clinical Note with Mixed Diagnoses")
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            response = requests.post(
+                f"{self.api_url}/notes",
+                json=self.test_clinical_note,
+                headers=headers,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                note_data = response.json()
+                note_id = note_data.get('id')
+                self.log_test("Create Clinical Note - vLLM Test", True, f"Note created: {note_id}")
+            else:
+                self.log_test("Create Clinical Note - vLLM Test", False, f"Failed: {response.status_code} - {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Create Clinical Note - vLLM Test", False, str(e))
+            return False
+        
+        # Step 3: Test /api/analyze endpoint with vLLM
+        print("\n🤖 Step 3: Test /api/analyze with vLLM Engine")
+        print("⏱️  This may take 10-60 seconds for vLLM processing...")
         
         try:
-            headers = {"Authorization": f"Bearer {self.token}"}
-            analyze_data = {"note_id": note_id}
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            analyze_request = {
+                "note_id": note_id,
+                "ai_provider": "meditron"  # This should trigger vLLM
+            }
             
-            print("🔄 Starting AI analysis (this may take 10-30 seconds)...")
             response = requests.post(
                 f"{self.api_url}/analyze",
-                json=analyze_data,
+                json=analyze_request,
                 headers=headers,
-                timeout=60  # Longer timeout for AI processing
+                timeout=120  # Extended timeout for vLLM processing
             )
-            success = response.status_code == 200
-            analysis_id = None
-            if success:
-                data = response.json()
-                analysis_id = data.get('id')
-                primary_count = len(data.get('primary_diagnoses', []))
-                secondary_count = len(data.get('secondary_diagnoses', []))
-                gaps_count = len(data.get('gaps', []))
-                queries_count = len(data.get('queries_for_doctor', []))
-                details = f"Analysis completed - Primary: {primary_count}, Secondary: {secondary_count}, Gaps: {gaps_count}, Queries: {queries_count}"
-            else:
-                details = f"Status: {response.status_code}, Error: {response.text}"
             
-            self.log_test("Analyze Note", success, details, response.json() if success else None)
-            return success, analysis_id
+            # Check for successful response
+            if response.status_code != 200:
+                error_text = response.text
+                self.log_test("vLLM Analysis Request", False, f"HTTP {response.status_code}: {error_text}")
+                
+                # Check specifically for Ollama connection errors
+                if "127.0.0.1:11434" in error_text or "Connection refused" in error_text:
+                    print("❌ CRITICAL: Still attempting Ollama connection!")
+                    print(f"   Error contains: 127.0.0.1:11434 or Connection refused")
+                
+                return False
+            
+            # Parse response
+            try:
+                analysis_data = response.json()
+            except json.JSONDecodeError as e:
+                self.log_test("vLLM Analysis Response", False, f"Invalid JSON response: {str(e)}")
+                return False
+            
+            # Step 4: Verify response structure and content
+            print("\n✅ Step 4: Verify vLLM Response Structure")
+            
+            # Check for Ollama connection attempts in response
+            response_text = json.dumps(analysis_data, ensure_ascii=False)
+            if "127.0.0.1:11434" in response_text or "Connection refused" in response_text:
+                self.log_test("vLLM No Ollama Check", False, "Response contains Ollama connection references")
+                return False
+            else:
+                self.log_test("vLLM No Ollama Check", True, "No Ollama connection attempts detected")
+            
+            # Required fields check
+            required_fields = [
+                'principal_diagnosis', 'secondary_diagnoses', 'documented_diagnoses',
+                'inferred_diagnoses', 'diagnoses_to_document', 'documentation_gaps',
+                'missing_documentation', 'queries_ar', 'queries_en', 'physician_queries',
+                'summary_ar', 'summary_en'
+            ]
+            
+            present_fields = []
+            missing_fields = []
+            
+            for field in required_fields:
+                if field in analysis_data:
+                    present_fields.append(field)
+                else:
+                    missing_fields.append(field)
+            
+            # Check alternative field names
+            if 'documented_diagnoses' not in analysis_data and 'secondary_diagnoses' in analysis_data:
+                present_fields.append('documented_diagnoses (as secondary_diagnoses)')
+            
+            if 'physician_queries' not in analysis_data and ('queries_ar' in analysis_data or 'queries_en' in analysis_data):
+                present_fields.append('physician_queries (as queries_ar/en)')
+            
+            # Log field analysis
+            field_success = len(missing_fields) <= 2  # Allow some flexibility
+            field_details = f"Present: {len(present_fields)}, Missing: {len(missing_fields)}"
+            if missing_fields:
+                field_details += f" (Missing: {', '.join(missing_fields[:3])})"
+            
+            self.log_test("vLLM Response Fields", field_success, field_details)
+            
+            # Step 5: Verify content quality
+            print("\n📊 Step 5: Verify Analysis Content Quality")
+            
+            # Check principal diagnosis
+            principal = analysis_data.get('principal_diagnosis', {})
+            has_principal = bool(principal.get('diagnosis_ar') or principal.get('diagnosis_en'))
+            
+            # Check documented diagnoses
+            documented = analysis_data.get('documented_diagnoses', analysis_data.get('secondary_diagnoses', []))
+            documented_count = len(documented) if isinstance(documented, list) else 0
+            
+            # Check inferred diagnoses
+            inferred = analysis_data.get('inferred_diagnoses', [])
+            inferred_count = len(inferred) if isinstance(inferred, list) else 0
+            
+            # Check queries
+            queries_ar = analysis_data.get('queries_ar', [])
+            queries_en = analysis_data.get('queries_en', [])
+            physician_queries = analysis_data.get('physician_queries', [])
+            total_queries = len(queries_ar) + len(queries_en) + len(physician_queries)
+            
+            # Check summaries
+            summary_ar = analysis_data.get('summary_ar', '')
+            summary_en = analysis_data.get('summary_en', '')
+            has_summaries = bool(summary_ar and summary_en)
+            
+            content_details = f"Principal: {has_principal}, Documented: {documented_count}, Inferred: {inferred_count}, Queries: {total_queries}, Summaries: {has_summaries}"
+            content_success = has_principal and (documented_count > 0 or inferred_count > 0) and total_queries > 0
+            
+            self.log_test("vLLM Content Quality", content_success, content_details)
+            
+            # Step 6: Log sample response (without sensitive data)
+            print("\n📋 Step 6: Sample Analysis Response")
+            
+            sample_response = {
+                "principal_diagnosis": {
+                    "diagnosis_ar": principal.get('diagnosis_ar', '')[:50] + "..." if principal.get('diagnosis_ar') else "N/A",
+                    "diagnosis_en": principal.get('diagnosis_en', '')[:50] + "..." if principal.get('diagnosis_en') else "N/A",
+                    "icd_code": principal.get('icd_code', 'N/A')
+                },
+                "documented_count": documented_count,
+                "inferred_count": inferred_count,
+                "queries_count": total_queries,
+                "has_summaries": has_summaries,
+                "response_size_kb": len(response_text) // 1024
+            }
+            
+            print(f"   📊 Analysis Summary:")
+            print(f"      Principal Diagnosis: {sample_response['principal_diagnosis']['diagnosis_en']}")
+            print(f"      ICD Code: {sample_response['principal_diagnosis']['icd_code']}")
+            print(f"      Documented Diagnoses: {sample_response['documented_count']}")
+            print(f"      Inferred Diagnoses: {sample_response['inferred_count']}")
+            print(f"      Physician Queries: {sample_response['queries_count']}")
+            print(f"      Response Size: {sample_response['response_size_kb']} KB")
+            
+            # Overall success determination
+            overall_success = field_success and content_success
+            
+            if overall_success:
+                self.log_test("vLLM Analysis Complete", True, 
+                            f"vLLM analysis successful - {content_details}")
+            else:
+                self.log_test("vLLM Analysis Complete", False, 
+                            f"Analysis issues detected - {content_details}")
+            
+            # Store analysis ID for potential further testing
+            self.analysis_id = analysis_data.get('id')
+            
+            return overall_success
+            
+        except requests.exceptions.Timeout:
+            self.log_test("vLLM Analysis Request", False, "Request timeout (>120s) - vLLM may be overloaded")
+            return False
         except Exception as e:
-            self.log_test("Analyze Note", False, str(e))
-            return False, None
+            self.log_test("vLLM Analysis Request", False, f"Exception: {str(e)}")
+            return False
 
     def test_get_analyses(self, note_id):
         """Test retrieving analyses for a note"""
