@@ -227,42 +227,33 @@ class VLLMAnalyzeEndpointTester:
         """Step 4b: Verify required JSON fields"""
         print("\n📋 Step 4b: Verify JSON Structure")
         
-        # Required fields as specified in the request
+        # Required fields for the backend API response (after transformation)
         required_fields = [
-            'principal_diagnosis',
-            ['secondary_diagnoses', 'documented_diagnoses'],  # Either one
-            'inferred_diagnoses',
             'diagnoses_to_document',
-            ['documentation_gaps', 'missing_documentation'],  # Either one
-            ['queries_ar', 'queries_en', 'physician_queries'],  # At least one
-            ['summary_ar', 'summary_en']  # Both preferred
+            'missing_documentation', 
+            'gaps_ar',
+            'gaps_en',
+            'queries_ar',
+            'queries_en',
+            'summary_ar',
+            'summary_en'
         ]
         
         present_fields = []
         missing_fields = []
         
         for field in required_fields:
-            if isinstance(field, list):
-                # Check if any of the alternative fields exist
-                found = False
-                for alt_field in field:
-                    if alt_field in analysis_data:
-                        present_fields.append(alt_field)
-                        found = True
-                        break
-                if not found:
-                    missing_fields.append(f"({' or '.join(field)})")
+            if field in analysis_data:
+                present_fields.append(field)
             else:
-                if field in analysis_data:
-                    present_fields.append(field)
-                else:
-                    missing_fields.append(field)
+                missing_fields.append(field)
         
         # Check for query fields specifically
-        has_queries = any(field in analysis_data for field in ['queries_ar', 'queries_en', 'physician_queries'])
+        has_queries = ('queries_ar' in analysis_data and analysis_data['queries_ar']) or \
+                     ('queries_en' in analysis_data and analysis_data['queries_en'])
         has_summaries = 'summary_ar' in analysis_data and 'summary_en' in analysis_data
         
-        success = len(missing_fields) <= 1  # Allow some flexibility
+        success = len(missing_fields) == 0  # All fields should be present
         details = f"Present: {len(present_fields)}, Missing: {len(missing_fields)}"
         if missing_fields:
             details += f" (Missing: {', '.join(missing_fields)})"
