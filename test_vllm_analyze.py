@@ -309,16 +309,17 @@ class VLLMAnalyzeEndpointTester:
         """Step 5: Generate sample response documentation"""
         print("\n📄 Step 5: Sample Analysis Response")
         
-        principal = analysis_data.get('principal_diagnosis', {})
+        diagnoses = analysis_data.get('diagnoses_to_document', [])
+        first_diagnosis = diagnoses[0] if diagnoses else {}
         
         sample = {
             "test_timestamp": datetime.now().isoformat(),
             "backend_url": self.backend_url,
             "processing_engine": "vLLM (Qwen2.5-32B)",
-            "principal_diagnosis": {
-                "diagnosis_ar": principal.get('diagnosis_ar', 'N/A')[:100] + "..." if len(principal.get('diagnosis_ar', '')) > 100 else principal.get('diagnosis_ar', 'N/A'),
-                "diagnosis_en": principal.get('diagnosis_en', 'N/A')[:100] + "..." if len(principal.get('diagnosis_en', '')) > 100 else principal.get('diagnosis_en', 'N/A'),
-                "icd_code": principal.get('icd_code', 'N/A')
+            "first_diagnosis": {
+                "diagnosis_ar": first_diagnosis.get('diagnosis_ar', 'N/A')[:100] + "..." if len(first_diagnosis.get('diagnosis_ar', '')) > 100 else first_diagnosis.get('diagnosis_ar', 'N/A'),
+                "diagnosis_en": first_diagnosis.get('diagnosis_en', 'N/A')[:100] + "..." if len(first_diagnosis.get('diagnosis_en', '')) > 100 else first_diagnosis.get('diagnosis_en', 'N/A'),
+                "icd_code": first_diagnosis.get('icd_code', 'N/A')
             },
             "analysis_counts": {
                 "total_diagnoses": content_stats['diagnoses_count'],
