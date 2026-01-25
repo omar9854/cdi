@@ -10,6 +10,7 @@ from prometheus_client import Counter, Histogram, Gauge, generate_latest, REGIST
 from prometheus_fastapi_instrumentator import Instrumentator
 import os
 import logging
+import json
 from pathlib import Path
 import time
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
