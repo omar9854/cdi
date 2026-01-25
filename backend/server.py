@@ -968,9 +968,90 @@ VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text b
         if not isinstance(result, dict):
             raise HTTPException(status_code=500, detail="Invalid AI result format")
         
-        # Return the result directly from vLLM (already in proper format)
-        logger.info(f"✅ vLLM analysis successful, found {len(result.get('documented_diagnoses', []))} documented diagnoses")
-        return result
+        # Transform vLLM result to expected backend format
+        transformed_result = transform_vllm_result_to_backend_format(result)
+        
+        # Return the transformed result
+        logger.info(f"✅ vLLM analysis successful, transformed to backend format")
+        return transformed_result
+
+
+def transform_vllm_result_to_backend_format(vllm_result: Dict) -> Dict:
+    """Transform vLLM result format to backend expected format"""
+    
+    # Extract diagnoses to document from various sources
+    diagnoses_to_document = []
+    
+    # Add principal diagnosis if present
+    principal = vllm_result.get('principal_diagnosis', {})
+    if principal.get('diagnosis_ar') or principal.get('diagnosis_en'):
+        diagnoses_to_document.append({
+            'diagnosis_ar': principal.get('diagnosis_ar', ''),
+            'diagnosis_en': principal.get('diagnosis_en', ''),
+            'icd_code': principal.get('icd_code', '')
+        })
+    
+    # Add documented diagnoses
+    documented = vllm_result.get('documented_diagnoses', [])
+    for diag in documented:
+        if isinstance(diag, dict):
+            diagnoses_to_document.append({
+                'diagnosis_ar': diag.get('diagnosis_ar', ''),
+                'diagnosis_en': diag.get('diagnosis_en', ''),
+                'icd_code': diag.get('icd_code', '')
+            })
+    
+    # Add inferred diagnoses
+    inferred = vllm_result.get('inferred_diagnoses', [])
+    for diag in inferred:
+        if isinstance(diag, dict):
+            diagnoses_to_document.append({
+                'diagnosis_ar': diag.get('diagnosis_ar', ''),
+                'diagnosis_en': diag.get('diagnosis_en', ''),
+                'icd_code': diag.get('potential_icd_code', diag.get('icd_code', ''))
+            })
+    
+    # Extract missing documentation
+    missing_documentation = []
+    gaps = vllm_result.get('documentation_gaps', [])
+    for gap in gaps:
+        if isinstance(gap, dict):
+            missing_documentation.append({
+                'item_ar': gap.get('gap_description_ar', ''),
+                'item_en': gap.get('gap_description_en', '')
+            })
+    
+    # Extract queries
+    queries_ar = []
+    queries_en = []
+    physician_queries = vllm_result.get('physician_queries', [])
+    for query in physician_queries:
+        if isinstance(query, dict):
+            if query.get('query_ar'):
+                queries_ar.append(query['query_ar'])
+            if query.get('query_en'):
+                queries_en.append(query['query_en'])
+    
+    # Extract summaries
+    summary_info = vllm_result.get('summary', {})
+    summary_ar = summary_info.get('summary_ar', '') if isinstance(summary_info, dict) else vllm_result.get('summary_ar', '')
+    summary_en = summary_info.get('summary_en', '') if isinstance(summary_info, dict) else vllm_result.get('summary_en', '')
+    
+    # Build the transformed result
+    transformed = {
+        'diagnoses_to_document': diagnoses_to_document,
+        'missing_documentation': missing_documentation,
+        'gaps_ar': [gap.get('gap_description_ar', '') for gap in gaps if isinstance(gap, dict)],
+        'gaps_en': [gap.get('gap_description_en', '') for gap in gaps if isinstance(gap, dict)],
+        'queries_ar': queries_ar,
+        'queries_en': queries_en,
+        'recommendations_ar': vllm_result.get('recommendations_ar', []),
+        'recommendations_en': vllm_result.get('recommendations_en', []),
+        'summary_ar': summary_ar,
+        'summary_en': summary_en
+    }
+    
+    return transformed
         
     except HTTPException:
         raise
