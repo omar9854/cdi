@@ -4196,6 +4196,10 @@ class MediDocAITester:
             # Test activate user
             self.test_activate_user(self.test_user_id)
         
+        # OFFLINE MODE COMPREHENSIVE TEST - PRIORITY
+        print("\n🔒 Testing Offline Mode Compliance...")
+        self.test_offline_mode_comprehensive()
+        
         # Supervisor Employees Test
         print("\n👥 Testing Supervisor Endpoints...")
         self.test_supervisor_employees()
