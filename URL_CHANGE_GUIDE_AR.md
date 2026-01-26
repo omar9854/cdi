@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://medanalyzer-6.preview.emergentagent.com
+https://ai-doctor-9.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://medanalyzer-6.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://medanalyzer-6.preview.emergentagent.com
+   https://ai-doctor-9.preview.emergentagent.com
    ```
 
 ---
