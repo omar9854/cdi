@@ -859,7 +859,8 @@ async def update_daily_target(user_id: str, daily_target: int):
 async def ai_analyze_case(case_id: str):
     """Use AI to analyze case and suggest ICD codes"""
     try:
-        from coding_ai_helper import analyze_case_for_coding
+        # from coding_ai_helper import analyze_case_for_coding
+        raise HTTPException(status_code=503, detail="Coding AI helper (Gemini) is disabled in offline mode")
         
         # Get case details
         case = await db.medical_cases.find_one({"id": case_id}, {"_id": 0})
@@ -887,7 +888,8 @@ async def ai_analyze_case(case_id: str):
 async def ai_search_icd(query: str):
     """Smart ICD code search with AI"""
     try:
-        from coding_ai_helper import search_icd_smart
+        # from coding_ai_helper import search_icd_smart
+        raise HTTPException(status_code=503, detail="Smart ICD search (Gemini) is disabled in offline mode")
         
         # Get all ICD codes
         icd_codes = await db.icd_codes.find({}, {"_id": 0}).to_list(500)
@@ -905,7 +907,8 @@ async def ai_search_icd(query: str):
 async def ai_calculate_drg(principal_code: str, secondary_codes: List[str] = []):
     """Calculate DRG and estimated value"""
     try:
-        from coding_ai_helper import calculate_drg_value
+        # from coding_ai_helper import calculate_drg_value
+        raise HTTPException(status_code=503, detail="DRG value calculation (Gemini) is disabled in offline mode")
         
         # Get DRG prices
         drg_prices = await db.drg_prices.find({}, {"_id": 0}).to_list(100)
