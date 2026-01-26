@@ -256,3 +256,4 @@ CDI_System_Complete.zip
 *.env.*
 nabih-production/src/frontend/node_modules/.cache/default-development/8.pack
 nabih-production/src/frontend/node_modules/.cache/default-development/2.pack
+nabih-production-final.tar.gz
