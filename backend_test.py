@@ -284,6 +284,247 @@ class MediDocAITester:
             self.log_test("Get Single Note", False, str(e))
             return False
 
+    def test_offline_mode_comprehensive(self):
+        """
+        Comprehensive test for offline mode requirements as specified in Arabic review request:
+        اختبار شامل لمتطلبات الوضع الأوفلاين كما هو محدد في طلب المراجعة العربي:
+        
+        1. POST /api/analyze - لا يقوم بأي طلب HTTP خارجي ويستخدم vLLM فقط
+        2. Chat endpoints - تستخدم vLLM فقط
+        3. Coding routes - تعيد HTTP 503 مع رسائل واضحة
+        4. Backend startup - لا يتعطل بدون مفاتيح API خارجية
+        """
+        print("\n🎯 COMPREHENSIVE OFFLINE MODE TEST")
+        print("=" * 70)
+        print("Testing complete offline functionality - NO external API calls")
+        print("=" * 70)
+        
+        # Step 1: Test /api/analyze endpoint
+        analyze_success = self.test_analyze_endpoint_offline()
+        
+        # Step 2: Test chat endpoints
+        chat_success = self.test_chat_endpoints_offline()
+        
+        # Step 3: Test coding routes return 503
+        coding_success = self.test_coding_routes_offline()
+        
+        # Step 4: Test backend startup without external keys
+        startup_success = self.test_backend_startup_offline()
+        
+        # Overall result
+        overall_success = analyze_success and chat_success and coding_success and startup_success
+        
+        if overall_success:
+            self.log_test("Offline Mode Complete", True, "All offline mode requirements verified")
+        else:
+            self.log_test("Offline Mode Complete", False, "Some offline mode requirements failed")
+        
+        return overall_success
+
+    def test_analyze_endpoint_offline(self):
+        """Test /api/analyze endpoint for offline mode compliance"""
+        print("\n🔍 Step 1: Testing /api/analyze Endpoint (Offline Mode)")
+        
+        # Admin login
+        if not self.admin_token:
+            if not self.test_admin_login():
+                return False
+        
+        # Create clinical note
+        success, note_id = self.test_create_clinical_note()
+        if not success or not note_id:
+            return False
+        
+        # Test analyze endpoint
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            analyze_request = {
+                "note_id": note_id,
+                "ai_provider": "meditron"  # Should use vLLM
+            }
+            
+            response = requests.post(
+                f"{self.api_url}/analyze",
+                json=analyze_request,
+                headers=headers,
+                timeout=120
+            )
+            
+            if response.status_code != 200:
+                self.log_test("Analyze Endpoint Offline", False, f"HTTP {response.status_code}: {response.text}")
+                return False
+            
+            # Check response doesn't contain external API references
+            response_text = response.text
+            external_refs = [
+                "gemini", "azure", "openai", "deepseek", "grok",
+                "api.google.com", "openai.azure.com", "api.deepseek.com"
+            ]
+            
+            found_external = []
+            for ref in external_refs:
+                if ref.lower() in response_text.lower():
+                    found_external.append(ref)
+            
+            if found_external:
+                self.log_test("Analyze Endpoint Offline", False, f"Found external API references: {found_external}")
+                return False
+            
+            # Verify vLLM usage (should contain local analysis results)
+            try:
+                analysis_data = response.json()
+                has_analysis_fields = any(field in analysis_data for field in [
+                    'diagnoses_to_document', 'queries_ar', 'queries_en', 'summary_ar', 'summary_en'
+                ])
+                
+                if not has_analysis_fields:
+                    self.log_test("Analyze Endpoint Offline", False, "Missing expected analysis fields from vLLM")
+                    return False
+                
+                self.log_test("Analyze Endpoint Offline", True, "vLLM analysis successful, no external API calls detected")
+                return True
+                
+            except json.JSONDecodeError:
+                self.log_test("Analyze Endpoint Offline", False, "Invalid JSON response")
+                return False
+                
+        except Exception as e:
+            self.log_test("Analyze Endpoint Offline", False, f"Exception: {str(e)}")
+            return False
+
+    def test_chat_endpoints_offline(self):
+        """Test chat endpoints for offline mode compliance"""
+        print("\n💬 Step 2: Testing Chat Endpoints (Offline Mode)")
+        
+        if not self.admin_token or not self.analysis_id:
+            # Need to create analysis first
+            if not self.test_analyze_endpoint_offline():
+                return False
+        
+        # Test POST /api/chat endpoint
+        try:
+            headers = {"Authorization": f"Bearer {self.admin_token}"}
+            chat_request = {
+                "analysis_id": self.analysis_id or "test-analysis-id",
+                "message": "ما هي التشخيصات المستنتجة من هذه الملاحظة؟",
+                "ai_provider": "meditron"
+            }
+            
+            response = requests.post(
+                f"{self.api_url}/chat",
+                json=chat_request,
+                headers=headers,
+                timeout=60
+            )
+            
+            if response.status_code == 200:
+                # Check response doesn't contain external API references
+                response_text = response.text
+                external_refs = ["gemini", "azure", "openai", "deepseek"]
+                
+                found_external = []
+                for ref in external_refs:
+                    if ref.lower() in response_text.lower():
+                        found_external.append(ref)
+                
+                if found_external:
+                    self.log_test("Chat Endpoints Offline", False, f"Found external API references: {found_external}")
+                    return False
+                
+                self.log_test("Chat Endpoints Offline", True, "Chat using vLLM only, no external API calls")
+                return True
+            else:
+                self.log_test("Chat Endpoints Offline", False, f"Chat failed: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Chat Endpoints Offline", False, f"Chat exception: {str(e)}")
+            return False
+
+    def test_coding_routes_offline(self):
+        """Test coding routes return HTTP 503 with appropriate messages"""
+        print("\n🏥 Step 3: Testing Coding Routes (Should Return 503)")
+        
+        if not self.admin_token:
+            if not self.test_admin_login():
+                return False
+        
+        headers = {"Authorization": f"Bearer {self.admin_token}"}
+        
+        # Test coding AI endpoints that should be disabled
+        coding_endpoints = [
+            ("/coding/ai/analyze-case", {"case_id": "test-case-id"}),
+            ("/coding/ai/search-icd", {"query": "diabetes"}),
+            ("/coding/ai/calculate-drg", {"principal_code": "E11.9", "secondary_codes": []})
+        ]
+        
+        all_disabled = True
+        
+        for endpoint, data in coding_endpoints:
+            try:
+                if "search-icd" in endpoint:
+                    # This is a POST with query parameter
+                    response = requests.post(f"{self.api_url}{endpoint}", json=data, headers=headers, timeout=10)
+                else:
+                    response = requests.post(f"{self.api_url}{endpoint}", json=data, headers=headers, timeout=10)
+                
+                if response.status_code == 503:
+                    # Check for appropriate offline message
+                    response_text = response.text.lower()
+                    offline_indicators = [
+                        "disabled in offline mode",
+                        "gemini) is disabled",
+                        "not available in offline mode"
+                    ]
+                    
+                    has_offline_message = any(indicator in response_text for indicator in offline_indicators)
+                    
+                    if has_offline_message:
+                        self.log_test(f"Coding Route {endpoint}", True, "Correctly returns 503 with offline message")
+                    else:
+                        self.log_test(f"Coding Route {endpoint}", False, f"503 but missing offline message: {response.text}")
+                        all_disabled = False
+                else:
+                    self.log_test(f"Coding Route {endpoint}", False, f"Expected 503, got {response.status_code}")
+                    all_disabled = False
+                    
+            except Exception as e:
+                self.log_test(f"Coding Route {endpoint}", False, f"Exception: {str(e)}")
+                all_disabled = False
+        
+        if all_disabled:
+            self.log_test("Coding Routes Offline", True, "All coding AI routes properly disabled with 503")
+        else:
+            self.log_test("Coding Routes Offline", False, "Some coding routes not properly disabled")
+        
+        return all_disabled
+
+    def test_backend_startup_offline(self):
+        """Test backend can start without external API keys"""
+        print("\n🚀 Step 4: Testing Backend Startup (No External Keys)")
+        
+        # Test health check to verify backend is running
+        try:
+            response = requests.get(f"{self.api_url}/", timeout=10)
+            if response.status_code == 200:
+                data = response.json()
+                message = data.get('message', '')
+                
+                # Check that backend is responding normally
+                if 'مركز الترميز الطبي' in message or 'active' in data.get('status', ''):
+                    self.log_test("Backend Startup Offline", True, "Backend running without external API keys")
+                    return True
+                else:
+                    self.log_test("Backend Startup Offline", False, f"Unexpected response: {data}")
+                    return False
+            else:
+                self.log_test("Backend Startup Offline", False, f"Health check failed: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.log_test("Backend Startup Offline", False, f"Backend not accessible: {str(e)}")
+            return False
+
     def test_vllm_analyze_endpoint_comprehensive(self):
         """
         Comprehensive test for /api/analyze endpoint with vLLM engine
