@@ -137,38 +137,37 @@ fi
 print_success "مجلد التثبيت: $INSTALL_DIR"
 
 #================================================================
-# الخطوة 5: نسخ الكود (يدوياً)
+# الخطوة 5: استنساخ الكود من GitHub
 #================================================================
-echo ""
-print_warning "=========================================="
-print_warning " الخطوة 5: نسخ الكود"
-print_warning "=========================================="
-echo ""
-echo "الآن يجب عليك نسخ الكود إلى الخادم:"
-echo ""
-echo "  الخيار 1 - من جهازك:"
-echo "  scp -r /path/to/backend root@YOUR_SERVER:$INSTALL_DIR/"
-echo "  scp -r /path/to/frontend root@YOUR_SERVER:$INSTALL_DIR/"
-echo ""
-echo "  الخيار 2 - من Git:"
-echo "  git clone YOUR_REPO_URL $INSTALL_DIR/app"
-echo "  mv $INSTALL_DIR/app/backend $INSTALL_DIR/"
-echo "  mv $INSTALL_DIR/app/frontend $INSTALL_DIR/"
-echo ""
+print_status "الخطوة 5: استنساخ الكود من GitHub..."
 
-# التحقق من وجود الكود
-check_code() {
-    if [ -d "$INSTALL_DIR/backend" ] && [ -d "$INSTALL_DIR/frontend" ]; then
-        return 0
-    else
-        return 1
-    fi
-}
+GITHUB_REPO="https://github.com/omar9854/clinical-doc-ai-tool.git"
 
-if ! check_code; then
-    print_warning "الكود غير موجود بعد. بعد نسخ الكود، أعد تشغيل السكربت."
-    print_status "أو يمكنك متابعة التثبيت اليدوي بالأوامر التالية..."
+# استنساخ المستودع
+print_status "جاري استنساخ الكود من: $GITHUB_REPO"
+git clone $GITHUB_REPO $INSTALL_DIR/repo
+
+# نقل الملفات
+if [ -d "$INSTALL_DIR/repo/backend" ]; then
+    cp -r $INSTALL_DIR/repo/backend $INSTALL_DIR/
+    print_success "تم نسخ Backend"
 fi
+
+if [ -d "$INSTALL_DIR/repo/frontend" ]; then
+    cp -r $INSTALL_DIR/repo/frontend $INSTALL_DIR/
+    print_success "تم نسخ Frontend"
+fi
+
+# نسخ ملفات vLLM
+if [ -f "$INSTALL_DIR/repo/local_llm_vllm_fixed.py" ]; then
+    cp $INSTALL_DIR/repo/local_llm_vllm_fixed.py $INSTALL_DIR/backend/
+    print_success "تم نسخ ملف vLLM"
+fi
+
+# تنظيف
+rm -rf $INSTALL_DIR/repo
+
+print_success "تم استنساخ الكود بنجاح"
 
 #================================================================
 # الخطوة 6: إعداد Python Virtual Environment
