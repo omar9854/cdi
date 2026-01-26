@@ -9,7 +9,7 @@ import { Lock, Mail, ArrowRight, Activity, Eye, EyeOff, Languages } from 'lucide
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getErrorMessage } from '@/utils/errorHandler';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 const API = `${BACKEND_URL}/api`;
 
 const Login = ({ setUser }) => {
