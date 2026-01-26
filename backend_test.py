@@ -4777,7 +4777,7 @@ class MediDocAITester:
 
 def main():
     """Main test execution"""
-    tester = MedicalCodingAPITester()
+    tester = MediDocAITester()
     
     # Check if we should run focused test
     if len(sys.argv) > 1:
@@ -4791,20 +4791,22 @@ def main():
             results = tester.run_whatsapp_removal_and_security_tests()
         elif sys.argv[1] == "--ai-providers":
             results = tester.run_ai_provider_test()
+        elif sys.argv[1] == "--offline-mode":
+            results = tester.test_offline_mode_comprehensive()
         else:
             results = tester.run_all_tests()
     else:
-        results = tester.run_ai_provider_test()  # Default to AI Provider tests
+        results = tester.run_all_tests()  # Default to all tests
     
     # Return appropriate exit code
     return 0 if results["failed_tests"] == 0 else 1
 
 if __name__ == "__main__":
-    # Check if we should run Gemini API test specifically
-    if len(sys.argv) > 1 and sys.argv[1] == "--gemini-test":
-        print("🔑 Running focused Gemini API Keys test...")
-        tester = MedicalCodingAPITester()
-        results = tester.run_gemini_api_test()
-        sys.exit(0 if results["failed_tests"] == 0 else 1)
+    # Check if we should run offline mode test specifically
+    if len(sys.argv) > 1 and sys.argv[1] == "--offline-mode":
+        print("🔒 Running focused Offline Mode test...")
+        tester = MediDocAITester()
+        success = tester.test_offline_mode_comprehensive()
+        sys.exit(0 if success else 1)
     else:
         sys.exit(main())
