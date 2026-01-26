@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { Lock, Mail, User, Phone, Activity, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 const API = `${BACKEND_URL}/api`;
 
 const Register = ({ setUser }) => {

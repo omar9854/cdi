@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Brain, Server, Shield, Cpu, Database, Lock } from 'lucide-react';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 
 export default function AISettings({ user, onLogout }) {
   const { language } = useLanguage();

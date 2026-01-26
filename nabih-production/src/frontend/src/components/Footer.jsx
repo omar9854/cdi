@@ -32,7 +32,7 @@ const Footer = () => {
           <div className="text-center">
             <p className="text-sm font-medium">
               {language === 'ar' 
-                ? 'إدارة تحسين التوثيق السريري - منصة نبيه'
+                ? 'إدارة تحسين التوثيق السريري - تجمع المدينة المنورة الصحي'
                 : 'نـبـيـه | NABIH - إدارة تحسين التوثيق السريري'
               }
             </p>

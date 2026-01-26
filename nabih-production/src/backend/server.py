@@ -10,6 +10,7 @@ from prometheus_client import Counter, Histogram, Gauge, generate_latest, REGIST
 from prometheus_fastapi_instrumentator import Instrumentator
 import os
 import logging
+import json
 from pathlib import Path
 import time
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
@@ -20,6 +21,11 @@ import bcrypt
 import jwt
 import random
 import google.generativeai as genai
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from local_llm_vllm_fixed import analyze_clinical_notes as vllm_analyze_clinical_notes
+
 import io
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -32,9 +38,10 @@ from reportlab.lib.enums import TA_RIGHT, TA_CENTER
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 import aiosmtplib
-from analysis_wrapper import analyze_with_local_llm
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+from local_llm_vllm_fixed import generate_text as vllm_generate_text
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -124,74 +131,13 @@ SECRET_KEY = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production'
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
-# Load ALL 7 Gemini API Keys (billed keys for rotation)
-GEMINI_API_KEYS = [
-    os.environ.get('GEMINI_API_KEY_1'),
-    os.environ.get('GEMINI_API_KEY_2'),
-    os.environ.get('GEMINI_API_KEY_3'),
-    os.environ.get('GEMINI_API_KEY_4'),
-    os.environ.get('GEMINI_API_KEY_5'),
-    os.environ.get('GEMINI_API_KEY_6'),
-    os.environ.get('GEMINI_API_KEY_7'),
-]
-# Filter out None values
-GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
+# Gemini cloud provider DISABLED - System is 100% offline
+GEMINI_API_KEYS: list[str] = []
 
-# Gemini is optional - using local vLLM
-if GEMINI_API_KEYS:
-    print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys")
-else:
-    print("🚀 Running with LOCAL vLLM (Qwen2.5-32B on 4x V100)")
 
-# Track failed keys to avoid reusing them immediately
-_failed_keys = set()
-
-def get_gemini_model(model_name='gemini-2.0-flash-exp', system_instruction=None):
-    """Get a Gemini model with smart key rotation and retry on quota errors"""
-    global _failed_keys
-    
-    # Clear failed keys if all keys have failed (reset for retry)
-    if len(_failed_keys) >= len(GEMINI_API_KEYS):
-        _failed_keys.clear()
-    
-    # Get available keys (not recently failed)
-    available_keys = [k for k in GEMINI_API_KEYS if k not in _failed_keys]
-    if not available_keys:
-        available_keys = GEMINI_API_KEYS.copy()
-        _failed_keys.clear()
-    
-    # Try all available keys
-    for attempt, api_key in enumerate(available_keys):
-        try:
-            genai.configure(api_key=api_key)
-            
-            if system_instruction:
-                model = genai.GenerativeModel(model_name, system_instruction=system_instruction)
-            else:
-                model = genai.GenerativeModel(model_name)
-            
-            # Quick validation test
-            model.count_tokens("test")
-            return model
-        except Exception as e:
-            error_msg = str(e).lower()
-            if 'quota' in error_msg or 'exhausted' in error_msg or 'insufficient' in error_msg:
-                _failed_keys.add(api_key)
-                print(f"⚠️ Key {attempt+1} quota exhausted, trying next...")
-                continue
-            elif attempt < len(available_keys) - 1:
-                print(f"⚠️ Key {attempt+1} failed: {str(e)[:50]}, trying next...")
-                continue
-            else:
-                raise e
-    
-    # Fallback: use first key without test
-    api_key = GEMINI_API_KEYS[0]
-    genai.configure(api_key=api_key)
-    if system_instruction:
-        return genai.GenerativeModel(model_name, system_instruction=system_instruction)
-    else:
-        return genai.GenerativeModel(model_name)
+def get_gemini_model(*args, **kwargs):
+    """Disabled: Gemini is not available in offline mode"""
+    raise RuntimeError("Gemini provider is disabled - offline mode only")
 
 # Admin Secret Code (يمكن تغييره من .env)
 ADMIN_SECRET_CODE = os.environ.get('ADMIN_SECRET_CODE', 'CDI-ADMIN-2024')
@@ -341,22 +287,14 @@ class Analysis(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     note_id: str
     user_id: str
-    principal_diagnosis: Optional[Dict] = None
-    secondary_diagnoses: Optional[List[Dict]] = []
-    inferred_diagnoses: Optional[List[Dict]] = []
-    diagnoses_to_document: List[DiagnosisBilingual]
-    documentation_gaps: Optional[List[Dict]] = []
-    missing_documentation: List[Dict[str, str]]
+    diagnoses_to_document: List[DiagnosisBilingual]  # التشخيصات التي يجب توثيقها
+    missing_documentation: List[Dict[str, str]]  # التوثيق الناقص
     gaps_ar: List[str]
     gaps_en: List[str]
     queries_ar: List[str]
     queries_en: List[str]
-    physician_queries: Optional[List[Dict]] = []
-    recommendations_ar: List[str]
+    recommendations_ar: List[str]  # توصيات لتحسين التوثيق
     recommendations_en: List[str]
-    case_summary: Optional[Dict] = {}
-    clinical_indicators: Optional[List[str]] = []
-    treatments_found: Optional[List[str]] = []
     summary_ar: str
     summary_en: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -476,20 +414,20 @@ async def send_email(to_email: str, subject: str, body_html: str):
 
 async def send_welcome_email(user_email: str, user_name: str):
     """Send welcome email to new users"""
-    subject = "مرحباً بك في منصة نبيه | Welcome to Medical Coding Center"
+    subject = "مرحباً بك في مركز الترميز الطبي | Welcome to Medical Coding Center"
     
     body_html = f"""
     <html dir="rtl">
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">نـبـيـه | NABIH - إدارة تحسين التوثيق السريري</h1>
+            <h1 style="color: white; margin: 0; font-size: 28px;">مركز الترميز الطبي وتحسين التوثيق السريري</h1>
             <p style="color: #f0f0f0; margin-top: 10px; font-size: 14px;">Medical Coding & Clinical Documentation Improvement Center</p>
         </div>
         
         <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
             <h2 style="color: #667eea; text-align: right;">مرحباً {user_name}</h2>
             <p style="text-align: right; font-size: 16px;">
-                نرحب بك في منصة نـبـيـه | NABIH - إدارة تحسين التوثيق السريري. نحن سعداء بانضمامك إلينا!
+                نرحب بك في منصة مركز الترميز الطبي وتحسين التوثيق السريري. نحن سعداء بانضمامك إلينا!
             </p>
             
             <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-right: 4px solid #667eea;">
@@ -598,207 +536,9 @@ async def send_password_reset_email(user_email: str, user_name: str, reset_token
     await send_email(user_email, subject, body_html)
 
 async def analyze_with_gemini(notes_text: str, doctor_notes: List[Dict]) -> Dict:
-    """Analyze clinical notes using Gemini AI - CDI Focus"""
-    
-    # Format doctor notes with specialties
-    formatted_notes = "\n\n".join([
-        f"**{note['specialty']}**:\n{note['text']}"
-        for note in doctor_notes
-    ])
-    
-    system_message = """You are a Clinical Documentation Improvement (CDI) Specialist expert.
-
-Your role is NOT to code or assign ICD-10-CM codes directly. Your role is to:
-1. Review clinical documentation for completeness and specificity
-2. Identify diagnoses that SHOULD BE documented based on clinical findings
-3. Identify missing or incomplete documentation
-4. Provide queries to physicians to improve documentation quality
-5. Ensure documentation supports the severity of illness and risk of mortality
-
-Focus on CLINICAL DOCUMENTATION IMPROVEMENT, not medical coding.
-
-⚠️ CRITICAL COMPLIANCE REQUIREMENT FOR PHYSICIAN QUERIES:
-
-**Query Structure (2 Parts):**
-
-**Part 1 - HEADER (For CDI Staff Only):**
-- Include diagnosis name and ICD code
-- This is for the CDI specialist's reference, NOT sent to physician directly
-- Format: "استفسار يخص: [Diagnosis] ([ICD Code])"
-
-**Part 2 - QUERY BODY (Sent to Physician):**
-- Cite SPECIFIC clinical findings from the notes (symptoms, medications, lab values, vital signs)
-- DO NOT mention the diagnosis name
-- Ask physician to document based on clinical judgment
-- Specify if principal or secondary diagnosis is needed
-
-✅ CORRECT Complete Query Example (Arabic):
-```
-استفسار يخص: ارتفاع ضغط الدم (I10)
-
-بناءً على الملاحظات الطبية:
-- المريض لديه قراءات ضغط متكررة 150/95، 145/92
-- تم وصف Amlodipine 5mg يومياً
-- التاريخ المرضي يشير إلى ارتفاعات سابقة
-
-بناءً على حكمك الطبي، الرجاء توثيق التشخيص الرئيسي.
-```
-
-✅ CORRECT Complete Query Example (English):
-```
-Query regarding: Hypertension (I10)
-
-Based on clinical documentation:
-- Patient has repeated BP readings of 150/95, 145/92
-- Prescribed Amlodipine 5mg daily
-- Medical history indicates previous elevations
-
-Based on your clinical judgment, please document the principal diagnosis.
-```
-
-❌ INCORRECT (DO NOT include diagnosis in query body):
-- "هل التشخيص هو ارتفاع ضغط الدم؟" ✗
-- "Is this hypertension or white coat syndrome?" ✗
-- "يُرجى تأكيد: ارتفاع ضغط الدم" ✗
-
-**Key Rules:**
-- Header = diagnosis name + code (for CDI staff)
-- Body = clinical findings ONLY + request for documentation (for physician)
-- NEVER suggest diagnosis in the body sent to physician
-
-IMPORTANT: Provide ALL responses in BOTH Arabic and English."""
-
-    user_prompt = f"""Please review the following clinical notes as a CDI Specialist:
-
-{formatted_notes}
-
-Perform a Clinical Documentation Improvement review and provide:
-
-1. **Diagnoses That Should Be Documented**: Based on the clinical findings in the notes, what diagnoses should be clearly documented? (with ICD-10-CM codes for reference only)
-   - For EACH diagnosis, specify if it's "principal" (التشخيص الرئيسي) or "secondary" (التشخيص الثانوي)
-   - Include the clinical evidence from the notes that supports this diagnosis
-
-2. **Missing Documentation**: What specific clinical information is missing or incomplete? (e.g., severity, acuity, specificity, causal relationships)
-
-3. **Documentation Gaps**: What gaps exist in the current documentation?
-
-4. **Physician Queries**: Generate DETAILED queries with clinical context. For EACH query:
-   
-   **CRITICAL FORMAT FOR EACH QUERY:**
-   
-   A. **Header (For CDI staff):**
-   "استفسار يخص: [Diagnosis name in Arabic] ([ICD-10 Code])"
-   "Query regarding: [Diagnosis name in English] ([ICD-10 Code])"
-   
-   B. **Query Body (For Physician):**
-   - First, cite SPECIFIC clinical findings from the notes (symptoms, medications prescribed, lab results, vital signs)
-   - Then ask physician to document based on clinical judgment
-   - Specify if asking for principal diagnosis or secondary diagnosis
-   
-   **Example Format in Arabic:**
-   ```
-   استفسار يخص: ارتفاع ضغط الدم (I10)
-   
-   بناءً على الملاحظات الطبية:
-   - [ذكر الأعراض المحددة من الملاحظات]
-   - [ذكر الأدوية المصروفة من الملاحظات]
-   - [ذكر القياسات أو الفحوصات من الملاحظات]
-   
-   بناءً على حكمك الطبي، الرجاء توثيق التشخيص [الرئيسي/الثانوي - حسب النوع].
-   ```
-   
-   **Example Format in English:**
-   ```
-   Query regarding: Hypertension (I10)
-   
-   Based on clinical documentation:
-   - [Cite specific symptoms from notes]
-   - [Cite specific medications prescribed from notes]
-   - [Cite specific measurements/tests from notes]
-   
-   Based on your clinical judgment, please document the [principal/secondary - based on type] diagnosis.
-   ```
-   
-   **CRITICAL RULES:**
-   - NEVER suggest a specific diagnosis name in the query body
-   - ALWAYS include clinical evidence from the actual notes
-   - ALWAYS specify if it's principal or secondary diagnosis
-   - Use "التشخيص الرئيسي" for principal, omit "الرئيسي" for secondary
-
-5. **Recommendations**: Specific recommendations to improve the clinical documentation quality
-
-Please respond in the following JSON format:
-{{{{
-  "diagnoses_to_document": [{{
-    "diagnosis_ar": "التشخيص بالعربي",
-    "diagnosis_en": "Diagnosis in English", 
-    "icd_code": "Code (for reference)",
-    "type": "principal" or "secondary",
-    "clinical_evidence": "Evidence from notes supporting this diagnosis"
-  }}],
-  "missing_documentation": [{{
-    "item_ar": "التوثيق الناقص بالعربي",
-    "item_en": "Missing item in English"
-  }}],
-  "gaps_ar": ["ثغرة 1", "ثغرة 2"],
-  "gaps_en": ["Gap 1", "Gap 2"],
-  "queries_ar": [
-    "استفسار يخص: [اسم التشخيص] ([كود ICD-10])\\n\\nبناءً على الملاحظات الطبية:\\n- [معطيات محددة من الملاحظات: الأعراض]\\n- [الأدوية المصروفة]\\n- [القياسات والفحوصات]\\n\\nبناءً على حكمك الطبي، الرجاء توثيق التشخيص [الرئيسي/الثانوي]."
-  ],
-  "queries_en": [
-    "Query regarding: [Diagnosis name] ([ICD-10 Code])\\n\\nBased on clinical documentation:\\n- [Specific findings from notes: symptoms]\\n- [Medications prescribed]\\n- [Measurements/tests]\\n\\nBased on your clinical judgment, please document the [principal/secondary] diagnosis."
-  ],
-  "recommendations_ar": ["توصية 1 لتحسين التوثيق", "توصية 2"],
-  "recommendations_en": ["Recommendation 1 for documentation improvement", "Recommendation 2"],
-  "summary_ar": "ملخص شامل لمراجعة تحسين التوثيق السريري بالعربي",
-  "summary_en": "Comprehensive CDI review summary in English"
-}}}}
-
-IMPORTANT: For queries, you MUST:
-1. Include the header with diagnosis name and ICD code for CDI staff reference
-2. Cite ACTUAL clinical findings from the provided notes (symptoms, medications, measurements)
-3. Never suggest diagnosis names in the query body itself
-4. Specify if it's principal or secondary diagnosis
-5. Each query should be detailed with real evidence from the notes"""
-
-    try:
-        # Use Google Gemini API with automatic key rotation
-        model = get_gemini_model('gemini-2.0-flash-exp')
-        
-        # Combine system message and user prompt
-        full_prompt = f"{system_message}\n\n{user_prompt}"
-        
-        # Generate response with retry logic
-        max_retries = len(GEMINI_API_KEYS)
-        last_error = None
-        
-        for attempt in range(max_retries):
-            try:
-                response = model.generate_content(full_prompt)
-                response_text = response.text.strip()
-                break  # Success, exit retry loop
-            except Exception as e:
-                last_error = e
-                if attempt < max_retries - 1:
-                    # Try with a different key
-                    logger.warning(f"Retry {attempt + 1}/{max_retries} with different API key")
-                    model = get_gemini_model('gemini-2.0-flash-exp')
-                else:
-                    raise e
-        
-        # Parse JSON response
-        import json
-        if "```json" in response_text:
-            response_text = response_text.split("```json")[1].split("```")[0].strip()
-        elif "```" in response_text:
-            response_text = response_text.split("```")[1].split("```")[0].strip()
-        
-        result = json.loads(response_text)
-        return result
-        
-    except Exception as e:
-        logging.error(f"Error analyzing with Gemini: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error in analysis: {str(e)}")
+    """(DISABLED) Legacy Gemini analysis - now routed to local vLLM for offline mode"""
+    # Preserve old behaviour signature but use local vLLM instead
+    return await analyze_with_ai(notes_text, doctor_notes, provider='phi3')
 
 
 async def analyze_with_ai(notes_text: str, doctor_notes: List[Dict], provider: str = 'phi3') -> Dict:
@@ -947,87 +687,35 @@ CRITICAL: Identify ALL diagnoses (principal, secondary, AND derived). Use COMPLE
 VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text before or after the JSON object. Start directly with {{ and end with }}."""
 
     try:
-        import requests
-        import json
-        
-        response_text = None
-        
-        # Use Local vLLM (Qwen2.5-32B on 4x V100)
-        if provider in ['meditron', 'phi3', 'azure', 'gemini', 'local']:
-            # All providers now use Meditron-70B locally
-            # Use vLLM local analysis
-            logger.info("🚀 Using vLLM with Qwen2.5-32B for analysis...")
+        # استخدم vLLM المحلي (Qwen2.5-32B) بدل Ollama
+        if provider in ['meditron', 'phi3', 'azure', 'gemini']:
+            logger.info("🏥 Using local vLLM Qwen2.5-32B engine for analysis...")
             try:
-                result = await analyze_with_local_llm(notes_text, doctor_notes)
-                return result
+                # دمج رسالة النظام مع طلب المستخدم لضمان التزام النموذج بالقواعد
+                full_prompt = f"{system_message}\n\n{user_prompt}"
+                result = vllm_analyze_clinical_notes(full_prompt, hospital_type="A")
             except Exception as e:
-                logger.error(f"❌ Analysis error: {str(e)}")
-                raise HTTPException(status_code=500, detail=f"فشل التحليل: {str(e)}")
-        
+                logger.error(f"❌ vLLM analysis error: {str(e)}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"فشل التحليل بواسطة المحرك المحلي: {str(e)}"
+                )
         else:
             raise HTTPException(
                 status_code=400,
                 detail="مزود AI غير مدعوم. Unsupported AI provider."
             )
         
-        # Check if we have a response
-        if not response_text:
-            raise HTTPException(status_code=500, detail="No response from AI provider")
+        # اجعل شكل النتيجة متوافقاً مع ما يتوقعه باقي الكود (diagnoses_to_document, gaps, queries, summary)
+        if not isinstance(result, dict):
+            raise HTTPException(status_code=500, detail="Invalid AI result format")
         
-        # Enhanced JSON parsing with better error handling
-        import re
+        # Transform vLLM result to expected backend format
+        transformed_result = transform_vllm_result_to_backend_format(result)
         
-        try:
-            # Remove markdown code blocks if present
-            if "```json" in response_text:
-                response_text = response_text.split("```json")[1].split("```")[0].strip()
-            elif "```" in response_text:
-                response_text = response_text.split("```")[1].split("```")[0].strip()
-            
-            # Remove any BOM or invisible characters
-            response_text = response_text.strip().lstrip('\ufeff').lstrip('\u200b')
-            
-            # Try to find JSON object in the response
-            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
-            if json_match:
-                response_text = json_match.group(0)
-            
-            # Parse JSON
-            result = json.loads(response_text)
-            logger.info(f"✅ JSON parsing successful, found {len(result.get('diagnoses_to_document', []))} diagnoses")
-            return result
-            
-        except json.JSONDecodeError as je:
-            logger.error(f"JSON parsing error: {str(je)}")
-            logger.error(f"Response text (first 500 chars): {response_text[:500] if response_text else 'No response'}")
-            
-            # Fallback: Create a structured response from the text
-            logger.info("🔄 Attempting to create structured response from text...")
-            
-            fallback_result = {
-                "diagnoses_to_document": [
-                    {
-                        "diagnosis_ar": "تحليل نصي - راجع الملاحظات",
-                        "diagnosis_en": "Text Analysis - Review Notes",
-                        "icd_code": "R69",
-                        "type": "secondary",
-                        "severity": "N/A",
-                        "clinical_evidence": response_text[:500] if response_text else "No analysis available"
-                    }
-                ],
-                "missing_documentation": [],
-                "gaps_ar": ["يرجى مراجعة التحليل النصي أدناه"],
-                "gaps_en": ["Please review the text analysis below"],
-                "queries_ar": [],
-                "queries_en": [],
-                "recommendations_ar": ["مراجعة التحليل الكامل في الملخص"],
-                "recommendations_en": ["Review full analysis in summary"],
-                "summary_ar": response_text[:1000] if response_text else "لا يوجد تحليل",
-                "summary_en": f"AI Analysis (raw text): {response_text[:1000] if response_text else 'No analysis available'}"
-            }
-            
-            logger.info("✅ Created fallback structured response")
-            return fallback_result
+        # Return the transformed result
+        logger.info(f"✅ vLLM analysis successful, transformed to backend format")
+        return transformed_result
         
     except HTTPException:
         raise
@@ -1036,10 +724,88 @@ VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text b
         raise HTTPException(status_code=500, detail=f"Error in analysis: {str(e)}")
 
 
+def transform_vllm_result_to_backend_format(vllm_result: Dict) -> Dict:
+    """Transform vLLM result format to backend expected format"""
+    
+    # Extract diagnoses to document from various sources
+    diagnoses_to_document = []
+    
+    # Add principal diagnosis if present
+    principal = vllm_result.get('principal_diagnosis', {})
+    if principal.get('diagnosis_ar') or principal.get('diagnosis_en'):
+        diagnoses_to_document.append({
+            'diagnosis_ar': principal.get('diagnosis_ar', ''),
+            'diagnosis_en': principal.get('diagnosis_en', ''),
+            'icd_code': principal.get('icd_code', '')
+        })
+    
+    # Add documented diagnoses
+    documented = vllm_result.get('documented_diagnoses', [])
+    for diag in documented:
+        if isinstance(diag, dict):
+            diagnoses_to_document.append({
+                'diagnosis_ar': diag.get('diagnosis_ar', ''),
+                'diagnosis_en': diag.get('diagnosis_en', ''),
+                'icd_code': diag.get('icd_code', '')
+            })
+    
+    # Add inferred diagnoses
+    inferred = vllm_result.get('inferred_diagnoses', [])
+    for diag in inferred:
+        if isinstance(diag, dict):
+            diagnoses_to_document.append({
+                'diagnosis_ar': diag.get('diagnosis_ar', ''),
+                'diagnosis_en': diag.get('diagnosis_en', ''),
+                'icd_code': diag.get('potential_icd_code', diag.get('icd_code', ''))
+            })
+    
+    # Extract missing documentation
+    missing_documentation = []
+    gaps = vllm_result.get('documentation_gaps', [])
+    for gap in gaps:
+        if isinstance(gap, dict):
+            missing_documentation.append({
+                'item_ar': gap.get('gap_description_ar', ''),
+                'item_en': gap.get('gap_description_en', '')
+            })
+    
+    # Extract queries
+    queries_ar = []
+    queries_en = []
+    physician_queries = vllm_result.get('physician_queries', [])
+    for query in physician_queries:
+        if isinstance(query, dict):
+            if query.get('query_ar'):
+                queries_ar.append(query['query_ar'])
+            if query.get('query_en'):
+                queries_en.append(query['query_en'])
+    
+    # Extract summaries
+    summary_info = vllm_result.get('summary', {})
+    summary_ar = summary_info.get('summary_ar', '') if isinstance(summary_info, dict) else vllm_result.get('summary_ar', '')
+    summary_en = summary_info.get('summary_en', '') if isinstance(summary_info, dict) else vllm_result.get('summary_en', '')
+    
+    # Build the transformed result
+    transformed = {
+        'diagnoses_to_document': diagnoses_to_document,
+        'missing_documentation': missing_documentation,
+        'gaps_ar': [gap.get('gap_description_ar', '') for gap in gaps if isinstance(gap, dict)],
+        'gaps_en': [gap.get('gap_description_en', '') for gap in gaps if isinstance(gap, dict)],
+        'queries_ar': queries_ar,
+        'queries_en': queries_en,
+        'recommendations_ar': vllm_result.get('recommendations_ar', []),
+        'recommendations_en': vllm_result.get('recommendations_en', []),
+        'summary_ar': summary_ar,
+        'summary_en': summary_en
+    }
+    
+    return transformed
+
+
 # Health check route
 @api_router.get("/")
 async def root():
-    return {"message": "نـبـيـه | NABIH - إدارة تحسين التوثيق السريري", "status": "active"}
+    return {"message": "مركز الترميز الطبي وتحسين التوثيق السريري", "status": "active"}
 
 @api_router.get("/metrics")
 async def metrics():
@@ -1206,7 +972,7 @@ async def login_step1(credentials: UserLogin):
         await unlock_account_if_expired(db, credentials.email)
         
         # Check rate limiting - TEMPORARILY DISABLED FOR ADMIN EMAIL
-        if credentials.email != "nabihai@gmail.com":
+        if credentials.email != "medidocai@gmail.com":
             is_allowed, remaining = await check_rate_limit(db, credentials.email)
             if not is_allowed:
                 raise HTTPException(
@@ -2231,26 +1997,18 @@ async def analyze_note(analyze_request: AnalyzeRequest, user: dict = Depends(get
         }
         normalized_diagnoses.append(normalized_d)
     
-    # Create analysis record with all fields
+    # Create analysis record
     analysis = Analysis(
         note_id=analyze_request.note_id,
         user_id=user['id'],
-        principal_diagnosis=result.get('principal_diagnosis'),
-        secondary_diagnoses=result.get('secondary_diagnoses', []),
-        inferred_diagnoses=result.get('inferred_diagnoses', []),
         diagnoses_to_document=[DiagnosisBilingual(**d) for d in normalized_diagnoses],
-        documentation_gaps=result.get('documentation_gaps', []),
         missing_documentation=result.get('missing_documentation', []),
         gaps_ar=result.get('gaps_ar', []),
         gaps_en=result.get('gaps_en', []),
         queries_ar=result.get('queries_ar', []),
         queries_en=result.get('queries_en', []),
-        physician_queries=result.get('physician_queries', []),
         recommendations_ar=result.get('recommendations_ar', []),
         recommendations_en=result.get('recommendations_en', []),
-        case_summary=result.get('case_summary', {}),
-        clinical_indicators=result.get('clinical_indicators', []),
-        treatments_found=result.get('treatments_found', []),
         summary_ar=result.get('summary_ar', ''),
         summary_en=result.get('summary_en', '')
     )
@@ -2432,19 +2190,36 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         try:
             import requests
             
-            # Use vLLM for chat
-            from local_llm import generate_text
+            ollama_host = os.environ.get('OLLAMA_HOST', 'http://localhost:11434')
+            ollama_model = os.environ.get('OLLAMA_MODEL', 'meditron:70b')
             
+            # Build conversation history
             conversation = f"{system_message}\n\n"
             for msg in previous_messages:
                 if 'role' in msg and msg['role'] in ['user', 'assistant']:
-                    role_label = "المستخدم" if msg['role'] == 'user' else "المساعد"
+                    role_label = "User" if msg['role'] == 'user' else "Assistant"
                     conversation += f"{role_label}: {msg['message']}\n\n"
-            conversation += f"المستخدم: {chat_request.message}\n\nالمساعد:"
+            conversation += f"User: {chat_request.message}\n\nAssistant:"
             
-            logger.info("🚀 Using vLLM for chat...")
-            response_text = generate_text(conversation, max_tokens=1500, temperature=0.3, use_chat_prompt=True)
-            logger.info("✅ vLLM chat successful")
+            response = requests.post(
+                f"{ollama_host}/api/generate",
+                json={
+                    "model": ollama_model,
+                    "prompt": conversation,
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.7,
+                        "num_predict": 1000
+                    }
+                },
+                timeout=120
+            )
+            
+            if response.status_code == 200:
+                response_text = response.json().get("response", "").strip()
+                logger.info("✅ Meditron chat successful")
+            else:
+                raise Exception(f"Ollama error: {response.status_code}")
                 
         except Exception as e:
             logger.error(f"❌ Meditron chat error: {str(e)}")
@@ -2549,32 +2324,31 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         
         # Use analysis_id as session for continuity
         try:
-            # Use vLLM for chat (Local Qwen2.5-32B)
-            from local_llm import generate_text
-            
-            # Get chat history for context
+            # Use local vLLM text generator instead of Gemini for chat
+            # Build full context prompt including analysis and chat history
+            chat_history = []
             previous_messages = await db.chat_messages.find(
                 {"analysis_id": analysis_id}
             ).sort("created_at", 1).to_list(100)
-            
-            # Build conversation with history
-            conversation = f"{system_message}\n\n"
-            for msg in previous_messages:
-                if 'role' in msg and msg['role'] in ['user', 'assistant']:
-                    role_label = "المستخدم" if msg['role'] == 'user' else "المساعد"
-                    conversation += f"{role_label}: {msg['message']}\n\n"
-                elif 'question' in msg and 'answer' in msg:
-                    conversation += f"المستخدم: {msg['question']}\n\n"
-                    conversation += f"المساعد: {msg['answer']}\n\n"
-            
-            conversation += f"المستخدم: {user_question}\n\nالمساعد:"
-            
-            logger.info("🚀 Using vLLM for enhanced chat...")
-            response_text = generate_text(conversation, max_tokens=1500, temperature=0.3, use_chat_prompt=True)
-            logger.info("✅ vLLM chat successful")
-            
 
-            
+            for msg in previous_messages:
+                if 'role' in msg:
+                    prefix = 'User: ' if msg['role'] == 'user' else 'Assistant: '
+                    chat_history.append(f"{prefix}{msg['message']}")
+                elif 'question' in msg and 'answer' in msg:
+                    chat_history.append(f"User: {msg['question']}")
+                    chat_history.append(f"Assistant: {msg['answer']}")
+
+            history_text = "\n".join(chat_history)
+            full_prompt = f"{system_message}\n\nCLINICAL CONTEXT AND ANALYSIS:\n{context}\n\nCHAT HISTORY:\n{history_text}\n\nUSER QUESTION:\n{user_question}\n\nASSISTANT ANSWER:"  # vLLM is completion-style
+
+            response_text = vllm_generate_text(
+                full_prompt,
+                max_tokens=800,
+                temperature=0.2,
+                use_chat_prompt=False,
+            )
+
             # Save assistant message
             assistant_msg = ChatMessage(
                 analysis_id=analysis_id,
@@ -2585,13 +2359,13 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
             assistant_doc = assistant_msg.model_dump()
             assistant_doc['created_at'] = assistant_doc['created_at'].isoformat()
             await db.chat_messages.insert_one(assistant_doc)
-            
+
             # Return format expected by ChatEnhanced.jsx
             return {
                 "question": user_question,
                 "answer": response_text
             }
-            
+
         except Exception as e:
             logging.error(f"Error in chat: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error in chat: {str(e)}")
@@ -4101,7 +3875,7 @@ async def ask_predefined_question(
         # Ask AI with the question's prompt
         full_prompt = f"{context}\n\n{question['prompt']}"
         
-        # Use local vLLM to answer
+        # Use local vLLM to answer instead of Gemini (offline mode)
         system_message = """You are a Clinical Documentation Improvement (CDI) specialist expert. 
 Answer the question based on the clinical context provided. 
 
@@ -4109,13 +3883,17 @@ CRITICAL: Be VERY concise and precise. Give direct answers without unnecessary d
 Use bullet points when listing items. Focus ONLY on what was specifically asked.
 Maximum 5-7 bullet points or 4-5 short paragraphs unless the question explicitly asks for comprehensive detail.
 Respond in Arabic if the question is in Arabic, or in English if the question is in English."""
-        
+
         try:
-            # Use vLLM local model
-            from local_llm import generate_text
-            result = generate_text(f"{system_message}\n\n{full_prompt}")
+            vllm_prompt = f"{system_message}\n\n{full_prompt}"
+            result = vllm_generate_text(
+                vllm_prompt,
+                max_tokens=800,
+                temperature=0.2,
+                use_chat_prompt=False,
+            )
         except Exception as e:
-            logger.error(f"Error generating AI response: {str(e)}")
+            logger.error(f"Error generating AI response with vLLM: {str(e)}")
             raise HTTPException(status_code=500, detail="Failed to generate AI response")
         
         # Save to chat history

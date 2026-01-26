@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>منصة نبيه | NABIH Platform Documentation</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap');
+        body {
+            font-family: 'Noto Sans Arabic', Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            line-height: 1.8;
+            background: #fff;
+            color: #333;
+        }
+        h1 { color: #0066a1; border-bottom: 3px solid #0066a1; padding-bottom: 10px; }
+        h2 { color: #00a99d; border-bottom: 2px solid #00a99d; padding-bottom: 8px; margin-top: 30px; }
+        h3 { color: #555; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 20px 0;
+            direction: rtl;
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 12px; 
+            text-align: right;
+        }
+        th { background: #0066a1; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        code { 
+            background: #f4f4f4; 
+            padding: 2px 6px; 
+            border-radius: 4px;
+            direction: ltr;
+            display: inline-block;
+        }
+        pre { 
+            background: #2d2d2d; 
+            color: #f8f8f2;
+            padding: 15px; 
+            border-radius: 8px;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+        }
+        hr { border: none; border-top: 2px solid #0066a1; margin: 30px 0; }
+    </style>
+</head>
+<body>
+<h1>منصة نبيه | NABIH Platform</h1>
+
+<h2>توثيق شامل للنظام</h2>
+
+<hr />
+
+<h1>1. نظرة عامة على المنصة</h1>
+
+<h2>1.1 الوصف</h2>
+
+<p><strong>منصة نبيه (NABIH)</strong> هي منصة متقدمة لتحسين التوثيق السريري (Clinical Documentation Improvement - CDI) تعمل بالذكاء الاصطناعي. تساعد المختصين في الترميز الطبي على:
+- تحليل الملاحظات السريرية
+- استخراج التشخيصات الموثقة والمستنتجة
+- تحديد الفجوات في التوثيق
+- توليد استفسارات غير موجهة للأطباء
+- ربط التشخيصات بأكواد ICD-10-AM</p>
+
+<h2>1.2 الميزات الرئيسية</h2>
+
+<table>
+<thead>
+<tr>
+  <th>الميزة</th>
+  <th>الوصف</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>تحليل CDI بالذكاء الاصطناعي</td>
+  <td>تحليل شامل للملاحظات السريرية</td>
+</tr>
+<tr>
+  <td>استخراج التشخيصات</td>
+  <td>موثقة نصاً + مستنتجة من التحاليل</td>
+</tr>
+<tr>
+  <td>دعم الاختصارات الطبية</td>
+  <td>DM, HTN, CKD, AKI, CHF, etc.</td>
+</tr>
+<tr>
+  <td>استنتاج ذكي</td>
+  <td>من نتائج التحاليل + العلاج المقدم</td>
+</tr>
+<tr>
+  <td>أكواد ICD-10-AM</td>
+  <td>لكل تشخيص</td>
+</tr>
+<tr>
+  <td>تعدد اللغات</td>
+  <td>عربي / إنجليزي</td>
+</tr>
+<tr>
+  <td>تحقق أمني MFA</td>
+  <td>عبر البريد الإلكتروني</td>
+</tr>
+<tr>
+  <td>تصدير التقارير</td>
+  <td>PDF / Excel</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h1>2. مواصفات السيرفر</h1>
+
+<h2>2.1 معلومات الأجهزة</h2>
+
+<table>
+<thead>
+<tr>
+  <th>المواصفة</th>
+  <th>القيمة</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>مزود الخدمة</strong></td>
+  <td>Alibaba Cloud</td>
+</tr>
+<tr>
+  <td><strong>نوع السيرفر</strong></td>
+  <td>ECS GPU Instance</td>
+</tr>
+<tr>
+  <td><strong>IP العام</strong></td>
+  <td>8.213.39.104</td>
+</tr>
+<tr>
+  <td><strong>نظام التشغيل</strong></td>
+  <td>Ubuntu 24.04.3 LTS</td>
+</tr>
+<tr>
+  <td><strong>Kernel</strong></td>
+  <td>6.8.0-87-generic</td>
+</tr>
+</tbody>
+</table>
+
+<h2>2.2 المعالج (CPU)</h2>
+
+<table>
+<thead>
+<tr>
+  <th>المواصفة</th>
+  <th>القيمة</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>النوع</strong></td>
+  <td>Intel Xeon</td>
+</tr>
+<tr>
+  <td><strong>عدد الأنوية</strong></td>
+  <td>8 cores</td>
+</tr>
+<tr>
+  <td><strong>الخيوط</strong></td>
+  <td>16 threads</td>
+</tr>
+</tbody>
+</table>
+
+<h2>2.3 الذاكرة (RAM)</h2>
+
+<table>
+<thead>
+<tr>
+  <th>المواصفة</th>
+  <th>القيمة</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>الإجمالي</strong></td>
+  <td>~64 GB</td>
+</tr>
+<tr>
+  <td><strong>المتاح للنظام</strong></td>
+  <td>~60 GB</td>
+</tr>
+</tbody>
+</table>
+
+<h2>2.4 وحدة معالجة الرسومات (GPU)</h2>
+
+<table>
+<thead>
+<tr>
+  <th>المواصفة</th>
+  <th>القيمة</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>النوع</strong></td>
+  <td>NVIDIA Tesla V100</td>
+</tr>
+<tr>
+  <td><strong>الذاكرة</strong></td>
+  <td>32 GB HBM2</td>
+</tr>
+<tr>
+  <td><strong>CUDA Version</strong></td>
+  <td>12.8</td>
+</tr>
+<tr>
+  <td><strong>Driver Version</strong></td>
+  <td>570.133.20</td>
+</tr>
+<tr>
+  <td><strong>الاستخدام</strong></td>
+  <td>تشغيل نموذج الذكاء الاصطناعي</td>
+</tr>
+</tbody>
+</table>
+
+<h2>2.5 التخزين</h2>
+
+<table>
+<thead>
+<tr>
+  <th>المواصفة</th>
+  <th>القيمة</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>السعة الكلية</strong></td>
+  <td>196.49 GB</td>
+</tr>
+<tr>
+  <td><strong>المستخدم</strong></td>
+  <td>~37.7%</td>
+</tr>
+<tr>
+  <td><strong>المتاح</strong></td>
+  <td>~122 GB</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h1>3. البنية التقنية</h1>
+
+<h2>3.1 هيكل التطبيق</h2>
+
+<pre><code>/opt/medidoc/
+├── backend/                 # الخادم الخلفي (FastAPI)
+│   ├── server.py           # الملف الرئيسي للـ API
+│   ├── local_llm.py        # محرك الذكاء الاصطناعي vLLM
+│   ├── analysis_wrapper.py # معالج نتائج التحليل
+│   ├── security_utils.py   # أدوات الأمان و OTP
+│   ├── drg_lookup.py       # البحث في جداول DRG
+│   ├── acs_reference.py    # مرجع معايير ACS
+│   ├── venv/               # البيئة الافتراضية Python
+│   ├── data/               # ملفات البيانات
+│   │   ├── Full ACS 10th edition_.pdf
+│   │   └── drg_prices.xlsx
+│   └── .env                # متغيرات البيئة
+│
+└── frontend/               # الواجهة الأمامية (React)
+    ├── static/
+    │   ├── js/
+    │   └── css/
+    └── index.html
+</code></pre>
+
+<h2>3.2 التقنيات المستخدمة</h2>
+
+<h3>Backend (الخادم الخلفي)</h3>
+
+<table>
+<thead>
+<tr>
+  <th>التقنية</th>
+  <th>الإصدار</th>
+  <th>الوصف</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Python</strong></td>
+  <td>3.12+</td>
+  <td>لغة البرمجة</td>
+</tr>
+<tr>
+  <td><strong>FastAPI</strong></td>
+  <td>Latest</td>
+  <td>إطار العمل للـ API</td>
+</tr>
+<tr>
+  <td><strong>vLLM</strong></td>
+  <td>0.13.0</td>
+  <td>محرك تشغيل النماذج اللغوية</td>
+</tr>
+<tr>
+  <td><strong>Uvicorn</strong></td>
+  <td>Latest</td>
+  <td>خادم ASGI</td>
+</tr>
+<tr>
+  <td><strong>PyMongo</strong></td>
+  <td>Latest</td>
+  <td>مكتبة MongoDB</td>
+</tr>
+<tr>
+  <td><strong>Pydantic</strong></td>
+  <td>v2</td>
+  <td>التحقق من البيانات</td>
+</tr>
+<tr>
+  <td><strong>bcrypt</strong></td>
+  <td>Latest</td>
+  <td>تشفير كلمات المرور</td>
+</tr>
+<tr>
+  <td><strong>PyJWT</strong></td>
+  <td>Latest</td>
+  <td>JSON Web Tokens</td>
+</tr>
+<tr>
+  <td><strong>aiosmtplib</strong></td>
+  <td>Latest</td>
+  <td>إرسال البريد الإلكتروني</td>
+</tr>
+<tr>
+  <td><strong>pandas</strong></td>
+  <td>Latest</td>
+  <td>معالجة البيانات</td>
+</tr>
+<tr>
+  <td><strong>openpyxl</strong></td>
+  <td>Latest</td>
+  <td>قراءة ملفات Excel</td>
+</tr>
+</tbody>
+</table>
+
+<h3>Frontend (الواجهة الأمامية)</h3>
+
+<table>
+<thead>
+<tr>
+  <th>التقنية</th>
+  <th>الإصدار</th>
+  <th>الوصف</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>React</strong></td>
+  <td>18.x</td>
+  <td>مكتبة واجهة المستخدم</td>
+</tr>
+<tr>
+  <td><strong>Tailwind CSS</strong></td>
+  <td>3.x</td>
+  <td>إطار CSS</td>
+</tr>
+<tr>
+  <td><strong>Shadcn/UI</strong></td>
+  <td>Latest</td>
+  <td>مكونات UI</td>
+</tr>
+<tr>
+  <td><strong>Axios</strong></td>
+  <td>Latest</td>
+  <td>طلبات HTTP</td>
+</tr>
+<tr>
+  <td><strong>Lucide React</strong></td>
+  <td>Latest</td>
+  <td>الأيقونات</td>
+</tr>
+<tr>
+  <td><strong>i18next</strong></td>
+  <td>Latest</td>
+  <td>تعدد اللغات</td>
+</tr>
+</tbody>
+</table>
+
+<h3>قاعدة البيانات</h3>
+
+<table>
+<thead>
+<tr>
+  <th>التقنية</th>
+  <th>الإصدار</th>
+  <th>الوصف</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>MongoDB</strong></td>
+  <td>7.x</td>
+  <td>قاعدة بيانات NoSQL</td>
+</tr>
+<tr>
+  <td><strong>Database Name</strong></td>
+  <td>clinical<em>doc</em>center</td>
+  <td></td>
+</tr>
+</tbody>
+</table>
+
+<h3>خادم الويب</h3>
+
+<table>
+<thead>
+<tr>
+  <th>التقنية</th>
+  <th>الإصدار</th>
+  <th>الوصف</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Nginx</strong></td>
+  <td>Latest</td>
+  <td>خادم الويب والـ Reverse Proxy</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h1>4. نموذج الذكاء الاصطناعي</h1>
+
+<h2>4.1 المواصفات</h2>
+
+<table>
+<thead>
+<tr>
+  <th>المواصفة</th>
+  <th>القيمة</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>اسم النموذج</strong></td>
+  <td>Qwen2.5-32B-Instruct-GPTQ-Int4</td>
+</tr>
+<tr>
+  <td><strong>المطور</strong></td>
+  <td>Alibaba (Qwen)</td>
+</tr>
+<tr>
+  <td><strong>الحجم</strong></td>
+  <td>32 Billion Parameters</td>
+</tr>
+<tr>
+  <td><strong>الكمية (Quantization)</strong></td>
+  <td>GPTQ Int4</td>
+</tr>
+<tr>
+  <td><strong>الذاكرة المطلوبة</strong></td>
+  <td>~18 GB GPU</td>
+</tr>
+<tr>
+  <td><strong>السياق الأقصى</strong></td>
+  <td>8,192 tokens</td>
+</tr>
+<tr>
+  <td><strong>درجة الحرارة</strong></td>
+  <td>0.0 (حتمي)</td>
+</tr>
+</tbody>
+</table>
+
+<h2>4.2 قدرات النموذج</h2>
+
+<ul>
+<li>فهم الملاحظات السريرية بالعربية والإنجليزية</li>
+<li>استخراج التشخيصات من النص</li>
+<li>التعرف على الاختصارات الطبية</li>
+<li>استنتاج التشخيصات من نتائج التحاليل</li>
+<li>توليد استفسارات للأطباء بصيغة غير موجهة</li>
+<li>الالتزام بمعايير ACS و ICD-10-AM</li>
+</ul>
+
+<h2>4.3 قواعد الاستنتاج</h2>
+
+<table>
+<thead>
+<tr>
+  <th>نتيجة التحليل</th>
+  <th>+ العلاج</th>
+  <th>= التشخيص</th>
+  <th>الكود</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Na &gt; 145</td>
+  <td>تصحيح سوائل</td>
+  <td>Hypernatremia</td>
+  <td>E87.0</td>
+</tr>
+<tr>
+  <td>Na &lt; 135</td>
+  <td>تصحيح صوديوم</td>
+  <td>Hyponatremia</td>
+  <td>E87.1</td>
+</tr>
+<tr>
+  <td>K &gt; 5.5</td>
+  <td>كايكسالات/غسيل</td>
+  <td>Hyperkalemia</td>
+  <td>E87.5</td>
+</tr>
+<tr>
+  <td>K &lt; 3.5</td>
+  <td>بوتاسيوم</td>
+  <td>Hypokalemia</td>
+  <td>E87.6</td>
+</tr>
+<tr>
+  <td>Hb &lt; 12</td>
+  <td>نقل دم/حديد</td>
+  <td>Anemia</td>
+  <td>D64.9</td>
+</tr>
+<tr>
+  <td>HbA1c &gt; 8%</td>
+  <td>-</td>
+  <td>Uncontrolled DM</td>
+  <td>E11.65</td>
+</tr>
+<tr>
+  <td>Cr↑ + GFR↓</td>
+  <td>-</td>
+  <td>CKD</td>
+  <td>N18.x</td>
+</tr>
+<tr>
+  <td>WBC↑ + حرارة</td>
+  <td>مضاد حيوي</td>
+  <td>Sepsis</td>
+  <td>A41.9</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h1>5. واجهات برمجة التطبيقات (APIs)</h1>
+
+<h2>5.1 نقاط النهاية الرئيسية</h2>
+
+<table>
+<thead>
+<tr>
+  <th>المسار</th>
+  <th>الطريقة</th>
+  <th>الوصف</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>/api/auth/login-step1</code></td>
+  <td>POST</td>
+  <td>الخطوة الأولى لتسجيل الدخول</td>
+</tr>
+<tr>
+  <td><code>/api/auth/login-step2</code></td>
+  <td>POST</td>
+  <td>التحقق من OTP</td>
+</tr>
+<tr>
+  <td><code>/api/auth/register</code></td>
+  <td>POST</td>
+  <td>تسجيل مستخدم جديد</td>
+</tr>
+<tr>
+  <td><code>/api/notes</code></td>
+  <td>GET/POST</td>
+  <td>إدارة الملاحظات</td>
+</tr>
+<tr>
+  <td><code>/api/notes/{id}</code></td>
+  <td>GET/PUT/DELETE</td>
+  <td>ملاحظة محددة</td>
+</tr>
+<tr>
+  <td><code>/api/analyze</code></td>
+  <td>POST</td>
+  <td>تحليل ملاحظة</td>
+</tr>
+<tr>
+  <td><code>/api/analysis/{id}</code></td>
+  <td>GET</td>
+  <td>نتيجة تحليل</td>
+</tr>
+<tr>
+  <td><code>/api/chat/ask-question/{q}</code></td>
+  <td>POST</td>
+  <td>أسئلة سريعة</td>
+</tr>
+<tr>
+  <td><code>/api/users</code></td>
+  <td>GET</td>
+  <td>قائمة المستخدمين (Admin)</td>
+</tr>
+</tbody>
+</table>
+
+<h2>5.2 المصادقة</h2>
+
+<ul>
+<li><strong>نوع المصادقة:</strong> JWT (JSON Web Token)</li>
+<li><strong>التحقق الثنائي:</strong> MFA عبر OTP بالبريد الإلكتروني</li>
+<li><strong>مدة صلاحية Token:</strong> 24 ساعة</li>
+<li><strong>مدة صلاحية OTP:</strong> 30 دقيقة</li>
+</ul>
+
+<hr />
+
+<h1>6. قاعدة البيانات</h1>
+
+<h2>6.1 المجموعات (Collections)</h2>
+
+<table>
+<thead>
+<tr>
+  <th>المجموعة</th>
+  <th>الوصف</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>users</code></td>
+  <td>بيانات المستخدمين</td>
+</tr>
+<tr>
+  <td><code>clinical_notes</code></td>
+  <td>الملاحظات السريرية</td>
+</tr>
+<tr>
+  <td><code>analyses</code></td>
+  <td>نتائج التحليل</td>
+</tr>
+<tr>
+  <td><code>otp_records</code></td>
+  <td>سجلات OTP</td>
+</tr>
+<tr>
+  <td><code>user_sessions</code></td>
+  <td>جلسات المستخدمين</td>
+</tr>
+<tr>
+  <td><code>chat_messages</code></td>
+  <td>رسائل الدردشة</td>
+</tr>
+<tr>
+  <td><code>audit_logs</code></td>
+  <td>سجلات المراجعة</td>
+</tr>
+<tr>
+  <td><code>login_attempts</code></td>
+  <td>محاولات تسجيل الدخول</td>
+</tr>
+</tbody>
+</table>
+
+<h2>6.2 نموذج المستخدم</h2>
+
+<div class="codehilite">
+<pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UUID&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;password_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;full_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;phone_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;role&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin | user | supervisor&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;mfa_enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;is_active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;created_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;datetime&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;last_login&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;datetime&quot;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<h2>6.3 نموذج الملاحظة السريرية</h2>
+
+<div class="codehilite">
+<pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UUID&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UUID&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;doctor_notes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;specialty&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;text&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;analysis_result_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;UUID&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;created_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;datetime&quot;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<hr />
+
+<h1>7. الأمان</h1>
+
+<h2>7.1 إجراءات الأمان</h2>
+
+<table>
+<thead>
+<tr>
+  <th>الإجراء</th>
+  <th>الوصف</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>تشفير كلمات المرور</strong></td>
+  <td>bcrypt مع salt</td>
+</tr>
+<tr>
+  <td><strong>JWT</strong></td>
+  <td>توقيع HS256</td>
+</tr>
+<tr>
+  <td><strong>MFA</strong></td>
+  <td>OTP عبر البريد</td>
+</tr>
+<tr>
+  <td><strong>HTTPS</strong></td>
+  <td>تشفير الاتصال</td>
+</tr>
+<tr>
+  <td><strong>CORS</strong></td>
+  <td>تقييد المصادر</td>
+</tr>
+<tr>
+  <td><strong>Rate Limiting</strong></td>
+  <td>حماية من الهجمات</td>
+</tr>
+</tbody>
+</table>
+
+<h2>7.2 إعدادات SMTP</h2>
+
+<table>
+<thead>
+<tr>
+  <th>الإعداد</th>
+  <th>القيمة</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>SMTP Host</strong></td>
+  <td>smtp.gmail.com</td>
+</tr>
+<tr>
+  <td><strong>SMTP Port</strong></td>
+  <td>587</td>
+</tr>
+<tr>
+  <td><strong>TLS</strong></td>
+  <td>نعم</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h1>8. الخدمات والعمليات</h1>
+
+<h2>8.1 خدمات Systemd</h2>
+
+<table>
+<thead>
+<tr>
+  <th>الخدمة</th>
+  <th>الملف</th>
+  <th>الوصف</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>medidoc-backend</code></td>
+  <td><code>/etc/systemd/system/medidoc-backend.service</code></td>
+  <td>الخادم الخلفي</td>
+</tr>
+<tr>
+  <td><code>nginx</code></td>
+  <td>Built-in</td>
+  <td>خادم الويب</td>
+</tr>
+<tr>
+  <td><code>mongod</code></td>
+  <td>Built-in</td>
+  <td>قاعدة البيانات</td>
+</tr>
+</tbody>
+</table>
+
+<h2>8.2 أوامر الإدارة</h2>
+
+<div class="codehilite">
+<pre><span></span><code><span class="c1"># إعادة تشغيل الخلفية</span>
+systemctl<span class="w"> </span>restart<span class="w"> </span>medidoc-backend
+
+<span class="c1"># فحص الحالة</span>
+systemctl<span class="w"> </span>status<span class="w"> </span>medidoc-backend
+
+<span class="c1"># عرض السجلات</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>medidoc-backend<span class="w"> </span>-n<span class="w"> </span><span class="m">100</span>
+
+<span class="c1"># إعادة تشغيل Nginx</span>
+nginx<span class="w"> </span>-s<span class="w"> </span>reload
+</code></pre>
+</div>
+
+<hr />
+
+<h1>9. هيكل الملفات</h1>
+
+<h2>9.1 ملفات الإعدادات</h2>
+
+<table>
+<thead>
+<tr>
+  <th>الملف</th>
+  <th>الموقع</th>
+  <th>الوصف</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><code>.env</code></td>
+  <td><code>/opt/medidoc/backend/</code></td>
+  <td>متغيرات البيئة</td>
+</tr>
+<tr>
+  <td><code>nginx config</code></td>
+  <td><code>/etc/nginx/sites-available/medidoc</code></td>
+  <td>إعدادات Nginx</td>
+</tr>
+<tr>
+  <td><code>systemd service</code></td>
+  <td><code>/etc/systemd/system/medidoc-backend.service</code></td>
+  <td>خدمة الخلفية</td>
+</tr>
+</tbody>
+</table>
+
+<h2>9.2 محتوى ملف .env</h2>
+
+<pre><code>MONGO_URL="mongodb://localhost:27017"
+DB_NAME="clinical_doc_center"
+CORS_ORIGINS="*"
+SECRET_KEY="[secure-key]"
+LOCAL_MODEL="Qwen/Qwen2.5-32B-Instruct"
+TENSOR_PARALLEL_SIZE=1
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=[email]
+SMTP_PASSWORD=[app-password]
+EMAIL_FROM=[email]
+</code></pre>
+
+<hr />
+
+<h1>10. صفحات التطبيق</h1>
+
+<h2>10.1 صفحات الواجهة</h2>
+
+<table>
+<thead>
+<tr>
+  <th>الصفحة</th>
+  <th>المسار</th>
+  <th>الوصف</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>تسجيل الدخول</td>
+  <td><code>/login</code></td>
+  <td>صفحة الدخول</td>
+</tr>
+<tr>
+  <td>التسجيل</td>
+  <td><code>/register</code></td>
+  <td>إنشاء حساب جديد</td>
+</tr>
+<tr>
+  <td>التحقق MFA</td>
+  <td><code>/mfa-verify</code></td>
+  <td>إدخال رمز OTP</td>
+</tr>
+<tr>
+  <td>لوحة التحكم</td>
+  <td><code>/dashboard</code></td>
+  <td>الصفحة الرئيسية</td>
+</tr>
+<tr>
+  <td>ملاحظة جديدة</td>
+  <td><code>/new-note</code></td>
+  <td>إنشاء ملاحظة</td>
+</tr>
+<tr>
+  <td>التحليل</td>
+  <td><code>/analysis/{id}</code></td>
+  <td>عرض نتائج التحليل</td>
+</tr>
+<tr>
+  <td>الدردشة</td>
+  <td><code>/chat</code></td>
+  <td>أسئلة سريعة</td>
+</tr>
+<tr>
+  <td>الإعدادات</td>
+  <td><code>/settings</code></td>
+  <td>إعدادات الحساب</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h1>11. المكتبات والاعتماديات</h1>
+
+<h2>11.1 Python (requirements.txt)</h2>
+
+<pre><code>fastapi&gt;=0.104.0
+uvicorn[standard]&gt;=0.24.0
+python-multipart&gt;=0.0.6
+pydantic&gt;=2.5.0
+motor&gt;=3.3.0
+pymongo&gt;=4.6.0
+python-jose[cryptography]&gt;=3.3.0
+passlib[bcrypt]&gt;=1.7.4
+bcrypt&gt;=4.1.0
+aiosmtplib&gt;=3.0.0
+email-validator&gt;=2.1.0
+pandas&gt;=2.1.0
+openpyxl&gt;=3.1.0
+vllm&gt;=0.13.0
+torch&gt;=2.0.0
+transformers&gt;=4.35.0
+accelerate&gt;=0.25.0
+</code></pre>
+
+<h2>11.2 Node.js (package.json)</h2>
+
+<div class="codehilite">
+<pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;dependencies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;react&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^18.2.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;react-dom&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^18.2.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;react-router-dom&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^6.20.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;axios&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^1.6.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;tailwindcss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^3.3.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;@radix-ui/react-*&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;latest&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;lucide-react&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;latest&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;i18next&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;latest&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;react-i18next&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;latest&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<hr />
+
+<h1>12. معلومات الاتصال والدعم</h1>
+
+<h2>12.1 الوصول</h2>
+
+<table>
+<thead>
+<tr>
+  <th>العنصر</th>
+  <th>القيمة</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>URL التطبيق</strong></td>
+  <td>http://8.213.39.104</td>
+</tr>
+<tr>
+  <td><strong>SSH</strong></td>
+  <td>root@8.213.39.104</td>
+</tr>
+<tr>
+  <td><strong>قاعدة البيانات</strong></td>
+  <td>mongodb://localhost:27017</td>
+</tr>
+</tbody>
+</table>
+
+<h2>12.2 الحسابات</h2>
+
+<table>
+<thead>
+<tr>
+  <th>الحساب</th>
+  <th>البريد</th>
+  <th>الدور</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>مدير النظام</td>
+  <td>almaghthawi.cdi@gmail.com</td>
+  <td>admin</td>
+</tr>
+</tbody>
+</table>
+
+<hr />
+
+<h1>13. الملخص</h1>
+
+<p>منصة <strong>نبيه (NABIH)</strong> هي حل متكامل لتحسين التوثيق السريري، مبني على:
+- <strong>بنية حديثة:</strong> FastAPI + React + MongoDB
+- <strong>ذكاء اصطناعي متقدم:</strong> Qwen2.5-32B على GPU V100
+- <strong>أمان عالي:</strong> MFA + JWT + تشفير
+- <strong>دعم ثنائي اللغة:</strong> عربي/إنجليزي
+- <strong>معايير طبية:</strong> ICD-10-AM + ACS Standards</p>
+
+<hr />
+
+<p><strong>تاريخ التوثيق:</strong> يناير 2026<br />
+<strong>الإصدار:</strong> 1.0</p>
+
+</body>
+</html>

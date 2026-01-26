@@ -5,7 +5,8 @@ import { LogOut, FileText, History, Home, Languages, Mail, Shield, Brain } from 
 import { useLanguage } from '@/contexts/LanguageContext';
 import axios from 'axios';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
+const API = BACKEND_URL || '';
 
 const Navbar = ({ user, onLogout }) => {
   const navigate = useNavigate();
