@@ -63,18 +63,8 @@ class AIProviderManager:
         logger.info(f"Updated API keys for provider: {provider}")
     
     async def analyze_with_ai(self, provider: str, prompt: str, system_instruction: str) -> str:
-        """Analyze using specified AI provider"""
-        if provider not in self.providers:
-            raise ValueError(f"Unsupported AI provider: {provider}")
-        
-        api_keys = await self.get_api_keys(provider)
-        if not api_keys:
-            raise ValueError(f"No API keys configured for provider: {provider}")
-        
-        # Use random key for load balancing
-        api_key = random.choice(api_keys)
-        
-        return await self.providers[provider](api_key, prompt, system_instruction)
+        """(DISABLED) Cloud AI providers are not available in offline mode"""
+        raise RuntimeError("External AI providers (Gemini/Azure/Grok) are disabled - offline mode only")
     
     async def _call_gemini(self, api_key: str, prompt: str, system_instruction: str) -> str:
         """Call Google Gemini API"""
