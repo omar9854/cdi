@@ -131,73 +131,13 @@ SECRET_KEY = os.environ.get('JWT_SECRET', 'your-secret-key-change-in-production'
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
-# Load ALL 7 Gemini API Keys (billed keys for rotation)
-GEMINI_API_KEYS = [
-    os.environ.get('GEMINI_API_KEY_1'),
-    os.environ.get('GEMINI_API_KEY_2'),
-    os.environ.get('GEMINI_API_KEY_3'),
-    os.environ.get('GEMINI_API_KEY_4'),
-    os.environ.get('GEMINI_API_KEY_5'),
-    os.environ.get('GEMINI_API_KEY_6'),
-    os.environ.get('GEMINI_API_KEY_7'),
-]
-# Filter out None values
-GEMINI_API_KEYS = [key for key in GEMINI_API_KEYS if key]
+# Gemini cloud provider DISABLED - System is 100% offline
+GEMINI_API_KEYS: list[str] = []
 
-if not GEMINI_API_KEYS:
-    raise ValueError("No Gemini API keys found in environment variables")
 
-print(f"✅ Loaded {len(GEMINI_API_KEYS)} Gemini API keys for rotation")
-
-# Track failed keys to avoid reusing them immediately
-_failed_keys = set()
-
-def get_gemini_model(model_name='gemini-2.0-flash-exp', system_instruction=None):
-    """Get a Gemini model with smart key rotation and retry on quota errors"""
-    global _failed_keys
-    
-    # Clear failed keys if all keys have failed (reset for retry)
-    if len(_failed_keys) >= len(GEMINI_API_KEYS):
-        _failed_keys.clear()
-    
-    # Get available keys (not recently failed)
-    available_keys = [k for k in GEMINI_API_KEYS if k not in _failed_keys]
-    if not available_keys:
-        available_keys = GEMINI_API_KEYS.copy()
-        _failed_keys.clear()
-    
-    # Try all available keys
-    for attempt, api_key in enumerate(available_keys):
-        try:
-            genai.configure(api_key=api_key)
-            
-            if system_instruction:
-                model = genai.GenerativeModel(model_name, system_instruction=system_instruction)
-            else:
-                model = genai.GenerativeModel(model_name)
-            
-            # Quick validation test
-            model.count_tokens("test")
-            return model
-        except Exception as e:
-            error_msg = str(e).lower()
-            if 'quota' in error_msg or 'exhausted' in error_msg or 'insufficient' in error_msg:
-                _failed_keys.add(api_key)
-                print(f"⚠️ Key {attempt+1} quota exhausted, trying next...")
-                continue
-            elif attempt < len(available_keys) - 1:
-                print(f"⚠️ Key {attempt+1} failed: {str(e)[:50]}, trying next...")
-                continue
-            else:
-                raise e
-    
-    # Fallback: use first key without test
-    api_key = GEMINI_API_KEYS[0]
-    genai.configure(api_key=api_key)
-    if system_instruction:
-        return genai.GenerativeModel(model_name, system_instruction=system_instruction)
-    else:
-        return genai.GenerativeModel(model_name)
+def get_gemini_model(*args, **kwargs):
+    """Disabled: Gemini is not available in offline mode"""
+    raise RuntimeError("Gemini provider is disabled - offline mode only")
 
 # Admin Secret Code (يمكن تغييره من .env)
 ADMIN_SECRET_CODE = os.environ.get('ADMIN_SECRET_CODE', 'CDI-ADMIN-2024')
@@ -596,207 +536,9 @@ async def send_password_reset_email(user_email: str, user_name: str, reset_token
     await send_email(user_email, subject, body_html)
 
 async def analyze_with_gemini(notes_text: str, doctor_notes: List[Dict]) -> Dict:
-    """Analyze clinical notes using Gemini AI - CDI Focus"""
-    
-    # Format doctor notes with specialties
-    formatted_notes = "\n\n".join([
-        f"**{note['specialty']}**:\n{note['text']}"
-        for note in doctor_notes
-    ])
-    
-    system_message = """You are a Clinical Documentation Improvement (CDI) Specialist expert.
-
-Your role is NOT to code or assign ICD-10-CM codes directly. Your role is to:
-1. Review clinical documentation for completeness and specificity
-2. Identify diagnoses that SHOULD BE documented based on clinical findings
-3. Identify missing or incomplete documentation
-4. Provide queries to physicians to improve documentation quality
-5. Ensure documentation supports the severity of illness and risk of mortality
-
-Focus on CLINICAL DOCUMENTATION IMPROVEMENT, not medical coding.
-
-⚠️ CRITICAL COMPLIANCE REQUIREMENT FOR PHYSICIAN QUERIES:
-
-**Query Structure (2 Parts):**
-
-**Part 1 - HEADER (For CDI Staff Only):**
-- Include diagnosis name and ICD code
-- This is for the CDI specialist's reference, NOT sent to physician directly
-- Format: "استفسار يخص: [Diagnosis] ([ICD Code])"
-
-**Part 2 - QUERY BODY (Sent to Physician):**
-- Cite SPECIFIC clinical findings from the notes (symptoms, medications, lab values, vital signs)
-- DO NOT mention the diagnosis name
-- Ask physician to document based on clinical judgment
-- Specify if principal or secondary diagnosis is needed
-
-✅ CORRECT Complete Query Example (Arabic):
-```
-استفسار يخص: ارتفاع ضغط الدم (I10)
-
-بناءً على الملاحظات الطبية:
-- المريض لديه قراءات ضغط متكررة 150/95، 145/92
-- تم وصف Amlodipine 5mg يومياً
-- التاريخ المرضي يشير إلى ارتفاعات سابقة
-
-بناءً على حكمك الطبي، الرجاء توثيق التشخيص الرئيسي.
-```
-
-✅ CORRECT Complete Query Example (English):
-```
-Query regarding: Hypertension (I10)
-
-Based on clinical documentation:
-- Patient has repeated BP readings of 150/95, 145/92
-- Prescribed Amlodipine 5mg daily
-- Medical history indicates previous elevations
-
-Based on your clinical judgment, please document the principal diagnosis.
-```
-
-❌ INCORRECT (DO NOT include diagnosis in query body):
-- "هل التشخيص هو ارتفاع ضغط الدم؟" ✗
-- "Is this hypertension or white coat syndrome?" ✗
-- "يُرجى تأكيد: ارتفاع ضغط الدم" ✗
-
-**Key Rules:**
-- Header = diagnosis name + code (for CDI staff)
-- Body = clinical findings ONLY + request for documentation (for physician)
-- NEVER suggest diagnosis in the body sent to physician
-
-IMPORTANT: Provide ALL responses in BOTH Arabic and English."""
-
-    user_prompt = f"""Please review the following clinical notes as a CDI Specialist:
-
-{formatted_notes}
-
-Perform a Clinical Documentation Improvement review and provide:
-
-1. **Diagnoses That Should Be Documented**: Based on the clinical findings in the notes, what diagnoses should be clearly documented? (with ICD-10-CM codes for reference only)
-   - For EACH diagnosis, specify if it's "principal" (التشخيص الرئيسي) or "secondary" (التشخيص الثانوي)
-   - Include the clinical evidence from the notes that supports this diagnosis
-
-2. **Missing Documentation**: What specific clinical information is missing or incomplete? (e.g., severity, acuity, specificity, causal relationships)
-
-3. **Documentation Gaps**: What gaps exist in the current documentation?
-
-4. **Physician Queries**: Generate DETAILED queries with clinical context. For EACH query:
-   
-   **CRITICAL FORMAT FOR EACH QUERY:**
-   
-   A. **Header (For CDI staff):**
-   "استفسار يخص: [Diagnosis name in Arabic] ([ICD-10 Code])"
-   "Query regarding: [Diagnosis name in English] ([ICD-10 Code])"
-   
-   B. **Query Body (For Physician):**
-   - First, cite SPECIFIC clinical findings from the notes (symptoms, medications prescribed, lab results, vital signs)
-   - Then ask physician to document based on clinical judgment
-   - Specify if asking for principal diagnosis or secondary diagnosis
-   
-   **Example Format in Arabic:**
-   ```
-   استفسار يخص: ارتفاع ضغط الدم (I10)
-   
-   بناءً على الملاحظات الطبية:
-   - [ذكر الأعراض المحددة من الملاحظات]
-   - [ذكر الأدوية المصروفة من الملاحظات]
-   - [ذكر القياسات أو الفحوصات من الملاحظات]
-   
-   بناءً على حكمك الطبي، الرجاء توثيق التشخيص [الرئيسي/الثانوي - حسب النوع].
-   ```
-   
-   **Example Format in English:**
-   ```
-   Query regarding: Hypertension (I10)
-   
-   Based on clinical documentation:
-   - [Cite specific symptoms from notes]
-   - [Cite specific medications prescribed from notes]
-   - [Cite specific measurements/tests from notes]
-   
-   Based on your clinical judgment, please document the [principal/secondary - based on type] diagnosis.
-   ```
-   
-   **CRITICAL RULES:**
-   - NEVER suggest a specific diagnosis name in the query body
-   - ALWAYS include clinical evidence from the actual notes
-   - ALWAYS specify if it's principal or secondary diagnosis
-   - Use "التشخيص الرئيسي" for principal, omit "الرئيسي" for secondary
-
-5. **Recommendations**: Specific recommendations to improve the clinical documentation quality
-
-Please respond in the following JSON format:
-{{{{
-  "diagnoses_to_document": [{{
-    "diagnosis_ar": "التشخيص بالعربي",
-    "diagnosis_en": "Diagnosis in English", 
-    "icd_code": "Code (for reference)",
-    "type": "principal" or "secondary",
-    "clinical_evidence": "Evidence from notes supporting this diagnosis"
-  }}],
-  "missing_documentation": [{{
-    "item_ar": "التوثيق الناقص بالعربي",
-    "item_en": "Missing item in English"
-  }}],
-  "gaps_ar": ["ثغرة 1", "ثغرة 2"],
-  "gaps_en": ["Gap 1", "Gap 2"],
-  "queries_ar": [
-    "استفسار يخص: [اسم التشخيص] ([كود ICD-10])\\n\\nبناءً على الملاحظات الطبية:\\n- [معطيات محددة من الملاحظات: الأعراض]\\n- [الأدوية المصروفة]\\n- [القياسات والفحوصات]\\n\\nبناءً على حكمك الطبي، الرجاء توثيق التشخيص [الرئيسي/الثانوي]."
-  ],
-  "queries_en": [
-    "Query regarding: [Diagnosis name] ([ICD-10 Code])\\n\\nBased on clinical documentation:\\n- [Specific findings from notes: symptoms]\\n- [Medications prescribed]\\n- [Measurements/tests]\\n\\nBased on your clinical judgment, please document the [principal/secondary] diagnosis."
-  ],
-  "recommendations_ar": ["توصية 1 لتحسين التوثيق", "توصية 2"],
-  "recommendations_en": ["Recommendation 1 for documentation improvement", "Recommendation 2"],
-  "summary_ar": "ملخص شامل لمراجعة تحسين التوثيق السريري بالعربي",
-  "summary_en": "Comprehensive CDI review summary in English"
-}}}}
-
-IMPORTANT: For queries, you MUST:
-1. Include the header with diagnosis name and ICD code for CDI staff reference
-2. Cite ACTUAL clinical findings from the provided notes (symptoms, medications, measurements)
-3. Never suggest diagnosis names in the query body itself
-4. Specify if it's principal or secondary diagnosis
-5. Each query should be detailed with real evidence from the notes"""
-
-    try:
-        # Use Google Gemini API with automatic key rotation
-        model = get_gemini_model('gemini-2.0-flash-exp')
-        
-        # Combine system message and user prompt
-        full_prompt = f"{system_message}\n\n{user_prompt}"
-        
-        # Generate response with retry logic
-        max_retries = len(GEMINI_API_KEYS)
-        last_error = None
-        
-        for attempt in range(max_retries):
-            try:
-                response = model.generate_content(full_prompt)
-                response_text = response.text.strip()
-                break  # Success, exit retry loop
-            except Exception as e:
-                last_error = e
-                if attempt < max_retries - 1:
-                    # Try with a different key
-                    logger.warning(f"Retry {attempt + 1}/{max_retries} with different API key")
-                    model = get_gemini_model('gemini-2.0-flash-exp')
-                else:
-                    raise e
-        
-        # Parse JSON response
-        import json
-        if "```json" in response_text:
-            response_text = response_text.split("```json")[1].split("```")[0].strip()
-        elif "```" in response_text:
-            response_text = response_text.split("```")[1].split("```")[0].strip()
-        
-        result = json.loads(response_text)
-        return result
-        
-    except Exception as e:
-        logging.error(f"Error analyzing with Gemini: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error in analysis: {str(e)}")
+    """(DISABLED) Legacy Gemini analysis - now routed to local vLLM for offline mode"""
+    # Preserve old behaviour signature but use local vLLM instead
+    return await analyze_with_ai(notes_text, doctor_notes, provider='phi3')
 
 
 async def analyze_with_ai(notes_text: str, doctor_notes: List[Dict], provider: str = 'phi3') -> Dict:
@@ -2582,45 +2324,31 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
         
         # Use analysis_id as session for continuity
         try:
-            # Use Google Gemini API with automatic key rotation
-            model = get_gemini_model('gemini-2.0-flash-exp', system_instruction=system_message)
-            
-            # Get chat history for context
+            # Use local vLLM text generator instead of Gemini for chat
+            # Build full context prompt including analysis and chat history
             chat_history = []
             previous_messages = await db.chat_messages.find(
                 {"analysis_id": analysis_id}
             ).sort("created_at", 1).to_list(100)
-            
-            # Build chat history
+
             for msg in previous_messages:
-                # Handle both open chat messages (with 'role') and predefined questions (with 'question'/'answer')
                 if 'role' in msg:
-                    if msg['role'] == 'user':
-                        chat_history.append({'role': 'user', 'parts': [msg['message']]})
-                    else:
-                        chat_history.append({'role': 'model', 'parts': [msg['message']]})
+                    prefix = 'User: ' if msg['role'] == 'user' else 'Assistant: '
+                    chat_history.append(f"{prefix}{msg['message']}")
                 elif 'question' in msg and 'answer' in msg:
-                    # Predefined question format
-                    chat_history.append({'role': 'user', 'parts': [msg['question']]})
-                    chat_history.append({'role': 'model', 'parts': [msg['answer']]})
-            
-            # Start chat with history and retry logic
-            max_retries = len(GEMINI_API_KEYS)
-            response_text = None
-            
-            for attempt in range(max_retries):
-                try:
-                    chat = model.start_chat(history=chat_history)
-                    response = chat.send_message(user_question)
-                    response_text = response.text
-                    break  # Success, exit retry loop
-                except Exception as e:
-                    if attempt < max_retries - 1:
-                        logger.warning(f"Chat retry {attempt + 1}/{max_retries} with different API key")
-                        model = get_gemini_model('gemini-2.0-flash-exp', system_instruction=system_message)
-                    else:
-                        raise e
-            
+                    chat_history.append(f"User: {msg['question']}")
+                    chat_history.append(f"Assistant: {msg['answer']}")
+
+            history_text = "\n".join(chat_history)
+            full_prompt = f"{system_message}\n\nCLINICAL CONTEXT AND ANALYSIS:\n{context}\n\nCHAT HISTORY:\n{history_text}\n\nUSER QUESTION:\n{user_question}\n\nASSISTANT ANSWER:"  # vLLM is completion-style
+
+            response_text = vllm_generate_text(
+                full_prompt,
+                max_tokens=800,
+                temperature=0.2,
+                use_chat_prompt=False,
+            )
+
             # Save assistant message
             assistant_msg = ChatMessage(
                 analysis_id=analysis_id,
@@ -2631,13 +2359,13 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
             assistant_doc = assistant_msg.model_dump()
             assistant_doc['created_at'] = assistant_doc['created_at'].isoformat()
             await db.chat_messages.insert_one(assistant_doc)
-            
+
             # Return format expected by ChatEnhanced.jsx
             return {
                 "question": user_question,
                 "answer": response_text
             }
-            
+
         except Exception as e:
             logging.error(f"Error in chat: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error in chat: {str(e)}")
@@ -4147,7 +3875,7 @@ async def ask_predefined_question(
         # Ask AI with the question's prompt
         full_prompt = f"{context}\n\n{question['prompt']}"
         
-        # Use Gemini to answer
+        # Use local vLLM to answer instead of Gemini (offline mode)
         system_message = """You are a Clinical Documentation Improvement (CDI) specialist expert. 
 Answer the question based on the clinical context provided. 
 
@@ -4155,13 +3883,17 @@ CRITICAL: Be VERY concise and precise. Give direct answers without unnecessary d
 Use bullet points when listing items. Focus ONLY on what was specifically asked.
 Maximum 5-7 bullet points or 4-5 short paragraphs unless the question explicitly asks for comprehensive detail.
 Respond in Arabic if the question is in Arabic, or in English if the question is in English."""
-        
+
         try:
-            model = get_gemini_model('gemini-2.0-flash-exp', system_instruction=system_message)
-            response = model.generate_content(full_prompt)
-            result = response.text
+            vllm_prompt = f"{system_message}\n\n{full_prompt}"
+            result = vllm_generate_text(
+                vllm_prompt,
+                max_tokens=800,
+                temperature=0.2,
+                use_chat_prompt=False,
+            )
         except Exception as e:
-            logger.error(f"Error generating AI response: {str(e)}")
+            logger.error(f"Error generating AI response with vLLM: {str(e)}")
             raise HTTPException(status_code=500, detail="Failed to generate AI response")
         
         # Save to chat history
