@@ -20,7 +20,7 @@ import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/contexts/LanguageContext';
 import Footer from '@/components/Footer';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 const API = `${BACKEND_URL}/api`;
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82ca9d', '#ffc658'];
