@@ -9,7 +9,7 @@ import { Shield, ArrowRight, RefreshCw } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getErrorMessage, logError } from '@/utils/errorHandler';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 const API = `${BACKEND_URL}/api`;
 
 const MFAVerification = ({ setUser }) => {
