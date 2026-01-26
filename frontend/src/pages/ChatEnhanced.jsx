@@ -15,7 +15,7 @@ import {
 import Navbar from '@/components/Navbar';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || '';
 const API = `${BACKEND_URL}/api`;
 
 const ChatEnhanced = ({ user, onLogout }) => {
