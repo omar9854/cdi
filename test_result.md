@@ -7,11 +7,14 @@
 |----------|--------|-------|
 | Authentication API | ✅ PASS | Register, Login, Me endpoints working |
 | Notes API | ✅ PASS | Create and List endpoints working |
-| Analysis API | ✅ PASS | vLLM integration working, Ollama-free |
+| Analysis API | ✅ PASS | vLLM integration working, fully offline |
+| Chat API | ✅ PASS | vLLM chat working, no external dependencies |
+| Coding Routes | ✅ PASS | Properly disabled for offline mode |
 | Admin Dashboard | ✅ PASS | Updated with CDI roles only |
 | Register Page | ✅ PASS | No coder/auditor options |
 | DRG Lookup | ✅ PASS | 800 codes, 190 ICD mappings |
-| Security | ✅ PASS | No external API keys, fully offline |
+| Offline Mode | ✅ PASS | 100% offline, no external API calls |
+| Security | ✅ PASS | No external API keys required |
 
 ## Latest Test Results (Jan 25, 2026)
 
