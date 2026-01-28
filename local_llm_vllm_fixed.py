@@ -4,6 +4,7 @@ Model: Qwen2.5-32B-Instruct with tensor parallelism
 """
 
 import logging
+import random
 import json
 import re
 from typing import Dict, List, Optional
@@ -279,7 +280,7 @@ def get_llm():
         return _llm
 
 
-def generate_text(prompt: str, max_tokens: int = 4000, temperature: float = 0.1, use_chat_prompt: bool = False) -> str:
+def generate_text(prompt: str, max_tokens: int = 4000, temperature: float = 0.2, use_chat_prompt: bool = False) -> str:
     """Generate text using vLLM"""
     llm = get_llm()
     
@@ -297,7 +298,8 @@ def generate_text(prompt: str, max_tokens: int = 4000, temperature: float = 0.1,
         max_tokens=max_tokens,
         temperature=temperature,
         top_p=0.9,
-        stop=["<|im_end|>", "<|endoftext|>"]
+        stop=["<|im_end|>", "<|endoftext|>"],
+        seed=random.randint(1, 2**31 - 1)
     )
     
     logger.info("📤 Generating response with vLLM...")
@@ -419,7 +421,7 @@ def analyze_clinical_notes(formatted_notes: str, hospital_type: str = "A") -> Di
 }}"""
 
     try:
-        response_text = generate_text(analysis_prompt, max_tokens=5000, temperature=0.1)
+        response_text = generate_text(analysis_prompt, max_tokens=5000, temperature=0.2)
         result = parse_json_response(response_text)
         result = enhance_with_drg_pricing(result, hospital_type)
         return result

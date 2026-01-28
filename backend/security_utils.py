@@ -40,7 +40,7 @@ async def send_welcome_email(email: str, user_name: str, role: str = "user"):
         message = MIMEMultipart("alternative")
         message["From"] = email_from
         message["To"] = email
-        message["Subject"] = "مرحباً بك في مركز الترميز الطبي وتحسين التوثيق السريري"
+        message["Subject"] = "مرحباً بك في منصة نبيه"
         
         # Email body
         html_content = f"""
@@ -51,15 +51,15 @@ async def send_welcome_email(email: str, user_name: str, role: str = "user"):
                         
                         <!-- Header -->
                         <div style="text-align: center; margin-bottom: 30px;">
-                            <h1 style="color: #2563eb; margin: 0;">🏥 مركز الترميز الطبي</h1>
-                            <p style="color: #64748b; margin-top: 5px;">نظام تحسين التوثيق السريري (CDI)</p>
+                            <h1 style="color: #2563eb; margin: 0;">🏥 منصة نبيه</h1>
+                            <p style="color: #64748b; margin-top: 5px;">NABIH Platform</p>
                         </div>
                         
                         <!-- Welcome Message -->
                         <div style="margin-bottom: 30px;">
                             <h2 style="color: #1e40af; margin-bottom: 15px;">مرحباً بك، {user_name}! 👋</h2>
                             <p style="font-size: 16px; color: #333; line-height: 1.6;">
-                                يسعدنا انضمامك إلى نظام تحسين التوثيق السريري (CDI). تم إنشاء حسابك بنجاح كـ <strong>{role_ar}</strong>.
+                                يسعدنا انضمامك إلى منصة نبيه. تم إنشاء حسابك بنجاح كـ <strong>{role_ar}</strong>.
                             </p>
                         </div>
                         
@@ -115,8 +115,8 @@ async def send_welcome_email(email: str, user_name: str, role: str = "user"):
                         <!-- Footer -->
                         <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
                             <p style="color: #94a3b8; font-size: 12px; margin: 5px 0;">
-                                مركز الترميز الطبي وتحسين التوثيق السريري<br>
-                                نظام CDI المدعوم بالذكاء الاصطناعي
+                                منصة نبيه<br>
+                                NABIH Platform
                             </p>
                             <p style="color: #cbd5e1; font-size: 11px; margin: 10px 0;">
                                 © 2024 جميع الحقوق محفوظة
@@ -156,7 +156,7 @@ async def send_otp_email(email: str, otp_code: str, user_name: str = "المست
         message = MIMEMultipart("alternative")
         message["From"] = email_from
         message["To"] = email
-        message["Subject"] = "رمز التحقق - مركز الترميز الطبي"
+        message["Subject"] = "رمز التحقق للدخول لمنصة نبيه"
         
         # Email body in Arabic and English
         html_content = f"""
@@ -164,9 +164,9 @@ async def send_otp_email(email: str, otp_code: str, user_name: str = "المست
             <body style="font-family: Arial, sans-serif; direction: rtl; text-align: right;">
                 <div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
                     <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        <h2 style="color: #2563eb; text-align: center;">🔒 رمز التحقق الأمني</h2>
+                        <h2 style="color: #2563eb; text-align: center;">🔒 رمز التحقق للدخول</h2>
                         <p style="font-size: 16px; color: #333;">مرحباً {user_name}،</p>
-                        <p style="font-size: 16px; color: #333;">لقد طلبت رمز التحقق لتسجيل الدخول إلى حسابك في مركز الترميز الطبي وتحسين التوثيق السريري.</p>
+                        <p style="font-size: 16px; color: #333;">لقد طلبت رمز التحقق لتسجيل الدخول إلى حسابك في منصة نبيه.</p>
                         
                         <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; text-align: center; margin: 30px 0;">
                             <p style="font-size: 14px; color: #666; margin-bottom: 10px;">رمز التحقق الخاص بك:</p>
@@ -189,8 +189,8 @@ async def send_otp_email(email: str, otp_code: str, user_name: str = "المست
                         
                         <div style="text-align: center;">
                             <p style="font-size: 12px; color: #9ca3af;">
-                                مركز الترميز الطبي وتحسين التوثيق السريري<br>
-                                Medical Coding & Clinical Documentation Improvement Center
+                                منصة نبيه<br>
+                                NABIH Platform
                             </p>
                         </div>
                     </div>

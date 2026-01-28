@@ -414,20 +414,20 @@ async def send_email(to_email: str, subject: str, body_html: str):
 
 async def send_welcome_email(user_email: str, user_name: str):
     """Send welcome email to new users"""
-    subject = "مرحباً بك في مركز الترميز الطبي | Welcome to Medical Coding Center"
+    subject = "مرحباً بك في منصة نبيه | Welcome to NABIH Platform"
     
     body_html = f"""
     <html dir="rtl">
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">مركز الترميز الطبي وتحسين التوثيق السريري</h1>
-            <p style="color: #f0f0f0; margin-top: 10px; font-size: 14px;">Medical Coding & Clinical Documentation Improvement Center</p>
+            <h1 style="color: white; margin: 0; font-size: 28px;">منصة نبيه</h1>
+            <p style="color: #f0f0f0; margin-top: 10px; font-size: 14px;">NABIH Platform</p>
         </div>
         
         <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
             <h2 style="color: #667eea; text-align: right;">مرحباً {user_name}</h2>
             <p style="text-align: right; font-size: 16px;">
-                نرحب بك في منصة مركز الترميز الطبي وتحسين التوثيق السريري. نحن سعداء بانضمامك إلينا!
+                نرحب بك في منصة نبيه. نحن سعداء بانضمامك إلينا!
             </p>
             
             <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-right: 4px solid #667eea;">
@@ -444,7 +444,7 @@ async def send_welcome_email(user_email: str, user_name: str):
             
             <h2 style="color: #667eea; text-align: left;">Welcome {user_name}</h2>
             <p style="text-align: left; font-size: 16px;">
-                Welcome to the Medical Coding & Clinical Documentation Improvement Center platform. We're excited to have you join us!
+                Welcome to the NABIH Platform. We're excited to have you join us!
             </p>
             
             <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
@@ -758,6 +758,20 @@ def transform_vllm_result_to_backend_format(vllm_result: Dict) -> Dict:
                 'diagnosis_en': diag.get('diagnosis_en', ''),
                 'icd_code': diag.get('potential_icd_code', diag.get('icd_code', ''))
             })
+
+    # Deduplicate diagnoses by ICD/code + text
+    deduped = []
+    seen = set()
+    for diag in diagnoses_to_document:
+        icd_code = (diag.get('icd_code') or '').strip().lower()
+        ar = (diag.get('diagnosis_ar') or '').strip().lower()
+        en = (diag.get('diagnosis_en') or '').strip().lower()
+        key = (icd_code, ar, en)
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(diag)
+    diagnoses_to_document = deduped
     
     # Extract missing documentation
     missing_documentation = []
@@ -2282,17 +2296,6 @@ async def chat_with_ai_by_path(request: Request, analysis_id: str, question: dic
         if not user_question:
             raise HTTPException(status_code=400, detail="Question is required")
         
-        # Save user message
-        user_msg = ChatMessage(
-            analysis_id=analysis_id,
-            user_id=user['id'],
-            role='user',
-            message=user_question
-        )
-        user_doc = user_msg.model_dump()
-        user_doc['created_at'] = user_doc['created_at'].isoformat()
-        await db.chat_messages.insert_one(user_doc)
-        
         # Build context
         import json
         
@@ -2327,17 +2330,22 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
             # Use local vLLM text generator instead of Gemini for chat
             # Build full context prompt including analysis and chat history
             chat_history = []
+            seen_messages = set()
             previous_messages = await db.chat_messages.find(
                 {"analysis_id": analysis_id}
             ).sort("created_at", 1).to_list(100)
 
             for msg in previous_messages:
+                msg_id = msg.get('id') or str(msg.get('_id') or '')
+                if msg_id and msg_id in seen_messages:
+                    continue
+                seen_messages.add(msg_id)
                 if 'role' in msg:
                     prefix = 'User: ' if msg['role'] == 'user' else 'Assistant: '
-                    chat_history.append(f"{prefix}{msg['message']}")
+                    chat_history.append(f"{prefix}{msg.get('message', '')}")
                 elif 'question' in msg and 'answer' in msg:
-                    chat_history.append(f"User: {msg['question']}")
-                    chat_history.append(f"Assistant: {msg['answer']}")
+                    chat_history.append(f"User: {msg.get('question', '')}")
+                    chat_history.append(f"Assistant: {msg.get('answer', '')}")
 
             history_text = "\n".join(chat_history)
             full_prompt = f"{system_message}\n\nCLINICAL CONTEXT AND ANALYSIS:\n{context}\n\nCHAT HISTORY:\n{history_text}\n\nUSER QUESTION:\n{user_question}\n\nASSISTANT ANSWER:"  # vLLM is completion-style
@@ -2345,9 +2353,20 @@ IMPORTANT: Be VERY concise and direct. Give precise answers without unnecessary 
             response_text = vllm_generate_text(
                 full_prompt,
                 max_tokens=800,
-                temperature=0.2,
+                temperature=0.3,
                 use_chat_prompt=False,
             )
+
+            # Save user message after response generation (avoid duplication in prompt)
+            user_msg = ChatMessage(
+                analysis_id=analysis_id,
+                user_id=user['id'],
+                role='user',
+                message=user_question
+            )
+            user_doc = user_msg.model_dump()
+            user_doc['created_at'] = user_doc['created_at'].isoformat()
+            await db.chat_messages.insert_one(user_doc)
 
             # Save assistant message
             assistant_msg = ChatMessage(
