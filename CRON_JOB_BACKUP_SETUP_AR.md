@@ -26,7 +26,7 @@
 **1. معلومات أساسية:**
 ```
 Title: CDI Daily Backup
-URL: https://ai-doctor-9.preview.emergentagent.com/api/admin/backup/create
+URL: https://nabeeh-medical.preview.emergentagent.com/api/admin/backup/create
 ```
 
 **2. إعدادات HTTP:**
@@ -69,7 +69,7 @@ Save response: Yes (for debugging)
 
 ```
 Title: CDI Weekly Backup
-URL: https://ai-doctor-9.preview.emergentagent.com/api/admin/backup/create
+URL: https://nabeeh-medical.preview.emergentagent.com/api/admin/backup/create
 Method: POST
 Headers: Same as above
 Schedule: Every Sunday at 03:00 AM
@@ -79,7 +79,7 @@ Schedule: Every Sunday at 03:00 AM
 
 ```
 Title: CDI Monthly Backup
-URL: https://ai-doctor-9.preview.emergentagent.com/api/admin/backup/create
+URL: https://nabeeh-medical.preview.emergentagent.com/api/admin/backup/create
 Method: POST
 Headers: Same as above
 Schedule: First day of month at 04:00 AM
@@ -92,13 +92,13 @@ Schedule: First day of month at 04:00 AM
 ### من لوحة الأدمن:
 
 1. سجّل دخول كـ Admin
-2. اذهب إلى: https://ai-doctor-9.preview.emergentagent.com
+2. اذهب إلى: https://nabeeh-medical.preview.emergentagent.com
 3. افتح Developer Tools (F12)
 4. Console اكتب:
 
 ```javascript
 // عرض قائمة النسخ الاحتياطية
-fetch('https://ai-doctor-9.preview.emergentagent.com/api/admin/backup/list', {
+fetch('https://nabeeh-medical.preview.emergentagent.com/api/admin/backup/list', {
   headers: {
     'Authorization': 'Bearer ' + localStorage.getItem('token')
   }
@@ -113,7 +113,7 @@ fetch('https://ai-doctor-9.preview.emergentagent.com/api/admin/backup/list', {
 
 ```bash
 curl -X POST \
-  https://ai-doctor-9.preview.emergentagent.com/api/admin/backup/create \
+  https://nabeeh-medical.preview.emergentagent.com/api/admin/backup/create \
   -H "X-Backup-Key: CDI-Backup-Key-2024-Secure" \
   -H "Content-Type: application/json"
 ```
@@ -142,7 +142,7 @@ curl -X POST \
 
 ```javascript
 // 1. عرض القائمة
-fetch('https://ai-doctor-9.preview.emergentagent.com/api/admin/backup/list', {
+fetch('https://nabeeh-medical.preview.emergentagent.com/api/admin/backup/list', {
   headers: { 'Authorization': 'Bearer YOUR_ADMIN_TOKEN' }
 })
 .then(r => r.json())
@@ -155,7 +155,7 @@ fetch('https://ai-doctor-9.preview.emergentagent.com/api/admin/backup/list', {
 
 // 2. تحميل نسخة محددة
 window.open(
-  'https://ai-doctor-9.preview.emergentagent.com/api/admin/backup/download/backup_20241107_020000.json',
+  'https://nabeeh-medical.preview.emergentagent.com/api/admin/backup/download/backup_20241107_020000.json',
   '_blank'
 );
 ```
@@ -228,7 +228,7 @@ X-Backup-Key: CDI-Backup-Key-2024-Secure
 ```bash
 # من API
 curl -H "Authorization: Bearer ADMIN_TOKEN" \
-  https://ai-doctor-9.preview.emergentagent.com/api/admin/backup/download/backup_YYYYMMDD_HHMMSS.json \
+  https://nabeeh-medical.preview.emergentagent.com/api/admin/backup/download/backup_YYYYMMDD_HHMMSS.json \
   -o backup.json
 ```
 

@@ -15,7 +15,7 @@ import pandas as pd
 from openpyxl import Workbook
 
 class MediDocAITester:
-    def __init__(self, base_url="https://ai-doctor-9.preview.emergentagent.com"):
+    def __init__(self, base_url="https://nabeeh-medical.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.token = None

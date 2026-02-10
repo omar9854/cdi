@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://ai-doctor-9.preview.emergentagent.com
+https://nabeeh-medical.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://ai-doctor-9.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://ai-doctor-9.preview.emergentagent.com
+   https://nabeeh-medical.preview.emergentagent.com
    ```
 
 ---

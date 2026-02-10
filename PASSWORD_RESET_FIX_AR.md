@@ -15,7 +15,7 @@
 **الوصف:**
 - عند طلب استعادة كلمة المرور، يتم إرسال رابط إلى الإيميل
 - الرابط كان يفتح على رابط المعاينة (preview URL) وليس رابط النشر
-- الرابط: `https://ai-doctor-9.preview.emergentagent.com`
+- الرابط: `https://nabeeh-medical.preview.emergentagent.com`
 - النتيجة: الرابط لا يعمل ويطلب من المستخدم إدخال الإيميل مرة أخرى
 
 **الحل:**
@@ -23,7 +23,7 @@
 
 ```env
 # قبل:
-FRONTEND_URL="https://ai-doctor-9.preview.emergentagent.com"
+FRONTEND_URL="https://nabeeh-medical.preview.emergentagent.com"
 
 # بعد:
 FRONTEND_URL="https://medidoc-ai.emergent.host"
