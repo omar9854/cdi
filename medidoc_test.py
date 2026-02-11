@@ -12,7 +12,7 @@ from datetime import datetime
 import time
 
 class MediDocAITester:
-    def __init__(self, base_url="https://nabeeh-medical.preview.emergentagent.com"):
+    def __init__(self, base_url="https://medical-app-preview.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.token = None

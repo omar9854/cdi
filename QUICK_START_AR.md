@@ -6,7 +6,7 @@
 
 1. **اذهب إلى صفحة التسجيل:**
    ```
-   https://nabeeh-medical.preview.emergentagent.com/register
+   https://medical-app-preview.preview.emergentagent.com/register
    ```
 
 2. **املأ البيانات:**
@@ -66,7 +66,7 @@
 
 1. **انسخ الرابط:**
    ```
-   https://nabeeh-medical.preview.emergentagent.com
+   https://medical-app-preview.preview.emergentagent.com
    ```
 
 2. **أرسله للفريق الطبي عبر:**

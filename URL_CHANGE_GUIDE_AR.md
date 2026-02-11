@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://nabeeh-medical.preview.emergentagent.com
+https://medical-app-preview.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://nabeeh-medical.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://nabeeh-medical.preview.emergentagent.com
+   https://medical-app-preview.preview.emergentagent.com
    ```
 
 ---

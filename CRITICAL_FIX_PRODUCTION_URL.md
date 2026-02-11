@@ -12,7 +12,7 @@
 
 ملف `/app/frontend/.env` مازال يحتوي على رابط Preview:
 ```
-REACT_APP_BACKEND_URL=https://nabeeh-medical.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://medical-app-preview.preview.emergentagent.com
 ```
 
 هذا يعني:
