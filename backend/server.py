@@ -2648,14 +2648,25 @@ async def upload_cdi_data(
     import pandas as pd
     from collections import Counter
     
+    logger.info(f"📤 File upload started by user: {supervisor.get('email')}")
+    logger.info(f"📁 File name: {file.filename}, Content type: {file.content_type}")
+    
     # Validate file type
     if not (file.filename.endswith('.xlsx') or file.filename.endswith('.xls')):
-        raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are allowed")
+        logger.warning(f"❌ Invalid file type: {file.filename}")
+        raise HTTPException(status_code=400, detail="Only Excel files (.xlsx, .xls) are allowed | يُسمح فقط بملفات Excel (.xlsx, .xls)")
     
     try:
         # Read Excel file
+        logger.info("📖 Reading Excel file...")
         contents = await file.read()
+        logger.info(f"📊 File size: {len(contents)} bytes")
+        
+        if len(contents) == 0:
+            raise HTTPException(status_code=400, detail="الملف فارغ | File is empty")
+        
         df = pd.read_excel(io.BytesIO(contents))
+        logger.info(f"✅ Excel loaded successfully. Rows: {len(df)}, Columns: {list(df.columns)}")
         
         # Normalize column names
         df.columns = df.columns.str.lower().str.strip()
