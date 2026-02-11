@@ -2708,7 +2708,14 @@ async def upload_cdi_data(
         
         # Check critical columns
         if not hospital_col:
-            raise HTTPException(status_code=400, detail="تعذر العثور على عمود المستشفى. يرجى التأكد من وجود عمود 'Hospital Name' أو مشابه.")
+            available_cols = ', '.join(df.columns.tolist())
+            logger.error(f"❌ Hospital column not found. Available columns: {available_cols}")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"تعذر العثور على عمود المستشفى. الأعمدة الموجودة: {available_cols}. يرجى التأكد من وجود عمود 'Hospital Name' أو مشابه."
+            )
+        
+        logger.info(f"✅ Hospital column found: {hospital_col}")
         
         # Basic Statistics
         total_records = len(df)
