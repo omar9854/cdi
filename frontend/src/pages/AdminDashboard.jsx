@@ -336,12 +336,21 @@ const AdminDashboard = ({ user, onLogout }) => {
           </Card>
         </div>
 
-        {/* Export Button */}
-        <div className="mb-6 flex justify-end">
+        {/* Action Buttons */}
+        <div className="mb-6 flex justify-end gap-4">
+          <Button
+            onClick={() => navigate('/supervisor')}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3"
+            data-testid="monthly-analysis-btn"
+          >
+            <FileSpreadsheet className={language === 'ar' ? 'ml-2' : 'mr-2'} />
+            {language === 'ar' ? 'تحليل الملفات الشهرية' : 'Monthly Analysis'}
+          </Button>
           <Button
             onClick={handleExportExcel}
             disabled={exporting}
             className="medical-blue text-white px-6 py-3"
+            data-testid="export-excel-btn"
           >
             <Download className={language === 'ar' ? 'ml-2' : 'mr-2'} />
             {exporting 
