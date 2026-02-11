@@ -3193,8 +3193,11 @@ async def upload_cdi_data(
         
     except HTTPException:
         raise
+    except pd.errors.EmptyDataError as e:
+        logger.error(f"❌ Empty Excel file: {str(e)}")
+        raise HTTPException(status_code=400, detail="الملف فارغ أو لا يحتوي على بيانات | File is empty or has no data")
     except Exception as e:
-        logger.error(f"Error processing Excel file: {str(e)}")
+        logger.error(f"❌ Error processing Excel file: {str(e)}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"خطأ في معالجة الملف: {str(e)}")
