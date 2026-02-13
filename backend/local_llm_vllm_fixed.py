@@ -1,6 +1,7 @@
 """
 Local LLM Integration with Ollama
 This module provides functions for AI analysis and text generation using Ollama
+Uses persistent configuration from nabih_config.py
 """
 
 import os
@@ -12,10 +13,32 @@ from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
-# Ollama Configuration
-OLLAMA_URL = os.environ.get('OLLAMA_URL', 'http://localhost:11434')
-ANALYSIS_MODEL = os.environ.get('OLLAMA_ANALYSIS_MODEL', 'qwen2.5:32b')
-CHAT_MODEL = os.environ.get('OLLAMA_CHAT_MODEL', 'qwen2.5:7b')
+# Import persistent configuration
+try:
+    from nabih_config import (
+        AI_CONFIG, 
+        CDI_ANALYSIS_SYSTEM_PROMPT, 
+        CDI_CHAT_SYSTEM_PROMPT,
+        get_analysis_prompt,
+        get_chat_prompt
+    )
+    logger.info("✅ Loaded persistent configuration from nabih_config.py")
+except ImportError:
+    logger.warning("⚠️ nabih_config.py not found, using defaults")
+    AI_CONFIG = {
+        "analysis_model": "qwen2.5:32b",
+        "chat_model": "qwen2.5:7b",
+        "ollama_url": "http://localhost:11434",
+        "temperature_analysis": 0.3,
+        "temperature_chat": 0.7
+    }
+    CDI_ANALYSIS_SYSTEM_PROMPT = ""
+    CDI_CHAT_SYSTEM_PROMPT = ""
+
+# Ollama Configuration - from persistent config or environment
+OLLAMA_URL = os.environ.get('OLLAMA_URL', AI_CONFIG.get('ollama_url', 'http://localhost:11434'))
+ANALYSIS_MODEL = os.environ.get('OLLAMA_ANALYSIS_MODEL', AI_CONFIG.get('analysis_model', 'qwen2.5:32b'))
+CHAT_MODEL = os.environ.get('OLLAMA_CHAT_MODEL', AI_CONFIG.get('chat_model', 'qwen2.5:7b'))
 
 
 def analyze_clinical_notes(prompt: str, hospital_type: str = "A") -> Dict:
