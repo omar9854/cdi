@@ -1412,6 +1412,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
             {renderTopDiagnoses()}
             {renderSpecialtyAnalysis()}
             {renderCDSPerformance()}
+            {renderFinancialImpact()}
           </>
         )}
       </main>
