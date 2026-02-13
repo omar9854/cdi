@@ -221,6 +221,30 @@ const SupervisorDashboard = ({ user, onLogout }) => {
           </CardContent>
         </Card>
 
+        {/* Financial Impact Card */}
+        {analysis.drg_financial_impact && (
+          <Card className="medical-card bg-gradient-to-br from-green-50 to-emerald-100 col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                {language === 'ar' ? 'التأثير المالي (DRG)' : 'Financial Impact (DRG)'}
+              </CardTitle>
+              <span className="text-2xl">💰</span>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-700">
+                {analysis.drg_financial_impact.summary.total_impact_formatted}
+              </div>
+              <p className="text-xs text-green-600 mt-1">
+                {analysis.drg_financial_impact.summary.total_drg_changes} {language === 'ar' ? 'حالة بتغيير DRG' : 'cases with DRG change'}
+              </p>
+              <p className="text-xs text-green-600">
+                {language === 'ar' ? 'متوسط التأثير لكل حالة: ' : 'Avg impact per case: '}
+                {analysis.drg_financial_impact.summary.average_impact_per_case?.toLocaleString()} {language === 'ar' ? 'ريال' : 'SAR'}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="medical-card bg-gradient-to-br from-blue-50 to-indigo-100">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
