@@ -44,9 +44,10 @@ CHAT_MODEL = os.environ.get('OLLAMA_CHAT_MODEL', AI_CONFIG.get('chat_model', 'qw
 def analyze_clinical_notes(prompt: str, hospital_type: str = "A") -> Dict:
     """
     Analyze clinical notes using Ollama with Qwen2.5 model
+    Uses hardcoded system prompt from nabih_config.py
     
     Args:
-        prompt: The full analysis prompt including clinical notes
+        prompt: The clinical notes to analyze
         hospital_type: Type of hospital (A, B, C)
     
     Returns:
@@ -54,20 +55,28 @@ def analyze_clinical_notes(prompt: str, hospital_type: str = "A") -> Dict:
     """
     logger.info(f"🏥 Starting clinical notes analysis with Ollama ({ANALYSIS_MODEL})...")
     
+    # Use persistent system prompt if available
+    if CDI_ANALYSIS_SYSTEM_PROMPT:
+        full_prompt = f"{CDI_ANALYSIS_SYSTEM_PROMPT}\n\n{prompt}"
+        logger.info("📋 Using hardcoded system prompt from nabih_config.py")
+    else:
+        full_prompt = prompt
+        logger.warning("⚠️ No system prompt configured, using raw prompt")
+    
     try:
         response = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json={
                 "model": ANALYSIS_MODEL,
-                "prompt": prompt,
+                "prompt": full_prompt,
                 "stream": False,
                 "options": {
-                    "temperature": 0.3,
-                    "num_predict": 4096,
+                    "temperature": AI_CONFIG.get('temperature_analysis', 0.3),
+                    "num_predict": AI_CONFIG.get('max_tokens_analysis', 4096),
                     "top_p": 0.9
                 }
             },
-            timeout=300  # 5 minutes timeout for analysis
+            timeout=AI_CONFIG.get('analysis_timeout', 300)  # 5 minutes timeout for analysis
         )
         
         if response.status_code != 200:
