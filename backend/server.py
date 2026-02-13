@@ -2652,9 +2652,9 @@ async def calculate_drg_financial_impact(df, drg_change_col, drg_before_col, drg
     Calculate DRG financial impact based on price differences
     
     Expected columns by index (0-based):
-    - T (19): DRG Change indicator (Yes/No)
-    - V (21): Old DRG code
-    - W (22) or next: New DRG code  
+    - S (18): DRG Change indicator (Yes/No)
+    - T (19): Old DRG code
+    - V (21): New DRG code  
     - X (23): Hospital Category (A, B, C)
     """
     import pandas as pd
@@ -2672,7 +2672,7 @@ async def calculate_drg_financial_impact(df, drg_change_col, drg_before_col, drg
         # Try to find columns by index or name
         columns = df.columns.tolist()
         
-        # Column mapping - try by index first (T=19, V=21, W=22, X=23)
+        # Column mapping - Updated: S=18, T=19, V=21, X=23 (0-based)
         def get_col_by_index_or_name(idx, name_col):
             if name_col and name_col in df.columns:
                 return name_col
@@ -2680,11 +2680,11 @@ async def calculate_drg_financial_impact(df, drg_change_col, drg_before_col, drg
                 return columns[idx]
             return None
         
-        # DRG columns
-        drg_change_indicator = get_col_by_index_or_name(19, drg_change_col)
-        old_drg_col = get_col_by_index_or_name(21, drg_before_col)
-        new_drg_col = get_col_by_index_or_name(22, drg_after_col)
-        category_col = get_col_by_index_or_name(23, None)  # Hospital category
+        # DRG columns - CORRECTED INDICES
+        drg_change_indicator = get_col_by_index_or_name(18, drg_change_col)  # Column S (index 18)
+        old_drg_col = get_col_by_index_or_name(19, drg_before_col)  # Column T (index 19)
+        new_drg_col = get_col_by_index_or_name(21, drg_after_col)   # Column V (index 21)
+        category_col = get_col_by_index_or_name(23, None)  # Column X (index 23) - Hospital category
         
         logger.info(f"📊 DRG Financial Analysis - Columns: change={drg_change_indicator}, old={old_drg_col}, new={new_drg_col}, category={category_col}")
         
