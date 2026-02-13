@@ -150,11 +150,13 @@ AI_CONFIG = {
     "chat_model": "qwen2.5:7b",
     "ollama_url": "http://localhost:11434",
     "analysis_timeout": 300,  # 5 minutes
-    "chat_timeout": 120,      # 2 minutes
+    "chat_timeout": 60,       # 1 minute (reduced for faster response)
     "temperature_analysis": 0.3,
-    "temperature_chat": 0.7,
+    "temperature_chat": 0.5,  # Lower temperature for faster, more focused responses
     "max_tokens_analysis": 4096,
-    "max_tokens_chat": 2048
+    "max_tokens_chat": 1024,  # Reduced for faster chat responses
+    "num_ctx_chat": 2048,     # Context window for chat
+    "repeat_penalty": 1.1     # Avoid repetition
 }
 
 # =============================================================================
