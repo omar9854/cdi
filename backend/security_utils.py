@@ -156,7 +156,7 @@ async def send_otp_email(email: str, otp_code: str, user_name: str = "المست
         message = MIMEMultipart("alternative")
         message["From"] = email_from
         message["To"] = email
-        message["Subject"] = "رمز التحقق - مركز الترميز الطبي"
+        message["Subject"] = "رمز التحقق - منصة نبيه"
         
         # Email body in Arabic and English
         html_content = f"""
@@ -166,7 +166,7 @@ async def send_otp_email(email: str, otp_code: str, user_name: str = "المست
                     <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <h2 style="color: #2563eb; text-align: center;">🔒 رمز التحقق الأمني</h2>
                         <p style="font-size: 16px; color: #333;">مرحباً {user_name}،</p>
-                        <p style="font-size: 16px; color: #333;">لقد طلبت رمز التحقق لتسجيل الدخول إلى حسابك في مركز الترميز الطبي وتحسين التوثيق السريري.</p>
+                        <p style="font-size: 16px; color: #333;">لقد طلبت رمز التحقق لتسجيل الدخول إلى حسابك في منصة نبيه - نظام تحسين التوثيق السريري.</p>
                         
                         <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; text-align: center; margin: 30px 0;">
                             <p style="font-size: 14px; color: #666; margin-bottom: 10px;">رمز التحقق الخاص بك:</p>
@@ -189,8 +189,8 @@ async def send_otp_email(email: str, otp_code: str, user_name: str = "المست
                         
                         <div style="text-align: center;">
                             <p style="font-size: 12px; color: #9ca3af;">
-                                مركز الترميز الطبي وتحسين التوثيق السريري<br>
-                                Medical Coding & Clinical Documentation Improvement Center
+                                منصة نبيه - نظام تحسين التوثيق السريري<br>
+                                NABIH Platform - Clinical Documentation Improvement
                             </p>
                         </div>
                     </div>
