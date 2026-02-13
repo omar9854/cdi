@@ -136,12 +136,14 @@ def generate_text(prompt: str, system_prompt: str = "", max_tokens: int = 2048) 
                 "prompt": full_prompt,
                 "stream": False,
                 "options": {
-                    "temperature": AI_CONFIG.get('temperature_chat', 0.7),
-                    "num_predict": max_tokens,
-                    "top_p": 0.9
+                    "temperature": AI_CONFIG.get('temperature_chat', 0.5),
+                    "num_predict": AI_CONFIG.get('max_tokens_chat', 1024),
+                    "num_ctx": AI_CONFIG.get('num_ctx_chat', 2048),
+                    "top_p": 0.85,
+                    "repeat_penalty": AI_CONFIG.get('repeat_penalty', 1.1)
                 }
             },
-            timeout=AI_CONFIG.get('chat_timeout', 120)  # 2 minutes timeout for chat
+            timeout=AI_CONFIG.get('chat_timeout', 60)
         )
         
         if response.status_code != 200:
