@@ -813,7 +813,7 @@ def transform_vllm_result_to_backend_format(vllm_result: Dict) -> Dict:
 # Health check route
 @api_router.get("/")
 async def root():
-    return {"message": "مركز الترميز الطبي وتحسين التوثيق السريري", "status": "active"}
+    return {"message": "منصة نبيه - نظام تحسين التوثيق السريري", "status": "active"}
 
 @api_router.get("/metrics")
 async def metrics():
