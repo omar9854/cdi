@@ -179,22 +179,12 @@ const Analysis = ({ user, onLogout }) => {
             <CardContent className="text-center py-8">
               <Sparkles className="w-16 h-16 text-cyan-600 mx-auto mb-4" />
               <h3 className="text-2xl font-semibold text-gray-800 mb-2">{t('readyToAnalyze')}</h3>
-              <p className="text-gray-800/70 mb-4">{t('aiAnalysisDescription')}</p>
-              
-              <div className="mb-6 inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 px-4 py-2 rounded-full border border-cyan-500/30">
-                <span className="text-2xl">🏥</span>
-                <span className="font-semibold text-cyan-600">
-                  {language === 'ar' ? 'Qwen2.5-32B الطبي المتخصص' : 'Qwen2.5-32B Medical AI'}
-                </span>
-                <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full border border-green-500/30">
-                  {language === 'ar' ? 'محلي 100%' : '100% Local'}
-                </span>
-              </div>
+              <p className="text-gray-800/70 mb-6">{t('aiAnalysisDescription')}</p>
               
               <Button
                 onClick={() => handleAnalyze()}
                 disabled={analyzing}
-                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-gray-800 text-lg py-6 px-8"
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white text-lg py-6 px-8"
                 data-testid="analyze-button"
               >
                 {analyzing ? (
