@@ -3149,6 +3149,9 @@ async def upload_cdi_data(
                 'no_change': int(total_records - drg_changes_count)
             },
             
+            # DRG Financial Impact Analysis (if DRG calculator is available)
+            'drg_financial_impact': await calculate_drg_financial_impact(df, drg_change_col, drg_before_col, drg_after_col, hospital_col, specialty_col, cds_col) if DRG_CALCULATOR_AVAILABLE else None,
+            
             # PDX Metrics (Principal Diagnosis)
             'pdx_metrics': {
                 'total_after_cdi': int(total_pdx_after),
