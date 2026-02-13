@@ -422,20 +422,20 @@ async def send_email(to_email: str, subject: str, body_html: str):
 
 async def send_welcome_email(user_email: str, user_name: str):
     """Send welcome email to new users"""
-    subject = "مرحباً بك في مركز الترميز الطبي | Welcome to Medical Coding Center"
+    subject = "مرحباً بك في منصة نبيه | Welcome to NABIH Platform"
     
     body_html = f"""
     <html dir="rtl">
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">مركز الترميز الطبي وتحسين التوثيق السريري</h1>
-            <p style="color: #f0f0f0; margin-top: 10px; font-size: 14px;">Medical Coding & Clinical Documentation Improvement Center</p>
+            <h1 style="color: white; margin: 0; font-size: 28px;">منصة نبيه - نظام تحسين التوثيق السريري</h1>
+            <p style="color: #f0f0f0; margin-top: 10px; font-size: 14px;">NABIH Platform - Clinical Documentation Improvement</p>
         </div>
         
         <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
             <h2 style="color: #667eea; text-align: right;">مرحباً {user_name}</h2>
             <p style="text-align: right; font-size: 16px;">
-                نرحب بك في منصة مركز الترميز الطبي وتحسين التوثيق السريري. نحن سعداء بانضمامك إلينا!
+                نرحب بك في منصة نبيه - نظام تحسين التوثيق السريري. نحن سعداء بانضمامك إلينا!
             </p>
             
             <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-right: 4px solid #667eea;">
@@ -452,7 +452,7 @@ async def send_welcome_email(user_email: str, user_name: str):
             
             <h2 style="color: #667eea; text-align: left;">Welcome {user_name}</h2>
             <p style="text-align: left; font-size: 16px;">
-                Welcome to the Medical Coding & Clinical Documentation Improvement Center platform. We're excited to have you join us!
+                Welcome to NABIH Platform - Clinical Documentation Improvement. We're excited to have you join us!
             </p>
             
             <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea;">
@@ -466,7 +466,7 @@ async def send_welcome_email(user_email: str, user_name: str):
             </div>
             
             <div style="text-align: center; margin-top: 30px;">
-                <p style="color: #999; font-size: 12px;">© 2025 جميع الحقوق محفوظة | عمر المغذوي</p>
+                <p style="color: #999; font-size: 12px;">© 2025 جميع الحقوق محفوظة | عمر المغذوي و سامي المعدوي</p>
             </div>
         </div>
     </body>
