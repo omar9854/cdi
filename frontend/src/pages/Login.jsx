@@ -252,7 +252,7 @@ const Login = ({ setUser }) => {
         <div className="text-center text-sm text-white/50 mt-6">
           <p>© 2025 {language === 'ar' ? 'جميع الحقوق محفوظة' : 'All Rights Reserved'}</p>
           <p className="mt-1 font-semibold text-white/60">
-            {language === 'ar' ? 'عمر المغذوي' : 'Omar Almaghthawi'}
+            {language === 'ar' ? 'عمر المغذوي و سامي المعدوي' : 'Omar Almaghthawi & Sami Almaadawi'}
           </p>
         </div>
       </div>
