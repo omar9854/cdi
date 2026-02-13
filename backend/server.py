@@ -43,6 +43,14 @@ from email.mime.multipart import MIMEMultipart
 
 from local_llm_vllm_fixed import generate_text as vllm_generate_text
 
+# Import DRG Calculator for financial impact analysis
+try:
+    from drg_calculator import load_drg_prices, calculate_drg_difference, analyze_monthly_drg_impact, get_drg_price
+    DRG_CALCULATOR_AVAILABLE = True
+except ImportError:
+    DRG_CALCULATOR_AVAILABLE = False
+    logging.warning("⚠️ DRG Calculator not available")
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
