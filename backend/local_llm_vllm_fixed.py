@@ -107,10 +107,11 @@ def analyze_clinical_notes(prompt: str, hospital_type: str = "A") -> Dict:
 def generate_text(prompt: str, system_prompt: str = "", max_tokens: int = 2048) -> str:
     """
     Generate text using Ollama for chat functionality
+    Uses hardcoded system prompt from nabih_config.py if not provided
     
     Args:
         prompt: User's message/question
-        system_prompt: System instructions
+        system_prompt: System instructions (optional, uses default if empty)
         max_tokens: Maximum tokens to generate
     
     Returns:
@@ -118,7 +119,14 @@ def generate_text(prompt: str, system_prompt: str = "", max_tokens: int = 2048) 
     """
     logger.info(f"💬 Generating chat response with Ollama ({CHAT_MODEL})...")
     
-    full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
+    # Use provided system prompt, or fall back to hardcoded one
+    effective_system_prompt = system_prompt if system_prompt else CDI_CHAT_SYSTEM_PROMPT
+    
+    if effective_system_prompt:
+        full_prompt = f"{effective_system_prompt}\n\nسؤال المستخدم:\n{prompt}"
+        logger.info("📋 Using system prompt for chat")
+    else:
+        full_prompt = prompt
     
     try:
         response = requests.post(
@@ -128,12 +136,12 @@ def generate_text(prompt: str, system_prompt: str = "", max_tokens: int = 2048) 
                 "prompt": full_prompt,
                 "stream": False,
                 "options": {
-                    "temperature": 0.7,
+                    "temperature": AI_CONFIG.get('temperature_chat', 0.7),
                     "num_predict": max_tokens,
                     "top_p": 0.9
                 }
             },
-            timeout=120  # 2 minutes timeout for chat
+            timeout=AI_CONFIG.get('chat_timeout', 120)  # 2 minutes timeout for chat
         )
         
         if response.status_code != 200:
