@@ -2647,6 +2647,191 @@ async def export_excel(analysis_id: str, user: dict = Depends(get_current_user))
         headers={"Content-Disposition": f"attachment; filename=analysis_{analysis_id}.xlsx"}
     )
 
+async def calculate_drg_financial_impact(df, drg_change_col, drg_before_col, drg_after_col, hospital_col, specialty_col, cds_col):
+    """
+    Calculate DRG financial impact based on price differences
+    
+    Expected columns by index (0-based):
+    - T (19): DRG Change indicator (Yes/No)
+    - V (21): Old DRG code
+    - W (22) or next: New DRG code  
+    - X (23): Hospital Category (A, B, C)
+    """
+    import pandas as pd
+    
+    if not DRG_CALCULATOR_AVAILABLE:
+        return None
+    
+    try:
+        # Load DRG prices
+        prices = load_drg_prices()
+        if not prices:
+            logger.warning("⚠️ DRG prices not available for financial calculation")
+            return None
+        
+        # Try to find columns by index or name
+        columns = df.columns.tolist()
+        
+        # Column mapping - try by index first (T=19, V=21, W=22, X=23)
+        def get_col_by_index_or_name(idx, name_col):
+            if name_col and name_col in df.columns:
+                return name_col
+            if idx < len(columns):
+                return columns[idx]
+            return None
+        
+        # DRG columns
+        drg_change_indicator = get_col_by_index_or_name(19, drg_change_col)
+        old_drg_col = get_col_by_index_or_name(21, drg_before_col)
+        new_drg_col = get_col_by_index_or_name(22, drg_after_col)
+        category_col = get_col_by_index_or_name(23, None)  # Hospital category
+        
+        logger.info(f"📊 DRG Financial Analysis - Columns: change={drg_change_indicator}, old={old_drg_col}, new={new_drg_col}, category={category_col}")
+        
+        # Results containers
+        total_impact = 0.0
+        total_cases = 0
+        hospital_impacts = {}
+        department_impacts = {}
+        specialist_impacts = {}
+        drg_details = []
+        
+        # Process each row
+        for idx in range(len(df)):
+            try:
+                # Check for DRG change
+                has_change = False
+                if drg_change_indicator and drg_change_indicator in df.columns:
+                    change_val = str(df.iloc[idx][drg_change_indicator]).strip().lower()
+                    has_change = change_val in ['yes', 'نعم', 'true', '1', 'y']
+                
+                if not has_change:
+                    continue
+                
+                # Get DRG codes
+                old_drg = str(df.iloc[idx][old_drg_col]).strip().upper() if old_drg_col and old_drg_col in df.columns and pd.notna(df.iloc[idx][old_drg_col]) else None
+                new_drg = str(df.iloc[idx][new_drg_col]).strip().upper() if new_drg_col and new_drg_col in df.columns and pd.notna(df.iloc[idx][new_drg_col]) else None
+                
+                if not old_drg or not new_drg or old_drg == 'NAN' or new_drg == 'NAN':
+                    continue
+                
+                # Get hospital category
+                category = 'A'  # Default
+                if category_col and category_col in df.columns and pd.notna(df.iloc[idx][category_col]):
+                    cat_val = str(df.iloc[idx][category_col]).strip().upper()
+                    if cat_val in ['A', 'B', 'C']:
+                        category = cat_val
+                    elif 'a' in cat_val.lower() or 'medical city' in cat_val.lower() or 'مدينة' in cat_val:
+                        category = 'A'
+                    elif 'b' in cat_val.lower() or '>50' in cat_val or 'more than 50' in cat_val.lower():
+                        category = 'B'
+                    elif 'c' in cat_val.lower() or '<50' in cat_val or 'less than 50' in cat_val.lower():
+                        category = 'C'
+                
+                # Calculate price difference
+                old_price = get_drg_price(old_drg, category)
+                new_price = get_drg_price(new_drg, category)
+                difference = new_price - old_price
+                
+                if difference == 0 and old_price == 0 and new_price == 0:
+                    continue  # Skip if no prices found
+                
+                total_cases += 1
+                total_impact += difference
+                
+                # Hospital aggregation
+                hospital_name = str(df.iloc[idx][hospital_col]) if hospital_col and hospital_col in df.columns else "Unknown"
+                if hospital_name not in hospital_impacts:
+                    hospital_impacts[hospital_name] = {'impact': 0.0, 'cases': 0, 'positive': 0, 'negative': 0}
+                hospital_impacts[hospital_name]['impact'] += difference
+                hospital_impacts[hospital_name]['cases'] += 1
+                if difference > 0:
+                    hospital_impacts[hospital_name]['positive'] += 1
+                else:
+                    hospital_impacts[hospital_name]['negative'] += 1
+                
+                # Department aggregation
+                department = str(df.iloc[idx][specialty_col]) if specialty_col and specialty_col in df.columns else "Unknown"
+                if department not in department_impacts:
+                    department_impacts[department] = {'impact': 0.0, 'cases': 0}
+                department_impacts[department]['impact'] += difference
+                department_impacts[department]['cases'] += 1
+                
+                # CDS Specialist aggregation
+                specialist = str(df.iloc[idx][cds_col]) if cds_col and cds_col in df.columns else "Unknown"
+                if specialist not in specialist_impacts:
+                    specialist_impacts[specialist] = {'impact': 0.0, 'cases': 0}
+                specialist_impacts[specialist]['impact'] += difference
+                specialist_impacts[specialist]['cases'] += 1
+                
+                # Store detail (limit to 50 for response size)
+                if len(drg_details) < 50:
+                    drg_details.append({
+                        'hospital': hospital_name,
+                        'department': department,
+                        'specialist': specialist,
+                        'old_drg': old_drg,
+                        'new_drg': new_drg,
+                        'category': category,
+                        'old_price': round(old_price, 2),
+                        'new_price': round(new_price, 2),
+                        'difference': round(difference, 2)
+                    })
+                
+            except Exception as e:
+                logger.warning(f"⚠️ Error processing row {idx} for DRG: {str(e)}")
+                continue
+        
+        # Format results
+        result = {
+            'summary': {
+                'total_drg_changes': total_cases,
+                'total_financial_impact_sar': round(total_impact, 2),
+                'total_impact_formatted': f"{total_impact:,.2f} ريال",
+                'average_impact_per_case': round(total_impact / total_cases, 2) if total_cases > 0 else 0,
+                'positive_impact_cases': sum(1 for d in drg_details if d['difference'] > 0),
+                'negative_impact_cases': sum(1 for d in drg_details if d['difference'] < 0)
+            },
+            'by_hospital': sorted([
+                {
+                    'hospital_name': name,
+                    'total_impact_sar': round(data['impact'], 2),
+                    'impact_formatted': f"{data['impact']:,.2f} ريال",
+                    'cases': data['cases'],
+                    'positive_changes': data['positive'],
+                    'negative_changes': data['negative']
+                }
+                for name, data in hospital_impacts.items()
+            ], key=lambda x: x['total_impact_sar'], reverse=True),
+            'by_department': sorted([
+                {
+                    'department': name,
+                    'total_impact_sar': round(data['impact'], 2),
+                    'impact_formatted': f"{data['impact']:,.2f} ريال",
+                    'cases': data['cases']
+                }
+                for name, data in department_impacts.items()
+            ], key=lambda x: x['total_impact_sar'], reverse=True)[:15],
+            'by_specialist': sorted([
+                {
+                    'specialist': name,
+                    'total_impact_sar': round(data['impact'], 2),
+                    'impact_formatted': f"{data['impact']:,.2f} ريال",
+                    'cases': data['cases']
+                }
+                for name, data in specialist_impacts.items()
+            ], key=lambda x: x['total_impact_sar'], reverse=True)[:15],
+            'sample_changes': drg_details
+        }
+        
+        logger.info(f"✅ DRG Financial Analysis Complete: {total_cases} changes, {total_impact:,.2f} SAR total impact")
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"❌ Error in DRG financial calculation: {str(e)}")
+        return None
+
 @api_router.post("/supervisor/upload-cdi-data")
 async def upload_cdi_data(
     file: UploadFile = File(...),
