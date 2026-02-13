@@ -1,0 +1,221 @@
+"""
+Local LLM Integration with Ollama
+This module provides functions for AI analysis and text generation using Ollama
+"""
+
+import os
+import json
+import requests
+import logging
+import re
+from typing import Dict, Optional
+
+logger = logging.getLogger(__name__)
+
+# Ollama Configuration
+OLLAMA_URL = os.environ.get('OLLAMA_URL', 'http://localhost:11434')
+ANALYSIS_MODEL = os.environ.get('OLLAMA_ANALYSIS_MODEL', 'qwen2.5:32b')
+CHAT_MODEL = os.environ.get('OLLAMA_CHAT_MODEL', 'qwen2.5:7b')
+
+
+def analyze_clinical_notes(prompt: str, hospital_type: str = "A") -> Dict:
+    """
+    Analyze clinical notes using Ollama with Qwen2.5 model
+    
+    Args:
+        prompt: The full analysis prompt including clinical notes
+        hospital_type: Type of hospital (A, B, C)
+    
+    Returns:
+        Dictionary containing analysis results
+    """
+    logger.info(f"🏥 Starting clinical notes analysis with Ollama ({ANALYSIS_MODEL})...")
+    
+    try:
+        response = requests.post(
+            f"{OLLAMA_URL}/api/generate",
+            json={
+                "model": ANALYSIS_MODEL,
+                "prompt": prompt,
+                "stream": False,
+                "options": {
+                    "temperature": 0.3,
+                    "num_predict": 4096,
+                    "top_p": 0.9
+                }
+            },
+            timeout=300  # 5 minutes timeout for analysis
+        )
+        
+        if response.status_code != 200:
+            logger.error(f"Ollama error: {response.status_code} - {response.text}")
+            raise Exception(f"Ollama API error: {response.status_code}")
+        
+        result = response.json()
+        response_text = result.get('response', '')
+        
+        logger.info(f"✅ Received response from Ollama ({len(response_text)} chars)")
+        
+        # Parse JSON from response
+        parsed_result = parse_json_response(response_text)
+        
+        return parsed_result
+        
+    except requests.exceptions.Timeout:
+        logger.error("❌ Ollama request timed out")
+        raise Exception("تجاوز وقت الاستجابة. يرجى المحاولة مرة أخرى.")
+    except requests.exceptions.ConnectionError:
+        logger.error("❌ Cannot connect to Ollama")
+        raise Exception("لا يمكن الاتصال بخدمة الذكاء الاصطناعي. تأكد من تشغيل Ollama.")
+    except Exception as e:
+        logger.error(f"❌ Analysis error: {str(e)}")
+        raise
+
+
+def generate_text(prompt: str, system_prompt: str = "", max_tokens: int = 2048) -> str:
+    """
+    Generate text using Ollama for chat functionality
+    
+    Args:
+        prompt: User's message/question
+        system_prompt: System instructions
+        max_tokens: Maximum tokens to generate
+    
+    Returns:
+        Generated text response
+    """
+    logger.info(f"💬 Generating chat response with Ollama ({CHAT_MODEL})...")
+    
+    full_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
+    
+    try:
+        response = requests.post(
+            f"{OLLAMA_URL}/api/generate",
+            json={
+                "model": CHAT_MODEL,
+                "prompt": full_prompt,
+                "stream": False,
+                "options": {
+                    "temperature": 0.7,
+                    "num_predict": max_tokens,
+                    "top_p": 0.9
+                }
+            },
+            timeout=120  # 2 minutes timeout for chat
+        )
+        
+        if response.status_code != 200:
+            logger.error(f"Ollama chat error: {response.status_code}")
+            raise Exception(f"Ollama API error: {response.status_code}")
+        
+        result = response.json()
+        response_text = result.get('response', '')
+        
+        logger.info(f"✅ Chat response generated ({len(response_text)} chars)")
+        
+        return response_text
+        
+    except requests.exceptions.Timeout:
+        logger.error("❌ Chat request timed out")
+        raise Exception("تجاوز وقت الاستجابة. يرجى المحاولة مرة أخرى.")
+    except requests.exceptions.ConnectionError:
+        logger.error("❌ Cannot connect to Ollama for chat")
+        raise Exception("لا يمكن الاتصال بخدمة الذكاء الاصطناعي.")
+    except Exception as e:
+        logger.error(f"❌ Chat error: {str(e)}")
+        raise
+
+
+def parse_json_response(text: str) -> Dict:
+    """
+    Parse JSON from AI response, handling common formatting issues
+    """
+    # Try to find JSON in the response
+    json_patterns = [
+        r'\{[\s\S]*\}',  # Match entire JSON object
+        r'```json\s*([\s\S]*?)```',  # Match JSON in code block
+        r'```\s*([\s\S]*?)```',  # Match any code block
+    ]
+    
+    for pattern in json_patterns:
+        matches = re.findall(pattern, text)
+        for match in matches:
+            try:
+                # Clean up the match
+                json_str = match.strip()
+                if not json_str.startswith('{'):
+                    continue
+                    
+                # Try to parse
+                parsed = json.loads(json_str)
+                if isinstance(parsed, dict):
+                    return parsed
+            except json.JSONDecodeError:
+                continue
+    
+    # If no valid JSON found, return a structured response
+    logger.warning("⚠️ Could not parse JSON from response, creating default structure")
+    
+    return {
+        "principal_diagnosis": {
+            "diagnosis_ar": "",
+            "diagnosis_en": "",
+            "icd_code": ""
+        },
+        "documented_diagnoses": [],
+        "inferred_diagnoses": [],
+        "documentation_gaps": [],
+        "physician_queries": [],
+        "recommendations_ar": [],
+        "recommendations_en": [],
+        "summary": {
+            "summary_ar": text[:500] if text else "لم يتم التحليل",
+            "summary_en": "Analysis could not be completed"
+        }
+    }
+
+
+def check_ollama_status() -> Dict:
+    """
+    Check if Ollama is running and which models are available
+    """
+    try:
+        # Check if Ollama is responding
+        response = requests.get(f"{OLLAMA_URL}/api/tags", timeout=10)
+        
+        if response.status_code == 200:
+            models = response.json().get('models', [])
+            model_names = [m.get('name', '') for m in models]
+            
+            return {
+                "status": "running",
+                "url": OLLAMA_URL,
+                "models": model_names,
+                "analysis_model": ANALYSIS_MODEL,
+                "chat_model": CHAT_MODEL,
+                "analysis_model_available": any(ANALYSIS_MODEL in m for m in model_names),
+                "chat_model_available": any(CHAT_MODEL in m for m in model_names)
+            }
+        else:
+            return {
+                "status": "error",
+                "message": f"Ollama returned status {response.status_code}"
+            }
+            
+    except requests.exceptions.ConnectionError:
+        return {
+            "status": "offline",
+            "message": "Cannot connect to Ollama. Make sure it's running."
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+
+# Test function
+if __name__ == "__main__":
+    print("Testing Ollama connection...")
+    status = check_ollama_status()
+    print(f"Status: {json.dumps(status, indent=2)}")
