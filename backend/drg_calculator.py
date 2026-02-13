@@ -142,16 +142,16 @@ def analyze_monthly_drg_impact(df: pd.DataFrame,
     """
     Analyze monthly DRG financial impact from uploaded Excel
     
-    Expected columns (by letter):
-    - T: DRG change indicator
-    - V: Old DRG code
-    - (next after V): New DRG code
-    - X: Hospital category
+    Expected columns (by letter, 0-based index):
+    - S (18): DRG change indicator (Yes/No)
+    - T (19): Old DRG code
+    - V (21): New DRG code
+    - X (23): Hospital category (A, B, C)
     
     Args:
         df: DataFrame from uploaded Excel
-        drg_old_col: Column name/index for old DRG (default: column V = index 21)
-        drg_new_col: Column name/index for new DRG (default: column after V)
+        drg_old_col: Column name/index for old DRG (default: column T = index 19)
+        drg_new_col: Column name/index for new DRG (default: column V = index 21)
         category_col: Column name/index for hospital category (default: column X = index 23)
     
     Returns:
@@ -164,8 +164,7 @@ def analyze_monthly_drg_impact(df: pd.DataFrame,
     if not prices:
         return {"error": "DRG prices not loaded", "total_impact": 0}
     
-    # Column indices (0-based): T=19, V=21, X=23
-    # Adjust based on actual file structure
+    # Column indices (0-based): S=18, T=19, V=21, X=23
     columns = df.columns.tolist()
     
     # Try to find columns by index or name
@@ -179,10 +178,10 @@ def analyze_monthly_drg_impact(df: pd.DataFrame,
             return df.iloc[:, default_index]
         return None
     
-    # Get relevant columns
-    drg_change_col = get_column(df, None, 19)  # Column T (index 19)
-    old_drg_series = get_column(df, drg_old_col, 21)  # Column V (index 21)
-    new_drg_series = get_column(df, drg_new_col, 22)  # Column W (index 22)
+    # Get relevant columns - CORRECTED INDICES
+    drg_change_col = get_column(df, None, 18)  # Column S (index 18)
+    old_drg_series = get_column(df, drg_old_col, 19)  # Column T (index 19)
+    new_drg_series = get_column(df, drg_new_col, 21)  # Column V (index 21)
     category_series = get_column(df, category_col, 23)  # Column X (index 23)
     
     # Results containers
