@@ -72,7 +72,7 @@ class VLLMAnalyzeEndpointTester:
             print(f"⚠️  Error reading .env: {e}")
         
         # Fallback
-        fallback_url = "https://medical-app-preview.preview.emergentagent.com"
+        fallback_url = "https://medical-finance-tool.preview.emergentagent.com"
         print(f"📡 Using fallback backend URL: {fallback_url}")
         return fallback_url
     

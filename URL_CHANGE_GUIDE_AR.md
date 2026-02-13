@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://medical-app-preview.preview.emergentagent.com
+https://medical-finance-tool.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://medical-app-preview.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://medical-app-preview.preview.emergentagent.com
+   https://medical-finance-tool.preview.emergentagent.com
    ```
 
 ---

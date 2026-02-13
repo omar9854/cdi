@@ -6,7 +6,7 @@
 
 1. **اذهب إلى صفحة التسجيل:**
    ```
-   https://medical-app-preview.preview.emergentagent.com/register
+   https://medical-finance-tool.preview.emergentagent.com/register
    ```
 
 2. **املأ البيانات:**
@@ -66,7 +66,7 @@
 
 1. **انسخ الرابط:**
    ```
-   https://medical-app-preview.preview.emergentagent.com
+   https://medical-finance-tool.preview.emergentagent.com
    ```
 
 2. **أرسله للفريق الطبي عبر:**
