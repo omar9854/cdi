@@ -40,7 +40,7 @@ async def send_welcome_email(email: str, user_name: str, role: str = "user"):
         message = MIMEMultipart("alternative")
         message["From"] = email_from
         message["To"] = email
-        message["Subject"] = "مرحباً بك في مركز الترميز الطبي وتحسين التوثيق السريري"
+        message["Subject"] = "مرحباً بك في منصة نبيه - نظام تحسين التوثيق السريري"
         
         # Email body
         html_content = f"""
@@ -51,7 +51,7 @@ async def send_welcome_email(email: str, user_name: str, role: str = "user"):
                         
                         <!-- Header -->
                         <div style="text-align: center; margin-bottom: 30px;">
-                            <h1 style="color: #2563eb; margin: 0;">🏥 مركز الترميز الطبي</h1>
+                            <h1 style="color: #2563eb; margin: 0;">🏥 منصة نبيه</h1>
                             <p style="color: #64748b; margin-top: 5px;">نظام تحسين التوثيق السريري (CDI)</p>
                         </div>
                         
@@ -115,11 +115,11 @@ async def send_welcome_email(email: str, user_name: str, role: str = "user"):
                         <!-- Footer -->
                         <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
                             <p style="color: #94a3b8; font-size: 12px; margin: 5px 0;">
-                                مركز الترميز الطبي وتحسين التوثيق السريري<br>
+                                منصة نبيه - نظام تحسين التوثيق السريري<br>
                                 نظام CDI المدعوم بالذكاء الاصطناعي
                             </p>
                             <p style="color: #cbd5e1; font-size: 11px; margin: 10px 0;">
-                                © 2024 جميع الحقوق محفوظة
+                                © 2024 جميع الحقوق محفوظة | عمر المغذوي و سامي المعدوي
                             </p>
                         </div>
                     </div>

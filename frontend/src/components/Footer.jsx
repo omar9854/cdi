@@ -16,13 +16,13 @@ const Footer = () => {
                 <>
                   © {currentYear} جميع الحقوق محفوظة
                   <span className="mx-2">|</span>
-                  <span className="font-semibold">عمر المغذوي</span>
+                  <span className="font-semibold">عمر المغذوي و سامي المعدوي</span>
                 </>
               ) : (
                 <>
                   © {currentYear} All Rights Reserved
                   <span className="mx-2">|</span>
-                  <span className="font-semibold">Omar Almaghthawi</span>
+                  <span className="font-semibold">Omar Almaghthawi & Sami Almaadawi</span>
                 </>
               )}
             </p>
