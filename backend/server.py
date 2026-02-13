@@ -534,7 +534,7 @@ async def send_password_reset_email(user_email: str, user_name: str, reset_token
             </div>
             
             <div style="text-align: center; margin-top: 30px;">
-                <p style="color: #999; font-size: 12px;">© 2025 جميع الحقوق محفوظة | عمر المغذوي</p>
+                <p style="color: #999; font-size: 12px;">© 2025 جميع الحقوق محفوظة | عمر المغذوي و سامي المعدوي</p>
             </div>
         </div>
     </body>
