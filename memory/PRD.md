@@ -133,4 +133,23 @@
 
 ---
 
-**آخر تحديث:** 15 فبراير 2025
+**آخر تحديث:** 14 فبراير 2025
+
+---
+
+## 8. ملاحظات مهمة للنشر
+
+### 8.1 متطلبات الخادم البعيد
+- يجب تشغيل خدمة Ollama على `localhost:11434`
+- النماذج المطلوبة:
+  - `qwen2.5:32b` للتحليل السريري
+  - `qwen2.5:7b` للدردشة
+
+### 8.2 نقل الملفات للخادم
+```bash
+# نقل SupervisorDashboard.jsx المحدث
+scp /app/frontend/src/pages/SupervisorDashboard.jsx root@8.213.84.113:/opt/medidoc/frontend_src/src/pages/
+
+# إعادة بناء الواجهة
+ssh root@8.213.84.113 "cd /opt/medidoc/frontend_src && npm run build && cp -r build/* /var/www/html/"
+```
