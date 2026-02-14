@@ -6,7 +6,7 @@
 
 1. **اذهب إلى صفحة التسجيل:**
    ```
-   https://medical-analysis-5.preview.emergentagent.com/register
+   https://cdi-financial-hub.preview.emergentagent.com/register
    ```
 
 2. **املأ البيانات:**
@@ -66,7 +66,7 @@
 
 1. **انسخ الرابط:**
    ```
-   https://medical-analysis-5.preview.emergentagent.com
+   https://cdi-financial-hub.preview.emergentagent.com
    ```
 
 2. **أرسله للفريق الطبي عبر:**

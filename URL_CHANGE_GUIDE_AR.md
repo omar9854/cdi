@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://medical-analysis-5.preview.emergentagent.com
+https://cdi-financial-hub.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://medical-analysis-5.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://medical-analysis-5.preview.emergentagent.com
+   https://cdi-financial-hub.preview.emergentagent.com
    ```
 
 ---
