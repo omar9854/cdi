@@ -733,18 +733,34 @@ VERY IMPORTANT: Your response MUST be ONLY valid JSON. Do not include any text b
 
 
 def transform_vllm_result_to_backend_format(vllm_result: Dict) -> Dict:
-    """Transform vLLM result format to backend expected format"""
+    """Transform vLLM result format to backend expected format - handles both old and new formats"""
     
-    # Extract diagnoses to document from various sources
+    # If result already has diagnoses_to_document, use it directly (new format)
+    if 'diagnoses_to_document' in vllm_result and vllm_result['diagnoses_to_document']:
+        return {
+            'diagnoses_to_document': vllm_result.get('diagnoses_to_document', []),
+            'missing_documentation': vllm_result.get('missing_documentation', []),
+            'gaps_ar': vllm_result.get('gaps_ar', []),
+            'gaps_en': vllm_result.get('gaps_en', []),
+            'queries_ar': vllm_result.get('queries_ar', []),
+            'queries_en': vllm_result.get('queries_en', []),
+            'recommendations_ar': vllm_result.get('recommendations_ar', []),
+            'recommendations_en': vllm_result.get('recommendations_en', []),
+            'summary_ar': vllm_result.get('summary_ar', ''),
+            'summary_en': vllm_result.get('summary_en', '')
+        }
+    
+    # Otherwise, transform from old format
     diagnoses_to_document = []
     
     # Add principal diagnosis if present
     principal = vllm_result.get('principal_diagnosis', {})
-    if principal.get('diagnosis_ar') or principal.get('diagnosis_en'):
+    if principal and (principal.get('diagnosis_ar') or principal.get('diagnosis_en')):
         diagnoses_to_document.append({
             'diagnosis_ar': principal.get('diagnosis_ar', ''),
             'diagnosis_en': principal.get('diagnosis_en', ''),
-            'icd_code': principal.get('icd_code', '')
+            'icd_code': principal.get('icd_code', ''),
+            'type': 'principal'
         })
     
     # Add documented diagnoses
@@ -754,7 +770,8 @@ def transform_vllm_result_to_backend_format(vllm_result: Dict) -> Dict:
             diagnoses_to_document.append({
                 'diagnosis_ar': diag.get('diagnosis_ar', ''),
                 'diagnosis_en': diag.get('diagnosis_en', ''),
-                'icd_code': diag.get('icd_code', '')
+                'icd_code': diag.get('icd_code', ''),
+                'type': 'secondary'
             })
     
     # Add inferred diagnoses
@@ -764,7 +781,8 @@ def transform_vllm_result_to_backend_format(vllm_result: Dict) -> Dict:
             diagnoses_to_document.append({
                 'diagnosis_ar': diag.get('diagnosis_ar', ''),
                 'diagnosis_en': diag.get('diagnosis_en', ''),
-                'icd_code': diag.get('potential_icd_code', diag.get('icd_code', ''))
+                'icd_code': diag.get('potential_icd_code', diag.get('icd_code', '')),
+                'type': 'derived'
             })
     
     # Extract missing documentation

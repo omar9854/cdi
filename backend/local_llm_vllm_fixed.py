@@ -104,29 +104,39 @@ def analyze_clinical_notes(prompt: str, hospital_type: str = "A") -> Dict:
         raise
 
 
-def generate_text(prompt: str, system_prompt: str = "", max_tokens: int = 2048) -> str:
+def generate_text(prompt: str, system_prompt: str = "", max_tokens: int = 2048, temperature: float = None, use_chat_prompt: bool = True) -> str:
     """
     Generate text using Ollama for chat functionality
     Uses hardcoded system prompt from nabih_config.py if not provided
     
     Args:
-        prompt: User's message/question
+        prompt: User's message/question  
         system_prompt: System instructions (optional, uses default if empty)
         max_tokens: Maximum tokens to generate
+        temperature: Temperature for generation (optional, uses config default)
+        use_chat_prompt: Whether to use chat-style prompting
     
     Returns:
         Generated text response
     """
     logger.info(f"💬 Generating chat response with Ollama ({CHAT_MODEL})...")
     
-    # Use provided system prompt, or fall back to hardcoded one
-    effective_system_prompt = system_prompt if system_prompt else CDI_CHAT_SYSTEM_PROMPT
+    # Use provided temperature or fall back to config
+    effective_temp = temperature if temperature is not None else AI_CONFIG.get('temperature_chat', 0.5)
     
-    if effective_system_prompt:
-        full_prompt = f"{effective_system_prompt}\n\nسؤال المستخدم:\n{prompt}"
-        logger.info("📋 Using system prompt for chat")
-    else:
+    # For direct prompts (use_chat_prompt=False), use prompt as-is
+    if not use_chat_prompt:
         full_prompt = prompt
+        logger.info("📋 Using direct prompt (no chat wrapper)")
+    else:
+        # Use provided system prompt, or fall back to hardcoded one
+        effective_system_prompt = system_prompt if system_prompt else CDI_CHAT_SYSTEM_PROMPT
+        
+        if effective_system_prompt:
+            full_prompt = f"{effective_system_prompt}\n\nسؤال المستخدم:\n{prompt}"
+            logger.info("📋 Using system prompt for chat")
+        else:
+            full_prompt = prompt
     
     try:
         response = requests.post(
@@ -136,7 +146,7 @@ def generate_text(prompt: str, system_prompt: str = "", max_tokens: int = 2048) 
                 "prompt": full_prompt,
                 "stream": False,
                 "options": {
-                    "temperature": AI_CONFIG.get('temperature_chat', 0.5),
+                    "temperature": effective_temp,
                     "num_predict": AI_CONFIG.get('max_tokens_chat', 1024),
                     "num_ctx": AI_CONFIG.get('num_ctx_chat', 2048),
                     "top_p": 0.85,
