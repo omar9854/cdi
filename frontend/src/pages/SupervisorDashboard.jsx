@@ -886,6 +886,179 @@ const SupervisorDashboard = ({ user, onLogout }) => {
     );
   };
 
+  const renderFinancialImpactDetails = () => {
+    if (!analysis || !analysis.drg_financial_impact) return null;
+
+    const fi = analysis.drg_financial_impact;
+
+    return (
+      <Card className="medical-card mb-8 bg-gradient-to-br from-green-50 to-emerald-100">
+        <CardHeader>
+          <CardTitle className="text-2xl text-gray-800 flex items-center gap-2">
+            <DollarSign className="h-6 w-6 text-green-600" />
+            {language === 'ar' ? 'تفاصيل الأثر المالي لتغييرات DRG' : 'Financial Impact Details of DRG Changes'}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Summary Row */}
+          <div className="grid md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white p-4 rounded-lg text-center border-l-4 border-green-500">
+              <div className="text-sm text-green-600 mb-1">{language === 'ar' ? 'إجمالي الأثر المالي' : 'Total Financial Impact'}</div>
+              <div className={`text-2xl font-bold ${fi.summary.total_financial_impact_sar >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                {fi.summary.total_impact_formatted}
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-lg text-center border-l-4 border-blue-500">
+              <div className="text-sm text-blue-600 mb-1">{language === 'ar' ? 'عدد الحالات' : 'Number of Cases'}</div>
+              <div className="text-2xl font-bold text-blue-700">{fi.summary.total_drg_changes}</div>
+            </div>
+            <div className="bg-white p-4 rounded-lg text-center border-l-4 border-purple-500">
+              <div className="text-sm text-purple-600 mb-1">{language === 'ar' ? 'متوسط الأثر للحالة' : 'Avg Impact per Case'}</div>
+              <div className="text-2xl font-bold text-purple-700">{fi.summary.average_impact_per_case?.toLocaleString()} {language === 'ar' ? 'ريال' : 'SAR'}</div>
+            </div>
+            <div className="bg-white p-4 rounded-lg text-center border-l-4 border-orange-500">
+              <div className="text-sm text-orange-600 mb-1">{language === 'ar' ? 'إيجابي / سلبي' : 'Positive / Negative'}</div>
+              <div className="text-lg font-bold">
+                <span className="text-green-600">{fi.summary.positive_impact_cases || 0}</span>
+                {' / '}
+                <span className="text-red-600">{fi.summary.negative_impact_cases || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* By Hospital */}
+          {fi.by_hospital && fi.by_hospital.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <Hospital className="h-5 w-5 text-blue-600" />
+                {language === 'ar' ? 'الأثر المالي حسب المستشفى' : 'Financial Impact by Hospital'}
+              </h3>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-center">{language === 'ar' ? 'المستشفى' : 'Hospital'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'الأثر المالي' : 'Financial Impact'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'الحالات' : 'Cases'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'إيجابي' : 'Positive'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'سلبي' : 'Negative'}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {fi.by_hospital.map((h, index) => (
+                      <TableRow key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                        <TableCell className="font-medium">{h.hospital_name}</TableCell>
+                        <TableCell className={`text-center font-bold ${h.total_impact_sar >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {h.impact_formatted}
+                        </TableCell>
+                        <TableCell className="text-center">{h.cases}</TableCell>
+                        <TableCell className="text-center text-green-600">{h.positive_changes}</TableCell>
+                        <TableCell className="text-center text-red-600">{h.negative_changes}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+
+          {/* By Department */}
+          {fi.by_department && fi.by_department.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <Stethoscope className="h-5 w-5 text-purple-600" />
+                {language === 'ar' ? 'الأثر المالي حسب القسم' : 'Financial Impact by Department'}
+              </h3>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {fi.by_department.map((d, index) => (
+                  <div key={index} className="bg-white p-3 rounded-lg border hover:shadow-md transition">
+                    <div className="font-medium text-gray-800 mb-1">{d.department}</div>
+                    <div className={`text-lg font-bold ${d.total_impact_sar >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {d.impact_formatted}
+                    </div>
+                    <div className="text-xs text-gray-500">{d.cases} {language === 'ar' ? 'حالة' : 'cases'}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* By Specialist */}
+          {fi.by_specialist && fi.by_specialist.length > 0 && (
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <Users className="h-5 w-5 text-orange-600" />
+                {language === 'ar' ? 'الأثر المالي حسب أخصائي CDI' : 'Financial Impact by CDI Specialist'}
+              </h3>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-center">{language === 'ar' ? 'الأخصائي' : 'Specialist'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'الأثر المالي' : 'Financial Impact'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'الحالات' : 'Cases'}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {fi.by_specialist.map((s, index) => (
+                      <TableRow key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                        <TableCell className="font-medium">{s.specialist}</TableCell>
+                        <TableCell className={`text-center font-bold ${s.total_impact_sar >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {s.impact_formatted}
+                        </TableCell>
+                        <TableCell className="text-center">{s.cases}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+
+          {/* Sample Changes */}
+          {fi.sample_changes && fi.sample_changes.length > 0 && (
+            <div>
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-cyan-600" />
+                {language === 'ar' ? 'عينة من تغييرات DRG' : 'Sample DRG Changes'}
+              </h3>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-center">{language === 'ar' ? 'المستشفى' : 'Hospital'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'DRG قبل' : 'Old DRG'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'DRG بعد' : 'New DRG'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'الفئة' : 'Category'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'السعر القديم' : 'Old Price'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'السعر الجديد' : 'New Price'}</TableHead>
+                      <TableHead className="text-center">{language === 'ar' ? 'الفرق' : 'Difference'}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {fi.sample_changes.slice(0, 10).map((c, index) => (
+                      <TableRow key={index} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                        <TableCell className="text-sm">{c.hospital}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">{c.old_drg}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">{c.new_drg}</TableCell>
+                        <TableCell className="text-center">{c.category}</TableCell>
+                        <TableCell className="text-center">{c.old_price?.toLocaleString()}</TableCell>
+                        <TableCell className="text-center">{c.new_price?.toLocaleString()}</TableCell>
+                        <TableCell className={`text-center font-bold ${c.difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {c.difference?.toLocaleString()} {language === 'ar' ? 'ريال' : 'SAR'}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   const renderHospitalDetailedAnalysis = () => {
     if (!analysis || !analysis.hospitals_analysis || analysis.hospitals_analysis.length === 0) return null;
 
