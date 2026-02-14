@@ -1416,6 +1416,7 @@ const SupervisorDashboard = ({ user, onLogout }) => {
         {analysis && (
           <>
             {renderSummaryCards()}
+            {renderFinancialImpactDetails()}
             {renderCharts()}
             {renderRecommendations()}
             {renderHospitalDetailedAnalysis()}
