@@ -12,7 +12,7 @@ from datetime import datetime
 
 class MediDocAPITester:
     def __init__(self):
-        self.base_url = "https://medical-finance-tool.preview.emergentagent.com"
+        self.base_url = "https://medical-analysis-5.preview.emergentagent.com"
         self.api_url = f"{self.base_url}/api"
         self.token = None
         self.user_data = None

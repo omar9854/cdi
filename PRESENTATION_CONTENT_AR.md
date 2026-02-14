@@ -432,7 +432,7 @@ Omar Almaghthawi
 Omar Almaghthawi
 
 **رابط التطبيق:**
-https://medical-finance-tool.preview.emergentagent.com
+https://medical-analysis-5.preview.emergentagent.com
 
 **حساب الأدمن:**
 📧 admin@cdi-center.sa

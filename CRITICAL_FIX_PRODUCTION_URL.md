@@ -12,7 +12,7 @@
 
 ملف `/app/frontend/.env` مازال يحتوي على رابط Preview:
 ```
-REACT_APP_BACKEND_URL=https://medical-finance-tool.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://medical-analysis-5.preview.emergentagent.com
 ```
 
 هذا يعني:
