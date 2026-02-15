@@ -12,7 +12,7 @@
 
 ملف `/app/frontend/.env` مازال يحتوي على رابط Preview:
 ```
-REACT_APP_BACKEND_URL=https://cdi-financial-hub.preview.emergentagent.com
+REACT_APP_BACKEND_URL=https://cdi-financial-hub-1.preview.emergentagent.com
 ```
 
 هذا يعني:
