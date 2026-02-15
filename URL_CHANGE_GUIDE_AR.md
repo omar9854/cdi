@@ -3,7 +3,7 @@
 ## 📍 الـ URL الحالي
 
 ```
-https://cdi-financial-hub-1.preview.emergentagent.com
+https://clinical-ai-review.preview.emergentagent.com
 ```
 
 ---
@@ -26,7 +26,7 @@ https://cdi-financial-hub-1.preview.emergentagent.com
 
 4. **النتيجة:**
    ```
-   https://cdi-financial-hub-1.preview.emergentagent.com
+   https://clinical-ai-review.preview.emergentagent.com
    ```
 
 ---
